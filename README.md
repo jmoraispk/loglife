@@ -1,10 +1,47 @@
 # WhatsApp Goal Bot
 
-A lightweight bot for tracking personal goals via WhatsApp messages. Uses:
-- Node.js + whatsapp-web.js to receive/send messages
-- Python Flask backend to process goal logic
+A bot that tracks personal goal check-ins via WhatsApp messages.
 
-## Usage
-1. Install dependencies in both `backend/` and `whatsapp-client/`.
-2. Run `run.sh`
-3. Scan the QR code with your bot WhatsApp account
+## 📋 Goals
+
+Defined in `config.py`:
+- 😴 Bed and lights out at 10 pm
+- 🥗 Eat clean (70% veggies, 30% protein)
+- 🏃 Exercise >=50 min
+- 📵 No mindless entertainment
+- 🙏 Pray and reflect
+
+## ✅ Daily Check-in
+
+Send a message like:
+```
+bot: 31232
+```
+
+It will reply with:
+```
+📅 2025-06-30
+> 😴 🥗 🏃 📵 🙏
+> ✅ ❌ ⚠️ ✅ ⚠️
+```
+
+## 📊 Weekly Summary
+
+Send:
+```
+bot: show week
+```
+
+Bot responds with a summary of Mon–Sun with ✅/⚠️/❌ or 🔲 if missing.
+
+## 🛠 Dev
+
+- Run Python backend:
+  ```
+  pip install -e .
+  cd backend && flask run
+  ```
+- JS listener (in another terminal):
+  ```
+  cd whatsapp-client && npm install && node index.js
+  ```
