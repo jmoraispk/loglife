@@ -46,7 +46,51 @@ Bot responds with a summary of Mon–Sun with ✅/⚠️/❌ or 🔲 if missing.
   cd whatsapp-client && npm install && node index.js
   ```
 
-## 🚀 Running the Bot
+
+## ⚙️ First-Time Setup (Linux)
+
+> Windows may differ slightly (use `set` instead of `export`, different path syntax, etc.)
+
+### 1. ✅ Python Backend
+```bash
+cd backend
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+export FLASK_APP=app.py
+flask run
+```
+
+### 2. ✅ Node.js Client
+
+#### a. Install `nvm` (Node Version Manager)
+If `nvm` is not installed:
+```bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+# then restart your terminal or run:
+export NVM_DIR="$HOME/.nvm"
+source "$NVM_DIR/nvm.sh"
+```
+
+#### b. Install Node 18
+```bash
+nvm install 18
+nvm use 18
+```
+
+#### c. Install dependencies and run the bot
+```bash
+cd whatsapp-client
+npm install
+node index.js
+```
+
+A QR code will appear — scan it using your bot WhatsApp account.
+Then message the bot from your main account:
+```
+bot: 31232
+```
+
 
 ### 1. Python Backend
 ```bash
