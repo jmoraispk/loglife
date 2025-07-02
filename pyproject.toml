@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "goal_bot_backend"
+name = "goal_bot"
 version = "0.1.0"
 description = "Backend for WhatsApp goal tracking bot"
 authors = [{name = "Your Name"}]
