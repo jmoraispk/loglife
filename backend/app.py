@@ -6,6 +6,7 @@ app = Flask(__name__)
 @app.route("/process", methods=["POST"])
 def process():
     data = request.get_json()
+    print("[BACKEND] Received data:", data)
     message = data.get("message", "")
     sender = data.get("from", "")
     response = process_message(message, sender)
