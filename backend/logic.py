@@ -39,7 +39,7 @@ def process_message(message: str, sender: str) -> str:
     message = message.strip().lower()
 
     if message.startswith("bot: goals"):
-        return format_goals(user_id)
+        return format_goals()
 
     if message.startswith("bot: week"):
         return format_week_summary(user_id)
@@ -53,17 +53,14 @@ def process_message(message: str, sender: str) -> str:
 
     return "❌ Unrecognized message. Use 'bot: 31232' or 'bot: show week'"
 
-def format_goals(user_id: str) -> str:
+def format_goals() -> str:
     """
     Format the goals for the user.
     """
-    data = load_user_data(user_id)
-    goals = data['goals']
     
     # Format each goal with its description
     goal_lines = []
-    for goal in goals:
-        description = GOAL_DESCRIPTIONS.get(goal, "")
+    for goal, description in GOAL_DESCRIPTIONS.items():
         goal_lines.append(f"{goal} {description}")
     
     return "```" + "\n".join(goal_lines) + "```"
