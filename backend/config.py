@@ -2,6 +2,12 @@
 
 GOALS = ["😴", "🥗", "🏃"]#, "📵", "🙏"]
 
+GOAL_DESCRIPTIONS = {
+    "😴": "Bedroom by 9:30pm",
+    "🥗": "No added sugar",
+    "🏃": "Exercise"
+}
+
 STYLE = {
     1: "❌",  # Failure
     2: "⚠️",  # Partial

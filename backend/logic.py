@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 from storage import load_user_data, save_user_data
-from config import GOALS, STYLE
+from config import GOALS, STYLE, GOAL_DESCRIPTIONS
 from typing import Optional
 
 # TODO: if things break, return a better message to the user
 # TODO: handle timezones
-# TODO: show "bot: goals"
-# TODO: show "bot: set goals"
+
+# TODO: make goals a per-user settings & add bot: set goals
 
 def storage_date_format(date: datetime) -> str:
     """
@@ -38,6 +38,9 @@ def process_message(message: str, sender: str) -> str:
     user_id = sender  # could be phone or group ID
     message = message.strip().lower()
 
+    if message.startswith("bot: goals"):
+        return format_goals(user_id)
+
     if message.startswith("bot: week"):
         return format_week_summary(user_id)
     
@@ -49,6 +52,21 @@ def process_message(message: str, sender: str) -> str:
         return handle_goal_ratings(payload, user_id)
 
     return "❌ Unrecognized message. Use 'bot: 31232' or 'bot: show week'"
+
+def format_goals(user_id: str) -> str:
+    """
+    Format the goals for the user.
+    """
+    data = load_user_data(user_id)
+    goals = data['goals']
+    
+    # Format each goal with its description
+    goal_lines = []
+    for goal in goals:
+        description = GOAL_DESCRIPTIONS.get(goal, "")
+        goal_lines.append(f"{goal} {description}")
+    
+    return "```" + "\n".join(goal_lines) + "```"
 
 def format_week_summary(user_id: str) -> str:
     """
