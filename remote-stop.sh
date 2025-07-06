@@ -1,5 +1,1 @@
-ssh root@5.161.234.127 '
-  pm2 stop goal-bot || true &&
-  systemctl stop goal-backend || true
-'
-
+ssh root@5.161.234.127 'tmux send-keys -t client C-c'
