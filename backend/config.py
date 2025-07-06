@@ -10,7 +10,8 @@ STYLE = {
 
 # Alternate style (for future config toggle)
 COLORS = {
-    1: "🟥",
-    2: "🟧",
-    3: "🟩"
+    0: "🟥",  # Failure
+    1: "🟧",  # Partial
+    2: "🟩",  # Success
+    3: "🎉"   # Perfect
 }
