@@ -22,6 +22,7 @@ client.on('message', async msg => {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ message: msg.body, from: msg.from })
+                // TODO: check if images can be sent/received
             });
             const text = await response.text();
             client.sendMessage(msg.from, text);
