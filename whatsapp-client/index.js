@@ -3,6 +3,16 @@ const fetch = require('node-fetch');
 const qrcode = require('qrcode-terminal');
 require('dotenv').config();
 
+const CLEAR_SESSION = process.argv.includes('--reset-session');
+const SESSION_PATH = './session';
+
+if (CLEAR_SESSION) {
+    const fs = require('fs');
+    fs.rmSync(SESSION_PATH, { recursive: true, force: true });
+    console.log('🧹 Session cleared. Restart to rescan QR code.');
+    process.exit();
+}
+
 const client = new Client({
     authStrategy: new LocalAuth({ clientId: "goal-bot-session" })
 });
