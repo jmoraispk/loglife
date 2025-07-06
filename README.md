@@ -38,8 +38,8 @@ bot: show week
 Bot responds with a summary of Mon–Sun with ✅/⚠️/❌ or 🔲 if missing.
 
 ```
-Week 26: Jun 30 - Jul 06
-  😴 🥗 🏃 📵 🙏
+Week 25: Jun 23 - 29
+    😴 🥗 🏃 📵 🙏
 Mon 🔲 🔲 🔲 🔲 🔲
 Tue 🔲 🔲 🔲 🔲 🔲
 Wed ✅ ✅ ✅ ✅ ✅
