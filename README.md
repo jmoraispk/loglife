@@ -11,7 +11,10 @@ Defined in `config.py`:
 - 📵 No mindless entertainment
 - 🙏 Pray and reflect
 
-## ✅ Daily Check-in
+
+## Features
+
+### ✅ Daily Check-in
 
 Send a message like:
 ```
@@ -25,7 +28,7 @@ It will reply with:
 > ✅ ❌ ⚠️ ✅ ⚠️
 ```
 
-## 📊 Weekly Summary
+### 📊 Weekly Summary
 
 Send:
 ```
@@ -34,43 +37,54 @@ bot: show week
 
 Bot responds with a summary of Mon–Sun with ✅/⚠️/❌ or 🔲 if missing.
 
+```
+Week 26: Jun 30 - Jul 06
+  😴 🥗 🏃 📵 🙏
+Mon 🔲 🔲 🔲 🔲 🔲
+Tue 🔲 🔲 🔲 🔲 🔲
+Wed ✅ ✅ ✅ ✅ ✅
+Thu 🔲 🔲 🔲 🔲 🔲
+Fri 🔲 🔲 🔲 🔲 🔲
+Sat 🔲 🔲 🔲 🔲 🔲
+Sun ❌ ❌ ❌ ❌ ❌
+```
+
 ## 🛠 Dev
 
-- Run Python backend:
+- Run Python message processor:
   ```
   pip install -e .
-  cd backend && flask run
+  cd backend && python app.py
   ```
-- JS listener (in another terminal):
+- JS WhatsApp Client interface listener (in another terminal):
   ```
-  cd whatsapp-client && npm install && node index.js
+  cd whatsapp-client && node index.js
   ```
 
+## ⚙️ First-Time Setup
 
-## ⚙️ First-Time Setup (Linux)
+<details>
+<summary>Click to Expand</summary>
 
-> Windows may differ slightly (use `set` instead of `export`, different path syntax, etc.)
-
-### 1. ✅ Python Backend
+### 1. Python Backend
 ```bash
 cd backend
-python -m venv .venv
-source .venv/bin/activate
+mamba create -n goal_bot python=3.11
+mamba activate goal_bot
 pip install -e .
-export FLASK_APP=app.py
-flask run
+python app.py
 ```
 
-### 2. ✅ Node.js Client
+### 2. Node.js Client
 
 #### a. Install `nvm` (Node Version Manager)
-If `nvm` is not installed:
+If `nvm` is not installed, run:
 ```bash
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
-# then restart your terminal or run:
-export NVM_DIR="$HOME/.nvm"
-source "$NVM_DIR/nvm.sh"
 ```
+(Note, may be different in Windows. )
+
+Then restart terminal.
 
 #### b. Install Node 18
 ```bash
@@ -86,46 +100,17 @@ node index.js
 ```
 
 A QR code will appear — scan it using your bot WhatsApp account.
-Then message the bot from your main account:
-```
-bot: 31232
-```
 
+The bot will remember this account. If you need to reset it, restart the node server like this:
 
-### 1. Python Backend
-```bash
-cd backend
-python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-pip install -e .
-export FLASK_APP=app.py    # Windows: set FLASK_APP=app.py
-flask run
-```
+`node index.js --reset-session`
 
-### 2. WhatsApp Client
-Open a new terminal:
-```bash
-cd whatsapp-client
-npm install
-node index.js
-```
+</details>
 
-Scan the QR code with your **secondary WhatsApp account**.
-
-Now, from your main WhatsApp, send a message like:
-```
-bot: 31232
-```
-
-Expect a reply with feedback for each goal.
-You can also try:
-```
-bot: show week
-```
 
 ## ❓ FAQ
 
-### Why doesn't the client need my number?
+### 1- Why doesn't the client need my number?
 
 The bot uses `whatsapp-web.js`, which logs in using a QR code — just like WhatsApp Web.
 
