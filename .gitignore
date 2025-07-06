@@ -5,3 +5,4 @@ whatsapp-client/.wwebjs_auth/**
 whatsapp-client/node_modules/**
 whatsapp-client/.wwebjs_cache/**
 whatsapp-client/package-lock.json
+git_token_server
