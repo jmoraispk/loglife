@@ -1,6 +1,6 @@
 # Define the goals and style (✅ or 🟩)
 
-GOALS = ["😴", "🥗", "🏃", "📵", "🙏"]
+GOALS = ["😴", "🥗", "🏃"]#, "📵", "🙏"]
 
 STYLE = {
     1: "❌",  # Failure
