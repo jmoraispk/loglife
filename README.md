@@ -12,7 +12,11 @@ Defined in `config.py`:
 - 🙏 Pray and reflect
 
 
+
 ## Features
+
+<details>
+<summary>Click to Expand</summary>
 
 ### ✅ Daily Check-in
 
@@ -38,7 +42,7 @@ bot: show week
 Bot responds with a summary of Mon–Sun with ✅/⚠️/❌ or 🔲 if missing.
 
 ```
-Week 25: Jun 23 - 29
+Week 25: Jun 23-29
     😴 🥗 🏃 📵 🙏
 Mon 🔲 🔲 🔲 🔲 🔲
 Tue 🔲 🔲 🔲 🔲 🔲
@@ -48,6 +52,7 @@ Fri 🔲 🔲 🔲 🔲 🔲
 Sat 🔲 🔲 🔲 🔲 🔲
 Sun ❌ ❌ ❌ ❌ ❌
 ```
+</details>
 
 ## 🛠 Dev
 
@@ -59,6 +64,16 @@ Sun ❌ ❌ ❌ ❌ ❌
 - JS WhatsApp Client interface listener (in another terminal):
   ```
   cd whatsapp-client && node index.js
+  ```
+- If server is available.
+  ```
+  remote-stop  # Before any local development!
+  
+  # Deploy locally with the steps above
+
+  # Push last changes to git
+
+  remote-start # Start remote again (will pull and kickstart)
   ```
 
 ## ⚙️ First-Time Setup
@@ -104,6 +119,27 @@ A QR code will appear — scan it using your bot WhatsApp account.
 The bot will remember this account. If you need to reset it, restart the node server like this:
 
 `node index.js --reset-session`
+
+</details>
+
+
+## Server Setup
+
+Plan for concialiating local develop and remote production hosting.
+
+1. Have `server_stop` bash alias to ssh into server, pause 
+
+<details>
+<summary>Click to Expand</summary>
+
+1. Rent a server. Example Hetzner.
+
+
+2. Ping (inbound ICMP rule)
+
+`ping 5.161.234.127`
+
+
 
 </details>
 
