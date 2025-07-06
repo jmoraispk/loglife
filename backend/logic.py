@@ -108,7 +108,7 @@ def look_back_summary(user_id: str, days: int, start: Optional[datetime] = None)
         if ratings:
             status = ' '.join(STYLE[r] for r in ratings)
         else:
-            status = ' '.join(['🔲'] * len(GOALS))
+            status = ' '.join([' '] * len(GOALS))
         summary += f"{display_date} {status}\n"
 
     return summary[:-1] + "```"
