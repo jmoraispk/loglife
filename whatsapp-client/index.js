@@ -1,6 +1,8 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const fetch = require('node-fetch');
 const qrcode = require('qrcode-terminal');
+const os = require('os');
+
 require('dotenv').config();
 
 const CLEAR_SESSION = process.argv.includes('--reset-session');
@@ -13,8 +15,14 @@ if (CLEAR_SESSION) {
     process.exit();
 }
 
+const isRoot = process.getuid && process.getuid() === 0;
+
 const client = new Client({
-    authStrategy: new LocalAuth({ clientId: "goal-bot-session" })
+    authStrategy: new LocalAuth({ clientId: "goal-bot-session" }),
+    puppeteer: {
+        headless: true,
+        args: isRoot ? ['--no-sandbox', '--disable-setuid-sandbox'] : []
+    }
 });
 
 client.on('qr', qr => {
