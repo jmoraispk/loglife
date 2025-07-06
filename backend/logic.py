@@ -1,7 +1,6 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from storage import load_user_data, save_user_data
 from config import GOALS, STYLE
-
 
 # TODO: if things break, return a better message to the user
 
@@ -14,22 +13,20 @@ def process_message(message: str, sender: str) -> str:
 
     if message.startswith("bot:"):
         payload = message[4:].strip()
-        if not all(c in "123" for c in payload) or len(payload) != len(GOALS):
-            return f"❌ Invalid input. Please send {len(GOALS)} digits like: 31232"
-        ratings = [int(c) for c in payload]
-        today = datetime.now().strftime('%Y-%m-%d')
-        data = load_user_data(user_id)
-        data['goals'] = GOALS
-        data['entries'][today] = ratings
-        save_user_data(user_id, data)
-        status = [STYLE[r] for r in ratings]
-        return f"📅 {today}\n> {' '.join(GOALS)}\n> {' '.join(status)}"
+        return handle_goal_ratings(payload, user_id)
 
     return "❌ Unrecognized message. Use 'bot: 31232' or 'bot: show week'"
 
 def format_week_summary(user_id: str) -> str:
-    from datetime import timedelta
-
+    """
+    Format a week summary for the user.
+    
+    Args:
+        user_id (str): User identifier for data storage
+    
+    Returns:
+        str: Formatted week summary
+    """
     today = datetime.now()
     start = today - timedelta(days=today.weekday())  # Monday
     data = load_user_data(user_id)
@@ -55,4 +52,35 @@ def format_week_summary(user_id: str) -> str:
             status = ' '.join(['🔲'] * len(GOALS))
         summary += f"\n{(start + timedelta(days=i)).strftime('%a')} {status}"
     return summary + "```"
+
+def handle_goal_ratings(payload: str, user_id: str) -> str:
+    """
+    Handle goal ratings input from user, validate it and store the ratings.
+    
+    Args:
+        payload (str): String containing goal ratings (must be digits 1-3)
+        user_id (str): User identifier for data storage
+        
+    Returns:
+        str: Response message indicating success or error
+    """
+    # Validate input length
+    if len(payload) != len(GOALS):
+        return f"❌ Invalid input. Send {len(GOALS)} digits like: 31232"
+
+    # Validate input digits
+    if not all(c in "123" for c in payload):
+        return f"❌ Invalid input. Send {len(GOALS)} digits between 1 and 3"
+
+    # Store ratings
+    ratings = [int(c) for c in payload]
+    today = datetime.now().strftime('%a (%b %d)')
+    data = load_user_data(user_id)
+    data['goals'] = GOALS
+    data['entries'][today] = ratings
+    save_user_data(user_id, data)
+    status = [STYLE[r] for r in ratings]
+
+    # Return success message
+    return f"📅 {today}\n{' '.join(GOALS)}\n{' '.join(status)}"
 
