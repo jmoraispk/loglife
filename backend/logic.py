@@ -2,11 +2,14 @@ from datetime import datetime
 from storage import load_user_data, save_user_data
 from config import GOALS, STYLE
 
+
+# TODO: if things break, return a better message to the user
+
 def process_message(message: str, sender: str) -> str:
     user_id = sender  # could be phone or group ID
     message = message.strip().lower()
 
-    if message.startswith("bot: show week"):
+    if message.startswith("bot: week"):
         return format_week_summary(user_id)
 
     if message.startswith("bot:"):
@@ -30,9 +33,20 @@ def format_week_summary(user_id: str) -> str:
     today = datetime.now()
     start = today - timedelta(days=today.weekday())  # Monday
     data = load_user_data(user_id)
-    summary = f"Week {start.strftime('%W')}: {start.strftime('%b %d')} - {(start + timedelta(days=6)).strftime('%b %d')}\n  {' '.join(GOALS)}"
 
-    for i in range(7):
+    # Create Week Summary Header (E.g. Week 26: Jun 30 - Jul 06)    
+    week_num = start.strftime('%W')
+    week_start = start.strftime('%b %d')
+    week_end = (start + timedelta(days=6)).strftime('%b %d')
+    if week_end.startswith(week_start[:3]):
+        week_end = week_end[4:]
+    summary = f"```Week {week_num}: {week_start} - {week_end}\n"
+    
+    # Add Goals Header
+    summary += '    ' + ' '.join(GOALS)
+
+    # Add Day-by-Day Summary
+    for i in range(7): # 7 days in a week
         day = (start + timedelta(days=i)).strftime('%Y-%m-%d')
         ratings = data['entries'].get(day, None)
         if ratings:
@@ -40,4 +54,5 @@ def format_week_summary(user_id: str) -> str:
         else:
             status = ' '.join(['🔲'] * len(GOALS))
         summary += f"\n{(start + timedelta(days=i)).strftime('%a')} {status}"
-    return summary
+    return summary + "```"
+
