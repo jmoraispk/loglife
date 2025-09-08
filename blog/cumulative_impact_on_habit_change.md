@@ -71,6 +71,27 @@ Stack these steps and you’ll massively improve your odds of making any habit s
 
 ---
 
+## 📌 Disclaimer: Precise Interpretation of Research
+
+Behavioral science doesn’t actually produce clean pie-chart percentages. What we have are *effect sizes* (Cohen’s d, SMD, R²) from meta-analyses, which give a sense of how much each strategy moves the needle. If forced to translate these into rough “contributions,” here’s what the data suggests:
+
+| Strategy                | Effect Size Indicator                   | Rough Contribution |
+|--------------------------|-----------------------------------------|--------------------|
+| Track It Daily           | Habit intervention SMD ≈ 0.69           | ~25–30%            |
+| Know Your WHY            | Intentions R² ≈ 0.28                    | ~10–15%            |
+| Schedule It              | Implementation intention d ≈ 0.65       | ~15–20%            |
+| Environment Design       | Part of habit intervention (implicit)   | ~10–15%            |
+| Notice Triggers/Feelings | Habit loop awareness (qualitative)      | ~10%               |
+| Reward Small Wins        | Reinforcement (implicit)                | ~10%               |
+| Self-Compassion/Slip-ups | Qualitative/self-regulation studies     | ~5–10%             |
+
+**Key caveats:**
+- You can’t add these up cleanly—they overlap. 
+- Percentages here are **interpretations**, not direct measurements. 
+- Research shows *what works*, but not exactly “how much” each step is worth in isolation.
+
+---
+
 ## Sources
 
 [^1]: Matthews, G. Dominican Univ. study – Writing down goals boosts achievement ~42%.  
