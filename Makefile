@@ -14,6 +14,12 @@ dev: ## Install deps, run migrations, start simulator
 simulate: ## Start simulator only
 	$(PY) -m app.adapters.simulator
 
+mainscheduler: ## Run scheduler loop
+	$(PY) -m app.core.scheduler
+
+mainscheduler-once: ## Run one scheduler tick
+	$(PY) -m app.core.scheduler --once
+
 migrate: ## Run DB migrations
 	$(PY) -m app.infra.repo_sqlite --migrate
 

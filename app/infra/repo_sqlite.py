@@ -81,8 +81,9 @@ class Repo:
 
     @classmethod
     def default(cls) -> "Repo":
-        """Return a Repo bound to the default DB path."""
-        return cls()
+        """Return a Repo bound to the DB path (env override if set)."""
+        db_path = os.environ.get("HABITS_DB", DB_PATH)
+        return cls(db_path=db_path)
 
     def connect(self) -> sqlite3.Connection:
         """Open a SQLite connection with row factory set to Row."""
@@ -106,6 +107,12 @@ class Repo:
                 return row[0]
             cur = conn.execute("INSERT INTO users(phone, created_at) VALUES(?, ?)", (phone, now))
             return cur.lastrowid
+
+    def list_users(self) -> list[sqlite3.Row]:
+        """Return all users as row objects (id, phone, tz, prefs_json)."""
+        with self.connect() as conn:
+            rows = conn.execute("SELECT id, phone, tz, prefs_json FROM users").fetchall()
+            return list(rows)
 
     def get_user_id(self, phone: str) -> int:
         """Return user id for a given phone number."""
@@ -220,6 +227,10 @@ class Repo:
             return conn.execute(
                 "SELECT * FROM logs WHERE habit_id=? AND date=?", (habit_id, d_iso)
             ).fetchone()
+
+    def has_log_for_date(self, habit_id: int, d_iso: str) -> bool:
+        """Return True if there is a log for the habit on the given date."""
+        return self.get_log_for_date(habit_id, d_iso) is not None
 
     def compute_streak(self, habit_id: int, upto_date_iso: str) -> int:
         """Compute current streak up to and including the provided date."""

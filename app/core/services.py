@@ -64,6 +64,9 @@ class ServiceContainer:
             self.repo.ensure_user(inbound.user_phone)
             path = self._handle_export(inbound.user_phone, cmd.arg)
             return render("export_ready_file", STYLE_DEFAULT, path=path)
+        if cmd.kind == "backfill":
+            self.repo.ensure_user(inbound.user_phone)
+            return self._handle_backfill(inbound, cmd.arg)
         if cmd.kind == "feedback":
             self.repo.ensure_user(inbound.user_phone)
             ticket_id = self.repo.open_feedback(inbound.user_phone, cmd.arg)
@@ -131,6 +134,34 @@ class ServiceContainer:
             )
         style = self.repo.get_user_prefs(phone).get("style", STYLE_DEFAULT)
         return render("check_logged", style, summary="\n".join(lines) or "Logged.")
+
+    def _handle_backfill(self, inbound: InboundMessage, arg: str) -> str:
+        phone = inbound.user_phone
+        tz = self.repo.get_user_tz(phone)
+        today = today_in_tz(tz)
+        parts = (arg or "").split(" ", 1)
+        if len(parts) != 2:
+            return render("error_syntax_date", STYLE_DEFAULT)
+        day_spec, ratings_str = parts[0], parts[1]
+        if day_spec == "yesterday":
+            target = today.fromordinal(today.toordinal() - 1)
+        else:
+            try:
+                target = date_type.fromisoformat(day_spec)
+            except Exception:
+                return render("error_syntax_date", STYLE_DEFAULT)
+            if target not in {today, today.fromordinal(today.toordinal() - 1)}:
+                return render("error_backfill_range", STYLE_DEFAULT)
+        habits = self.repo.get_habits(phone)
+        ratings = self._parse_ratings(ratings_str, len(habits))
+        for i, habit in enumerate(habits):
+            score = ratings[i]
+            if score is None:
+                continue
+            self.repo.upsert_log(int(habit["id"]), target.isoformat(), score)
+        return render(
+            "check_logged", STYLE_DEFAULT, summary="Backfill saved for " + target.isoformat()
+        )
 
     def _handle_export(self, phone: str, arg: str) -> str:
         tz = self.repo.get_user_tz(phone)
