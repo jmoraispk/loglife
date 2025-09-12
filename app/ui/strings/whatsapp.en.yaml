@@ -1,0 +1,65 @@
+bullet:
+  onboarding_welcome: |
+    Welcome! I’ll help you track a habit by WhatsApp.
+    Reply with: add <habit> at HH:MM (e.g., add Sleep by 23:00 at 21:30)
+  habit_added: |
+    Added “{name}” at {time}. I’ll check in daily.
+  check_prompt: |
+    Did you do it today? Reply 3 (✅), 2 (⚠️), or 1 (❌).
+  morning_reminder: |
+    Morning nudge: one tiny rep keeps the chain alive.
+  check_logged: |
+    {summary}
+  celebration: |
+    🎉 Milestone! Keep the chain alive.
+  nudge_text: |
+    {text}
+  list_habits: |
+    Your habits:
+    {habits}
+  streak_report: |
+    Streak: {streak} days. {percent}% of {horizon}-day ramp.
+  stats_week: |
+    Week stats: {summary}
+  stats_month: |
+    Month stats: {summary}
+  export_ready_file: |
+    Export ready. Sending CSV… ({path})
+  export_ready_link: |
+    Export ready: {url}
+  feedback_opened: |
+    Thanks! Ticket #{ticket_id} is open.
+  delete_confirm: |
+    Confirm delete. Type YES to proceed.
+  delete_done: |
+    Your data has been deleted.
+  error_syntax_time: |
+    Please use time HH:MM (e.g., 20:00).
+  error_syntax_date: |
+    Please use date YYYY-MM-DD.
+  error_unknown: |
+    Sorry, I didn’t get that.
+  error_soft_cap: |
+    You’re set to 1 habit. Use 'add force' to add up to 3.
+
+compact:
+  onboarding_welcome: "Welcome! Try: add <habit> at HH:MM"
+  habit_added: "Added “{name}” at {time}."
+  check_prompt: "3✅ / 2⚠️ / 1❌?"
+  morning_reminder: "Tiny rep today? Keep the chain alive."
+  check_logged: "{summary}"
+  celebration: "🎉 Milestone!"
+  nudge_text: "{text}"
+  list_habits: "{habits}"
+  streak_report: "Streak {streak} ({percent}% of {horizon})."
+  stats_week: "Week: {summary}"
+  stats_month: "Month: {summary}"
+  export_ready_file: "CSV ready: {path}"
+  export_ready_link: "Export: {url}"
+  feedback_opened: "Ticket #{ticket_id} opened."
+  delete_confirm: "Type YES to delete."
+  delete_done: "Deleted."
+  error_syntax_time: "Time HH:MM (e.g., 20:00)."
+  error_syntax_date: "Date YYYY-MM-DD."
+  error_unknown: "Unknown command."
+  error_soft_cap: "1 habit set; use 'add force' for up to 3."
