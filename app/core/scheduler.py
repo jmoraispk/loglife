@@ -19,28 +19,39 @@ def _at_hhmm(now_local: datetime, hhmm: str) -> bool:
     return now_local.strftime("%H:%M") == hhmm
 
 
-def tick(repo: Repo) -> None:
-    """Execute one scheduler tick across all users and habits."""
+def tick(repo: Repo, now_by_phone: dict[str, datetime] | None = None) -> list[tuple[str, str]]:
+    """Execute one scheduler tick across all users and habits.
+
+    Returns a list of (event, phone) tuples for testability. Events include
+    "morning_reminder" and "check_prompt".
+    """
+    events: list[tuple[str, str]] = []
     users = repo.list_users()
     for u in users:
+        phone = u["phone"]
         tz = u["tz"] or "America/Los_Angeles"
-        now_local = datetime.now(tz=ZoneInfo(tz))
-        prefs = repo.get_user_prefs(u["phone"])
+        now_local = (
+            now_by_phone[phone].astimezone(ZoneInfo(tz))
+            if now_by_phone and phone in now_by_phone
+            else datetime.now(tz=ZoneInfo(tz))
+        )
+        prefs = repo.get_user_prefs(phone)
 
         # Morning reminder
         mr = prefs.get("morning_remind_hhmm", "08:00")
         if mr and _at_hhmm(now_local, mr):
-            # In a full system, this would send via adapter and log message
             _ = render("morning_reminder", prefs.get("style", "bullet"))
+            events.append(("morning_reminder", phone))
 
         # Evening checks per habit
-        for h in repo.get_habits(u["phone"]):
+        for h in repo.get_habits(phone):
             if _at_hhmm(now_local, h["remind_hhmm"]):
-                # suppression: if already logged today, skip
                 today_iso = now_local.date().isoformat()
                 if repo.has_log_for_date(int(h["id"]), today_iso):
                     continue
                 _ = render("check_prompt", prefs.get("style", "bullet"))
+                events.append(("check_prompt", phone))
+    return events
 
 
 def main() -> int:
