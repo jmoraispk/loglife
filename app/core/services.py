@@ -129,9 +129,15 @@ class ServiceContainer:
             percent = min(100, round(100 * streak / horizon)) if horizon else 0
             emoji = {1: "❌", 2: "⚠️", 3: "✅"}.get(score, "")
             name = habit["name"]
-            lines.append(
-                f"Logged {emoji} “{name}”. 🔥 Day {streak} ({percent}% of {horizon}-day ramp)."
+            # Celebration tone: congratulate on first 3 and milestone hits
+            celebrate = ""
+            if score == 3 and streak in MILESTONES_DEFAULT:
+                celebrate = " 🎉"
+            msg = (
+                f"Logged {emoji} “{name}”. 🔥 Day {streak}{celebrate} "
+                f"({percent}% of {horizon}-day ramp)."
             )
+            lines.append(msg)
         style = self.repo.get_user_prefs(phone).get("style", STYLE_DEFAULT)
         return render("check_logged", style, summary="\n".join(lines) or "Logged.")
 

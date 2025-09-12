@@ -32,8 +32,12 @@ def handle_message(raw_payload: dict[str, Any]) -> OutboundMessage:
     )
 
     services = ServiceContainer.default()
+    # Ensure user exists before logging messages
+    services.repo.ensure_user(inbound.user_phone)
+    services.repo.log_message(inbound.user_phone, "in", inbound.text)
     cmd = parse_command(inbound.text)
     response_text = services.route_command(inbound, cmd)
+    services.repo.log_message(inbound.user_phone, "out", response_text)
     return OutboundMessage(user_phone=inbound.user_phone, text=response_text)
 
 

@@ -42,4 +42,4 @@ def test_checkin_single():
     sc.repo.ensure_user("+10000000001")
     handle_message({"from": "+10000000001", "text": "add Run 20m at 20:00"})
     out = handle_message({"from": "+10000000001", "text": "3"})
-    assert "Day" in out.text
+    assert "Day" in out.text and "🎉" in out.text

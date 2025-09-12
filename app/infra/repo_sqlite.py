@@ -283,6 +283,18 @@ class Repo:
             out.append((phone_masked, tz, name, emoji, d, score, streak, created, note))
         return out
 
+    # --- Messages logging ---
+    def log_message(self, phone: str, direction: str, text: str) -> None:
+        """Insert a message record for KPI/debug purposes."""
+        snippet = (text or "").replace("\n", " ")[:100]
+        now = datetime.utcnow().isoformat()
+        with self.connect() as conn:
+            user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
+            conn.execute(
+                "INSERT INTO messages(user_id, direction, timestamp, snippet) VALUES(?,?,?,?)",
+                (user_id, direction, now, snippet),
+            )
+
     # --- Feedback ---
     def open_feedback(self, phone: str, text: str) -> int:
         """Create a feedback ticket and return its id."""

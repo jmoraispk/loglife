@@ -41,3 +41,9 @@ def test_morning_and_evening_events():
 
     events_evening = tick(repo, now_by_phone={phone: evening})
     assert ("check_prompt", phone) in events_evening
+
+    # pre-log suppression: log a '3' then expect no prompt
+    user_habits = repo.get_habits(phone)
+    repo.upsert_log(int(user_habits[0]["id"]), evening.date().isoformat(), 3)
+    suppressed = tick(repo, now_by_phone={phone: evening})
+    assert ("check_prompt", phone) not in suppressed
