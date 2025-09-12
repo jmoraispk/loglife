@@ -4,6 +4,7 @@ Provides minimal read/write operations needed for M0 scaffolding.
 """
 
 import argparse
+import json
 import os
 import sqlite3
 from datetime import datetime
@@ -106,6 +107,35 @@ class Repo:
             cur = conn.execute("INSERT INTO users(phone, created_at) VALUES(?, ?)", (phone, now))
             return cur.lastrowid
 
+    def get_user_id(self, phone: str) -> int:
+        """Return user id for a given phone number."""
+        with self.connect() as conn:
+            row = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()
+            if not row:
+                raise ValueError("user not found")
+            return int(row[0])
+
+    def get_user_tz(self, phone: str) -> str:
+        """Return timezone name for a given phone number."""
+        with self.connect() as conn:
+            row = conn.execute("SELECT tz FROM users WHERE phone=?", (phone,)).fetchone()
+            return row[0] if row else "America/Los_Angeles"
+
+    def get_user_prefs(self, phone: str) -> dict:
+        """Return prefs JSON (with defaults) for a given phone number."""
+        with self.connect() as conn:
+            row = conn.execute("SELECT prefs_json FROM users WHERE phone=?", (phone,)).fetchone()
+            prefs = {}
+            if row and row[0]:
+                try:
+                    prefs = json.loads(row[0])
+                except Exception:
+                    prefs = {}
+            prefs.setdefault("style", "bullet")
+            prefs.setdefault("export_mode", "file")
+            prefs.setdefault("morning_remind_hhmm", "08:00")
+            return prefs
+
     def list_habits(self, phone: str) -> str:
         """Return a user-friendly multi-line list of active habits."""
         with self.connect() as conn:
@@ -130,7 +160,16 @@ class Repo:
             ).fetchone()
             return int(row[0])
 
-    def add_habit(self, phone: str, name: str, hhmm: str, force: bool, max_default: int) -> str:
+    def add_habit(
+        self,
+        phone: str,
+        name: str,
+        hhmm: str,
+        force: bool,
+        max_default: int,
+        milestones: list[int] | None = None,
+        horizon_days: int = 14,
+    ) -> str:
         """Add a habit, enforcing soft/hard caps. Returns status string."""
         with self.connect() as conn:
             user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
@@ -145,14 +184,93 @@ class Repo:
                 return "hard_cap"
             order_idx = count
             now = datetime.utcnow().isoformat()
+            milestones_json = json.dumps(milestones or [])
             conn.execute(
                 (
-                    "INSERT INTO habits(user_id, name, remind_hhmm, order_idx, "
-                    "created_at, milestones_json) VALUES(?,?,?,?,?, '[]')"
+                    "INSERT INTO habits(user_id, name, remind_hhmm, order_idx, created_at, "
+                    "milestones_json, horizon_days) VALUES(?,?,?,?,?,?,?)"
                 ),
-                (user_id, name, hhmm, order_idx, now),
+                (user_id, name, hhmm, order_idx, now, milestones_json, horizon_days),
             )
             return "ok"
+
+    def get_habits(self, phone: str) -> list[sqlite3.Row]:
+        """Return all active habits for a user ordered by index."""
+        with self.connect() as conn:
+            user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
+            rows = conn.execute(
+                "SELECT * FROM habits WHERE user_id=? AND active=1 ORDER BY order_idx ASC",
+                (user_id,),
+            ).fetchall()
+            return list(rows)
+
+    def upsert_log(self, habit_id: int, d_iso: str, score: int, note: str | None = None) -> None:
+        """Insert or update a daily log for a habit on date d_iso."""
+        now = datetime.utcnow().isoformat()
+        with self.connect() as conn:
+            sql = (
+                "INSERT INTO logs(habit_id, date, score, note, created_at) VALUES(?,?,?,?,?) "
+                "ON CONFLICT(habit_id, date) DO UPDATE SET score=excluded.score, note=excluded.note"
+            )
+            conn.execute(sql, (habit_id, d_iso, score, note, now))
+
+    def get_log_for_date(self, habit_id: int, d_iso: str) -> sqlite3.Row | None:
+        """Return the log row for a habit on a given date if present."""
+        with self.connect() as conn:
+            return conn.execute(
+                "SELECT * FROM logs WHERE habit_id=? AND date=?", (habit_id, d_iso)
+            ).fetchone()
+
+    def compute_streak(self, habit_id: int, upto_date_iso: str) -> int:
+        """Compute current streak up to and including the provided date."""
+        with self.connect() as conn:
+            rows = conn.execute(
+                "SELECT date, score FROM logs WHERE habit_id=? AND date<=? ORDER BY date DESC",
+                (habit_id, upto_date_iso),
+            ).fetchall()
+        streak = 0
+        for r in rows:
+            if int(r[1]) == 3:
+                streak += 1
+            else:
+                break
+        return streak
+
+    def export_rows(self, phone: str, start_iso: str, end_iso: str) -> list[tuple]:
+        """Return rows for CSV export within [start, end] inclusive.
+
+        Columns: user_phone,tz,habit_name,emoji,date,score,streak_after,created_at,note
+        """
+        with self.connect() as conn:
+            user_row = conn.execute(
+                "SELECT id, tz, phone FROM users WHERE phone=?", (phone,)
+            ).fetchone()
+            user_id = int(user_row[0])
+            tz = user_row[1]
+            phone_masked = user_row[2]
+            rows = conn.execute(
+                (
+                    "SELECT h.id, h.name, h.emoji, l.date, l.score, l.created_at, l.note "
+                    "FROM logs l JOIN habits h ON l.habit_id=h.id "
+                    "WHERE h.user_id=? AND l.date BETWEEN ? AND ? ORDER BY h.id ASC, l.date ASC"
+                ),
+                (user_id, start_iso, end_iso),
+            ).fetchall()
+        out: list[tuple] = []
+        last_streak_by_hid: dict[int, int] = {}
+        for r in rows:
+            hid = int(r[0])
+            name = r[1]
+            emoji = r[2]
+            d = r[3]
+            score = int(r[4])
+            created = r[5]
+            note = r[6]
+            streak = last_streak_by_hid.get(hid, 0)
+            streak = streak + 1 if score == 3 else 0
+            last_streak_by_hid[hid] = streak
+            out.append((phone_masked, tz, name, emoji, d, score, streak, created, note))
+        return out
 
     # --- Feedback ---
     def open_feedback(self, phone: str, text: str) -> int:

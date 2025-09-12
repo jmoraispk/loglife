@@ -41,6 +41,8 @@ bullet:
     Sorry, I didn’t get that.
   error_soft_cap: |
     You’re set to 1 habit. Use 'add force' to add up to 3.
+  error_backfill_range: |
+    Backfill allowed only for yesterday or today.
 
 compact:
   onboarding_welcome: "Welcome! Try: add <habit> at HH:MM"
@@ -63,3 +65,4 @@ compact:
   error_syntax_date: "Date YYYY-MM-DD."
   error_unknown: "Unknown command."
   error_soft_cap: "1 habit set; use 'add force' for up to 3."
+  error_backfill_range: "Backfill only for yesterday or today."

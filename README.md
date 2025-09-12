@@ -1,157 +1,53 @@
-# WhatsApp Goal Bot
+# WhatsApp Habit Tracker
 
-A bot that tracks personal goal check-ins via WhatsApp messages.
+Python-only backend with SQLite and a simulator to test WhatsApp-like interactions.
 
-## 📋 Goals
+## Dev quickstart
 
-Defined in `config.py`:
-- 😴 Bed and lights out at 10 pm
-- 🥗 Eat clean (70% veggies, 30% protein)
-- 🏃 Exercise >=50 min
-- 📵 No mindless entertainment
-- 🙏 Pray and reflect
+1) Install uv (once):
 
-
-
-## Features
-
-<details>
-<summary>Click to Expand</summary>
-
-### ✅ Daily Check-in
-
-Send a message like:
-```
-bot: 31232
-```
-
-It will reply with:
-```
-📅 2025-06-30
-> 😴 🥗 🏃 📵 🙏
-> ✅ ❌ ⚠️ ✅ ⚠️
-```
-
-### 📊 Weekly Summary
-
-Send:
-```
-bot: show week
-```
-
-Bot responds with a summary of Mon–Sun with ✅/⚠️/❌ or 🔲 if missing.
-
-```
-Week 25: Jun 23-29
-    😴 🥗 🏃 📵 🙏
-Mon 🔲 🔲 🔲 🔲 🔲
-Tue 🔲 🔲 🔲 🔲 🔲
-Wed ✅ ✅ ✅ ✅ ✅
-Thu 🔲 🔲 🔲 🔲 🔲
-Fri 🔲 🔲 🔲 🔲 🔲
-Sat 🔲 🔲 🔲 🔲 🔲
-Sun ❌ ❌ ❌ ❌ ❌
-```
-</details>
-
-## 🛠 Dev
-
-- Run Python message processor:
-  ```
-  pip install -e .
-  cd backend && python app.py
-  ```
-- JS WhatsApp Client interface listener (in another terminal):
-  ```
-  cd whatsapp-client && node index.js
-  ```
-- If server is available.
-  ```
-  remote-stop  # Before any local development!
-  
-  # Deploy locally with the steps above
-
-  # Push last changes to git
-
-  remote-start # Start remote again (will pull and kickstart)
-  ```
-
-## ⚙️ First-Time Setup
-
-<details>
-<summary>Click to Expand</summary>
-
-### 1. Python Backend
 ```bash
-cd backend
-mamba create -n goal_bot python=3.11
-mamba activate goal_bot
-pip install -e .
-python app.py
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source $HOME/.local/bin/env
 ```
 
-### 2. Node.js Client
+2) Sync deps and run migrations:
 
-#### a. Install `nvm` (Node Version Manager)
-If `nvm` is not installed, run:
 ```bash
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+make sync
+make migrate
 ```
-(Note, may be different in Windows. )
 
-Then restart terminal.
+3) Start the simulator:
 
-#### b. Install Node 18
 ```bash
-nvm install 18
-nvm use 18
+make simulate
 ```
 
-#### c. Install dependencies and run the bot
+Simulator input format:
+
+```text
++15551234567> start
++15551234567> add Sleep by 23:00 at 21:30
++15551234567> list
++15551234567> 3
+```
+
+## Healthcheck
+
 ```bash
-cd whatsapp-client
-npm install
-node index.js
+make health
 ```
 
-A QR code will appear — scan it using your bot WhatsApp account.
+## Tests
 
-The bot will remember this account. If you need to reset it, restart the node server like this:
+```bash
+uv sync
+uv run pytest -q
+```
 
-`node index.js --reset-session`
+## Defaults
 
-</details>
-
-
-## Server Setup
-
-Plan for concialiating local develop and remote production hosting.
-
-1. Have `server_stop` bash alias to ssh into server, pause 
-
-<details>
-<summary>Click to Expand</summary>
-
-1. Rent a server. Example Hetzner.
-
-
-2. Ping (inbound ICMP rule)
-
-`ping 5.161.234.127`
-
-
-
-</details>
-
-
-## ❓ FAQ
-
-### 1- Why doesn't the client need my number?
-
-The bot uses `whatsapp-web.js`, which logs in using a QR code — just like WhatsApp Web.
-
-- It acts as if you're logged into WhatsApp Web.
-- Once scanned, the bot listens for all messages *received by that account*.
-- No need to hardcode or configure your phone number — the session is handled automatically.
-
-You just scan the QR once, and it remembers the session.
+- Morning reminder: ON at 08:00 (user TZ)
+- Export default mode: file (CSV attachment)
+- Habit soft cap: 1 (use `add force` for up to 3)
