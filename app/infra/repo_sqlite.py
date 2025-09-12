@@ -1,9 +1,12 @@
+"""SQLite repository and migration runner.
+
+Provides minimal read/write operations needed for M0 scaffolding.
+"""
+
 import argparse
 import os
 import sqlite3
 from datetime import datetime
-from typing import List, Tuple
-
 
 DB_PATH = os.environ.get("HABITS_DB", os.path.join(os.getcwd(), "habits.sqlite3"))
 
@@ -68,41 +71,50 @@ CREATE INDEX IF NOT EXISTS idx_habits_user_active ON habits(user_id, active);
 
 
 class Repo:
+    """Lightweight repository for SQLite persistence."""
+
     def __init__(self, db_path: str = DB_PATH):
+        """Initialize repository with a target database path."""
         self.db_path = db_path
         os.makedirs(os.path.dirname(db_path) or ".", exist_ok=True)
 
     @classmethod
     def default(cls) -> "Repo":
+        """Return a Repo bound to the default DB path."""
         return cls()
 
     def connect(self) -> sqlite3.Connection:
+        """Open a SQLite connection with row factory set to Row."""
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         return conn
 
     def ensure_ready(self) -> None:
+        """Create tables and indices if they do not exist."""
         with self.connect() as conn:
             conn.executescript(SCHEMA_SQL)
 
     # --- Users & Habits ---
     def ensure_user(self, phone: str) -> int:
+        """Ensure a user row exists; return user_id."""
         now = datetime.utcnow().isoformat()
         with self.connect() as conn:
             cur = conn.execute("SELECT id FROM users WHERE phone=?", (phone,))
             row = cur.fetchone()
             if row:
                 return row[0]
-            cur = conn.execute(
-                "INSERT INTO users(phone, created_at) VALUES(?, ?)", (phone, now)
-            )
+            cur = conn.execute("INSERT INTO users(phone, created_at) VALUES(?, ?)", (phone, now))
             return cur.lastrowid
 
     def list_habits(self, phone: str) -> str:
+        """Return a user-friendly multi-line list of active habits."""
         with self.connect() as conn:
             user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
             rows = conn.execute(
-                "SELECT name, remind_hhmm FROM habits WHERE user_id=? AND active=1 ORDER BY order_idx ASC",
+                (
+                    "SELECT name, remind_hhmm FROM habits "
+                    "WHERE user_id=? AND active=1 ORDER BY order_idx ASC"
+                ),
                 (user_id,),
             ).fetchall()
         if not rows:
@@ -110,6 +122,7 @@ class Repo:
         return "\n".join(f"• {r['name']} at {r['remind_hhmm']}" for r in rows)
 
     def count_active_habits(self, phone: str) -> int:
+        """Return active habit count for a user by phone."""
         with self.connect() as conn:
             user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
             row = conn.execute(
@@ -118,6 +131,7 @@ class Repo:
             return int(row[0])
 
     def add_habit(self, phone: str, name: str, hhmm: str, force: bool, max_default: int) -> str:
+        """Add a habit, enforcing soft/hard caps. Returns status string."""
         with self.connect() as conn:
             user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
             cur = conn.execute(
@@ -132,27 +146,32 @@ class Repo:
             order_idx = count
             now = datetime.utcnow().isoformat()
             conn.execute(
-                """
-                INSERT INTO habits(user_id, name, remind_hhmm, order_idx, created_at, milestones_json)
-                VALUES(?,?,?,?,?, '[]')
-                """,
+                (
+                    "INSERT INTO habits(user_id, name, remind_hhmm, order_idx, "
+                    "created_at, milestones_json) VALUES(?,?,?,?,?, '[]')"
+                ),
                 (user_id, name, hhmm, order_idx, now),
             )
             return "ok"
 
     # --- Feedback ---
     def open_feedback(self, phone: str, text: str) -> int:
+        """Create a feedback ticket and return its id."""
         with self.connect() as conn:
             user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
             now = datetime.utcnow().isoformat()
             cur = conn.execute(
-                "INSERT INTO feedback_tickets(user_id, text, status, created_at) VALUES(?, ?, 'open', ?)",
+                (
+                    "INSERT INTO feedback_tickets(user_id, text, status, created_at) "
+                    "VALUES(?, ?, 'open', ?)"
+                ),
                 (user_id, text, now),
             )
             return cur.lastrowid
 
 
 def main():
+    """CLI to run migrations for local development."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--migrate", action="store_true", help="Run SQLite schema migrations")
     args = parser.parse_args()
@@ -163,4 +182,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

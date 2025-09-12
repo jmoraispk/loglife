@@ -1,12 +1,18 @@
-import sys
-import re
-from app.api.handler import handle_message
+"""Simple stdin/stdout simulator using the common handler.
 
+Input format: "+15551234567> message". Prints bot replies with "<".
+"""
+
+import re
+import sys
+
+from app.api.handler import handle_message
 
 PROMPT_RE = re.compile(r"^\+(\d{7,15})>\s*(.*)$")
 
 
 def main():
+    """Run a REPL-like loop for manual end-to-end testing."""
     print("Simulator ready. Type '+15551234567> message'")
     for line in sys.stdin:
         line = line.rstrip("\n")
@@ -24,4 +30,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

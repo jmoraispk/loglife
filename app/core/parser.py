@@ -1,7 +1,11 @@
+"""Command parser for WhatsApp Habit Tracker.
+
+Parses inbound user text into a structured Command type. Parsing is
+case-insensitive and focuses on MVP commands for M0/M1 scaffolding.
+"""
+
 import re
 from dataclasses import dataclass
-from typing import Optional
-
 
 HHMM_RE = re.compile(r"\b([01]\d|2[0-3]):[0-5]\d\b")
 DATE_RE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
@@ -9,11 +13,21 @@ DATE_RE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 
 @dataclass
 class Command:
+    """Parsed command with a kind discriminator and optional raw argument."""
+
     kind: str
-    arg: Optional[str] = None
+    arg: str | None = None
 
 
 def parse_command(text: str) -> Command:
+    """Parse raw text into a Command.
+
+    Args:
+        text: User-provided message body.
+
+    Returns:
+        Command with kind and optional arg content.
+    """
     t = text.strip().lower()
     if not t:
         return Command("unknown")
@@ -53,4 +67,3 @@ def parse_command(text: str) -> Command:
         return Command("feedback", arg=text.strip()[9:].strip())
 
     return Command("unknown")
-

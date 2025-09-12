@@ -1,11 +1,15 @@
+"""Core service layer routing parsed commands to behaviors.
+
+This module wires the repository to command handlers and rendering.
+M0 focuses on minimal flows; later milestones will expand logic.
+"""
+
 from dataclasses import dataclass
-from typing import List
 
-from app.domain.dto import InboundMessage
 from app.core.parser import Command
-from app.ui.render_whatsapp import render
+from app.domain.dto import InboundMessage
 from app.infra.repo_sqlite import Repo
-
+from app.ui.render_whatsapp import render
 
 MAX_HABITS_DEFAULT = 1
 DEFAULT_REMIND_HHMM = "20:00"
@@ -18,13 +22,17 @@ MILESTONES_DEFAULT = [1, 3, 5, 7, 10, 14, 21, 30, 50, 66, 100]
 
 @dataclass
 class ServiceContainer:
+    """Service container aggregating infrastructure dependencies."""
+
     repo: Repo
 
     @classmethod
     def default(cls) -> "ServiceContainer":
+        """Construct a default container with the default repository."""
         return cls(repo=Repo.default())
 
     def route_command(self, inbound: InboundMessage, cmd: Command) -> str:
+        """Route a parsed command and return a rendered message body."""
         if cmd.kind == "start":
             self.repo.ensure_user(inbound.user_phone)
             return render("onboarding_welcome", STYLE_DEFAULT)
@@ -39,7 +47,9 @@ class ServiceContainer:
                 name, hhmm = self._parse_add_args(cmd.arg)
             except Exception:
                 return render("error_syntax_time", STYLE_DEFAULT)
-            res = self.repo.add_habit(inbound.user_phone, name, hhmm, force=force, max_default=MAX_HABITS_DEFAULT)
+            res = self.repo.add_habit(
+                inbound.user_phone, name, hhmm, force=force, max_default=MAX_HABITS_DEFAULT
+            )
             if res == "soft_cap":
                 return render("error_soft_cap", STYLE_DEFAULT)
             return render("habit_added", STYLE_DEFAULT, name=name, time=hhmm)
@@ -56,8 +66,12 @@ class ServiceContainer:
             return render("feedback_opened", STYLE_DEFAULT, ticket_id=ticket_id)
         return render("error_unknown", STYLE_DEFAULT)
 
-    def _parse_add_args(self, arg: str) -> List[str]:
-        # expects "<habit text> at HH:MM"
+    def _parse_add_args(self, arg: str) -> list[str]:
+        """Parse arguments for the add command.
+
+        Expected format: "<habit text> at HH:MM".
+        Returns a list [name, hhmm].
+        """
         parts = arg.rsplit(" at ", 1)
         if len(parts) != 2:
             raise ValueError("bad add args")
@@ -67,4 +81,3 @@ class ServiceContainer:
         if not (len(hhmm) == 5 and hhmm[2] == ":"):
             raise ValueError("bad time")
         return [name, hhmm]
-

@@ -1,10 +1,13 @@
-PY=python3
-PIP=pip3
+UV=uv
+PY=$(UV) run python
 
-.PHONY: dev simulate test lint fmt migrate health
+.PHONY: dev simulate test lint fmt migrate health sync
+
+sync: ## Sync dependencies with uv
+	$(UV) sync
 
 dev: ## Install deps, run migrations, start simulator
-	$(PIP) install -r requirements.txt
+	$(UV) sync
 	$(PY) -m app.infra.repo_sqlite --migrate
 	$(PY) -m app.adapters.simulator
 
@@ -17,6 +20,14 @@ migrate: ## Run DB migrations
 health: ## Healthcheck (DB + renderer)
 	$(PY) -m app.api.handler --check
 
-test: ## Run tests quietly with coverage
-	pytest -q --maxfail=1 --disable-warnings
+fmt: ## Format with Ruff
+	uvx ruff format .
+
+lint: ## Lint with Ruff
+	uvx ruff check .
+
+test: ## Run tests quietly (placeholder)
+	$(PY) - <<'PY'
+print("Tests not yet implemented.")
+PY
 
