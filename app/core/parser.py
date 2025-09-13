@@ -66,4 +66,20 @@ def parse_command(text: str) -> Command:
     if t.startswith("feedback "):
         return Command("feedback", arg=text.strip()[9:].strip())
 
+    if t.startswith("boost"):
+        arg = text.strip()[5:].strip() if len(t) > 5 else ""
+        return Command("boost", arg=arg)
+    if t.startswith("set why "):
+        return Command("set_why", arg=text.strip()[8:].strip())
+    if t.startswith("set identity "):
+        return Command("set_identity", arg=text.strip()[13:].strip())
+    if t.startswith("set env+ "):
+        return Command("set_env_add", arg=text.strip()[9:].strip())
+    if t.startswith("set env- "):
+        return Command("set_env_remove", arg=text.strip()[9:].strip())
+    if t.startswith("set minimum "):
+        return Command("set_minimum", arg=text.strip()[12:].strip())
+    if t.startswith("set ifthen "):
+        return Command("set_ifthen", arg=text.strip()[11:].strip())
+
     return Command("unknown")

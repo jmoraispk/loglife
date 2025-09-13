@@ -71,6 +71,18 @@ class ServiceContainer:
             self.repo.ensure_user(inbound.user_phone)
             ticket_id = self.repo.open_feedback(inbound.user_phone, cmd.arg)
             return render("feedback_opened", STYLE_DEFAULT, ticket_id=ticket_id)
+        # Boost-related
+        if cmd.kind in {
+            "boost",
+            "set_why",
+            "set_identity",
+            "set_env_add",
+            "set_env_remove",
+            "set_minimum",
+            "set_ifthen",
+        }:
+            self.repo.ensure_user(inbound.user_phone)
+            return self._handle_boost(inbound, cmd)
         return render("error_unknown", STYLE_DEFAULT)
 
     def _parse_add_args(self, arg: str) -> list[str]:
@@ -201,3 +213,27 @@ class ServiceContainer:
             for r in rows[:EXPORT_MAX_ROWS]:
                 writer.writerow(r)
         return fname
+
+    # --- Boost & setters (M2 subset) ---
+    def _handle_boost(self, inbound: InboundMessage, cmd: Command) -> str:
+        phone = inbound.user_phone
+        habits = self.repo.get_habits(phone)
+        if not habits:
+            return render("error_unknown", STYLE_DEFAULT)
+        target = habits[0]  # MVP: first habit by order_idx; can parse name later
+        hid = int(target["id"])
+        key_map = {
+            "set_why": ("habit_meta", "why"),
+            "set_identity": ("habits", "identity_frame"),
+            "set_env_add": ("habit_strategy", "env_additions"),
+            "set_env_remove": ("habit_strategy", "env_removals"),
+            "set_minimum": ("habit_meta", "minimum"),
+            "set_ifthen": ("habit_meta", "if_then"),
+        }
+        if cmd.kind == "boost":
+            return render("nudge_text", STYLE_DEFAULT, text="Boost started. Reply with setters.")
+        table, column = key_map[cmd.kind]
+        self.repo.upsert_boost_field(hid, table, column, cmd.arg or "")
+        # Precompute nudges minimal stub
+        self.repo.rebuild_habit_nudges(hid)
+        return render("nudge_text", STYLE_DEFAULT, text="Saved.")

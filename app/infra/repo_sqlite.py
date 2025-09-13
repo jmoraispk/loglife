@@ -66,6 +66,59 @@ CREATE TABLE IF NOT EXISTS messages (
   snippet TEXT NOT NULL
 );
 
+-- Boost & strategy tables
+CREATE TABLE IF NOT EXISTS habit_meta (
+  habit_id INTEGER PRIMARY KEY REFERENCES habits(id),
+  why TEXT NULL,
+  trigger TEXT NULL,
+  minimum TEXT NULL,
+  blockers TEXT NULL,
+  if_then TEXT NULL,
+  reward TEXT NULL,
+  support TEXT NULL,
+  summary TEXT NULL,
+  depth INTEGER NOT NULL DEFAULT 0,
+  updated_at DATETIME NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS habit_strategy (
+  habit_id INTEGER PRIMARY KEY REFERENCES habits(id),
+  goal_specificity TEXT NULL,
+  daily_tracking_enabled INTEGER NOT NULL DEFAULT 1,
+  impl_daymask TEXT NULL,
+  impl_time TEXT NULL,
+  impl_place TEXT NULL,
+  impl_how TEXT NULL,
+  env_additions TEXT NULL,
+  env_removals TEXT NULL,
+  why_list TEXT NULL,
+  reward_plan TEXT NULL,
+  celebration_micro TEXT NULL,
+  readiness_score INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS habit_nudges (
+  id INTEGER PRIMARY KEY,
+  habit_id INTEGER NOT NULL REFERENCES habits(id),
+  kind TEXT NOT NULL,
+  text TEXT NOT NULL,
+  priority INTEGER NOT NULL,
+  cooldown_days INTEGER NOT NULL,
+  send_time_policy TEXT NOT NULL,
+  last_sent_at DATETIME NULL,
+  enabled INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS nudge_queue (
+  id INTEGER PRIMARY KEY,
+  habit_id INTEGER NOT NULL REFERENCES habits(id),
+  date DATE NOT NULL,
+  scheduled_at DATETIME NOT NULL,
+  text TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  state TEXT NOT NULL CHECK(state IN ('ready','sent','skipped','expired'))
+);
+
 CREATE INDEX IF NOT EXISTS idx_logs_habit_date ON logs(habit_id, date);
 CREATE INDEX IF NOT EXISTS idx_habits_user_active ON habits(user_id, active);
 """
@@ -294,6 +347,67 @@ class Repo:
                 "INSERT INTO messages(user_id, direction, timestamp, snippet) VALUES(?,?,?,?)",
                 (user_id, direction, now, snippet),
             )
+
+    # --- Boost helpers ---
+    def upsert_boost_field(self, habit_id: int, table: str, column: str, value: str) -> None:
+        """Upsert a boost/meta/strategy field for a habit."""
+        now = datetime.utcnow().isoformat()
+        with self.connect() as conn:
+            if table == "habit_meta":
+                # Ensure row exists
+                conn.execute(
+                    "INSERT OR IGNORE INTO habit_meta(habit_id, updated_at) VALUES(?, ?)",
+                    (habit_id, now),
+                )
+                conn.execute(
+                    f"UPDATE habit_meta SET {column}=?, updated_at=? WHERE habit_id=?",
+                    (value, now, habit_id),
+                )
+            elif table == "habit_strategy":
+                conn.execute(
+                    "INSERT OR IGNORE INTO habit_strategy(habit_id) VALUES(?)",
+                    (habit_id,),
+                )
+                conn.execute(
+                    f"UPDATE habit_strategy SET {column}=? WHERE habit_id=?",
+                    (value, habit_id),
+                )
+            elif table == "habits":
+                conn.execute(
+                    f"UPDATE habits SET {column}=? WHERE id=?",
+                    (value, habit_id),
+                )
+
+    def rebuild_habit_nudges(self, habit_id: int) -> None:
+        """Minimal placeholder: ensure at least an if_then and minimum nudge rows exist."""
+        with self.connect() as conn:
+            # Inspect meta/strategy to build texts
+            meta = conn.execute(
+                "SELECT minimum, if_then FROM habit_meta WHERE habit_id=?", (habit_id,)
+            ).fetchone()
+            minimum = meta[0] if meta else None
+            if_then = meta[1] if meta else None
+            templates = []
+            if if_then:
+                templates.append(
+                    (
+                        "if_then",
+                        f"If blocker then {if_then}. One tiny rep counts.",
+                        1,
+                        2,
+                        "next_morning",
+                    )
+                )
+            if minimum:
+                templates.append(
+                    ("minimum", f"Minimum today: {minimum}. Log 2 if partial.", 3, 2, "post_time")
+                )
+            for kind, text, priority, cooldown, policy in templates:
+                sql = (
+                    "INSERT INTO habit_nudges(habit_id, kind, text, priority, cooldown_days, "
+                    "send_time_policy, enabled) VALUES(?,?,?,?,?,?,1)"
+                )
+                conn.execute(sql, (habit_id, kind, text, priority, cooldown, policy))
 
     # --- Feedback ---
     def open_feedback(self, phone: str, text: str) -> int:
