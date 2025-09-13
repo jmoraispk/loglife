@@ -13,6 +13,7 @@ from app.core.parser import Command
 from app.domain.dto import InboundMessage
 from app.infra.clock import today_in_tz
 from app.infra.repo_sqlite import Repo
+from app.infra.signing import sign_path
 from app.ui.render_whatsapp import render
 
 MAX_HABITS_DEFAULT = 1
@@ -250,6 +251,9 @@ class ServiceContainer:
             )
             for r in rows[:EXPORT_MAX_ROWS]:
                 writer.writerow(r)
+        prefs = self.repo.get_user_prefs(phone)
+        if prefs.get("export_mode", "file") == "link":
+            return sign_path(fname)
         return fname
 
     # --- Boost & setters (M2 subset) ---

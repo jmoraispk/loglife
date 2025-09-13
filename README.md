@@ -59,10 +59,10 @@ Legend: Status indicates whether the capability is available in M1 or planned fo
 | Command | Syntax | Description | Status |
 | --- | --- | --- | --- |
 | start | `start` | Begin onboarding; welcomes the user (questions phased in later). | M1 |
-| set timezone | `set tz <Area/City>` | Set timezone (e.g., `America/Los_Angeles`). | M2 |
-| style set | `style set <bullet|compact|table|card>` | Set message style (M1 supports bullet/compact). | M2 |
-| style get | `style get` | Show current style. | M2 |
-| morning reminder | `set morning <HH:MM|off>` | Enable/disable and set morning reminder time. | M2 |
+| set timezone | `set tz <Area/City>` | Set timezone (e.g., `America/Los_Angeles`). | M2 (implemented) |
+| style set | `style set <bullet|compact|table|card>` | Set message style (bullet/compact active). | M2 (implemented) |
+| style get | `style get` | Show current style. | M2 (implemented) |
+| morning reminder | `set morning <HH:MM|off>` | Enable/disable and set morning reminder time. | M2 (implemented) |
 | add habit | `add <habit> at <HH:MM>` | Add a habit (respects soft cap 1). | M1 |
 | add habit (force) | `add force <habit> at <HH:MM>` | Add even if at soft cap (up to 3 total). | M1 |
 | remove habit | `remove <habit>` | Remove a habit by name. | M2 |
@@ -74,13 +74,13 @@ Legend: Status indicates whether the capability is available in M1 or planned fo
 | streak | `streak <habit>` | Show current streak for a habit. | M2 |
 | stats | `stats w1|w12|m1|m3` | Aggregate stats for a window. | M2 |
 | export | `export w1|m3|YYYY-MM-DD..YYYY-MM-DD [habit:"name"]` | Generate CSV (file by default). | M1 |
-| export mode | `export mode file|link` | Choose export delivery mode. | M2 |
+| export mode | `export mode file|link` | Choose export delivery mode (link mode returns signed URL). | M2 (implemented) |
 | boost | `boost [<habit>]` | 7-step prompts to improve habit strategy. | M2 |
 | set why/identity/... | `set why <habit>: <text>` (and similar) | Shortcuts to set strategy fields. | M2 |
 | nudges | `nudges on|off [<habit>]` / `nudges status [<habit>]` | Control precomputed nudges and see status. | M2 |
 | celebrate | `celebrate on|off [<habit>]` / `celebrate milestones <habit>: ...` | Configure celebration behavior. | M2 |
 | feedback | `feedback <text>` | Open a feedback ticket and return id. | M1 |
-| account | `pause` / `resume` / `cancel` | Pause/resume reminders; log cancel. | M2 |
+| account | `pause` / `resume` / `cancel` | Pause/resume reminders; log cancel. | M2 (pause/resume implemented) |
 | delete | `delete me` (then `YES`) | Delete user data (requires confirm). | M2 |
 
 Notes:
