@@ -32,8 +32,6 @@ fmt: ## Format with Ruff
 lint: ## Lint with Ruff
 	uvx ruff check .
 
-test: ## Run tests quietly (placeholder)
-	$(PY) - <<'PY'
-print("Tests not yet implemented.")
-PY
+test: ## Run tests via uv/pytest
+	$(UV) run pytest -q
 
