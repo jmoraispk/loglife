@@ -113,6 +113,11 @@ class ServiceContainer:
             return self._handle_checkin(inbound, cmd.arg)
         if cmd.kind == "export":
             self.repo.ensure_user(inbound.user_phone)
+            # frequency limit: <=3/day
+            if self.repo.export_count_today(inbound.user_phone) >= 3:
+                return render(
+                    "nudge_text", STYLE_DEFAULT, text="Too many exports today. Try tomorrow."
+                )
             path = self._handle_export(inbound.user_phone, cmd.arg)
             return render("export_ready_file", STYLE_DEFAULT, path=path)
         if cmd.kind == "export_mode":

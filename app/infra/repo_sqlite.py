@@ -492,6 +492,17 @@ class Repo:
             row = conn.execute(sql, (user_id, today)).fetchone()
             return int(row[0])
 
+    def last_inbound_ts(self, phone: str) -> str | None:
+        """Return last inbound message timestamp (ISO) for user or None."""
+        with self.connect() as conn:
+            user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
+            sql = (
+                "SELECT timestamp FROM messages WHERE user_id=? AND direction='in' "
+                "ORDER BY timestamp DESC LIMIT 1"
+            )
+            row = conn.execute(sql, (user_id,)).fetchone()
+            return row[0] if row else None
+
     def mark_inbound_seen(self, phone: str, message_id: str) -> bool:
         """Mark an inbound message id as seen, return False if duplicate."""
         with self.connect() as conn:

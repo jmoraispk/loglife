@@ -54,6 +54,16 @@ def tick(repo: Repo, now_by_phone: dict[str, datetime] | None = None) -> list[tu
                     continue
                 _ = render("check_prompt", prefs.get("style", "bullet"))
                 events.append(("check_prompt", phone))
+
+        # Nudges (minimal): skip if user interacted in last 10 minutes
+        last_in = repo.last_inbound_ts(phone)
+        if last_in:
+            try:
+                last_dt = datetime.fromisoformat(last_in)
+                if (now_local - last_dt).total_seconds() < 600:
+                    continue
+            except Exception:
+                pass
     return events
 
 
