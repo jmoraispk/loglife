@@ -42,6 +42,10 @@ def parse_command(text: str) -> Command:
         return Command("style_get")
     if t.startswith("set morning "):
         return Command("set_morning", arg=text.strip()[12:].strip())
+    if t == "pause":
+        return Command("pause")
+    if t == "resume":
+        return Command("resume")
 
     if t.startswith("add force ") and " at " in t:
         return Command("add_force", arg=text.strip()[10:].strip())

@@ -40,6 +40,44 @@ class ServiceContainer:
         if cmd.kind == "start":
             self.repo.ensure_user(inbound.user_phone)
             return render("onboarding_welcome", STYLE_DEFAULT)
+        if cmd.kind == "set_tz":
+            self.repo.ensure_user(inbound.user_phone)
+            tz = (cmd.arg or "").strip()
+            if not tz or "/" not in tz:
+                return render("error_unknown", STYLE_DEFAULT)
+            self.repo.set_user_tz(inbound.user_phone, tz)
+            return render("nudge_text", STYLE_DEFAULT, text=f"Timezone set to {tz}.")
+        if cmd.kind == "style_set":
+            self.repo.ensure_user(inbound.user_phone)
+            style = (cmd.arg or "").strip()
+            if style not in {"bullet", "compact", "table", "card"}:
+                return render("error_unknown", STYLE_DEFAULT)
+            self.repo.set_user_pref(inbound.user_phone, "style", style)
+            return render("nudge_text", STYLE_DEFAULT, text=f"Style set to {style}.")
+        if cmd.kind == "style_get":
+            self.repo.ensure_user(inbound.user_phone)
+            prefs = self.repo.get_user_prefs(inbound.user_phone)
+            return render(
+                "nudge_text", STYLE_DEFAULT, text=f"Style: {prefs.get('style', 'bullet')}"
+            )
+        if cmd.kind == "set_morning":
+            self.repo.ensure_user(inbound.user_phone)
+            arg = (cmd.arg or "").strip().lower()
+            if arg == "off":
+                self.repo.set_user_pref(inbound.user_phone, "morning_remind_hhmm", "")
+                return render("nudge_text", STYLE_DEFAULT, text="Morning reminder turned off.")
+            if not (len(arg) == 5 and arg[2] == ":"):
+                return render("error_syntax_time", STYLE_DEFAULT)
+            self.repo.set_user_pref(inbound.user_phone, "morning_remind_hhmm", arg)
+            return render("nudge_text", STYLE_DEFAULT, text=f"Morning reminder set to {arg}.")
+        if cmd.kind == "pause":
+            self.repo.ensure_user(inbound.user_phone)
+            self.repo.set_paused(inbound.user_phone, True)
+            return render("nudge_text", STYLE_DEFAULT, text="Paused reminders.")
+        if cmd.kind == "resume":
+            self.repo.ensure_user(inbound.user_phone)
+            self.repo.set_paused(inbound.user_phone, False)
+            return render("nudge_text", STYLE_DEFAULT, text="Resumed reminders.")
         if cmd.kind == "list":
             self.repo.ensure_user(inbound.user_phone)
             habits = self.repo.list_habits(inbound.user_phone)

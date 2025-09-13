@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS users (
   phone TEXT UNIQUE NOT NULL,
   tz TEXT NOT NULL DEFAULT 'America/Los_Angeles',
   prefs_json TEXT NOT NULL DEFAULT '{}',
+  paused INTEGER NOT NULL DEFAULT 0,
   usage_streak_current INTEGER NOT NULL DEFAULT 0,
   usage_streak_best INTEGER NOT NULL DEFAULT 0,
   created_at DATETIME NOT NULL
@@ -195,6 +196,38 @@ class Repo:
             prefs.setdefault("export_mode", "file")
             prefs.setdefault("morning_remind_hhmm", "08:00")
             return prefs
+
+    def set_user_pref(self, phone: str, key: str, value: str) -> None:
+        """Set a key/value in the user's prefs JSON blob."""
+        with self.connect() as conn:
+            row = conn.execute("SELECT prefs_json FROM users WHERE phone=?", (phone,)).fetchone()
+            data = {}
+            if row and row[0]:
+                try:
+                    data = json.loads(row[0])
+                except Exception:
+                    data = {}
+            data[key] = value
+            conn.execute(
+                "UPDATE users SET prefs_json=? WHERE phone=?",
+                (json.dumps(data), phone),
+            )
+
+    def set_user_tz(self, phone: str, tz: str) -> None:
+        """Update the user's IANA timezone string."""
+        with self.connect() as conn:
+            conn.execute("UPDATE users SET tz=? WHERE phone=?", (tz, phone))
+
+    def set_paused(self, phone: str, paused: bool) -> None:
+        """Set paused flag for the user (skip reminders/checks when true)."""
+        with self.connect() as conn:
+            conn.execute("UPDATE users SET paused=? WHERE phone=?", (1 if paused else 0, phone))
+
+    def is_paused(self, phone: str) -> bool:
+        """Return True if the user is paused."""
+        with self.connect() as conn:
+            row = conn.execute("SELECT paused FROM users WHERE phone=?", (phone,)).fetchone()
+            return bool(row[0]) if row else False
 
     def list_habits(self, phone: str) -> str:
         """Return a user-friendly multi-line list of active habits."""

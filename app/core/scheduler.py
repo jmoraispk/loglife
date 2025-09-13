@@ -35,6 +35,9 @@ def tick(repo: Repo, now_by_phone: dict[str, datetime] | None = None) -> list[tu
             if now_by_phone and phone in now_by_phone
             else datetime.now(tz=ZoneInfo(tz))
         )
+        # Skip paused users
+        if repo.is_paused(phone):
+            continue
         prefs = repo.get_user_prefs(phone)
 
         # Morning reminder
