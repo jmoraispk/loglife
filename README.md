@@ -116,6 +116,19 @@ Makefile                    # uv-based tasks: sync, migrate, simulate, test, hea
 pyproject.toml              # Project + tooling config (uv, ruff, pytest)
 ```
 
+## Message flow (file-level)
+
+Inbound (webhook or simulator):
+1. `app.api.handler.handle_message` parses the raw payload into `InboundMessage` and ensures the user exists. It logs the inbound message in `messages`, updates usage streak, applies idempotency guard, then parses the command via `app.core.parser.parse_command`.
+2. `app.core.services.ServiceContainer.route_command` dispatches to the appropriate handler (e.g., add/list/checkin/backfill/export/boost/prefs). These handlers call into `app.infra.repo_sqlite.Repo` for reads/writes and use `app.ui.render_whatsapp.render` to generate the WhatsApp text.
+3. `app.api.handler` logs the outbound message, applies a simple daily rate limit budget, and returns `OutboundMessage` to the adapter.
+4. Adapters (e.g., `app.adapters.simulator`) print/send the text. A real WhatsApp adapter would call the transport API here.
+
+Scheduler (tick loop):
+1. `app.core.scheduler.tick` iterates users, determines local time (TZ), sends morning reminders and evening check prompts as needed.
+2. Suppression rules: skip checks if a log exists for today; suppress nudges if the user interacted in the last 10 minutes.
+3. The loop can run with `--once` for testing or continuously every 60 seconds.
+
 ## M2 outline (Boost & Nudges, Polishing)
 
 - Boost & strategy
