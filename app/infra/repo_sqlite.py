@@ -201,6 +201,7 @@ class Repo:
             prefs.setdefault("style", "bullet")
             prefs.setdefault("export_mode", "file")
             prefs.setdefault("morning_remind_hhmm", "08:00")
+            prefs.setdefault("celebrate", "on")
             return prefs
 
     def set_user_pref(self, phone: str, key: str, value: str) -> None:
@@ -269,6 +270,16 @@ class Repo:
                 (new, user_id, old),
             )
             return res.rowcount > 0
+
+    def set_habit_milestones(self, habit_id: int, milestones: list[int]) -> None:
+        """Persist a new milestones list for a habit."""
+        with self.connect() as conn:
+            import json as _json
+
+            conn.execute(
+                "UPDATE habits SET milestones_json=? WHERE id=?",
+                (_json.dumps(milestones), habit_id),
+            )
 
     def count_active_habits(self, phone: str) -> int:
         """Return active habit count for a user by phone."""

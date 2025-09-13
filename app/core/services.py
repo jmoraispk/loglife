@@ -323,8 +323,30 @@ class ServiceContainer:
         return render("stats_week", STYLE_DEFAULT, summary=summary)
 
     def _handle_celebrate(self, inbound: InboundMessage, arg: str) -> str:
-        # Placeholder: ack only
-        return render("nudge_text", STYLE_DEFAULT, text="Celebrate settings updated.")
+        phone = inbound.user_phone
+        tokens = (arg or "").split()
+        if not tokens:
+            return render("error_unknown", STYLE_DEFAULT)
+        if tokens[0] in {"on", "off"}:
+            self.repo.set_user_pref(phone, "celebrate", tokens[0])
+            return render("nudge_text", STYLE_DEFAULT, text=f"Celebrate {tokens[0]}.")
+        if tokens[0] == "milestones" and len(tokens) >= 2:
+            # Expect: celebrate milestones <habit>: 1,3,5
+            rest = arg[len("milestones"):].strip()
+            if ":" not in rest:
+                return render("error_unknown", STYLE_DEFAULT)
+            habit_name, nums = [p.strip() for p in rest.split(":", 1)]
+            habits = self.repo.get_habits(phone)
+            target = next((h for h in habits if h["name"].lower() == habit_name.lower()), None)
+            if not target:
+                return render("error_unknown", STYLE_DEFAULT)
+            try:
+                vals = [int(x.strip()) for x in nums.split(",") if x.strip().isdigit()]
+            except Exception:
+                return render("error_unknown", STYLE_DEFAULT)
+            self.repo.set_habit_milestones(int(target["id"]), vals)
+            return render("nudge_text", STYLE_DEFAULT, text="Milestones updated.")
+        return render("error_unknown", STYLE_DEFAULT)
 
     # --- Boost & setters (M2 subset) ---
     def _handle_boost(self, inbound: InboundMessage, cmd: Command) -> str:

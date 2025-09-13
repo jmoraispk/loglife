@@ -62,6 +62,14 @@ def main(argv: list[str] | None = None) -> int:
     sh.add_argument("id", type=int)
     cl = fb_sub.add_parser("close")
     cl.add_argument("id", type=int)
+    # users show <phone>
+    users = sub.add_parser("users")
+    users_sub = users.add_subparsers(dest="users_cmd")
+    show = users_sub.add_parser("show")
+    show.add_argument("phone")
+    # habits list <phone>
+    habits = sub.add_parser("habits")
+    habits.add_argument("phone")
     args = parser.parse_args(argv)
 
     repo = Repo.default()
@@ -78,6 +86,27 @@ def main(argv: list[str] | None = None) -> int:
         if args.fb_cmd == "close":
             feedback_close(repo, args.id)
             return 0
+    if args.cmd == "users" and args.users_cmd == "show":
+        with repo.connect() as conn:
+            r = conn.execute(
+                "SELECT phone, tz, prefs_json, paused FROM users WHERE phone=?",
+                (args.phone,),
+            ).fetchone()
+            print(dict(r) if r else "Not found")
+        return 0
+    if args.cmd == "habits":
+        with repo.connect() as conn:
+            uid = conn.execute("SELECT id FROM users WHERE phone=?", (args.phone,)).fetchone()
+            if not uid:
+                print("Not found")
+                return 0
+            rows = conn.execute(
+                "SELECT name, remind_hhmm, active FROM habits WHERE user_id=? ORDER BY order_idx",
+                (uid[0],),
+            ).fetchall()
+            for r in rows:
+                print(f"{r['name']} at {r['remind_hhmm']} (active={r['active']})")
+        return 0
     parser.print_help()
     return 0
 
