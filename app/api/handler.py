@@ -34,10 +34,17 @@ def handle_message(raw_payload: dict[str, Any]) -> OutboundMessage:
     services = ServiceContainer.default()
     # Ensure user exists before logging messages
     services.repo.ensure_user(inbound.user_phone)
+    # Idempotency: drop if seen
+    if message_id:
+        if not services.repo.mark_inbound_seen(inbound.user_phone, message_id):
+            return OutboundMessage(user_phone=inbound.user_phone, text="")
     services.repo.log_message(inbound.user_phone, "in", inbound.text)
     cmd = parse_command(inbound.text)
     response_text = services.route_command(inbound, cmd)
-    services.repo.log_message(inbound.user_phone, "out", response_text)
+    # Rate limit simple budget: skip logging/sending if over
+    if services.repo.count_out_messages_today(inbound.user_phone) >= 30:
+        response_text = ""
+    services.repo.log_message(inbound.user_phone, "out", response_text or "(suppressed)")
     return OutboundMessage(user_phone=inbound.user_phone, text=response_text)
 
 

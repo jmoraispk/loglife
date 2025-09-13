@@ -67,6 +67,12 @@ CREATE TABLE IF NOT EXISTS messages (
   snippet TEXT NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS inbound_seen (
+  user_id INTEGER NOT NULL,
+  message_id TEXT NOT NULL,
+  PRIMARY KEY(user_id, message_id)
+);
+
 -- Boost & strategy tables
 CREATE TABLE IF NOT EXISTS habit_meta (
   habit_id INTEGER PRIMARY KEY REFERENCES habits(id),
@@ -244,6 +250,26 @@ class Repo:
             return "(none)"
         return "\n".join(f"• {r['name']} at {r['remind_hhmm']}" for r in rows)
 
+    def remove_habit(self, phone: str, name: str) -> bool:
+        """Soft-delete a habit by setting active=0. Returns True if updated."""
+        with self.connect() as conn:
+            user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
+            res = conn.execute(
+                "UPDATE habits SET active=0 WHERE user_id=? AND name=? AND active=1",
+                (user_id, name),
+            )
+            return res.rowcount > 0
+
+    def rename_habit(self, phone: str, old: str, new: str) -> bool:
+        """Rename a habit for a user. Returns True if updated."""
+        with self.connect() as conn:
+            user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
+            res = conn.execute(
+                "UPDATE habits SET name=? WHERE user_id=? AND name=? AND active=1",
+                (new, user_id, old),
+            )
+            return res.rowcount > 0
+
     def count_active_habits(self, phone: str) -> int:
         """Return active habit count for a user by phone."""
         with self.connect() as conn:
@@ -380,6 +406,43 @@ class Repo:
                 "INSERT INTO messages(user_id, direction, timestamp, snippet) VALUES(?,?,?,?)",
                 (user_id, direction, now, snippet),
             )
+
+    def count_out_messages_today(self, phone: str) -> int:
+        """Return the number of outbound messages sent today for this user."""
+        with self.connect() as conn:
+            user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
+            today = datetime.utcnow().date().isoformat()
+            sql = (
+                "SELECT COUNT(*) FROM messages WHERE user_id=? AND direction='out' "
+                "AND DATE(timestamp)=?"
+            )
+            row = conn.execute(sql, (user_id, today)).fetchone()
+            return int(row[0])
+
+    def export_count_today(self, phone: str) -> int:
+        """Return number of export messages sent today for this user."""
+        with self.connect() as conn:
+            user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
+            today = datetime.utcnow().date().isoformat()
+            sql = (
+                "SELECT COUNT(*) FROM messages WHERE user_id=? AND direction='out' "
+                "AND DATE(timestamp)=? AND snippet LIKE 'Export %'"
+            )
+            row = conn.execute(sql, (user_id, today)).fetchone()
+            return int(row[0])
+
+    def mark_inbound_seen(self, phone: str, message_id: str) -> bool:
+        """Mark an inbound message id as seen, return False if duplicate."""
+        with self.connect() as conn:
+            user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
+            try:
+                conn.execute(
+                    "INSERT INTO inbound_seen(user_id, message_id) VALUES(?,?)",
+                    (user_id, message_id),
+                )
+                return True
+            except sqlite3.IntegrityError:
+                return False
 
     # --- Boost helpers ---
     def upsert_boost_field(self, habit_id: int, table: str, column: str, value: str) -> None:

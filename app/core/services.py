@@ -83,6 +83,18 @@ class ServiceContainer:
             self.repo.ensure_user(inbound.user_phone)
             habits = self.repo.list_habits(inbound.user_phone)
             return render("list_habits", STYLE_DEFAULT, habits=habits)
+        if cmd.kind == "remove":
+            self.repo.ensure_user(inbound.user_phone)
+            ok = self.repo.remove_habit(inbound.user_phone, cmd.arg or "")
+            return render("nudge_text", STYLE_DEFAULT, text=("Removed." if ok else "Not found."))
+        if cmd.kind == "rename":
+            self.repo.ensure_user(inbound.user_phone)
+            arg = cmd.arg or ""
+            if "->" not in arg:
+                return render("error_unknown", STYLE_DEFAULT)
+            old, new = [p.strip() for p in arg.split("->", 1)]
+            ok = self.repo.rename_habit(inbound.user_phone, old, new)
+            return render("nudge_text", STYLE_DEFAULT, text=("Renamed." if ok else "Not found."))
         if cmd.kind == "add" or cmd.kind == "add_force":
             self.repo.ensure_user(inbound.user_phone)
             force = cmd.kind == "add_force"
@@ -103,6 +115,15 @@ class ServiceContainer:
             self.repo.ensure_user(inbound.user_phone)
             path = self._handle_export(inbound.user_phone, cmd.arg)
             return render("export_ready_file", STYLE_DEFAULT, path=path)
+        if cmd.kind == "export_mode":
+            self.repo.ensure_user(inbound.user_phone)
+            mode = (cmd.arg or "").strip().lower()
+            if mode not in {"file", "link"}:
+                return render("error_unknown", STYLE_DEFAULT)
+            self.repo.set_user_pref(inbound.user_phone, "export_mode", mode)
+            if mode == "link":
+                return render("export_ready_link", STYLE_DEFAULT, url="(link mode enabled)")
+            return render("nudge_text", STYLE_DEFAULT, text="Export mode set to file.")
         if cmd.kind == "backfill":
             self.repo.ensure_user(inbound.user_phone)
             return self._handle_backfill(inbound, cmd.arg)
@@ -122,6 +143,15 @@ class ServiceContainer:
         }:
             self.repo.ensure_user(inbound.user_phone)
             return self._handle_boost(inbound, cmd)
+        if cmd.kind == "streak":
+            self.repo.ensure_user(inbound.user_phone)
+            return self._handle_streak(inbound, cmd.arg or "")
+        if cmd.kind == "stats":
+            self.repo.ensure_user(inbound.user_phone)
+            return self._handle_stats(inbound, cmd.arg or "")
+        if cmd.kind == "celebrate":
+            self.repo.ensure_user(inbound.user_phone)
+            return self._handle_celebrate(inbound, cmd.arg or "")
         return render("error_unknown", STYLE_DEFAULT)
 
     def _parse_add_args(self, arg: str) -> list[str]:
@@ -255,6 +285,29 @@ class ServiceContainer:
         if prefs.get("export_mode", "file") == "link":
             return sign_path(fname)
         return fname
+
+    def _handle_streak(self, inbound: InboundMessage, habit_name: str) -> str:
+        phone = inbound.user_phone
+        habits = self.repo.get_habits(phone)
+        target = next((h for h in habits if h["name"].lower() == habit_name.lower()), None)
+        if not target:
+            return render("error_unknown", STYLE_DEFAULT)
+        tz = self.repo.get_user_tz(phone)
+        today = today_in_tz(tz).isoformat()
+        streak = self.repo.compute_streak(int(target["id"]), today)
+        horizon = int(target["horizon_days"]) if target["horizon_days"] else 14
+        percent = min(100, round(100 * streak / horizon)) if horizon else 0
+        return render(
+            "streak_report", STYLE_DEFAULT, streak=streak, percent=percent, horizon=horizon
+        )
+
+    def _handle_stats(self, inbound: InboundMessage, window: str) -> str:
+        # Placeholder summary text
+        return render("stats_week", STYLE_DEFAULT, summary=f"Window {window}")
+
+    def _handle_celebrate(self, inbound: InboundMessage, arg: str) -> str:
+        # Placeholder: ack only
+        return render("nudge_text", STYLE_DEFAULT, text="Celebrate settings updated.")
 
     # --- Boost & setters (M2 subset) ---
     def _handle_boost(self, inbound: InboundMessage, cmd: Command) -> str:

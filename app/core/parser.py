@@ -66,9 +66,18 @@ def parse_command(text: str) -> Command:
 
     if t.startswith("export "):
         return Command("export", arg=text.strip()[7:].strip())
+    if t.startswith("export mode "):
+        return Command("export_mode", arg=text.strip()[12:].strip())
 
     if t.startswith("feedback "):
         return Command("feedback", arg=text.strip()[9:].strip())
+
+    if t.startswith("streak "):
+        return Command("streak", arg=text.strip()[7:].strip())
+    if t.startswith("stats "):
+        return Command("stats", arg=text.strip()[6:].strip())
+    if t.startswith("celebrate "):
+        return Command("celebrate", arg=text.strip()[10:].strip())
 
     if t.startswith("boost"):
         arg = text.strip()[5:].strip() if len(t) > 5 else ""
