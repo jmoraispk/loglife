@@ -2,6 +2,12 @@
 
 This MVP implementation runs a single tick or a loop (every 60 seconds)
 and dispatches messages based on user preferences and habit times.
+
+Responsibilities:
+- Morning reminders at user-configured HH:MM
+- Evening check prompts per habit at configured HH:MM
+- Suppress checks if the user already logged for that habit today
+- Suppress nudges when the user interacted recently (basic 10-minute window)
 """
 
 from __future__ import annotations
