@@ -302,8 +302,20 @@ class ServiceContainer:
         )
 
     def _handle_stats(self, inbound: InboundMessage, window: str) -> str:
-        # Placeholder summary text
-        return render("stats_week", STYLE_DEFAULT, summary=f"Window {window}")
+        tz = self.repo.get_user_tz(inbound.user_phone)
+        end = today_in_tz(tz)
+        if window.startswith("m"):
+            start = date_type.fromordinal(
+                end.toordinal() - (30 * (int(window[1:]) if window[1:].isdigit() else 1) - 1)
+            )
+        else:
+            weeks = int(window[1:]) if window[1:].isdigit() else 1
+            start = date_type.fromordinal(end.toordinal() - (7 * weeks - 1))
+        counts = self.repo.stats_counts(inbound.user_phone, start.isoformat(), end.isoformat())
+        summary = f"3={counts[3]} 2={counts[2]} 1={counts[1]} ({start}..{end})"
+        if window.startswith("m"):
+            return render("stats_month", STYLE_DEFAULT, summary=summary)
+        return render("stats_week", STYLE_DEFAULT, summary=summary)
 
     def _handle_celebrate(self, inbound: InboundMessage, arg: str) -> str:
         # Placeholder: ack only

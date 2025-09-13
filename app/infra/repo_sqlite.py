@@ -395,6 +395,67 @@ class Repo:
             out.append((phone_masked, tz, name, emoji, d, score, streak, created, note))
         return out
 
+    # --- Stats helpers ---
+    def stats_counts(self, phone: str, start_iso: str, end_iso: str) -> dict:
+        """Return counts of scores {1,2,3} for all habits in range."""
+        with self.connect() as conn:
+            user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
+            rows = conn.execute(
+                (
+                    "SELECT l.score, COUNT(*) FROM logs l JOIN habits h ON l.habit_id=h.id "
+                    "WHERE h.user_id=? AND l.date BETWEEN ? AND ? GROUP BY l.score"
+                ),
+                (user_id, start_iso, end_iso),
+            ).fetchall()
+        out = {1: 0, 2: 0, 3: 0}
+        for s, c in rows:
+            out[int(s)] = int(c)
+        return out
+
+    def get_last_inbound_date(self, phone: str) -> str | None:
+        """Return ISO date string of the last inbound message for the user."""
+        with self.connect() as conn:
+            user_id = conn.execute("SELECT id FROM users WHERE phone=?", (phone,)).fetchone()[0]
+            sql = (
+                "SELECT DATE(timestamp) FROM messages WHERE user_id=? AND direction='in' "
+                "ORDER BY timestamp DESC LIMIT 1"
+            )
+            row = conn.execute(sql, (user_id,)).fetchone()
+            return row[0] if row else None
+
+    def update_usage_streak_on_inbound(self, phone: str, today_iso: str) -> None:
+        """Update usage streak counters based on today's inbound date."""
+        last = self.get_last_inbound_date(phone)
+        with self.connect() as conn:
+            # Ensure user row
+            user = conn.execute(
+                "SELECT id, usage_streak_current, usage_streak_best FROM users WHERE phone=?",
+                (phone,),
+            ).fetchone()
+            if not user:
+                return
+            current = int(user[1])
+            best = int(user[2])
+            # If last seen was yesterday, increment, if today, keep, else reset to 1
+            from datetime import date
+
+            today = date.fromisoformat(today_iso)
+            if last is None:
+                current = 1
+            else:
+                last_date = date.fromisoformat(last)
+                if last_date == today:
+                    pass
+                elif last_date.toordinal() == today.toordinal() - 1:
+                    current = current + 1 if current > 0 else 1
+                else:
+                    current = 1
+            best = max(best, current)
+            conn.execute(
+                "UPDATE users SET usage_streak_current=?, usage_streak_best=? WHERE phone=?",
+                (current, best, phone),
+            )
+
     # --- Messages logging ---
     def log_message(self, phone: str, direction: str, text: str) -> None:
         """Insert a message record for KPI/debug purposes."""

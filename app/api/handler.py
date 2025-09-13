@@ -5,6 +5,7 @@ verifies database connectivity and renderer template loading.
 """
 
 import argparse
+from datetime import UTC, datetime
 from typing import Any
 
 from app.core.parser import parse_command
@@ -39,6 +40,10 @@ def handle_message(raw_payload: dict[str, Any]) -> OutboundMessage:
         if not services.repo.mark_inbound_seen(inbound.user_phone, message_id):
             return OutboundMessage(user_phone=inbound.user_phone, text="")
     services.repo.log_message(inbound.user_phone, "in", inbound.text)
+    # Update usage streak on inbound
+    services.repo.update_usage_streak_on_inbound(
+        inbound.user_phone, datetime.now(UTC).date().isoformat()
+    )
     cmd = parse_command(inbound.text)
     response_text = services.route_command(inbound, cmd)
     # Rate limit simple budget: skip logging/sending if over
