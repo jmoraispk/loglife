@@ -38,3 +38,13 @@ def test_usage_streak_increment():
     phone = "+19990000001"
     out = handle_message({"from": phone, "text": "hello"})
     assert out.text is not None
+
+
+def test_streak_report_command():
+    """Streak report returns current streak and percent toward horizon."""
+    phone = "+19990000002"
+    handle_message({"from": phone, "text": "start"})
+    handle_message({"from": phone, "text": "add Read 10m at 21:00"})
+    handle_message({"from": phone, "text": "3"})
+    out = handle_message({"from": phone, "text": "streak Read 10m"})
+    assert "Streak:" in out.text and "days" in out.text
