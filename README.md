@@ -125,6 +125,24 @@ The bot will remember this account. If you need to reset it, restart the node se
 
 `node index.js --reset-session`
 
+<details>
+<summary>Ubuntu 23+ (including 24.04) — read this if WhatsApp Web won't launch</summary>
+
+On Ubuntu 23+ (e.g., 24.04), AppArmor restricts unprivileged user namespaces. If Chromium/Puppeteer fails to start, try:
+
+Temporary (until reboot):
+```bash
+echo 0 | sudo tee /proc/sys/kernel/apparmor_restrict_unprivileged_userns
+```
+
+Persistent (survives reboots):
+```bash
+echo kernel.apparmor_restrict_unprivileged_userns=0 | sudo tee /etc/sysctl.d/60-apparmor-namespace.conf
+```
+
+Security note: This disables a useful Ubuntu security feature. Revert by setting the value back to 1 or deleting the sysctl file.
+</details>
+
 </details>
 
 
