@@ -2,6 +2,10 @@
 
 A bot that tracks personal goal check-ins via WhatsApp messages.
 
+
+This project uses: https://wwebjs.dev/
+
+
 ## 📋 Goals
 
 Defined in `config.py`:
@@ -58,7 +62,8 @@ Sun ❌ ❌ ❌ ❌ ❌
 
 - Run Python message processor:
   ```
-  pip install -e .
+  pip install uv
+  uv pip install -e .
   cd backend && python app.py
   ```
 - JS WhatsApp Client interface listener (in another terminal):
@@ -138,6 +143,11 @@ Plan for concialiating local develop and remote production hosting.
 2. Ping (inbound ICMP rule)
 
 `ping 5.161.234.127`
+
+
+
+
+git config --global credential.helper store
 
 
 
