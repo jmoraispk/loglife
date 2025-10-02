@@ -20,7 +20,7 @@ const isRoot = process.getuid && process.getuid() === 0;
 const client = new Client({
     authStrategy: new LocalAuth({ clientId: "goal-bot-session" }),
     puppeteer: {
-        headless: true,
+        headless: false,
         args: isRoot ? ['--no-sandbox', '--disable-setuid-sandbox'] : []
     }
 });
