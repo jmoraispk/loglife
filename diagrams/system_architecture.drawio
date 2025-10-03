@@ -1,6 +1,6 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36" version="28.2.5">
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36" version="28.2.5">
   <diagram name="Life Bot System Architecture" id="life-bot-system">
-    <mxGraphModel dx="1114" dy="518" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+    <mxGraphModel dx="1281" dy="596" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
@@ -10,20 +10,20 @@
         <mxCell id="user" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
           <mxGeometry x="50" y="100" width="30" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="whatsapp" value="WhatsApp&#xa;Messaging Platform" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
-          <mxGeometry x="180" y="100" width="140" height="60" as="geometry" />
+        <mxCell id="whatsapp" value="Messaging Clients&#xa;&#xa;• WhatsApp (current)&#xa;• Telegram (placeholder)&#xa;• Messenger (placeholder)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="180" y="80" width="160" height="100" as="geometry" />
         </mxCell>
-        <mxCell id="whatsapp-client" value="WhatsApp Client&#xa;(Node.js)&#xa;&#xa;• Message Reception&#xa;• API Integration&#xa;• Response Forwarding" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" parent="1" vertex="1">
-          <mxGeometry x="420" y="80" width="160" height="100" as="geometry" />
+        <mxCell id="whatsapp-client" value="Client Adapter&#xa;&#xa;• Message Reception&#xa;• API Integration&#xa;• Response Forwarding&#xa;&#xa;Files:&#xa;• whatsapp-client/index.js" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="420" y="70" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="backend-api" value="Backend API&#xa;(Python Flask)&#xa;&#xa;• REST Endpoints&#xa;• Message Processing&#xa;• Business Logic" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" parent="1" vertex="1">
-          <mxGeometry x="740" y="80" width="160" height="100" as="geometry" />
+        <mxCell id="backend-api" value="Backend API&#xa;&#xa;• REST Endpoints&#xa;• Message Processing&#xa;• Business Logic&#xa;&#xa;Files:&#xa;• backend/app.py&#xa;• backend/logic.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="740" y="70" width="160" height="140" as="geometry" />
         </mxCell>
-        <mxCell id="data-storage" value="Data Storage&#xa;(JSON File)&#xa;&#xa;• User Data&#xa;• Goal Entries&#xa;• Historical Records" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" parent="1" vertex="1">
-          <mxGeometry x="990" y="80" width="160" height="100" as="geometry" />
+        <mxCell id="data-storage" value="Data Storage&#xa;&#xa;• User Data&#xa;• Goal Entries&#xa;• Historical Records&#xa;&#xa;Files:&#xa;• backend/storage.py&#xa;Data:&#xa;• journal.json" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="990" y="60" width="160" height="160" as="geometry" />
         </mxCell>
-        <mxCell id="config" value="Configuration&#xa;(config.py)&#xa;&#xa;• Goals Definition&#xa;• Rating Styles&#xa;• System Settings" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;fontStyle=1;" parent="1" vertex="1">
-          <mxGeometry x="740" y="220" width="160" height="100" as="geometry" />
+        <mxCell id="config" value="Configuration&#xa;&#xa;• Goals Definition&#xa;• Rating Styles&#xa;• System Settings&#xa;&#xa;Files:&#xa;• backend/config.py" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=11;fontStyle=1;" parent="1" vertex="1">
+          <mxGeometry x="740" y="255" width="160" height="135" as="geometry" />
         </mxCell>
         <mxCell id="flow-title" value="Message Flow Process" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" parent="1" vertex="1">
           <mxGeometry x="50" y="250" width="200" height="30" as="geometry" />
@@ -31,7 +31,7 @@
         <mxCell id="flow1" value="1. User sends&#xa;   message" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
           <mxGeometry x="50" y="290" width="80" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="flow2" value="2. WhatsApp&#xa;   receives" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
+        <mxCell id="flow2" value="2. Client&#xa;   receives" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
           <mxGeometry x="150" y="290" width="80" height="50" as="geometry" />
         </mxCell>
         <mxCell id="flow3" value="3. Client&#xa;   processes" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;" parent="1" vertex="1">
@@ -88,7 +88,7 @@
         <mxCell id="tech-title" value="Technical Stack" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=14;fontStyle=1;" parent="1" vertex="1">
           <mxGeometry x="600" y="420" width="200" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="tech-frontend" value="Frontend (WhatsApp Client):&#xa;• Node.js&#xa;• WhatsApp API Integration&#xa;• HTTP Client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" parent="1" vertex="1">
+        <mxCell id="tech-frontend" value="Frontend (Client Adapter):&#xa;• Node.js&#xa;• Messaging API Integration&#xa;• HTTP Client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=10;fontStyle=1;" parent="1" vertex="1">
           <mxGeometry x="600" y="460" width="180" height="80" as="geometry" />
         </mxCell>
         <mxCell id="tech-backend" value="Backend:&#xa;• Python 3.x&#xa;• Flask Framework&#xa;• JSON File Storage&#xa;• RESTful API&#xa;• Port 5000" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=10;fontStyle=1;" parent="1" vertex="1">
@@ -100,13 +100,13 @@
             <mxPoint x="150" y="130" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="arrow2" value="API Call" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#666666;labelBackgroundColor=#ffffff;" parent="1" source="whatsapp" target="whatsapp-client" edge="1">
+        <mxCell id="arrow2" value="Message Event" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#666666;labelBackgroundColor=#ffffff;" parent="1" source="whatsapp" target="whatsapp-client" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="320" y="130" as="sourcePoint" />
             <mxPoint x="380" y="130" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="arrow3" value="HTTP POST&lt;div&gt;Response&lt;/div&gt;" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#666666;labelBackgroundColor=#ffffff;" parent="1" source="whatsapp-client" target="backend-api" edge="1">
+        <mxCell id="arrow3" value="HTTP Request/Response" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#666666;labelBackgroundColor=#ffffff;" parent="1" source="whatsapp-client" target="backend-api" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="580" y="130" as="sourcePoint" />
             <mxPoint x="620" y="130" as="targetPoint" />
@@ -125,7 +125,7 @@
             <mxPoint x="840" y="220" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="arrow6" value="" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#666666;labelBackgroundColor=#ffffff;dashed=1;" parent="1" source="backend-api" target="whatsapp-client" edge="1">
+        <mxCell id="arrow6" value="Response" style="endArrow=classic;html=1;rounded=0;strokeWidth=2;strokeColor=#666666;labelBackgroundColor=#ffffff;dashed=1;" parent="1" source="backend-api" target="whatsapp-client" edge="1">
           <mxGeometry y="10" width="50" height="50" relative="1" as="geometry">
             <mxPoint x="620" y="130" as="sourcePoint" />
             <mxPoint x="580" y="130" as="targetPoint" />
