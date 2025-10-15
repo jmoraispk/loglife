@@ -1,4 +1,4 @@
-from app.db.sqlite import get_user_goals
+from app.db.CRUD.user_goals.get_user_goals import get_user_goals
 
 def format_goals(user_id: str) -> str:
     """
