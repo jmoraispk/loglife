@@ -5,20 +5,41 @@ from flask import g
 DATABASE = "db/life_bot.db"
 
 def get_db():
-    """Get database connection with proper Flask context handling."""
+    """Get database connection with proper Flask context handling.
+    
+    Establishes a SQLite database connection using Flask's g object for
+    proper context management. Returns existing connection if available.
+
+    Returns:
+        sqlite3.Connection: Database connection with row factory enabled
+    """
     if "db" not in g:
         g.db = sqlite3.connect(DATABASE)
         g.db.row_factory = sqlite3.Row
     return g.db
 
 def close_db(exception):
-    """Close database connection."""
+    """Close database connection.
+    
+    Properly closes the database connection and removes it from Flask's g object.
+    Called automatically by Flask's teardown mechanism.
+
+    Args:
+        exception: Exception that triggered the teardown (if any)
+    """
     db = g.pop("db", None)
     if db is not None:
         db.close()
 
 def init_db():
-    """Initialize database with schema if it doesn't exist."""
+    """Initialize database with schema if it doesn't exist.
+    
+    Creates the database file and applies the schema from schema.sql if the
+    database file doesn't already exist.
+
+    Raises:
+        FileNotFoundError: If schema.sql file is not found
+    """
     if not os.path.exists(DATABASE):
         with open("db/schema.sql", "r") as f:
             db = get_db()

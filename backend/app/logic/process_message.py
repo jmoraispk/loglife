@@ -7,6 +7,18 @@ from app.logic.helpers.rate_individual_goal import rate_individual_goal
 from app.logic.helpers.show_help import show_help
 
 def process_message(message: str, sender: str) -> str:
+    """Process incoming messages and route to appropriate handlers.
+    
+    Parses user messages and routes them to the appropriate command handlers
+    based on message content. Supports goals, ratings, summaries, and help commands.
+
+    Args:
+        message (str): The message text from the user
+        sender (str): User identifier (phone number or group ID)
+
+    Returns:
+        str: Response message to send back to the user
+    """
     user_id = sender  # could be phone or group ID
     message = message.strip().lower()
 
@@ -29,12 +41,11 @@ def process_message(message: str, sender: str) -> str:
         return look_back_summary(user_id, days)
     
     if message.startswith("add goal"):
-        # Extract emoji and description (e.g., "add goal 😴 Sleep by 9pm")
+        # Extract the complete goal string (e.g., "add goal 😴 Sleep by 9pm")
         parts = message.split(" ", 2)  # Split into max 3 parts
         if len(parts) >= 3:
-            emoji = parts[2].split()[0]  # First word after "add goal"
-            description = " ".join(parts[2].split()[1:])  # Rest of the text
-            return add_goal(user_id, emoji, description)
+            goal_string = parts[2]  # Everything after "add goal"
+            return add_goal(user_id, goal_string)
         else:
             return "❌ Usage: add goal 😴 Sleep by 9pm"
     

@@ -1,7 +1,17 @@
 from app.db.sqlite import get_db
 
-def get_user_goals(user_id: str):
-    """Get user goals from database."""
+def get_user_goals(user_id: str) -> list:
+    """Retrieve user goals from the database.
+    
+    Fetches all active goals for a user from the database. Creates the user
+    if they don't exist in the system.
+
+    Args:
+        user_id (str): User identifier (phone number)
+
+    Returns:
+        list: List of dictionaries containing goal emoji and description
+    """
     db = get_db()
     
     # First, get or create the user
