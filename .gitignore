@@ -6,3 +6,5 @@ whatsapp-client/node_modules/**
 whatsapp-client/.wwebjs_cache/**
 whatsapp-client/package-lock.json
 git_token_server
+whatsapp-client/node_modules
+backend/db/life_bot.db

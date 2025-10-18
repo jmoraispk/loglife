@@ -1,0 +1,55 @@
+import logging
+from flask import Flask, request
+from app.logic.process_message import process_message
+from app.db.sqlite import get_db, close_db, init_db
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+
+app = Flask(__name__)
+
+@app.teardown_appcontext
+def close_db_connection(exception):
+    """Flask teardown handler for database connection cleanup.
+    
+    Automatically called by Flask when the application context is torn down.
+    Ensures database connections are properly closed.
+
+    Args:
+        exception: Exception that triggered the teardown (if any)
+    """
+    close_db(exception)
+
+with app.app_context():
+    init_db()
+
+@app.route("/process", methods=["POST"])
+def process():
+    """Process incoming webhook requests from messaging platform.
+    
+    Handles POST requests containing message data, processes the message
+    through the bot logic, and returns the response.
+
+    Returns:
+        str: Bot response message to send back to user
+    """
+    data = request.get_json()
+    message = data.get("message", "")
+    sender = data.get("from", "")
+    
+    # Log incoming request for debugging
+    logging.debug(f"[BACKEND] Received data: {data}")
+    logging.debug(f"[BACKEND] Processing message: '{message}' from: {sender}")
+    
+    response = process_message(message, sender)
+    
+    # Log response for debugging
+    logging.debug(f"[BACKEND] Sending response: '{response}'")
+    
+    return response
+
+if __name__ == "__main__":
+    app.run(port=5000, debug=True)

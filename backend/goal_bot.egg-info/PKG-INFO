@@ -1,0 +1,7 @@
+Metadata-Version: 2.4
+Name: goal_bot
+Version: 0.1.0
+Summary: Backend for WhatsApp goal tracking bot
+Author: Your Name
+Requires-Python: >=3.11
+Requires-Dist: flask
