@@ -1,7 +1,8 @@
 import logging
 from flask import Flask, request
 from app.logic.process_message import process_message
-from app.db.sqlite import get_db, close_db, init_db
+from app.db.sqlite import close_db, init_db
+from app.routes.web import web_bp
 
 # Configure logging
 logging.basicConfig(
@@ -9,7 +10,7 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
 )
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='app/templates')
 
 @app.teardown_appcontext
 def close_db_connection(exception):
@@ -25,6 +26,9 @@ def close_db_connection(exception):
 
 with app.app_context():
     init_db()
+
+# Register the web blueprint
+app.register_blueprint(web_bp)
 
 @app.route("/process", methods=["POST"])
 def process():
