@@ -34,11 +34,20 @@ app.register_blueprint(web_bp)
 def process():
     """Process incoming webhook requests from messaging platform.
     
-    Handles POST requests containing message data, processes the message
-    through the bot logic, and returns the response.
-
+    Handles POST requests containing message data from external messaging
+    platforms (like WhatsApp, Telegram, etc.). Extracts the message content
+    and sender information, processes it through the bot's message handling
+    logic, and returns the appropriate response.
+    
+    Expected JSON payload:
+        - message (str): The text message from the user
+        - from (str): The sender identifier (phone number, user ID, etc.)
+    
     Returns:
-        str: Bot response message to send back to user
+        str: Bot response message to send back to the user
+        
+    Raises:
+        KeyError: If required fields are missing from the request data
     """
     data = request.get_json()
     message = data.get("message", "")
