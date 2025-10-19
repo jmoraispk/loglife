@@ -2,7 +2,9 @@ import sqlite3
 import os
 from flask import g
 
-DATABASE = "db/life_bot.db"
+# Get the absolute path to the project root (backend directory)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DATABASE = os.path.join(PROJECT_ROOT, "db", "life_bot.db")
 
 def get_db():
     """Get database connection with proper Flask context handling.
@@ -41,7 +43,8 @@ def init_db():
         FileNotFoundError: If schema.sql file is not found
     """
     if not os.path.exists(DATABASE):
-        with open("db/schema.sql", "r") as f:
+        schema_path = os.path.join(PROJECT_ROOT, "db", "schema.sql")
+        with open(schema_path, "r") as f:
             db = get_db()
             db.executescript(f.read())
             db.commit()
