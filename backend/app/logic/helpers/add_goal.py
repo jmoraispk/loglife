@@ -11,6 +11,7 @@ from app.utils.messages import (
 )
 from app.helpers.state_manager import set_user_state
 from app.helpers.time_parser import parse_reminder_time, format_time_for_display
+from app.helpers.user_timezone import detect_and_save_user_timezone, update_existing_user_timezone
 
 def add_goal(user_id: str, goal_string: str) -> str:
     """
@@ -46,9 +47,15 @@ def add_goal(user_id: str, goal_string: str) -> str:
         # Create user if doesn't exist
         cursor = db.execute("INSERT INTO user (phone) VALUES (?)", (user_id,))
         db.commit()
-        user_id_db: int = cursor.lastrowid
+        user_id_db = cursor.lastrowid
+        
+        # Detect and save timezone for new user
+        detect_and_save_user_timezone(user_id, cursor, db)
     else:
-        user_id_db: int = user['id']
+        user_id_db = user['id']
+        
+        # Check and update timezone for existing user if not set
+        update_existing_user_timezone(user_id, cursor, db)
     
     # Check if goal already exists for this user
     cursor = db.execute("""
