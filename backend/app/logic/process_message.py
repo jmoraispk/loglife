@@ -11,7 +11,7 @@ from app.logic.helpers.format_goals import format_goals
 from app.logic.helpers.format_week_summary import format_week_summary
 from app.logic.helpers.look_back_summary import look_back_summary
 from app.logic.helpers.handle_goal_ratings import handle_goal_ratings
-from app.logic.helpers.add_goal import add_goal
+from app.logic.helpers.add_goal import add_goal, set_reminder_time
 from app.logic.helpers.rate_individual_goal import rate_individual_goal
 from app.logic.helpers.show_help import show_help
 from app.helpers.contact_detector import is_vcard, extract_waid_from_vcard
