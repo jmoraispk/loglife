@@ -1,8 +1,16 @@
+import os
+from dotenv import load_dotenv
+# Load environment variables from .env file
+load_dotenv()
+
 import logging
 from flask import Flask, request
 from app.logic.process_message import process_message
 from app.db.sqlite import close_db, init_db
 from app.routes.web import web_bp
+from app.helpers.contact_detector import is_contact_shared, extract_waid_from_contact
+from app.helpers.whatsapp_sender import send_hi_message_to_contact
+from app.helpers.referral_tracker import save_referral
 
 # Configure logging
 logging.basicConfig(
@@ -53,11 +61,48 @@ def process():
     message = data.get("message", "")
     sender = data.get("from", "")
     
+    # Contact sharing detection: When users share contacts on WhatsApp, the message contains VCARD data
+    # Example: BEGIN:VCARD\nVERSION:3.0\nN:;0332 5727426;;;\nFN:0332 5727426\nTEL;type=CELL;waid=923325727426:+92 332 5727426\nEND:VCARD
+    
     # Log incoming request for debugging
     logging.debug(f"[BACKEND] Received data: {data}")
     logging.debug(f"[BACKEND] Processing message: '{message}' from: {sender}")
     
-    response = process_message(message, sender)
+    # Check if the message is a shared contact (VCARD format)
+    if is_contact_shared(message):
+        # Extract WhatsApp ID from the contact data
+        waid = extract_waid_from_contact(message)
+        logging.debug(f"[BACKEND] Contact shared detected, WAID: {waid}")
+        
+        # Save referral to database
+        if waid:
+            # Extract phone number from WAID (remove country code if present)
+            referred_phone = waid
+            if waid.startswith('92'):
+                referred_phone = '0' + waid[2:]  # Convert 923325727426 to 03325727426
+            
+            save_referral(sender, referred_phone, waid)
+            
+            # Send onboarding message to the referred contact
+            send_result = send_hi_message_to_contact(waid)
+            if send_result.get("success"):
+                logging.debug(f"[BACKEND] Onboarding message sent successfully to {waid}")
+            else:
+                logging.error(f"[BACKEND] Failed to send onboarding message to {waid}: {send_result.get('error')}")
+        
+        response = """🎉 *Thank you for the referral!*
+
+You've successfully shared a contact with Life Bot. The person you referred will receive an onboarding message to get started with their goal tracking journey.
+
+💡 *What happens next:*
+• They'll get a welcome message with instructions
+• They can start adding and tracking their goals
+• You've helped someone improve their life habits!
+
+Keep up the great work of spreading positive habits! 🌟"""
+    else:
+        # Process regular message through the bot logic
+        response = process_message(message, sender)
     
     # Log response for debugging
     logging.debug(f"[BACKEND] Sending response: '{response}'")
