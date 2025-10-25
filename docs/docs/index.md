@@ -37,28 +37,11 @@ This repository contains the backend for Life Bot, a messaging-based goal and ha
 
 ## Setup & Dependencies
 
-Use `uv` to manage the environment and dependencies.
+Use `uv` to manage the environment and dependencies. No manual virtualenv activation is required.
 
-1) Create a virtual environment (in the backend folder):
+1) From the `backend` directory, install and sync dependencies from `pyproject.toml`/`uv.lock`:
 ```sh
 cd backend
-uv venv .venv
-```
-
-2) Activate the virtual environment:
-
-- Windows (PowerShell):
-```powershell
-. .\.venv\Scripts\Activate.ps1
-```
-
-- macOS/Linux (bash/zsh):
-```sh
-source .venv/bin/activate
-```
-
-3) Install and sync dependencies from `pyproject.toml`/`uv.lock`:
-```sh
 uv sync
 ```
 
@@ -167,16 +150,16 @@ backend/
 
 ## Running
 
-After completing [Setup & Dependencies](#setup--dependencies), ensure the virtual environment is active and start the backend from the `backend` directory:
+For development, run the app directly with `uv` from the `backend` directory (no need to activate a venv):
 ```sh
-python main.py
+uv run main.py
 ```
 - The server runs at `http://localhost:5000`.
 - Emulator UI: open `http://localhost:5000/emulator`.
 
 To stop the server: press `Ctrl+C` in the terminal.
 
-For production (optional), you can run with Gunicorn from the `backend` directory:
+For production, use Gunicorn from the `backend` directory:
 ```sh
 gunicorn -w 2 -b 0.0.0.0:5000 'main:app'
 ```
