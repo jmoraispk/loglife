@@ -10,7 +10,6 @@ description = "Backend for WhatsApp goal tracking bot"
 authors = [{name = "Your Name"}]
 dependencies = [
     "flask",
-    "gunicorn>=23.0.0",
     "pytest>=8.4.2",
 ]
 
