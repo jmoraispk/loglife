@@ -21,7 +21,7 @@ const client = new Client({
     authStrategy: new LocalAuth({ clientId: "goal-bot-session" }),
     puppeteer: {
         headless: true,
-        args: isRoot ? ['--no-sandbox', '--disable-setuid-sandbox'] : []
+        args: ['--no-sandbox', '--disable-setuid-sandbox'] // Required for Ubuntu servers with AppArmor restrictions
     }
 });
 
@@ -34,19 +34,17 @@ client.on('ready', () => {
 });
 
 client.on('message', async msg => {
-    if (msg.body.toLowerCase().startsWith("bot:")) {
-        try {
-            const response = await fetch(process.env.PY_BACKEND_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg.body, from: msg.from })
-                // TODO: check if images can be sent/received
-            });
-            const text = await response.text();
-            client.sendMessage(msg.from, text);
-        } catch (err) {
-            console.error("Failed to fetch from backend:", err);
-        }
+    try {
+        const response = await fetch(process.env.PY_BACKEND_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: msg.body, from: msg.from })
+            // TODO: check if images can be sent/received
+        });
+        const text = await response.text();
+        client.sendMessage(msg.from, text);
+    } catch (err) {
+        console.error("Failed to fetch from backend:", err);
     }
 });
 

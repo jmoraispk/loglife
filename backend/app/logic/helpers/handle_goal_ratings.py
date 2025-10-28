@@ -45,8 +45,53 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
     today_storage = storage_date_format(now)  # For storage
     today_display = now.strftime('%a (%b %d)')  # For display
     
-    # TODO: Store ratings in database using the new schema
-    # For now, we'll return a success message with the ratings
+    # Get database connection
+    from app.db.sqlite import get_db
+    db = get_db()
+    
+    # Get user ID from database
+    cursor = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
+    user = cursor.fetchone()
+    if not user:
+        return "❌ User not found"
+    user_id_db = user['id']
+    
+    # Store ratings for each goal
+    for i, rating in enumerate(ratings):
+        goal = user_goals[i]
+        goal_emoji = goal['emoji']
+        
+        # Get user_goal_id
+        cursor = db.execute("""
+            SELECT id FROM user_goals 
+            WHERE user_id = ? AND goal_emoji = ? AND is_active = 1
+        """, (user_id_db, goal_emoji))
+        user_goal = cursor.fetchone()
+        if not user_goal:
+            return f"❌ Goal {goal_emoji} not found"
+        user_goal_id = user_goal['id']
+        
+        # Check if rating already exists for today
+        cursor = db.execute("""
+            SELECT id FROM goal_ratings 
+            WHERE user_goal_id = ? AND date = ?
+        """, (user_goal_id, today_storage))
+        
+        if cursor.fetchone():
+            # Update existing rating
+            db.execute("""
+                UPDATE goal_ratings 
+                SET rating = ? 
+                WHERE user_goal_id = ? AND date = ?
+            """, (rating, user_goal_id, today_storage))
+        else:
+            # Insert new rating
+            db.execute("""
+                INSERT INTO goal_ratings (user_goal_id, rating, date) 
+                VALUES (?, ?, ?)
+            """, (user_goal_id, rating, today_storage))
+    
+    db.commit()
     
     # Get goal emojis for display
     goal_emojis = [goal['emoji'] for goal in user_goals]
