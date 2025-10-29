@@ -47,7 +47,6 @@ uv sync
 
 Main dependencies:
 - `flask`
-- `gunicorn` (for production)
 - `pytest` (for testing)
 
 ---
@@ -150,7 +149,7 @@ backend/
 
 ## Running
 
-For development, run the app directly with `uv` from the `backend` directory (no need to activate a venv):
+Run the app directly with `uv`:
 ```sh
 uv run main.py
 ```
@@ -159,10 +158,7 @@ uv run main.py
 
 To stop the server: press `Ctrl+C` in the terminal.
 
-For production, use Gunicorn from the `backend` directory:
-```sh
-gunicorn -w 2 -b 0.0.0.0:5000 'main:app'
-```
+For production, run the same command under a process manager like `systemd` (we use `systemd`).
 
 ---
 
