@@ -1,7 +1,7 @@
 # Backend Code Architecture
 
 ## Overview
-This diagram shows the complete backend architecture for the Life Bot application, including the recent additions of **Contact Sharing** and **Referral Tracking** features.
+This diagram shows the complete backend architecture for the Life Bot application, including the recent additions of **Contact Sharing**, **Referral Tracking**, and **Reminder System** features.
 
 <<<<<<< HEAD
 **Recent Refactoring (Code Quality):**
@@ -17,26 +17,46 @@ This diagram shows the complete backend architecture for the Life Bot applicatio
 >>>>>>> 8f0704f (updated backend code arch and replaced it's drawio diagram with mermaid diagram)
 ## Key Features
 
-### 1. Contact Sharing & Referral System (NEW)
+### 1. Reminder System (NEW)
+- **Daily Reminders**: Automated WhatsApp reminders for goals at scheduled times
+- **Time Parsing**: Flexible time input (18:00, 6 PM, 6pm, 6)
+- **Timezone Support**: Timezone-aware reminders using user's local time
+- **State Management**: Multi-step conversation flow for setting reminder times
+- **Cron Job**: Background script (`reminder.py`) that continuously checks and sends reminders
+
+### 2. Contact Sharing & Referral System
 - **VCARD Detection**: Automatically detects when users share contacts via WhatsApp
 - **WAID Extraction**: Extracts WhatsApp ID from contact data
 - **Referral Tracking**: Saves referral relationships in database
 - **Auto-Onboarding**: Automatically sends welcome message to referred contacts
 
-### 2. Goal Management
+### 3. Goal Management
 - Track personal goals with emojis and descriptions
 - Rate goals individually or in bulk (1-3 scale)
 - View weekly summaries and lookback reports
+- Add goals with reminder times
 
-### 3. Database Schema
-- `user`: User information
-- `user_goals`: Goal definitions
+### 4. Database Schema
+- `user`: User information with timezone
+- `user_goals`: Goal definitions with reminder_time (NEW)
 - `goal_ratings`: Daily goal ratings
-- `referrals`: Referral tracking (NEW)
+- `referrals`: Referral tracking
+- `user_states`: Conversation state management (NEW)
 
 ## Architecture Flow
 
-### Contact Sharing Flow (NEW)
+### Reminder Flow (NEW)
+1. **Goal Creation**: User adds goal with "add goal 😴 Sleep by 9pm"
+2. **State Set**: System saves goal and sets user state to 'waiting_for_reminder_time'
+3. **Time Input**: User provides time (e.g., "18:00", "6 PM")
+4. **Time Parsing**: `time_parser.py` normalizes time to HH:MM format
+5. **DB Update**: Goal's reminder_time field updated, state cleared
+6. **Background Job**: `reminder.py` (cron) continuously polls database every 15 seconds
+7. **Time Check**: Compares current time (in user's timezone) with goal's reminder_time
+8. **Send Reminder**: WhatsApp message sent via API when time matches
+9. **Duplicate Prevention**: Tracks sent reminders to avoid duplicates
+
+### Contact Sharing Flow
 1. User shares contact via WhatsApp → VCARD format received
 <<<<<<< HEAD
 2. `webhook.py` `/process` endpoint receives message
@@ -91,7 +111,14 @@ graph TB
 >>>>>>> 8f0704f (updated backend code arch and replaced it's drawio diagram with mermaid diagram)
     end
 
-    subgraph contact_referral["Contact & Referral System (app/helpers/)"]
+    subgraph reminder_system["Reminder System (NEW)"]
+        reminder_cron["cron/reminder.py<br/>• Poll Database (15s)<br/>• Timezone Aware<br/>• Send Reminders<br/>• Duplicate Prevention"]
+        state_manager["helpers/state_manager.py<br/>• set_user_state()<br/>• get_user_state()<br/>• clear_user_state()"]
+        time_parser["helpers/time_parser.py<br/>• parse_reminder_time()<br/>• format_time_for_display()"]
+        timezone_helper["helpers/timezone_helper.py<br/>helpers/user_timezone.py<br/>• Timezone Detection<br/>• Timezone Storage"]
+    end
+
+    subgraph contact_referral["Contact & Referral System"]
         contact_detector["contact_detector.py<br/>• VCARD Detection<br/>• WAID Extraction"]
         referral_tracker["referral_tracker.py<br/>• Save Referrals<br/>• Get Referral Count"]
         whatsapp_sender["whatsapp_sender.py<br/>• Send Onboarding Message"]
@@ -108,7 +135,7 @@ graph TB
 
     subgraph helpers["Goal Management Helpers<br/>(app/logic/helpers/)"]
         format_goals["format_goals.py"]
-        add_goal["add_goal.py"]
+        add_goal["add_goal.py<br/>• add_goal()<br/>• set_reminder_time() (NEW)"]
         handle_ratings["handle_goal_ratings.py"]
         rate_goal["rate_individual_goal.py"]
         week_summary["format_week_summary.py"]
@@ -135,7 +162,7 @@ graph TB
     end
 
     subgraph schema["Database Schema (db/)"]
-        schema_sql["schema.sql<br/>• user<br/>• user_goals<br/>• goal_ratings<br/>• referrals"]
+        schema_sql["schema.sql<br/>• user (+ timezone)<br/>• user_goals (+ reminder_time)<br/>• goal_ratings<br/>• referrals<br/>• user_states (NEW)"]
         life_bot_db["life_bot.db<br/>SQLite Database"]
     end
 
@@ -186,8 +213,23 @@ graph TB
     whatsapp_sender -->|"uses"| whatsapp_api
     whatsapp_api -->|"HTTP POST"| whatsapp_api_ext
     
-    %% Message processing flow
-    process_msg -->|"calls"| helpers
+    %% Message processing flow with state management
+    process_msg -->|"check state"| state_manager
+    process_msg -->|"if waiting_for_reminder_time"| add_goal
+    process_msg -->|"else normal"| helpers
+    
+    %% Reminder flow
+    add_goal -->|"set state"| state_manager
+    add_goal -->|"parse time"| time_parser
+    add_goal -->|"detect timezone"| timezone_helper
+    add_goal -->|"save goal & reminder"| sqlite
+    state_manager -->|"queries/updates"| sqlite
+    
+    %% Reminder cron flow
+    reminder_cron -->|"polls every 15s"| sqlite
+    reminder_cron -->|"uses timezone"| timezone_helper
+    reminder_cron -->|"sends message"| whatsapp_api
+    whatsapp_api -->|"HTTP POST"| whatsapp_api_ext
     
     %% Goal helpers flow
 <<<<<<< HEAD
@@ -210,6 +252,7 @@ graph TB
     %% Styling
     style external fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     style flask fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
+    style reminder_system fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
     style contact_referral fill:#fff9c4,stroke:#f57f17,stroke-width:2px
     style logic fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
     style helpers fill:#f0f8f0,stroke:#1b5e20,stroke-width:1px
@@ -226,7 +269,22 @@ graph TB
 
 ## Component Details
 
-### Contact & Referral System (Yellow Box - NEW)
+### Reminder System (Green Box - NEW)
+| Component | Description | Key Functions |
+|-----------|-------------|---------------|
+| `cron/reminder.py` | Background cron job that polls database and sends reminders | `fetch_active_goals()`, `should_send()`, `send_reminder()`, `get_current_hhmm_in_timezone()` |
+| `helpers/state_manager.py` | Manages conversation state for multi-step flows | `set_user_state()`, `get_user_state()`, `clear_user_state()` |
+| `helpers/time_parser.py` | Parses and formats time in multiple formats | `parse_reminder_time()`, `format_time_for_display()` |
+| `helpers/timezone_helper.py`<br/>`helpers/user_timezone.py` | Handles timezone detection and storage | `detect_and_save_user_timezone()`, `update_existing_user_timezone()` |
+| `logic/helpers/add_goal.py` | Extended with reminder functionality | `add_goal()`, `set_reminder_time()` |
+
+**Running the Reminder System:**
+```bash
+# From backend directory
+uv run .\cron\reminder.py
+```
+
+### Contact & Referral System (Yellow Box)
 | Component | Description | Key Functions |
 |-----------|-------------|---------------|
 <<<<<<< HEAD
@@ -257,7 +315,7 @@ graph TB
 | `/process` | POST | Main webhook endpoint for message processing and contact detection |
 >>>>>>> 8f0704f (updated backend code arch and replaced it's drawio diagram with mermaid diagram)
 
-### Message Processing (Green Box)
+### Message Processing (Light Green Box)
 | Component | Description |
 |-----------|-------------|
 <<<<<<< HEAD
@@ -270,7 +328,7 @@ graph TB
 | Component | Purpose |
 |-----------|---------|
 | `format_goals.py` | Display user's goals in formatted list |
-| `add_goal.py` | Add new goals with emoji and description |
+| `add_goal.py` | **UPDATED:** Add new goals with emoji and description, set state to wait for reminder time, and handle reminder time setting via `set_reminder_time()` |
 | `handle_goal_ratings.py` | Process bulk goal ratings (e.g., "123") |
 | `rate_individual_goal.py` | Rate single goal (e.g., "rate 2 3") |
 | `format_week_summary.py` | Generate weekly goal summary |
@@ -298,17 +356,43 @@ graph TB
 >>>>>>> 8f0704f (updated backend code arch and replaced it's drawio diagram with mermaid diagram)
 
 ### Database Schema
-| Table | Description | New? |
-|-------|-------------|------|
-| `user` | User information (id, name, phone) | No |
-| `user_goals` | Goal definitions with emoji and description | No |
-| `goal_ratings` | Daily goal ratings (1-3 scale) | No |
-| `referrals` | Referral tracking (referrer → referred) | **✓ Yes** |
+| Table | Description | Changes |
+|-------|-------------|---------|
+| `user` | User information (id, name, phone, **timezone**) | **NEW:** timezone field |
+| `user_goals` | Goal definitions with emoji, description, and **reminder_time** | **NEW:** reminder_time field |
+| `goal_ratings` | Daily goal ratings (1-3 scale) | No changes |
+| `referrals` | Referral tracking (referrer → referred) | No changes |
+| `user_states` | Conversation state management (user_phone, state, temp_data) | **✓ NEW TABLE** |
 
 ## Technology Stack
 - **Backend Framework**: Flask (Python)
-- **Database**: SQLite
+- **Database**: SQLite with state management
 - **External API**: WhatsApp API (Node.js service on port 3000)
 - **Message Format**: VCARD for contact sharing
 - **Deployment**: Python with dotenv for configuration
+- **Background Jobs**: Reminder cron job (runs with `uv run .\cron\reminder.py`)
+- **Timezone Support**: Python zoneinfo for timezone-aware reminders
+- **State Management**: Multi-step conversation flows with database-backed state
+
+## How to Run the Complete System
+
+### 1. Start the Flask Backend
+```bash
+cd backend
+python main.py
+```
+
+### 2. Start the WhatsApp API Service
+```bash
+cd whatsapp-client
+npm start
+```
+
+### 3. Start the Reminder Service (NEW)
+```bash
+cd backend
+uv run .\cron\reminder.py
+```
+
+This will start the reminder cron job that polls the database every 15 seconds and sends reminders to users based on their configured times and timezones.
 

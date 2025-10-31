@@ -32,11 +32,41 @@ _Tip: Click the image to zoom._
 - **Backend returns a confirmation message** to the referrer.
 - **Referred contact receives** an automated welcome message with instructions.
 
+### Reminder Setup Flow *(NEW)*
+
+- **User adds a goal** with `add goal 🏃 Exercise daily`.
+- **Backend** (`helpers/add_goal.py`) processes the request:
+  - Creates new goal in `user_goals` table
+  - Detects/saves user timezone to `user` table (if new user)
+  - Sets user state to `waiting_for_reminder_time` in `user_states` table
+  - Stores goal ID in `temp_data` field
+- **Backend asks for reminder time**: "⏰ What time should I remind you daily? (e.g., 18:00, 6 PM, 6pm)"
+- **User responds with time** (e.g., "6 PM", "18:00", "6pm", or "6").
+- **State check** in `process_message.py` detects user is in `waiting_for_reminder_time` state.
+- **Time parser** (`helpers/time_parser.py`) parses and validates the time:
+  - Supports multiple formats: 24-hour, 12-hour, short formats
+  - Normalizes to HH:MM (24-hour format)
+  - Returns error if invalid format
+- **Backend updates goal** with reminder time in `user_goals` table.
+- **Backend clears user state** back to `normal`.
+- **Backend confirms**: "✅ Reminder set for 6:00 PM daily!"
+- **Background cron job** (`cron/reminder.py`) continuously monitors database:
+  - Polls every 15 seconds for active goals with reminder times
+  - Compares current time (in user's timezone) with goal reminder times
+  - Sends WhatsApp reminder message when time matches
+  - Tracks sent reminders to prevent duplicates
+
 ---
 
 ## Decision Points and Steps
 
-### Message Type Detection
+- **Is message VCARD format?**
+  - First check: determines if message is contact sharing vs. regular text
+  - VCARD format: `BEGIN:VCARD\nVERSION:3.0\n...TEL;type=CELL;waid=...END:VCARD`
+  - Files:
+    - `app/helpers/contact_detector.py` - `is_contact_shared()`
+  - If YES: Route to contact sharing flow
+  - If NO: Route to regular command processing
 
 **Is message VCARD format?**
 
@@ -127,7 +157,35 @@ The WhatsApp client bridges WhatsApp Web and the backend. See [WhatsApp Client](
 }
 ```
 
-**File:** `whatsapp-client/index.js`
+## Backend Components (Reference)
+
+### Core Application
+- `backend/main.py`: Flask entrypoint and routes (`/process`, `/emulator`)
+- `app/logic/process_message.py`: Command routing *(UPDATED - now includes state checking)*
+- `app/logic/helpers/*`: Command implementations
+- `app/db/sqlite.py`: DB connection/init
+- `backend/db/schema.sql`: Schema definition *(UPDATED - new tables and fields)*
+
+### Reminder System *(NEW)*
+- `app/helpers/state_manager.py`: Conversation state management
+- `app/helpers/time_parser.py`: Flexible time format parsing
+- `app/helpers/timezone_helper.py`: Timezone utilities
+- `app/helpers/user_timezone.py`: User timezone detection and storage
+- `app/logic/helpers/add_goal.py`: Goal creation with reminder setup *(UPDATED)*
+- `cron/reminder.py`: Background cron job for sending reminders
+
+### Referral System
+- `app/helpers/contact_detector.py`: VCARD detection and WAID extraction
+- `app/helpers/referral_tracker.py`: Referral database operations
+- `app/helpers/whatsapp_sender.py`: Automated onboarding messages
+- `app/helpers/api/whatsapp_api.py`: WhatsApp API client integration
+
+### Database Tables
+- `user`: User information (with `timezone` field) *(UPDATED)*
+- `user_goals`: Goal definitions (with `reminder_time` field) *(UPDATED)*
+- `goal_ratings`: Daily ratings
+- `referrals`: Referral tracking
+- `user_states`: Conversation state management *(NEW)*
 
 ---
 
@@ -135,19 +193,19 @@ The WhatsApp client bridges WhatsApp Web and the backend. See [WhatsApp Client](
 
 ### Goal Management
 
-**Scenario 1: New User**
-```
-User → "goals"
-Bot  → Creates user record
-Bot  → Shows empty list or guidance
-```
+- **New user says "goals"**
+  - User record is created (if absent)
+  - Timezone is automatically detected and saved
+  - Empty goals list is returned or initial guidance is shown
 
-**Scenario 2: Adding Goals**
-```
-User → "add goal 🏃 Exercise daily"
-Bot  → Creates active goal with emoji and description
-Bot  → Confirms addition
-```
+- **User adds a goal** *(UPDATED - now multi-step)*
+  - User: `add goal 🏃 Exercise daily`
+  - Bot creates goal and asks: "⏰ What time should I remind you daily?"
+  - System sets state to `waiting_for_reminder_time`
+  - User: `6 PM` (or `18:00`, `6pm`, `6:00 PM`, `6`)
+  - Bot parses time, saves reminder, and confirms: "✅ Reminder set for 6:00 PM daily!"
+  - System clears state back to `normal`
+  - Goal is now active with daily reminders
 
 **Scenario 3: Rating Goals**
 ```
@@ -158,10 +216,26 @@ User → "rate 2 3" (rate specific goal)
 Bot  → Updates goal #2 rating to 3
 ```
 
-**Scenario 4: View Summaries**
-```
-User → "week"
-Bot  → Shows current week with daily status
+### Reminder Scenarios *(NEW)*
+
+- **User receives daily reminder**
+  - Background cron job (`reminder.py`) checks database every 15 seconds
+  - When current time (in user's timezone) matches goal's reminder time:
+    - Bot sends: "⏰ Reminder: 🏃 Exercise daily"
+    - Reminder is tracked to prevent duplicates
+  - User can then rate their goal or take action
+
+- **Invalid time format**
+  - If user enters invalid time (e.g., "invalid"), system responds:
+    - "❌ Invalid time format. Please use formats like: 18:00, 6 PM, 6pm, or 6"
+  - User remains in `waiting_for_reminder_time` state to retry
+
+- **Timezone handling**
+  - System automatically detects user timezone on first interaction
+  - Reminders sent based on user's local time, not server time
+  - Supports all IANA timezones
+
+### Referral Scenarios *(NEW)*
 
 User → "lookback 5"
 Bot  → Shows last 5 days history
