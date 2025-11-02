@@ -48,8 +48,6 @@ def rate_individual_goal(user_id: str, goal_number: int, rating: int) -> str:
     if rating not in [1, 2, 3]:
         return ERROR_RATING_INVALID
     
-    db = get_db()
-    
     # Get user's goals
     user_goals: list[dict[str, str]] = get_user_goals(user_id)
     
