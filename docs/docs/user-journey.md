@@ -39,170 +39,165 @@
 
 ## Decision Points and Steps
 
-- **Is message VCARD format?** *(NEW)*
-  - First check: determines if message is contact sharing vs. regular text
-  - VCARD format: `BEGIN:VCARD\nVERSION:3.0\n...TEL;type=CELL;waid=...END:VCARD`
-  - Files:
-    - `app/helpers/contact_detector.py` - `is_contact_shared()`
-  - If YES: Route to contact sharing flow
-  - If NO: Route to regular command processing
+### Message Type Detection
 
-- **Contact Sharing Flow** *(NEW)*
-  - **Extract WhatsApp ID (WAID)**:
-    - Pattern matching: `waid=(\d+)` from VCARD data
-    - File: `app/helpers/contact_detector.py` - `extract_waid_from_contact()`
-  - **Save referral record**:
-    - Database: `referrals` table
-    - Fields: `referrer_phone`, `referred_phone`, `referred_waid`, `status`
-    - Duplicate prevention: checks existing referrals
-    - File: `app/helpers/referral_tracker.py` - `save_referral()`
-  - **Send onboarding message**:
-    - Automated welcome message with quick start guide
-    - Sent via WhatsApp API (external service on port 3000)
-    - Files:
-      - `app/helpers/whatsapp_sender.py` - `send_hi_message_to_contact()`
-      - `app/helpers/api/whatsapp_api.py` - `send_whatsapp_message()`
-  - **Return confirmation**:
-    - Thank you message to referrer
-    - Confirms referral was processed
+**Is message VCARD format?**
+- **Check:** VCARD pattern (`BEGIN:VCARD...END:VCARD`)
+- **Module:** `contact_detector.py` → `is_vcard()`
+- **YES:** Route to Contact Sharing Flow
+- **NO:** Route to Command Processing
 
-- **Is user already in database?**
-  - Checked when accessing goals or storing ratings.
-  - If not found, a user record is created using the WhatsApp number or chat ID.
-  - Files:
-    - `app/db/CRUD/user_goals/get_user_goals.py`
-    - `app/db/sqlite.py`
+### Contact Sharing Flow
 
-- **Detect command** (message parsing and routing)
-  - Supported triggers in `process_message.py`:
-    - `help`
-    - `goals`
-    - `add goal <emoji> <description>`
-    - `rate <goal-number> <rating-1-3>`
-    - `[digits like 123]` (rate all goals for today)
-    - `week`
-    - `lookback [n]`
-  - File: `app/logic/process_message.py`
+**1. Extract WhatsApp ID**
+- Pattern: `waid=(\d+)` from VCARD data
+- Module: `contact_detector.py` → `extract_waid_from_vcard()`
 
-- **Is command valid?**
-  - Invalid or unknown commands result in a help message or a usage hint.
-  - Example responses:
-    - "❌ Unrecognized message. Type 'help' to see available commands."
-    - "❌ Usage: add goal 😴 Sleep by 9pm"
+**2. Process Referral**
+- Convert WAID to local phone format
+- Save to `referrals` table (with duplicate check)
+- Module: `referral_tracker.py` → `process_referral()`
 
-- **Execute command logic**
-  - `goals`: `helpers/format_goals.py`
-  - `add goal`: `helpers/add_goal.py`
-  - `rate <n> <r>`: `helpers/rate_individual_goal.py`
-  - `123...`: `helpers/handle_goal_ratings.py`
-  - `week`: `helpers/format_week_summary.py`
-  - `lookback [n]`: `helpers/look_back_summary.py`
-  - Shared utilities: `app/utils/config.py` (icons/styles)
-  - DB access: `app/db/sqlite.py`
+**3. Automated Onboarding**
+- Send welcome message to referred contact
+- Module: `whatsapp_sender.py` → `send_hi_message_to_contact()`
+- Integration: `api/whatsapp_api.py` → `send_whatsapp_message()`
 
-- **Send formatted reply**
-  - Helpers return plain-text responses (often wrapped with code blocks for alignment).
-  - WhatsApp client posts that reply back to the originating chat.
+**4. Confirmation**
+- Return success message to referrer
 
-- **Wait for next message**
-  - The loop continues per user’s ongoing interaction.
+### Command Processing Flow
+
+**1. User Verification**
+- Check if user exists in database
+- Create user record if needed (using phone number)
+- Module: `db/CRUD/user_goals/get_user_goals.py`
+
+**2. Command Detection**
+- Parse message text for known commands
+- Supported: `help`, `goals`, `add goal`, `rate`, `[digits]`, `week`, `lookback`
+- Module: `logic/process_message.py`
+
+**3. Command Validation**
+- Validate command format and parameters
+- Return error/usage hint if invalid
+- Example: "❌ Usage: add goal 😴 Sleep by 9pm"
+
+**4. Execute Command**
+
+| Command | Module | Action |
+|---------|--------|--------|
+| `goals` | `format_goals.py` | Display user's goals |
+| `add goal` | `add_goal.py` | Create new goal |
+| `rate X Y` | `rate_individual_goal.py` | Rate specific goal |
+| `123...` | `handle_goal_ratings.py` | Rate all goals |
+| `week` | `format_week_summary.py` | Show week summary |
+| `lookback N` | `look_back_summary.py` | Show N days history |
+
+**5. Return Response**
+- Format reply message
+- Send back to WhatsApp client
+- Client relays to user
 
 ---
 
-## WhatsApp Client Responsibilities
+## WhatsApp Client Integration
 
-- Subscribe to `message` events
-- POST the message payload to the backend:
-  - Regular messages: `{ message: msg.body, from: msg.from }`
-  - Contact sharing: `{ message: <VCARD data>, from: msg.from }`
-- Handle QR login on first run; persist session with `LocalAuth`
-- On errors (network/backend), log and fail gracefully
-- Expose `/send-message` endpoint for automated messages (referral system)
+The WhatsApp client bridges WhatsApp Web and the backend. See [WhatsApp Client](whatsapp-client.md) for complete documentation.
 
-File: `whatsapp-client/index.js`
+**Key Responsibilities:**
+- Listen for incoming WhatsApp messages
+- Forward messages to backend `/process` endpoint
+- Relay backend responses to users
+- Expose `/send-message` API for automated messages
+- Manage WhatsApp session persistence
 
----
+**Message Format:**
+```json
+{
+  "message": "<text or VCARD data>",
+  "from": "<phone number>"
+}
+```
 
-## Backend Components (Reference)
-
-### Core Application
-- `backend/main.py`: Flask entrypoint and routes (`/process`, `/emulator`)
-- `app/logic/process_message.py`: Command routing
-- `app/logic/helpers/*`: Command implementations
-- `app/db/sqlite.py`: DB connection/init
-- `backend/db/schema.sql`: Schema definition
-
-### Referral System *(NEW)*
-- `app/helpers/contact_detector.py`: VCARD detection and WAID extraction
-- `app/helpers/referral_tracker.py`: Referral database operations
-- `app/helpers/whatsapp_sender.py`: Automated onboarding messages
-- `app/helpers/api/whatsapp_api.py`: WhatsApp API client integration
-
-### Database Tables
-- `user`: User information
-- `user_goals`: Goal definitions
-- `goal_ratings`: Daily ratings
-- `referrals`: Referral tracking *(NEW)*
+**File:** `whatsapp-client/index.js`
 
 ---
 
 ## Typical User Scenarios
 
-### Goal Management Scenarios
+### Goal Management
 
-- **New user says "goals"**
-  - User record is created (if absent)
-  - Empty goals list is returned or initial guidance is shown
+**Scenario 1: New User**
+```
+User → "goals"
+Bot  → Creates user record
+Bot  → Shows empty list or guidance
+```
 
-- **User adds a goal**
-  - `add goal 🏃 Exercise daily` creates an active goal with emoji and description
+**Scenario 2: Adding Goals**
+```
+User → "add goal 🏃 Exercise daily"
+Bot  → Creates active goal with emoji and description
+Bot  → Confirms addition
+```
 
-- **User rates the day**
-  - `312` stores ratings for the three goals for today
-  - `rate 2 3` updates a specific goal's rating
+**Scenario 3: Rating Goals**
+```
+User → "312" (rate all goals)
+Bot  → Stores ratings for today: goal 1=3, goal 2=1, goal 3=2
 
-- **User requests summaries**
-  - `week` returns current week header and daily statuses
-  - `lookback 5` returns the last 5 days summary
+User → "rate 2 3" (rate specific goal)
+Bot  → Updates goal #2 rating to 3
+```
 
-### Referral Scenarios *(NEW)*
+**Scenario 4: View Summaries**
+```
+User → "week"
+Bot  → Shows current week with daily status
 
-- **User shares a contact to refer someone**
-  - User opens WhatsApp and shares contact with Life Bot
-  - Backend detects VCARD format containing contact data
-  - System extracts WAID (e.g., `923325727426`) from `TEL;type=CELL;waid=...`
-  - Referral record saved: `referrer_phone` → `referred_phone`
-  - Automated onboarding message sent to referred contact:
-    ```
-    🎯 Welcome to Life Bot!
-    I'm your personal goal tracking assistant...
-    [Quick start guide with commands]
-    ```
-  - Referrer receives confirmation:
-    ```
-    🎉 Thank you for the referral!
-    You've successfully shared a contact with Life Bot...
-    ```
+User → "lookback 5"
+Bot  → Shows last 5 days history
+```
 
-- **Referred user receives welcome message**
-  - New contact receives automated onboarding via WhatsApp
-  - Message includes all available commands and examples
-  - User can immediately start using bot (send `goals`, `add goal`, etc.)
+### Referral System
 
-- **Duplicate referral handling**
-  - If user shares same contact twice, system detects duplicate
-  - Referral count remains accurate (no double-counting)
-  - Still sends confirmation to referrer
+**Scenario 5: Sharing a Contact**
+```
+User shares contact → VCARD data sent to bot
+Bot detects VCARD → Extracts WAID (e.g., 923325727426)
+Bot saves referral → referrer_phone → referred_phone
+Bot sends welcome → Automated onboarding to referred contact
+Bot confirms → "🎉 Thank you for the referral!"
+```
+
+**Scenario 6: Referred User Onboarding**
+```
+New contact receives → "🎯 Welcome to Life Bot! ..."
+Message includes → All commands and quick start guide
+User can start → "goals", "add goal", etc.
+```
+
+**Scenario 7: Duplicate Referral**
+```
+User shares same contact again → System detects duplicate
+Bot skips duplicate save → Referral count stays accurate
+Bot still confirms → Success message to referrer
+```
 
 ---
 
-## Notes
+## Technical Notes
 
-- Error and validation messages guide users toward correct usage
-- All data persists in SQLite; deleting `life_bot.db` resets state
-- **Referral system requires**:
-  - External WhatsApp API service running (default: `http://localhost:3000`)
-  - Environment variable `WHATSAPP_API_URL` configured (optional, defaults to localhost)
-  - WhatsApp client must expose `/send-message` endpoint for automated messages
-- **VCARD format** is specific to WhatsApp contact sharing
-- **Phone number format handling**: System converts WAID (e.g., `923325727426`) to local format (e.g., `03325727426`) for database storage
+**Data Persistence:**
+- SQLite database stores all data
+- Deleting `life_bot.db` resets all state
+
+**VCARD Format:**
+- WhatsApp-specific contact sharing format
+- Contains: `TEL;type=CELL;waid=<number>`
+- System extracts WAID and converts to local format
+
+**System Requirements:**
+- See [Backend Documentation](index.md) for setup details
+- See [WhatsApp Client](whatsapp-client.md) for client configuration

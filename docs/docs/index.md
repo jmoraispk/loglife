@@ -54,43 +54,42 @@ uv sync
 
 Main dependencies:
 - `flask>=3.1.2` - Web framework
-- `pytest>=8.4.2` - Testing framework
 - `python-dotenv>=1.1.1` - Environment variable management
 - `requests>=2.32.5` - HTTP library for WhatsApp API integration
+
+Development dependencies (install with `uv sync --extra dev`):
+- `pytest>=8.4.2` - Testing framework
 
 ---
 
 ## API Endpoints
 
 ### POST `/process`
-- Processes chat messages and contact sharing delivered as JSON payloads.
-- **Request JSON Structure (Regular Message):**
-  ```json
-  {
-    "message": "<user message>",
-    "from": "+1234567890"
-  }
-  ```
-- **Request JSON Structure (Contact Sharing/VCARD):**
-  ```json
-  {
-    "message": "BEGIN:VCARD\nVERSION:3.0\nN:;0332 5727426;;;\nFN:0332 5727426\nTEL;type=CELL;waid=923325727426:+92 332 5727426\nEND:VCARD",
-    "from": "+1234567890"
-  }
-  ```
-- **Response:**
-  - String message (bot reply)
-- **Behavior:**
-  - Regular messages are processed through command routing
-  - Contact sharing (VCARD format) triggers the referral system:
-    - Extracts WhatsApp ID (WAID) from contact data
-    - Saves referral record to database
-    - Sends automated onboarding message to referred contact
-    - Returns confirmation message to referrer
+
+Main webhook endpoint for processing incoming messages.
+
+**Request Body:**
+```json
+{
+  "message": "<message content or VCARD data>",
+  "from": "<sender phone number>"
+}
+```
+
+**Response:**
+- Plain text string with bot reply
+
+**Behavior:**
+- Routes VCARD format messages to referral system
+- Routes regular text messages to command processing
 
 ### GET `/emulator`
-- Serves a web-based emulator UI (`index.html` in `templates/`).
-- Used for developer testing without real chat platforms.
+
+Serves web-based testing interface.
+
+**Purpose:** Developer testing without connecting to real chat platforms
+
+**Location:** `app/templates/index.html`
 
 ---
 
@@ -123,81 +122,47 @@ lookback 3 # show last 3 days
 
 ## Referral System
 
-Life Bot includes a built-in referral system that allows users to share the bot with others through WhatsApp contact sharing.
+Allows users to share Life Bot via WhatsApp contact sharing. See [User Journey](user-journey.md) for complete flow documentation.
 
-### How It Works
+### Core Modules
 
-1. **Contact Sharing Detection**
-   - When a user shares a contact on WhatsApp, the message contains VCARD data
-   - Backend detects VCARD format: `BEGIN:VCARD ... END:VCARD`
-   - Extracts WhatsApp ID (WAID) from the contact data using pattern matching
+| Module | Functions | Purpose |
+|--------|-----------|---------|
+| `contact_detector.py` | `is_vcard()`<br>`extract_waid_from_vcard()` | VCARD format detection<br>WhatsApp ID extraction |
+| `referral_tracker.py` | `process_referral()`<br>`convert_waid_to_phone()`<br>`save_referral()`<br>`get_referral_count()` | Complete referral workflow<br>Phone format conversion<br>Database operations<br>Referral statistics |
+| `whatsapp_sender.py` | `send_hi_message_to_contact()` | Automated onboarding messages |
+| `api/whatsapp_api.py` | `send_whatsapp_message()` | WhatsApp API client |
 
-2. **Referral Tracking**
-   - Referral record is saved to the `referrals` table
-   - Tracks referrer phone, referred phone, WAID, and status
-   - Prevents duplicate referrals automatically
+### Configuration
 
-3. **Automated Onboarding**
-   - Sends welcome message to the referred contact via WhatsApp API
-   - Welcome message includes quick start guide and command examples
-   - Helps new users get started immediately
+**Environment Variable:**
+- `WHATSAPP_API_URL` - WhatsApp API base URL (default: `http://localhost:3000`)
 
-### Technical Implementation
+**Database Table:**
+- `referrals` - Tracks referrer/referred relationships
 
-**Helper Modules:**
-- `contact_detector.py` - Detects VCARD format and extracts WAID
-- `referral_tracker.py` - Manages referral database operations
-- `whatsapp_sender.py` - Sends automated messages via WhatsApp API
-- `whatsapp_api.py` - Integration with external WhatsApp messaging service
-
-**Environment Variables:**
-- `WHATSAPP_API_URL` - Base URL for WhatsApp API (default: `http://localhost:3000`)
-
-**Example VCARD Data:**
-```text
-BEGIN:VCARD
-VERSION:3.0
-N:;0332 5727426;;;
-FN:0332 5727426
-TEL;type=CELL;waid=923325727426:+92 332 5727426
-END:VCARD
-```
-
-**API Integration:**
-The backend sends POST requests to `/send-message` endpoint:
-```json
-{
-  "number": "923325727426",
-  "message": "Welcome to Life Bot! ..."
-}
-```
+**External Dependency:**
+- WhatsApp client service must be running with `/send-message` endpoint
 
 ---
 
 ## Database Schema
 
-Managed by SQLite (see `backend/db/schema.sql`). Auto-setup via `init_db()`.
+**Location:** `backend/db/schema.sql`
 
-### Tables
+**Initialization:** Auto-setup via `init_db()` on first run
 
-**user**
-- Stores user information (name, phone, registration timestamp)
-- Phone number is unique identifier
+### Tables Overview
 
-**user_goals**
-- Stores individual goals with emoji and description
-- Linked to users via `user_id` foreign key
-- `is_active` flag for soft deletion
+| Table | Purpose | Key Fields |
+|-------|---------|------------|
+| `user` | User profiles | `phone` (unique), `name`, `created_at` |
+| `user_goals` | Goal definitions | `user_id`, `goal_emoji`, `goal_description`, `is_active` |
+| `goal_ratings` | Daily ratings | `user_goal_id`, `rating` (1-3), `date` |
+| `referrals` | Referral tracking | `referrer_phone`, `referred_phone`, `referred_waid`, `status` |
 
-**goal_ratings**
-- Stores daily ratings for each goal
-- Rating scale: 1 (fail), 2 (partial), 3 (success)
-- Linked to `user_goals` via `user_goal_id` foreign key
-
-**referrals** *(new)*
-- Tracks referral relationships between users
-- Stores referrer phone, referred phone, and WhatsApp ID
-- Status field for tracking referral lifecycle (`pending`, etc.)
+<details>
+<summary>Full Schema SQL</summary>
 
 ```sql
 CREATE TABLE IF NOT EXISTS user (
@@ -236,6 +201,8 @@ CREATE TABLE IF NOT EXISTS referrals (
 );
 ```
 
+</details>
+
 ---
 
 ## Directory Structure
@@ -257,7 +224,9 @@ backend/
   │   │   └── web.py         # Emulator route
   │   ├── templates/         # Web UI (emulator)
   │   │   └── index.html     # Emulator interface
-  │   └── utils/             # Config, constants
+  │   └── utils/             # Config, constants, messages
+  │       ├── config.py       # Goals configuration
+  │       └── messages.py     # Centralized user-facing messages
   ├── db/                    # SQLite file and schema
   │   ├── life_bot.db        # Database file
   │   └── schema.sql         # Database schema
@@ -271,32 +240,54 @@ backend/
 
 ### Environment Variables
 
-Create a `.env` file in the `backend` directory (optional):
-```sh
-WHATSAPP_API_URL=http://localhost:3000  # WhatsApp API base URL (default: http://localhost:3000)
+Create `.env` in `backend/` directory:
+
+```ini
+# WhatsApp API Integration (for referral system)
+WHATSAPP_API_URL=http://localhost:3000
 ```
 
-### Starting the Server
+| Variable | Default | Required | Purpose |
+|----------|---------|----------|---------|
+| `WHATSAPP_API_URL` | `http://localhost:3000` | No | WhatsApp client endpoint for referral messages |
 
-Run the app directly with `uv`:
-```sh
+### Quick Start
+
+**Start the backend:**
+```bash
 cd backend
 uv run main.py
 ```
-- The server runs at `http://localhost:5000`.
-- Emulator UI: open `http://localhost:5000/emulator`.
 
-To stop the server: press `Ctrl+C` in the terminal.
+**Access points:**
+- API: `http://localhost:5000/process`
+- Emulator: `http://localhost:5000/emulator`
 
-For production, run the same command under a process manager like `systemd` (we use `systemd`).
+**Stop:** Press `Ctrl+C`
 
-### Prerequisites for Referral System
+### System Requirements
 
-For the referral system to work, you need:
-1. **WhatsApp Client Service** running on the configured URL (default: `http://localhost:3000`)
-   - See `whatsapp-client/` directory for the WhatsApp client implementation
-   - The service must expose a `/send-message` endpoint
-2. **Environment variable** `WHATSAPP_API_URL` pointing to your WhatsApp client service
+**For Basic Operation:**
+- Python 3.11+
+- SQLite (included with Python)
+
+**For Referral System:**
+- WhatsApp Client service running on port 3000
+- See [WhatsApp Client](whatsapp-client.md) documentation
+
+### Production Deployment
+
+Run under process manager (e.g., `systemd`):
+
+```bash
+cd backend
+uv run main.py
+```
+
+Configure process manager to:
+- Auto-restart on failure
+- Run on system boot
+- Log stdout/stderr
 
 ---
 
