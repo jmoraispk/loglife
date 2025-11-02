@@ -3,6 +3,11 @@
 ## Overview
 This diagram shows the complete backend architecture for the Life Bot application, including the recent additions of **Contact Sharing** and **Referral Tracking** features.
 
+**Recent Refactoring (Code Quality):**
+- Function naming improvements (VCARD-related functions)
+- Message centralization in `app/utils/messages.py`
+- Referral workflow generalization with country-specific phone conversion
+
 ## Key Features
 
 ### 1. Contact Sharing & Referral System (NEW)
@@ -92,8 +97,9 @@ graph TB
         index["index.html<br/>Emulator Interface"]
     end
 
-    subgraph config["Configuration (app/utils/)"]
+    subgraph utils["Utilities (app/utils/)"]
         config_py["config.py<br/>Goals & Styles Config"]
+        messages_py["messages.py<br/>User-facing Messages<br/>& Text Constants"]
     end
 
     %% External connections
@@ -120,6 +126,8 @@ graph TB
     %% Goal helpers flow
     helpers -->|"queries"| get_goals
     helpers -->|"reads config"| config_py
+    helpers -->|"uses messages"| messages_py
+    process -->|"uses messages"| messages_py
     
     %% Database flow
     get_goals -->|"queries"| sqlite
@@ -137,7 +145,7 @@ graph TB
     style crud fill:#fff8f0,stroke:#e65100,stroke-width:1px
     style schema fill:#fff3e0,stroke:#e65100,stroke-width:2px
     style templates fill:#fce4ec,stroke:#880e4f,stroke-width:2px
-    style config fill:#f1f8e9,stroke:#33691e,stroke-width:2px
+    style utils fill:#f1f8e9,stroke:#33691e,stroke-width:2px
 ```
 
 ## Component Details
@@ -145,8 +153,8 @@ graph TB
 ### Contact & Referral System (Yellow Box - NEW)
 | Component | Description | Key Functions |
 |-----------|-------------|---------------|
-| `contact_detector.py` | Detects VCARD format and extracts WhatsApp IDs | `is_contact_shared()`, `extract_waid_from_contact()` |
-| `referral_tracker.py` | Manages referral database operations | `save_referral()`, `get_referral_count()` |
+| `contact_detector.py` | Detects VCARD format and extracts WhatsApp IDs | `is_vcard()`, `extract_waid_from_vcard()` |
+| `referral_tracker.py` | Manages referral database operations and workflow | `process_referral()`, `convert_waid_to_phone()`, `save_referral()`, `get_referral_count()` |
 | `whatsapp_sender.py` | Sends onboarding messages to new referrals | `send_hi_message_to_contact()` |
 | `api/whatsapp_api.py` | External WhatsApp API client | `send_whatsapp_message()` |
 
@@ -177,6 +185,12 @@ graph TB
 |-----------|-------------|
 | `sqlite.py` | Database connection manager with init, get, and close functions |
 | CRUD Operations | User goals queries and operations |
+
+### Utilities (Light Green Box)
+| Component | Description |
+|-----------|-------------|
+| `config.py` | Goals configuration and styling constants |
+| `messages.py` | **Centralized user-facing messages** (welcome, help, errors, success messages). Improves maintainability and simplifies future translation/localization. |
 
 ### Database Schema
 | Table | Description | New? |

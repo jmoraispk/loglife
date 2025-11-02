@@ -27,25 +27,28 @@ This WhatsApp client bridges WhatsApp to the Life Bot backend. It provides two m
 
 ## Setup
 
-1) Install dependencies:
-```sh
+### Installation
+
+```bash
 cd whatsapp-client
 npm install
 ```
 
-2) Create `.env` in `whatsapp-client/`:
+### Environment Configuration
+
+Create `.env` in `whatsapp-client/`:
+
 ```ini
 PY_BACKEND_URL=http://localhost:5000/process
 PORT=3000
 KEEPALIVE_MS=120000
 ```
 
-Environment variables:
-- `PY_BACKEND_URL`: Python backend endpoint for processing messages
-- `PORT`: Port for Express server (default: 3000)
-- `KEEPALIVE_MS`: Interval for connection keep-alive checks (default: 120000ms)
-
-Optionally pin proxy/puppeteer settings as needed for your environment.
+| Variable | Default | Required | Purpose |
+|----------|---------|----------|---------|
+| `PY_BACKEND_URL` | none | Yes | Backend endpoint for message processing |
+| `PORT` | `3000` | No | Express server port |
+| `KEEPALIVE_MS` | `120000` | No | Connection keep-alive interval (ms) |
 
 ---
 
@@ -68,20 +71,21 @@ node index.js --reset-session
 
 ## How It Works
 
-### Message Relay (Incoming Messages)
+### Message Relay (Incoming)
 
-- Subscribes to `message` events from WhatsApp
-- Sends the received message and sender to the backend:
-  - Regular messages: `{ message: <text>, from: <whatsapp-number-or-chat-id> }`
-  - Contact sharing: `{ message: <VCARD data>, from: <whatsapp-number-or-chat-id> }`
-- Forwards backend response back to the same chat
+1. Subscribe to WhatsApp `message` events
+2. Forward to backend `/process` endpoint:
+   ```json
+   { "message": "<text or VCARD>", "from": "<phone>" }
+   ```
+3. Receive backend response
+4. Send reply back to WhatsApp chat
 
-### API Endpoints (Outgoing Messages)
-
-The client runs an Express server exposing HTTP endpoints:
+### API Endpoints (Outgoing)
 
 #### POST `/send-message`
-Sends WhatsApp messages programmatically (used by referral system).
+
+Send WhatsApp messages programmatically.
 
 **Request:**
 ```json
@@ -91,7 +95,7 @@ Sends WhatsApp messages programmatically (used by referral system).
 }
 ```
 
-**Response (Success):**
+**Response:**
 ```json
 {
   "success": true,
@@ -100,22 +104,15 @@ Sends WhatsApp messages programmatically (used by referral system).
 }
 ```
 
-**Response (Error):**
-```json
-{
-  "error": "WhatsApp client is not connected. Please scan QR code first.",
-  "details": "..."
-}
-```
-
 **Features:**
-- Automatic phone number formatting (adds `@c.us` suffix)
-- Client readiness check before sending
-- Automatic retry on detached frame errors
-- Country code handling (adds `92` prefix if needed for 10-digit numbers)
+- Auto phone formatting (`@c.us` suffix)
+- Client readiness check
+- Retry on frame detachment
+- Country code handling
 
 #### GET `/health`
-Health check endpoint for monitoring.
+
+Monitor client status.
 
 **Response:**
 ```json
@@ -123,98 +120,69 @@ Health check endpoint for monitoring.
   "status": "OK",
   "whatsappReady": true,
   "state": "CONNECTED",
-  "lastReadyAt": 1234567890,
   "timestamp": "2025-10-29T12:00:00.000Z"
 }
 ```
 
 ### Connection Management
 
-- **Keep-Alive**: Periodic checks (default: 2 minutes) monitor connection state
-- **Auto-Restart**: Automatically restarts client on disconnection or errors
-- **Frame Detachment Recovery**: Handles WhatsApp Web frame detachment issues
-
-Key file: `whatsapp-client/index.js`.
-
----
-
-## Environment & Configuration
-
-### Environment Variables
-
-- **PY_BACKEND_URL**: Full URL of the Python backend `/process` endpoint (default: none, required)
-- **PORT**: Express server port for API endpoints (default: `3000`)
-- **KEEPALIVE_MS**: Keep-alive check interval in milliseconds (default: `120000`)
-
-### WhatsApp Configuration
-
-- Puppeteer runs headless with `--no-sandbox --disable-setuid-sandbox` (tuned for Linux servers)
-- Session path managed by `whatsapp-web.js` LocalAuth (`clientId: "goal-bot-session"`)
-- Session data stored in `./session` directory
-
-### Server Configuration
-
-- Express server listens on configured PORT (default: 3000)
-- JSON body parser enabled for API requests
-- CORS not configured (add if needed for browser access)
+| Feature | Description |
+|---------|-------------|
+| Keep-Alive | Periodic checks every 2 minutes |
+| Auto-Restart | Restart on disconnection/errors |
+| Frame Recovery | Handle WhatsApp Web detachment |
+| Session Persist | LocalAuth saves QR authentication |
 
 ---
 
-## Integration with Referral System
+## Referral System Integration
 
-The WhatsApp client's `/send-message` endpoint is used by the Python backend for automated onboarding:
+The `/send-message` endpoint enables automated onboarding:
 
-1. User shares a contact with Life Bot (VCARD format)
-2. Backend detects contact sharing and extracts WhatsApp ID (WAID)
-3. Backend calls `POST http://localhost:3000/send-message` with:
-   ```json
-   {
-     "number": "923325727426",
-     "message": "🎯 Welcome to Life Bot! ..."
-   }
-   ```
-4. WhatsApp client sends the welcome message to the referred contact
-5. Backend confirms referral to the original user
+**Flow:**
+1. User shares contact → Backend detects VCARD
+2. Backend extracts WAID → Calls `/send-message`
+3. Client sends welcome message → New user receives onboarding
+4. Backend confirms → Original user gets success message
 
 **Configuration:**
-- Backend uses `WHATSAPP_API_URL` environment variable (default: `http://localhost:3000`)
-- Ensure WhatsApp client is running and authenticated before backend sends messages
+- Backend env: `WHATSAPP_API_URL=http://localhost:3000`
+- Client must be running and authenticated
+- See [Backend Documentation](index.md#referral-system) for details
 
 ---
 
 ## Troubleshooting
 
-### WhatsApp Connection Issues
+### Common Issues
 
-- **QR not showing properly**: Enlarge your terminal or use a different terminal emulator.
-- **Session/auth issues**: Run with `--reset-session` to clear and rescan.
-- **Auto-disconnect**: Keep-alive mechanism should handle this, check logs for restart attempts.
-- **"detached Frame" errors**: Client automatically restarts; if persistent, restart the process.
+| Issue | Solution |
+|-------|----------|
+| QR not showing | Enlarge terminal or use different emulator |
+| Session/auth problems | Run `node index.js --reset-session` |
+| Auto-disconnect | Check logs for restart attempts (keep-alive handles this) |
+| "detached Frame" errors | Automatic restart; if persistent, manually restart |
+| Backend not responding | Verify backend is running at `PY_BACKEND_URL` |
+| Message sending fails | Check client status: `curl http://localhost:3000/health` |
+| Port already in use | Change `PORT` in `.env` |
+| Puppeteer errors (Linux) | Install Chromium dependencies |
+| Memory issues | Monitor resources (WhatsApp Web is memory-intensive) |
 
-### Backend Integration Issues
+### Testing Commands
 
-- **Backend not responding**: Verify the backend is running at `PY_BACKEND_URL` and reachable from the machine.
-- **Message sending fails**: 
-  - Check if WhatsApp client is ready: `curl http://localhost:3000/health`
-  - Verify phone number format (should be digits only, e.g., `923325727426`)
-  - Check logs for specific error messages
-
-### System Issues
-
-- **Puppeteer errors on Linux**: Ensure dependencies for Chromium are installed or run Chrome/Chromium via environment configuration.
-- **Port already in use**: Change `PORT` in `.env` or stop conflicting process.
-- **Memory issues**: WhatsApp Web can be memory-intensive; monitor system resources.
-
-### Testing Endpoints
-
-Test the `/send-message` endpoint:
+**Test message sending:**
 ```bash
 curl -X POST http://localhost:3000/send-message \
   -H "Content-Type: application/json" \
-  -d '{"number":"923325727426","message":"Test message"}'
+  -d '{"number":"923325727426","message":"Test"}'
 ```
 
-Check health status:
+**Check health:**
 ```bash
 curl http://localhost:3000/health
+```
+
+**View logs:**
+```bash
+# Check console output for detailed error messages
 ```

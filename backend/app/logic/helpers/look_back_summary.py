@@ -1,5 +1,18 @@
+"""Historical goal tracking summary utilities.
+
+This module provides functions for generating formatted summaries
+of goal ratings over specified time periods.
+"""
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import Any, Dict, List, Optional
+from app.db.sqlite import get_db
+from app.utils.config import STYLE
+from app.db.CRUD.user_goals.get_user_goals import get_user_goals
+from app.utils.messages import (
+    LOOKBACK_NO_GOALS,
+    LOOKBACK_USER_NOT_FOUND,
+    LOOKBACK_HEADER
+)
 
 def storage_date_format(date: datetime) -> str:
     """
@@ -25,33 +38,29 @@ def look_back_summary(user_id: str, days: int, start: Optional[datetime] = None)
     Returns:
         str: Formatted summary
     """
-    from app.db.sqlite import get_db
-    from app.utils.config import STYLE
-    
-    summary = "```"
+    summary: str = "```"
     if start is None:
         start = datetime.now() - timedelta(days=days-1)  # Include today
-        summary += f"Last {days} days:\n"
+        summary += LOOKBACK_HEADER(days)
 
     # Get user goals to determine how many goals to show
-    from app.db.CRUD.user_goals.get_user_goals import get_user_goals
-    user_goals = get_user_goals(user_id)
+    user_goals: List[Dict[str, str]] = get_user_goals(user_id)
     
     if not user_goals:
-        return "```No goals set. Use 'add goal 😴 Description' to add goals.```"
+        return LOOKBACK_NO_GOALS()
     
     # Get user ID from database
     db = get_db()
-    cursor = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
-    user = cursor.fetchone()
+    cursor: Any = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
+    user: Any = cursor.fetchone()
     if not user:
-        return "```User not found```"
-    user_id_db = user['id']
+        return LOOKBACK_USER_NOT_FOUND
+    user_id_db: int = user['id']
     
     for i in range(days):
-        current_date = start + timedelta(days=i)
-        storage_date = storage_date_format(current_date)  # For looking up in data
-        display_date = current_date.strftime('%a')  # For display
+        current_date: datetime = start + timedelta(days=i)
+        storage_date: str = storage_date_format(current_date)  # For looking up in data
+        display_date: str = current_date.strftime('%a')  # For display
         
         # Get ratings for this date
         cursor = db.execute("""
@@ -62,13 +71,13 @@ def look_back_summary(user_id: str, days: int, start: Optional[datetime] = None)
             ORDER BY ug.created_at
         """, (storage_date, user_id_db))
         
-        ratings_data = cursor.fetchall()
+        ratings_data: Any = cursor.fetchall()
         
         # Create status symbols for each goal
-        status_symbols = []
+        status_symbols: List[str] = []
         for goal in user_goals:
             # Find rating for this goal
-            rating = None
+            rating: Optional[int] = None
             for rating_row in ratings_data:
                 if rating_row['goal_emoji'] == goal['emoji']:
                     rating = rating_row['rating']
@@ -79,7 +88,7 @@ def look_back_summary(user_id: str, days: int, start: Optional[datetime] = None)
             else:
                 status_symbols.append(' ')  # No rating yet
         
-        status = ' '.join(status_symbols)
+        status: str = ' '.join(status_symbols)
         summary += f"{display_date} {status}\n"
 
     return summary[:-1] + "```"

@@ -1,12 +1,18 @@
+"""SQLite database connection and management utilities.
+
+This module provides database connection management using Flask's application
+context, including connection handling, initialization, and teardown functions.
+"""
 import sqlite3
 import os
+from typing import Optional
 from flask import g
 
 # Get the absolute path to the project root (backend directory)
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-DATABASE = os.path.join(PROJECT_ROOT, "db", "life_bot.db")
+PROJECT_ROOT: str = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DATABASE: str = os.path.join(PROJECT_ROOT, "db", "life_bot.db")
 
-def get_db():
+def get_db() -> sqlite3.Connection:
     """Get database connection with proper Flask context handling.
     
     Establishes a SQLite database connection using Flask's g object for
@@ -20,7 +26,7 @@ def get_db():
         g.db.row_factory = sqlite3.Row
     return g.db
 
-def close_db(exception):
+def close_db(exception: Optional[Exception]) -> None:
     """Close database connection.
     
     Properly closes the database connection and removes it from Flask's g object.
@@ -29,11 +35,11 @@ def close_db(exception):
     Args:
         exception: Exception that triggered the teardown (if any)
     """
-    db = g.pop("db", None)
+    db: Optional[sqlite3.Connection] = g.pop("db", None)
     if db is not None:
         db.close()
 
-def init_db():
+def init_db() -> None:
     """Initialize database with schema if it doesn't exist.
     
     Creates the database file and applies the schema from schema.sql if the
@@ -43,8 +49,8 @@ def init_db():
         FileNotFoundError: If schema.sql file is not found
     """
     if not os.path.exists(DATABASE):
-        schema_path = os.path.join(PROJECT_ROOT, "db", "schema.sql")
+        schema_path: str = os.path.join(PROJECT_ROOT, "db", "schema.sql")
         with open(schema_path, "r") as f:
-            db = get_db()
+            db: sqlite3.Connection = get_db()
             db.executescript(f.read())
             db.commit()

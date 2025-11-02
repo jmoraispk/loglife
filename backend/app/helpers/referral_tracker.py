@@ -1,9 +1,82 @@
+"""Referral tracking utilities.
+
+This module provides functions for tracking and managing user referrals,
+including saving referral records and counting referrals.
+"""
 import sqlite3
 import logging
+from typing import Any, Dict
 from app.db.sqlite import get_db
+from app.helpers.whatsapp_sender import send_hi_message_to_contact
 
 
-def save_referral(referrer_phone, referred_phone, referred_waid):
+def convert_waid_to_phone(waid: str) -> str:
+    """
+    Convert WhatsApp ID (WAID) to phone number format.
+    
+    Handles common country code conversions. Currently supports:
+    - Pakistan (country code 92): Converts 923325727426 to 03325727426
+    
+    Args:
+        waid (str): WhatsApp ID in international format
+        
+    Returns:
+        str: Phone number in local format (or original WAID if no conversion applies)
+    """
+    # Pakistan: Remove country code 92 and add leading 0
+    if waid.startswith('92') and len(waid) > 2:
+        return '0' + waid[2:]
+    
+    # Add more country code conversions here as needed
+    # Example for other countries:
+    # if waid.startswith('1') and len(waid) == 11:  # US/Canada
+    #     return waid[1:]  # Remove leading 1
+    
+    return waid
+
+
+def process_referral(referrer_phone: str, waid: str) -> bool:
+    """
+    Process a referral: save to database and send onboarding message.
+    
+    This function handles the complete referral workflow:
+    1. Converts WAID to phone number format
+    2. Saves referral to database
+    3. Sends onboarding message to referred contact
+    
+    Args:
+        referrer_phone (str): Phone number of person who shared contact
+        waid (str): WhatsApp ID from VCARD data
+        
+    Returns:
+        bool: True if referral was processed successfully, False otherwise
+    """
+    if not waid:
+        logging.warning(f"[REFERRAL] Invalid WAID provided: {waid}")
+        return False
+    
+    # Convert WAID to phone number format
+    referred_phone: str = convert_waid_to_phone(waid)
+    
+    # Save referral to database
+    save_success: bool = save_referral(referrer_phone, referred_phone, waid)
+    
+    if not save_success:
+        logging.error(f"[REFERRAL] Failed to save referral: {referrer_phone} -> {referred_phone}")
+        return False
+    
+    # Send onboarding message to the referred contact
+    send_result: Dict[str, Any] = send_hi_message_to_contact(waid)
+    if send_result.get("success"):
+        logging.debug(f"[REFERRAL] Onboarding message sent successfully to {waid}")
+        return True
+    else:
+        logging.error(f"[REFERRAL] Failed to send onboarding message to {waid}: {send_result.get('error')}")
+        # Still return True as referral was saved, even if message failed
+        return True
+
+
+def save_referral(referrer_phone: str, referred_phone: str, referred_waid: str) -> bool:
     """
     Save a referral record to the database.
     Checks for existing referral to prevent duplicates.
@@ -18,7 +91,7 @@ def save_referral(referrer_phone, referred_phone, referred_waid):
     """
     try:
         db = get_db()
-        cursor = db.cursor()
+        cursor: Any = db.cursor()
         
         # Check if referral already exists
         cursor.execute("""
@@ -26,7 +99,7 @@ def save_referral(referrer_phone, referred_phone, referred_waid):
             WHERE referrer_phone = ? AND referred_phone = ?
         """, (referrer_phone, referred_phone))
         
-        existing = cursor.fetchone()
+        existing: Any = cursor.fetchone()
         if existing:
             logging.debug(f"[REFERRAL] Referral already exists: {referrer_phone} -> {referred_phone}")
             return True  # Return True since referral already exists
@@ -46,7 +119,7 @@ def save_referral(referrer_phone, referred_phone, referred_waid):
         return False
 
 
-def get_referral_count(referrer_phone):
+def get_referral_count(referrer_phone: str) -> int:
     """
     Get the number of referrals made by a user.
     
@@ -58,14 +131,14 @@ def get_referral_count(referrer_phone):
     """
     try:
         db = get_db()
-        cursor = db.cursor()
+        cursor: Any = db.cursor()
         
         cursor.execute("""
             SELECT COUNT(*) FROM referrals 
             WHERE referrer_phone = ?
         """, (referrer_phone,))
         
-        count = cursor.fetchone()[0]
+        count: int = cursor.fetchone()[0]
         return count
         
     except Exception as e:

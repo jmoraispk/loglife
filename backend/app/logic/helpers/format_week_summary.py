@@ -1,7 +1,14 @@
-from datetime import datetime, timedelta
-from app.logic.helpers.look_back_summary import look_back_summary
+"""Week summary formatting utilities.
 
-def get_last_monday(from_date: datetime = None) -> datetime:
+This module provides functions for formatting and displaying weekly
+goal tracking summaries for users.
+"""
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional
+from app.logic.helpers.look_back_summary import look_back_summary
+from app.db.CRUD.user_goals.get_user_goals import get_user_goals
+
+def get_last_monday(from_date: Optional[datetime] = None) -> datetime:
     """
     Get the date of the most recent past Monday.
     
@@ -11,8 +18,8 @@ def get_last_monday(from_date: datetime = None) -> datetime:
     Returns:
         datetime: Date of the last Monday (if today is Monday, returns today)
     """
-    reference_date = from_date if from_date else datetime.now()
-    days_since_monday = reference_date.weekday()  # Monday is 0, Sunday is 6
+    reference_date: datetime = from_date if from_date else datetime.now()
+    days_since_monday: int = reference_date.weekday()  # Monday is 0, Sunday is 6
     return reference_date - timedelta(days=days_since_monday)
 
 def format_week_summary(user_id: str) -> str:
@@ -25,21 +32,20 @@ def format_week_summary(user_id: str) -> str:
     Returns:
         str: Formatted week summary
     """
-    start = get_last_monday()
+    start: datetime = get_last_monday()
     
     # Create Week Summary Header (E.g. Week 26: Jun 30 - Jul 06)    
-    week_num = start.strftime('%W')
-    week_start = start.strftime('%b %d')
-    week_end = (start + timedelta(days=6)).strftime('%b %d')
+    week_num: str = start.strftime('%W')
+    week_start: str = start.strftime('%b %d')
+    week_end: str = (start + timedelta(days=6)).strftime('%b %d')
     if week_end.startswith(week_start[:3]):
         week_end = week_end[4:]
     
-    summary = f"```Week {week_num}: {week_start} - {week_end}\n"
+    summary: str = f"```Week {week_num}: {week_start} - {week_end}\n"
     
     # Add Goals Header - we'll need to get user goals dynamically
-    from app.db.CRUD.user_goals.get_user_goals import get_user_goals
-    user_goals = get_user_goals(user_id)
-    goal_emojis = [goal['emoji'] for goal in user_goals]
+    user_goals: List[Dict[str, str]] = get_user_goals(user_id)
+    goal_emojis: List[str] = [goal['emoji'] for goal in user_goals]
     summary += '    ' + ' '.join(goal_emojis) + "\n```"
 
     # Add Day-by-Day Summary

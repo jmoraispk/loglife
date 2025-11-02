@@ -1,9 +1,15 @@
+"""WhatsApp API integration utilities.
+
+This module provides functions for sending messages via the WhatsApp API,
+handling requests, responses, and error management.
+"""
 import requests
 import logging
 import os
+from typing import Any, Dict
 
 
-def send_whatsapp_message(number, message):
+def send_whatsapp_message(number: str, message: str) -> Dict[str, Any]:
     """
     Sends a WhatsApp message using the external API.
     
@@ -12,7 +18,7 @@ def send_whatsapp_message(number, message):
         message (str): The message content to send
         
     Returns:
-        dict: API response containing success status and details
+        Dict[str, Any]: API response containing success status and details
         
     Example:
         response = send_whatsapp_message("923090052353", "Hi there!")
@@ -20,23 +26,23 @@ def send_whatsapp_message(number, message):
             print("Message sent successfully")
     """
     # Get WhatsApp API URL from environment variable
-    api_base_url = os.getenv("WHATSAPP_API_URL", "http://localhost:3000")
-    api_url = f"{api_base_url}/send-message"
+    api_base_url: str = os.getenv("WHATSAPP_API_URL", "http://localhost:3000")
+    api_url: str = f"{api_base_url}/send-message"
     
-    payload = {
+    payload: Dict[str, str] = {
         "number": number,
         "message": message
     }
     
-    headers = {
+    headers: Dict[str, str] = {
         "Content-Type": "application/json"
     }
     
     try:
         logging.debug(f"[WHATSAPP_API] Sending message to {number}: '{message}'")
         
-        response = requests.post(api_url, json=payload, headers=headers, timeout=10)
-        response_data = response.json()
+        response: requests.Response = requests.post(api_url, json=payload, headers=headers, timeout=10)
+        response_data: Any = response.json()
         
         if response.status_code == 200 and response_data.get("success"):
             logging.debug(f"[WHATSAPP_API] Message sent successfully to {response_data.get('to')}")
