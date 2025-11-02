@@ -68,26 +68,20 @@ def process_message(message: str, sender: str) -> str:
         return look_back_summary(user_id, days)
     
     if message.startswith("add goal"):
-        # Extract the complete goal string (e.g., "add goal 😴 Sleep by 9pm")
-        parts = message.split(" ", 2)  # Split into max 3 parts
-        if len(parts) >= 3:
-            goal_string: str = parts[2]  # Everything after "add goal"
+        goal_string = parse_add_goal_command(message)
+        if goal_string:
             return add_goal(user_id, goal_string)
-        else:
-            return USAGE_ADD_GOAL
+        return USAGE_ADD_GOAL
     
     if message.startswith("rate"):
-        # Extract goal number and rating (e.g., "rate 2 3")
-        parts = message.split()
-        if len(parts) == 3 and parts[1].isdigit() and parts[2].isdigit():
-            goal_number: int = int(parts[1])
-            rating: int = int(parts[2])
+        parsed = parse_rate_command(message)
+        if parsed:
+            goal_number, rating = parsed
             return rate_individual_goal(user_id, goal_number, rating)
-        else:
-            return USAGE_RATE
+        return USAGE_RATE
     
     # Handle goal ratings (digits 1-3) - rate all goals at once
-    if message.isdigit() and all(c in "123" for c in message):
+    if is_valid_rating_digits(message):
         return handle_goal_ratings(message, user_id)
 
     return ERROR_UNRECOGNIZED_MESSAGE

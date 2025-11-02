@@ -32,7 +32,7 @@ def get_user_goals(user_id: str) -> list[dict[str, str]]:
         user_id_db: int = user['id']
     
     # Get user's active goals
-    cursor = db.execute("""
+    goals = fetch_all("""
         SELECT goal_emoji, goal_description 
         FROM user_goals 
         WHERE user_id = ? AND is_active = 1

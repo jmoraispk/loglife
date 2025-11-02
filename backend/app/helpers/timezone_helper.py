@@ -1,3 +1,9 @@
+"""Timezone detection utilities from phone numbers.
+
+This module provides functions for detecting user timezones from phone numbers
+using the phonenumbers library. It handles timezone lookup and provides fallback
+behavior for invalid or unrecognized numbers.
+"""
 import re
 
 try:

@@ -8,7 +8,11 @@ from app.helpers.api.whatsapp_api import send_whatsapp_message
 from app.utils.messages import WELCOME_MESSAGE, ERROR_WAID_REQUIRED
 
 
+<<<<<<< HEAD
 def send_onboarding_msg(waid: str) -> dict[str, Any]:
+=======
+def send_onboarding_msg(waid: str) -> Dict[str, Any]:
+>>>>>>> 18f54b0 (Refactor, doc, and modularity updates: added docs build guide, improved code structure (imports, docstrings, helpers), refactored reminder system, centralized utilities, and renamed onboarding/timezone funcs.)
     """
     Sends an onboarding message to a contact using their WhatsApp ID.
     

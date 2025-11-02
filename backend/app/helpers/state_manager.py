@@ -1,5 +1,10 @@
+"""User conversation state management utilities.
+
+This module provides functions for managing user conversation states,
+allowing the bot to track multi-step interactions like setting reminder times.
+"""
 import logging
-from app.db.sqlite import get_db
+from app.db.sqlite import execute_query, fetch_one
 
 
 def set_user_state(user_phone, state, temp_data=None):
@@ -15,15 +20,11 @@ def set_user_state(user_phone, state, temp_data=None):
         bool: True if successful, False otherwise
     """
     try:
-        db = get_db()
-        cursor = db.cursor()
-        
-        cursor.execute("""
+        execute_query("""
             INSERT OR REPLACE INTO user_states (user_phone, state, temp_data)
             VALUES (?, ?, ?)
         """, (user_phone, state, temp_data))
         
-        db.commit()
         logging.debug(f"[STATE] Set user {user_phone} to state: {state}")
         return True
         
@@ -43,19 +44,15 @@ def get_user_state(user_phone):
         dict: State info with 'state' and 'temp_data', or None if not found
     """
     try:
-        db = get_db()
-        cursor = db.cursor()
-        
-        cursor.execute("""
+        result = fetch_one("""
             SELECT state, temp_data FROM user_states 
             WHERE user_phone = ?
         """, (user_phone,))
         
-        result = cursor.fetchone()
         if result:
             return {
-                'state': result[0],
-                'temp_data': result[1]
+                'state': result['state'],
+                'temp_data': result['temp_data']
             }
         return None
         

@@ -2,6 +2,7 @@
 
 This module provides functions for adding and managing user goals.
 """
+<<<<<<< HEAD
 import re
 from app.db.sqlite import get_db
 from app.utils.messages import (
@@ -10,8 +11,14 @@ from app.utils.messages import (
     SUCCESS_GOAL_ADDED
 )
 from app.helpers.state_manager import set_user_state
+=======
+from app.db.sqlite import fetch_one, execute_query
+from app.db.CRUD.user import get_or_create_user
+from app.utils.messages import ERROR_GOAL_ALREADY_EXISTS
+from app.utils.goal_utils import parse_goal_emoji_and_description
+from app.helpers.state_manager import set_user_state, clear_user_state
+>>>>>>> 18f54b0 (Refactor, doc, and modularity updates: added docs build guide, improved code structure (imports, docstrings, helpers), refactored reminder system, centralized utilities, and renamed onboarding/timezone funcs.)
 from app.helpers.time_parser import parse_reminder_time, format_time_for_display
-from app.helpers.user_timezone import detect_and_save_user_timezone, update_existing_user_timezone
 
 def add_goal(user_id: str, goal_string: str) -> str:
     """
@@ -24,6 +31,7 @@ def add_goal(user_id: str, goal_string: str) -> str:
     Returns:
         str: Success or error message
     """
+<<<<<<< HEAD
     # Separate emoji from text - find emoji anywhere in the string
     # Simple emoji detection - look for emoji characters anywhere in the string
     emoji_pattern: str = r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF\U00002600-\U000026FF\U00002700-\U000027BF\U0001F900-\U0001F9FF\U0001FA70-\U0001FAFF\U0001F018-\U0001F0F5\U0001F200-\U0001F2FF]+'
@@ -56,23 +64,29 @@ def add_goal(user_id: str, goal_string: str) -> str:
         
         # Check and update timezone for existing user if not set
         update_existing_user_timezone(user_id, cursor, db)
+=======
+    # Parse emoji and description from goal string
+    goal_emoji, goal_description = parse_goal_emoji_and_description(goal_string)
+    
+    # Get or create user with timezone handling
+    user_id_db = get_or_create_user(user_id)
+>>>>>>> 18f54b0 (Refactor, doc, and modularity updates: added docs build guide, improved code structure (imports, docstrings, helpers), refactored reminder system, centralized utilities, and renamed onboarding/timezone funcs.)
     
     # Check if goal already exists for this user
-    cursor = db.execute("""
+    existing_goal = fetch_one("""
         SELECT id FROM user_goals 
         WHERE user_id = ? AND goal_emoji = ? AND is_active = 1
     """, (user_id_db, goal_emoji))
     
-    if cursor.fetchone():
+    if existing_goal:
         return ERROR_GOAL_ALREADY_EXISTS(goal_emoji)
     
     # Add the new goal (without reminder time initially)
-    cursor = db.execute("""
+    cursor = execute_query("""
         INSERT INTO user_goals (user_id, goal_emoji, goal_description, reminder_time) 
         VALUES (?, ?, ?, NULL)
     """, (user_id_db, goal_emoji, goal_description))
     goal_id = cursor.lastrowid
-    db.commit()
     
     # Set user state to wait for reminder time
     set_user_state(user_id, 'waiting_for_reminder_time', str(goal_id))
@@ -99,8 +113,7 @@ def set_reminder_time(user_id: str, time_input: str, goal_id: str) -> str:
         return "❌ Invalid time format. Please use formats like: 18:00, 6 PM, 6pm, or 6"
     
     try:
-        db = get_db()
-        cursor = db.execute("""
+        cursor = execute_query("""
             UPDATE user_goals 
             SET reminder_time = ? 
             WHERE id = ? AND user_id = (
@@ -111,10 +124,7 @@ def set_reminder_time(user_id: str, time_input: str, goal_id: str) -> str:
         if cursor.rowcount == 0:
             return "❌ Goal not found or you don't have permission to update it."
         
-        db.commit()
-        
         # Clear user state
-        from app.helpers.state_manager import clear_user_state
         clear_user_state(user_id)
         
         formatted_time = format_time_for_display(parsed_time)

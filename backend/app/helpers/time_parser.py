@@ -1,3 +1,8 @@
+"""Time parsing and formatting utilities.
+
+This module provides functions for parsing various time input formats
+from users and formatting time values for display.
+"""
 import re
 import logging
 

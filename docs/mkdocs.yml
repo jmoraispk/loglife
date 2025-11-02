@@ -1,0 +1,11 @@
+site_name: My Docs
+theme:
+  name: material
+  palette:
+    scheme: slate
+
+nav:
+  - Backend: index.md
+  - User Journey: user-journey.md
+  - WhatsApp Client: whatsapp-client.md
+  - Building Docs: building-docs.md
