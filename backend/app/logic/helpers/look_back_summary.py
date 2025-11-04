@@ -4,10 +4,9 @@ This module provides functions for generating formatted summaries
 of goal ratings over specified time periods.
 """
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
 from app.db.sqlite import get_db
 from app.utils.config import STYLE
-from app.db.CRUD.user_goals.get_user_goals import get_user_goals
+from app.db.data_access.user_goals.get_user_goals import get_user_goals
 from app.utils.messages import (
     LOOKBACK_NO_GOALS,
     LOOKBACK_USER_NOT_FOUND,
@@ -26,7 +25,7 @@ def storage_date_format(date: datetime) -> str:
     """
     return date.strftime('%Y-%m-%d')
 
-def look_back_summary(user_id: str, days: int, start: Optional[datetime] = None) -> str:
+def look_back_summary(user_id: str, days: int, start: datetime | None = None) -> str:
     """
     Look back at the summary for the last N days.
     
@@ -44,15 +43,15 @@ def look_back_summary(user_id: str, days: int, start: Optional[datetime] = None)
         summary += LOOKBACK_HEADER(days)
 
     # Get user goals to determine how many goals to show
-    user_goals: List[Dict[str, str]] = get_user_goals(user_id)
+    user_goals: list[dict[str, str]] = get_user_goals(user_id)
     
     if not user_goals:
         return LOOKBACK_NO_GOALS()
     
     # Get user ID from database
     db = get_db()
-    cursor: Any = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
-    user: Any = cursor.fetchone()
+    cursor = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
+    user = cursor.fetchone()
     if not user:
         return LOOKBACK_USER_NOT_FOUND
     user_id_db: int = user['id']
@@ -71,13 +70,13 @@ def look_back_summary(user_id: str, days: int, start: Optional[datetime] = None)
             ORDER BY ug.created_at
         """, (storage_date, user_id_db))
         
-        ratings_data: Any = cursor.fetchall()
+        ratings_data = cursor.fetchall()
         
         # Create status symbols for each goal
-        status_symbols: List[str] = []
+        status_symbols: list[str] = []
         for goal in user_goals:
             # Find rating for this goal
-            rating: Optional[int] = None
+            rating: int | None = None
             for rating_row in ratings_data:
                 if rating_row['goal_emoji'] == goal['emoji']:
                     rating = rating_row['rating']

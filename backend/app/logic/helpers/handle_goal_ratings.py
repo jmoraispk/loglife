@@ -4,9 +4,8 @@ This module provides functions for handling user goal ratings input,
 validation, and storage in the database.
 """
 from datetime import datetime
-from typing import Any, Dict, List
 from app.utils.config import STYLE
-from app.db.CRUD.user_goals.get_user_goals import get_user_goals
+from app.db.data_access.user_goals.get_user_goals import get_user_goals
 from app.db.sqlite import get_db
 from app.utils.messages import (
     ERROR_NO_GOALS_SET,
@@ -41,7 +40,7 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
         str: Response message indicating success or error
     """
     # Get user goals to validate input length
-    user_goals: List[Dict[str, str]] = get_user_goals(user_id)
+    user_goals: list[dict[str, str]] = get_user_goals(user_id)
     
     if not user_goals:
         return ERROR_NO_GOALS_SET
@@ -55,7 +54,7 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
         return ERROR_INVALID_INPUT_DIGITS(len(user_goals))
 
     # Store ratings
-    ratings: List[int] = [int(c) for c in payload]
+    ratings: list[int] = [int(c) for c in payload]
     now: datetime = datetime.now()
     today_storage: str = storage_date_format(now)  # For storage
     today_display: str = now.strftime('%a (%b %d)')  # For display
@@ -64,15 +63,15 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
     db = get_db()
     
     # Get user ID from database
-    cursor: Any = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
-    user: Any = cursor.fetchone()
+    cursor = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
+    user = cursor.fetchone()
     if not user:
         return ERROR_USER_NOT_FOUND
     user_id_db: int = user['id']
     
     # Store ratings for each goal
     for i, rating in enumerate(ratings):
-        goal: Dict[str, str] = user_goals[i]
+        goal: dict[str, str] = user_goals[i]
         goal_emoji: str = goal['emoji']
         
         # Get user_goal_id
@@ -80,7 +79,7 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
             SELECT id FROM user_goals 
             WHERE user_id = ? AND goal_emoji = ? AND is_active = 1
         """, (user_id_db, goal_emoji))
-        user_goal: Any = cursor.fetchone()
+        user_goal = cursor.fetchone()
         if not user_goal:
             return ERROR_GOAL_NOT_FOUND_WITH_EMOJI(goal_emoji)
         user_goal_id: int = user_goal['id']
@@ -108,8 +107,8 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
     db.commit()
     
     # Get goal emojis for display
-    goal_emojis: List[str] = [goal['emoji'] for goal in user_goals]
-    status: List[str] = [STYLE[r] for r in ratings]
+    goal_emojis: list[str] = [goal['emoji'] for goal in user_goals]
+    status: list[str] = [STYLE[r] for r in ratings]
 
     # Return success message
     return SUCCESS_RATINGS_SUBMITTED(today_display, goal_emojis, status)

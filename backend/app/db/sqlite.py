@@ -5,7 +5,6 @@ context, including connection handling, initialization, and teardown functions.
 """
 import sqlite3
 import os
-from typing import Optional
 from flask import g
 
 # Get the absolute path to the project root (backend directory)
@@ -26,7 +25,7 @@ def get_db() -> sqlite3.Connection:
         g.db.row_factory = sqlite3.Row
     return g.db
 
-def close_db(exception: Optional[Exception]) -> None:
+def close_db(exception: Exception | None) -> None:
     """Close database connection.
     
     Properly closes the database connection and removes it from Flask's g object.
@@ -35,7 +34,7 @@ def close_db(exception: Optional[Exception]) -> None:
     Args:
         exception: Exception that triggered the teardown (if any)
     """
-    db: Optional[sqlite3.Connection] = g.pop("db", None)
+    db: sqlite3.Connection | None = g.pop("db", None)
     if db is not None:
         db.close()
 

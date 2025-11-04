@@ -4,7 +4,6 @@ This module provides functions to detect and extract contact information
 from WhatsApp messages when users share contact cards.
 """
 import re
-from typing import Optional
 
 
 def is_vcard(message: str) -> bool:
@@ -27,7 +26,7 @@ def is_vcard(message: str) -> bool:
     return message.strip().startswith("BEGIN:VCARD") and message.strip().endswith("END:VCARD")
 
 
-def extract_waid_from_vcard(message: str) -> Optional[str]:
+def extract_waid_from_vcard(message: str) -> str:
     """
     Extracts the WhatsApp ID (waid) from VCARD data.
     
@@ -35,22 +34,22 @@ def extract_waid_from_vcard(message: str) -> Optional[str]:
         message (str): The VCARD message content
         
     Returns:
-        Optional[str]: The WhatsApp ID (waid) if found, None otherwise
+        str: The WhatsApp ID (waid) if found, empty string otherwise
         
     Example:
         Input: "BEGIN:VCARD\nVERSION:3.0\nN:;0332 5727426;;;\nFN:0332 5727426\nTEL;type=CELL;waid=923325727426:+92 332 5727426\nEND:VCARD"
         Output: "923325727426"
     """
     if not message or not isinstance(message, str):
-        return None
+        return ""
     
     try:
         # Look for waid= pattern in the message
         waid_pattern: str = r'waid=(\d+)'
-        match: Optional[re.Match[str]] = re.search(waid_pattern, message)
+        match: re.Match[str] | None = re.search(waid_pattern, message)
         
         if match:
             return match.group(1)
-        return None
+        return ""
     except Exception:
-        return None
+        return ""

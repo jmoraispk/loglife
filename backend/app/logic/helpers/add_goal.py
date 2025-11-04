@@ -3,7 +3,6 @@
 This module provides functions for adding and managing user goals.
 """
 import re
-from typing import Any, Optional
 from app.db.sqlite import get_db
 from app.utils.messages import (
     DEFAULT_GOAL_EMOJI,
@@ -25,7 +24,7 @@ def add_goal(user_id: str, goal_string: str) -> str:
     # Separate emoji from text - find emoji anywhere in the string
     # Simple emoji detection - look for emoji characters anywhere in the string
     emoji_pattern: str = r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF\U00002600-\U000026FF\U00002700-\U000027BF\U0001F900-\U0001F9FF\U0001FA70-\U0001FAFF\U0001F018-\U0001F0F5\U0001F200-\U0001F2FF]+'
-    match: Optional[re.Match[str]] = re.search(emoji_pattern, goal_string)
+    match: re.Match[str] | None = re.search(emoji_pattern, goal_string)
     
     if match:
         goal_emoji: str = match.group(0)
@@ -38,8 +37,8 @@ def add_goal(user_id: str, goal_string: str) -> str:
     db = get_db()
     
     # First, get or create the user
-    cursor: Any = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
-    user: Any = cursor.fetchone()
+    cursor = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
+    user = cursor.fetchone()
     
     if not user:
         # Create user if doesn't exist

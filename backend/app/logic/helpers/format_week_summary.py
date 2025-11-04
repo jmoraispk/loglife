@@ -4,21 +4,20 @@ This module provides functions for formatting and displaying weekly
 goal tracking summaries for users.
 """
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional
 from app.logic.helpers.look_back_summary import look_back_summary
-from app.db.CRUD.user_goals.get_user_goals import get_user_goals
+from app.db.data_access.user_goals.get_user_goals import get_user_goals
 
-def get_last_monday(from_date: Optional[datetime] = None) -> datetime:
+def get_monday_before(date: datetime | None = None) -> datetime:
     """
-    Get the date of the most recent past Monday.
-    
+    Get the Monday on or before the given date.
+
     Args:
-        from_date (datetime, optional): Reference date. Defaults to current date.
-        
+        date (datetime, optional): Reference date. Defaults to current date/time.
+
     Returns:
-        datetime: Date of the last Monday (if today is Monday, returns today)
+        datetime: Monday of the same week if the date is a Monday; otherwise the previous Monday.
     """
-    reference_date: datetime = from_date if from_date else datetime.now()
+    reference_date: datetime = date if date else datetime.now()
     days_since_monday: int = reference_date.weekday()  # Monday is 0, Sunday is 6
     return reference_date - timedelta(days=days_since_monday)
 
@@ -32,7 +31,7 @@ def format_week_summary(user_id: str) -> str:
     Returns:
         str: Formatted week summary
     """
-    start: datetime = get_last_monday()
+    start: datetime = get_monday_before()
     
     # Create Week Summary Header (E.g. Week 26: Jun 30 - Jul 06)    
     week_num: str = start.strftime('%W')
@@ -44,8 +43,8 @@ def format_week_summary(user_id: str) -> str:
     summary: str = f"```Week {week_num}: {week_start} - {week_end}\n"
     
     # Add Goals Header - we'll need to get user goals dynamically
-    user_goals: List[Dict[str, str]] = get_user_goals(user_id)
-    goal_emojis: List[str] = [goal['emoji'] for goal in user_goals]
+    user_goals: list[dict[str, str]] = get_user_goals(user_id)
+    goal_emojis: list[str] = [goal['emoji'] for goal in user_goals]
     summary += '    ' + ' '.join(goal_emojis) + "\n```"
 
     # Add Day-by-Day Summary

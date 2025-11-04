@@ -4,10 +4,9 @@ This module provides functions for rating individual goals for users
 with validation and database storage.
 """
 from datetime import datetime
-from typing import Any, Dict, List
 from app.db.sqlite import get_db
 from app.utils.config import STYLE
-from app.db.CRUD.user_goals.get_user_goals import get_user_goals
+from app.db.data_access.user_goals.get_user_goals import get_user_goals
 from app.utils.messages import (
     ERROR_RATING_INVALID,
     ERROR_NO_GOALS_ADD_FIRST,
@@ -48,7 +47,7 @@ def rate_individual_goal(user_id: str, goal_number: int, rating: int) -> str:
     db = get_db()
     
     # Get user's goals
-    user_goals: List[Dict[str, str]] = get_user_goals(user_id)
+    user_goals: list[dict[str, str]] = get_user_goals(user_id)
     
     if not user_goals:
         return ERROR_NO_GOALS_ADD_FIRST
@@ -58,13 +57,13 @@ def rate_individual_goal(user_id: str, goal_number: int, rating: int) -> str:
         return ERROR_GOAL_NUMBER_RANGE(len(user_goals))
     
     # Get the specific goal
-    goal: Dict[str, str] = user_goals[goal_number - 1]  # Convert to 0-based index
+    goal: dict[str, str] = user_goals[goal_number - 1]  # Convert to 0-based index
     goal_emoji: str = goal['emoji']
     goal_description: str = goal['description']
     
     # Get user ID from database
-    cursor: Any = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
-    user: Any = cursor.fetchone()
+    cursor = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
+    user = cursor.fetchone()
     if not user:
         return ERROR_USER_NOT_FOUND
     user_id_db: int = user['id']
@@ -74,7 +73,7 @@ def rate_individual_goal(user_id: str, goal_number: int, rating: int) -> str:
         SELECT id FROM user_goals 
         WHERE user_id = ? AND goal_emoji = ? AND is_active = 1
     """, (user_id_db, goal_emoji))
-    user_goal: Any = cursor.fetchone()
+    user_goal = cursor.fetchone()
     if not user_goal:
         return ERROR_GOAL_NOT_FOUND
     user_goal_id: int = user_goal['id']

@@ -4,7 +4,6 @@ This Flask application handles incoming webhook requests from messaging platform
 processes user messages, and manages goal tracking functionality.
 """
 import os
-from typing import Any, Optional
 from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
@@ -27,7 +26,7 @@ logging.basicConfig(
 app = Flask(__name__, template_folder='app/templates')
 
 @app.teardown_appcontext
-def close_db_connection(exception: Optional[Exception]) -> None:
+def close_db_connection(exception: Exception | None) -> None:
     """Flask teardown handler for database connection cleanup.
     
     Automatically called by Flask when the application context is torn down.
@@ -63,7 +62,7 @@ def process() -> str:
     Raises:
         KeyError: If required fields are missing from the request data
     """
-    data: Any = request.get_json()
+    data = request.get_json()
     message: str = data.get("message", "")
     sender: str = data.get("from", "")
     
@@ -77,7 +76,7 @@ def process() -> str:
     # Check if the message is a shared contact (VCARD format)
     if is_vcard(message):
         # Extract WhatsApp ID from the VCARD data
-        waid: Optional[str] = extract_waid_from_vcard(message)
+        waid: str = extract_waid_from_vcard(message)
         logging.debug(f"[BACKEND] Contact shared detected, WAID: {waid}")
         
         # Process referral: save to database and send onboarding message

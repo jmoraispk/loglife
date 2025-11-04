@@ -6,7 +6,8 @@ including goal management, ratings, summaries, and contact/referral handling.
 from unittest.mock import Mock, patch
 from app.logic.process_message import process_message
 from app.helpers.contact_detector import is_vcard, extract_waid_from_vcard
-from app.helpers.referral_tracker import convert_waid_to_phone
+from app.helpers.referral_tracker import get_referral_count
+from app.helpers.referral_tracker import process_referral
 
 
 def test_add_goal_and_show_goals() -> None:
@@ -206,23 +207,15 @@ FN:0332 5727426
 TEL;type=CELL;waid=923325727426:+92 332 5727426
 END:VCARD"""
     
-    waid: str | None = extract_waid_from_vcard(vcard_message)
+    waid: str = extract_waid_from_vcard(vcard_message)
+    waid: str = extract_waid_from_vcard(vcard_message)
     assert waid == "923325727426"
 
 
-def test_waid_to_phone_conversion() -> None:
-    """Test WAID to phone number conversion."""
-    waid: str = "923325727426"
-    phone: str = convert_waid_to_phone(waid)
-    assert phone == "03325727426"
-
-
-@patch('app.helpers.referral_tracker.send_hi_message_to_contact')
+@patch('app.helpers.referral_tracker.send_onboarding_msg')
 def test_referral_process_integration(mock_send: Mock) -> None:
     """Test complete referral process integration."""
     mock_send.return_value = {"success": True}
-    
-    from app.helpers.referral_tracker import process_referral
     
     result: bool = process_referral("03325727426", "923325727426")
     
@@ -236,7 +229,6 @@ def test_regular_message_not_vcard() -> None:
     assert is_vcard(regular_message) is False
     
     # Should be processed as regular message
-    from app.helpers.referral_tracker import get_referral_count
     user: str = "12345678"
     resp: str = process_message(regular_message, user)
     # Should be unrecognized or return help

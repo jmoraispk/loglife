@@ -3,8 +3,7 @@
 This module provides functions for formatting and displaying user goals
 in a readable format.
 """
-from typing import Any, Dict, List
-from app.db.CRUD.user_goals.get_user_goals import get_user_goals
+from app.db.data_access.user_goals.get_user_goals import get_user_goals
 
 def format_goals(user_id: str) -> str:
     """Format user goals for display.
@@ -20,10 +19,10 @@ def format_goals(user_id: str) -> str:
     """
 
     # get user goals from database
-    user_goals: List[Dict[str, str]] = get_user_goals(user_id)
+    user_goals: list[dict[str, str]] = get_user_goals(user_id)
     
     # Format each goal with its description
-    goal_lines: List[str] = []
+    goal_lines: list[str] = []
     for goal in user_goals:
         goal_lines.append(f"{goal['emoji']} {goal['description']}")
     

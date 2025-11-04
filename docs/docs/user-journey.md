@@ -8,6 +8,8 @@
 
 ![User Flow](images/user_flow.png)
 
+_Tip: Click the image to zoom._ 
+
 ---
 
 ## High-level Flow
@@ -19,8 +21,6 @@
 - **Flask backend** (`backend/main.py`) checks the message type:
   - **If VCARD format** (contact sharing): Routes to referral system
   - **If regular text**: Routes to `process_message(message, sender)`
-- **Message router** (`backend/app/logic/process_message.py`) detects the intended command and dispatches to the appropriate helper.
-- **Helpers & DB** perform reads/writes in SQLite (via `app/db/sqlite.py` and CRUD modules).
 - **Backend returns a formatted reply**, and the WhatsApp client relays it back to the user.
 - **Conversation continues** with the next incoming message.
 
@@ -28,10 +28,7 @@
 
 - **User shares a contact** via WhatsApp (VCARD format).
 - **WhatsApp client** forwards the VCARD data to the backend `/process` endpoint.
-- **Flask backend** (`backend/main.py`) detects VCARD format and routes to contact/referral handlers:
-  - `contact_detector.py`: Detects VCARD and extracts WhatsApp ID (WAID)
-  - `referral_tracker.py`: Saves referral record to database
-  - `whatsapp_sender.py`: Sends automated onboarding message to referred contact
+- **Flask backend** (`backend/main.py`) detects VCARD format and routes to contact/referral handlers
 - **Backend returns a confirmation message** to the referrer.
 - **Referred contact receives** an automated welcome message with instructions.
 
@@ -42,6 +39,7 @@
 ### Message Type Detection
 
 **Is message VCARD format?**
+
 - **Check:** VCARD pattern (`BEGIN:VCARD...END:VCARD`)
 - **Module:** `contact_detector.py` → `is_vcard()`
 - **YES:** Route to Contact Sharing Flow
@@ -50,35 +48,42 @@
 ### Contact Sharing Flow
 
 **1. Extract WhatsApp ID**
+
 - Pattern: `waid=(\d+)` from VCARD data
 - Module: `contact_detector.py` → `extract_waid_from_vcard()`
 
 **2. Process Referral**
+
 - Convert WAID to local phone format
 - Save to `referrals` table (with duplicate check)
 - Module: `referral_tracker.py` → `process_referral()`
 
 **3. Automated Onboarding**
+
 - Send welcome message to referred contact
-- Module: `whatsapp_sender.py` → `send_hi_message_to_contact()`
+- Module: `whatsapp_sender.py` → `send_onboarding_msg()`
 - Integration: `api/whatsapp_api.py` → `send_whatsapp_message()`
 
 **4. Confirmation**
+
 - Return success message to referrer
 
 ### Command Processing Flow
 
 **1. User Verification**
+
 - Check if user exists in database
 - Create user record if needed (using phone number)
 - Module: `db/CRUD/user_goals/get_user_goals.py`
 
 **2. Command Detection**
+
 - Parse message text for known commands
 - Supported: `help`, `goals`, `add goal`, `rate`, `[digits]`, `week`, `lookback`
 - Module: `logic/process_message.py`
 
 **3. Command Validation**
+
 - Validate command format and parameters
 - Return error/usage hint if invalid
 - Example: "❌ Usage: add goal 😴 Sleep by 9pm"
@@ -95,6 +100,7 @@
 | `lookback N` | `look_back_summary.py` | Show N days history |
 
 **5. Return Response**
+
 - Format reply message
 - Send back to WhatsApp client
 - Client relays to user
@@ -106,6 +112,7 @@
 The WhatsApp client bridges WhatsApp Web and the backend. See [WhatsApp Client](whatsapp-client.md) for complete documentation.
 
 **Key Responsibilities:**
+
 - Listen for incoming WhatsApp messages
 - Forward messages to backend `/process` endpoint
 - Relay backend responses to users
@@ -190,14 +197,12 @@ Bot still confirms → Success message to referrer
 ## Technical Notes
 
 **Data Persistence:**
+
 - SQLite database stores all data
 - Deleting `life_bot.db` resets all state
 
 **VCARD Format:**
+
 - WhatsApp-specific contact sharing format
 - Contains: `TEL;type=CELL;waid=<number>`
 - System extracts WAID and converts to local format
-
-**System Requirements:**
-- See [Backend Documentation](index.md) for setup details
-- See [WhatsApp Client](whatsapp-client.md) for client configuration

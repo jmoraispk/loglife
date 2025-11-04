@@ -4,7 +4,7 @@ This module contains all user-facing messages, responses, and text strings
 used throughout the application. Centralizing messages makes translation
 and maintenance easier.
 """
-from typing import List
+
 
 # Welcome and onboarding messages
 WELCOME_MESSAGE = """🎯 *Welcome to Life Bot!*
@@ -105,7 +105,7 @@ def SUCCESS_GOAL_ADDED(goal_emoji: str, goal_description: str) -> str:
     return f"✅ Added goal: {goal_emoji} {goal_description}"
 
 # Summary messages
-def SUCCESS_RATINGS_SUBMITTED(today_display: str, goal_emojis: List[str], status: List[str]) -> str:
+def SUCCESS_RATINGS_SUBMITTED(today_display: str, goal_emojis: list[str], status: list[str]) -> str:
     return f"📅 {today_display}\n{' '.join(goal_emojis)}\n{' '.join(status)}"
 
 def SUCCESS_INDIVIDUAL_RATING(today_display: str, goal_emoji: str, goal_description: str, status_symbol: str) -> str:

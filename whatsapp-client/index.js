@@ -85,11 +85,14 @@ function createClient() {
     });
 
     newClient.on('message', async msg => {
+        // console.log(`📨 Incoming message from ${msg.from}: ${msg.body}`);
         try {
+            // Remove @ and everything after it from the phone number
+            const phoneNumber = msg.from.split('@')[0];
             const response = await fetch(process.env.PY_BACKEND_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg.body, from: msg.from })
+                body: JSON.stringify({ message: msg.body, from: phoneNumber })
                 // TODO: check if images can be sent/received
             });
             const text = await response.text();

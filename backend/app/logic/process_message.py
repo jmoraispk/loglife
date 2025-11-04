@@ -3,7 +3,6 @@
 This module handles incoming user messages, parses commands, and routes them
 to appropriate handlers for goals, ratings, summaries, and help commands.
 """
-from typing import List
 from app.logic.helpers.format_goals import format_goals
 from app.logic.helpers.format_week_summary import format_week_summary
 from app.logic.helpers.look_back_summary import look_back_summary
@@ -40,7 +39,7 @@ def process_message(message: str, sender: str) -> str:
     
     if message.startswith("lookback"):
         # Extract number of days from message (e.g., "lookback 5" or "lookback")
-        parts: List[str] = message.split()
+        parts: list[str] = message.split()
         if len(parts) > 1 and parts[1].isdigit():
             days: int = int(parts[1])
         else:

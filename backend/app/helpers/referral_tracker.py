@@ -5,34 +5,9 @@ including saving referral records and counting referrals.
 """
 import sqlite3
 import logging
-from typing import Any, Dict
+from typing import Any
 from app.db.sqlite import get_db
-from app.helpers.whatsapp_sender import send_hi_message_to_contact
-
-
-def convert_waid_to_phone(waid: str) -> str:
-    """
-    Convert WhatsApp ID (WAID) to phone number format.
-    
-    Handles common country code conversions. Currently supports:
-    - Pakistan (country code 92): Converts 923325727426 to 03325727426
-    
-    Args:
-        waid (str): WhatsApp ID in international format
-        
-    Returns:
-        str: Phone number in local format (or original WAID if no conversion applies)
-    """
-    # Pakistan: Remove country code 92 and add leading 0
-    if waid.startswith('92') and len(waid) > 2:
-        return '0' + waid[2:]
-    
-    # Add more country code conversions here as needed
-    # Example for other countries:
-    # if waid.startswith('1') and len(waid) == 11:  # US/Canada
-    #     return waid[1:]  # Remove leading 1
-    
-    return waid
+from app.helpers.whatsapp_sender import send_onboarding_msg
 
 
 def process_referral(referrer_phone: str, waid: str) -> bool:
@@ -40,9 +15,8 @@ def process_referral(referrer_phone: str, waid: str) -> bool:
     Process a referral: save to database and send onboarding message.
     
     This function handles the complete referral workflow:
-    1. Converts WAID to phone number format
-    2. Saves referral to database
-    3. Sends onboarding message to referred contact
+    1. Saves referral to database
+    2. Sends onboarding message to referred contact
     
     Args:
         referrer_phone (str): Phone number of person who shared contact
@@ -55,18 +29,15 @@ def process_referral(referrer_phone: str, waid: str) -> bool:
         logging.warning(f"[REFERRAL] Invalid WAID provided: {waid}")
         return False
     
-    # Convert WAID to phone number format
-    referred_phone: str = convert_waid_to_phone(waid)
-    
     # Save referral to database
-    save_success: bool = save_referral(referrer_phone, referred_phone, waid)
+    save_success: bool = save_referral(referrer_phone, waid, waid)
     
     if not save_success:
-        logging.error(f"[REFERRAL] Failed to save referral: {referrer_phone} -> {referred_phone}")
+        logging.error(f"[REFERRAL] Failed to save referral: {referrer_phone} -> {waid}")
         return False
     
     # Send onboarding message to the referred contact
-    send_result: Dict[str, Any] = send_hi_message_to_contact(waid)
+    send_result: dict[str, Any] = send_onboarding_msg(waid)
     if send_result.get("success"):
         logging.debug(f"[REFERRAL] Onboarding message sent successfully to {waid}")
         return True
@@ -91,7 +62,7 @@ def save_referral(referrer_phone: str, referred_phone: str, referred_waid: str) 
     """
     try:
         db = get_db()
-        cursor: Any = db.cursor()
+        cursor = db.cursor()
         
         # Check if referral already exists
         cursor.execute("""
@@ -99,7 +70,7 @@ def save_referral(referrer_phone: str, referred_phone: str, referred_waid: str) 
             WHERE referrer_phone = ? AND referred_phone = ?
         """, (referrer_phone, referred_phone))
         
-        existing: Any = cursor.fetchone()
+        existing = cursor.fetchone()
         if existing:
             logging.debug(f"[REFERRAL] Referral already exists: {referrer_phone} -> {referred_phone}")
             return True  # Return True since referral already exists
@@ -131,7 +102,7 @@ def get_referral_count(referrer_phone: str) -> int:
     """
     try:
         db = get_db()
-        cursor: Any = db.cursor()
+        cursor = db.cursor()
         
         cursor.execute("""
             SELECT COUNT(*) FROM referrals 

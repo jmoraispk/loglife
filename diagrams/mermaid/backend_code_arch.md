@@ -6,7 +6,8 @@ This diagram shows the complete backend architecture for the Life Bot applicatio
 **Recent Refactoring (Code Quality):**
 - Function naming improvements (VCARD-related functions)
 - Message centralization in `app/utils/messages.py`
-- Referral workflow generalization with country-specific phone conversion
+- Type hints modernization (dict/list instead of Dict/List)
+- Directory rename: CRUD → data_access
 
 ## Key Features
 
@@ -84,7 +85,7 @@ graph TB
         sqlite["sqlite.py<br/>DB Connection Manager<br/>• init_db()<br/>• get_db()<br/>• close_db()"]
     end
 
-    subgraph crud["CRUD Operations<br/>(app/db/CRUD/)"]
+    subgraph crud["Data Access<br/>(app/db/data_access/)"]
         get_goals["user_goals/<br/>get_user_goals.py"]
     end
 
@@ -154,8 +155,8 @@ graph TB
 | Component | Description | Key Functions |
 |-----------|-------------|---------------|
 | `contact_detector.py` | Detects VCARD format and extracts WhatsApp IDs | `is_vcard()`, `extract_waid_from_vcard()` |
-| `referral_tracker.py` | Manages referral database operations and workflow | `process_referral()`, `convert_waid_to_phone()`, `save_referral()`, `get_referral_count()` |
-| `whatsapp_sender.py` | Sends onboarding messages to new referrals | `send_hi_message_to_contact()` |
+| `referral_tracker.py` | Manages referral database operations and workflow | `process_referral()`, `save_referral()`, `get_referral_count()` |
+| `whatsapp_sender.py` | Sends onboarding messages to new referrals | `send_onboarding_msg()` |
 | `api/whatsapp_api.py` | External WhatsApp API client | `send_whatsapp_message()` |
 
 ### Flask Application (Purple Box)
@@ -184,7 +185,7 @@ graph TB
 | Component | Description |
 |-----------|-------------|
 | `sqlite.py` | Database connection manager with init, get, and close functions |
-| CRUD Operations | User goals queries and operations |
+| Data Access | User goals queries and operations |
 
 ### Utilities (Light Green Box)
 | Component | Description |

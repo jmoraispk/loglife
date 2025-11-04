@@ -2,6 +2,7 @@ import pytest
 import sqlite3
 from typing import Generator
 from flask import Flask
+from flask import g
 
 @pytest.fixture(autouse=True, scope="function")
 def test_db(monkeypatch: pytest.MonkeyPatch) -> Generator[sqlite3.Connection, None, None]:
@@ -32,7 +33,6 @@ def test_db(monkeypatch: pytest.MonkeyPatch) -> Generator[sqlite3.Connection, No
     # Set up application context for tests
     with app.app_context():
         # Set the Flask g object to use our test connection
-        from flask import g
         g.db = conn
         
         yield conn

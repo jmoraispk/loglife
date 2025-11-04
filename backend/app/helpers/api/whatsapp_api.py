@@ -6,10 +6,10 @@ handling requests, responses, and error management.
 import requests
 import logging
 import os
-from typing import Any, Dict
+from typing import Any
 
 
-def send_whatsapp_message(number: str, message: str) -> Dict[str, Any]:
+def send_whatsapp_message(number: str, message: str) -> dict[str, Any]:
     """
     Sends a WhatsApp message using the external API.
     
@@ -18,7 +18,7 @@ def send_whatsapp_message(number: str, message: str) -> Dict[str, Any]:
         message (str): The message content to send
         
     Returns:
-        Dict[str, Any]: API response containing success status and details
+        dict[str, Any]: API response containing success status and details
         
     Example:
         response = send_whatsapp_message("923090052353", "Hi there!")
@@ -29,12 +29,12 @@ def send_whatsapp_message(number: str, message: str) -> Dict[str, Any]:
     api_base_url: str = os.getenv("WHATSAPP_API_URL", "http://localhost:3000")
     api_url: str = f"{api_base_url}/send-message"
     
-    payload: Dict[str, str] = {
+    payload: dict[str, str] = {
         "number": number,
         "message": message
     }
     
-    headers: Dict[str, str] = {
+    headers: dict[str, str] = {
         "Content-Type": "application/json"
     }
     

@@ -8,14 +8,13 @@ This module contains comprehensive tests for:
 """
 import pytest
 from unittest.mock import Mock, patch
-from typing import Any, Dict
 from app.helpers.contact_detector import is_vcard, extract_waid_from_vcard
 from app.helpers.referral_tracker import (
-    convert_waid_to_phone,
     process_referral,
     save_referral,
     get_referral_count
 )
+from app.db.sqlite import get_db
 
 
 # ============================================================================
@@ -73,7 +72,7 @@ N:;0332 5727426;;;
 FN:0332 5727426
 TEL;type=CELL;waid=923325727426:+92 332 5727426
 END:VCARD"""
-    waid: str | None = extract_waid_from_vcard(vcard_message)
+    waid: str = extract_waid_from_vcard(vcard_message)
     assert waid == "923325727426"
 
 
@@ -83,19 +82,19 @@ def test_extract_waid_from_vcard_invalid() -> None:
 VERSION:3.0
 N:;Test;;;
 END:VCARD"""
-    waid: str | None = extract_waid_from_vcard(invalid_vcard)
-    assert waid is None
+    waid: str = extract_waid_from_vcard(invalid_vcard)
+    assert waid == ""
 
 
 def test_extract_waid_from_vcard_empty_string() -> None:
     """Test extraction fails for empty string."""
-    assert extract_waid_from_vcard("") is None
+    assert extract_waid_from_vcard("") == ""
 
 
 def test_extract_waid_from_vcard_non_vcard_message() -> None:
     """Test extraction fails for non-VCARD message."""
     regular_message: str = "This is not a VCARD message"
-    assert extract_waid_from_vcard(regular_message) is None
+    assert extract_waid_from_vcard(regular_message) == ""
 
 
 def test_extract_waid_from_vcard_multiple_waids() -> None:
@@ -105,47 +104,15 @@ VERSION:3.0
 TEL;waid=923325727426:+92 332 5727426
 TEL;waid=123456789:+1 234 5678
 END:VCARD"""
-    waid: str | None = extract_waid_from_vcard(vcard_multiple)
+    waid: str = extract_waid_from_vcard(vcard_multiple)
     assert waid == "923325727426"
-
-
-# ============================================================================
-# WAID to Phone Conversion Tests
-# ============================================================================
-
-def test_convert_waid_to_phone_pakistan() -> None:
-    """Test conversion of Pakistani WAID to local phone format."""
-    waid: str = "923325727426"
-    phone: str = convert_waid_to_phone(waid)
-    assert phone == "03325727426"
-
-
-def test_convert_waid_to_phone_other_country() -> None:
-    """Test conversion returns original WAID for unsupported countries."""
-    waid: str = "1234567890"
-    phone: str = convert_waid_to_phone(waid)
-    assert phone == "1234567890"
-
-
-def test_convert_waid_to_phone_short_waid() -> None:
-    """Test conversion handles short WAID gracefully."""
-    waid: str = "12"
-    phone: str = convert_waid_to_phone(waid)
-    assert phone == "12"
-
-
-def test_convert_waid_to_phone_empty_string() -> None:
-    """Test conversion handles empty string."""
-    waid: str = ""
-    phone: str = convert_waid_to_phone(waid)
-    assert phone == ""
 
 
 # ============================================================================
 # Referral Processing Tests
 # ============================================================================
 
-@patch('app.helpers.referral_tracker.send_hi_message_to_contact')
+@patch('app.helpers.referral_tracker.send_onboarding_msg')
 def test_process_referral_success(mock_send: Mock) -> None:
     """Test successful referral processing with message sending."""
     mock_send.return_value = {"success": True}
@@ -156,7 +123,7 @@ def test_process_referral_success(mock_send: Mock) -> None:
     mock_send.assert_called_once_with("923325727426")
 
 
-@patch('app.helpers.referral_tracker.send_hi_message_to_contact')
+@patch('app.helpers.referral_tracker.send_onboarding_msg')
 def test_process_referral_message_failure(mock_send: Mock) -> None:
     """Test referral processing succeeds even if message send fails."""
     mock_send.return_value = {"success": False, "error": "API error"}
@@ -168,7 +135,7 @@ def test_process_referral_message_failure(mock_send: Mock) -> None:
     mock_send.assert_called_once_with("923325727426")
 
 
-@patch('app.helpers.referral_tracker.send_hi_message_to_contact')
+@patch('app.helpers.referral_tracker.send_onboarding_msg')
 def test_process_referral_invalid_waid(mock_send: Mock) -> None:
     """Test referral processing fails for invalid WAID."""
     result: bool = process_referral("03325727426", "")
@@ -184,7 +151,6 @@ def test_save_referral_new_referral() -> None:
     referred_waid: str = "923325727427"
     
     # Clean database state
-    from app.db.sqlite import get_db
     db = get_db()
     db.execute("DELETE FROM referrals WHERE referrer_phone = ? AND referred_phone = ?", 
                (referrer, referred))
@@ -195,11 +161,11 @@ def test_save_referral_new_referral() -> None:
     assert result is True
     
     # Verify it was saved
-    cursor: Any = db.execute(
+    cursor = db.execute(
         "SELECT * FROM referrals WHERE referrer_phone = ? AND referred_phone = ?",
         (referrer, referred)
     )
-    row: Any = cursor.fetchone()
+    row = cursor.fetchone()
     assert row is not None
     assert row['referrer_phone'] == referrer
     assert row['referred_phone'] == referred
@@ -213,7 +179,6 @@ def test_save_referral_duplicate_referral() -> None:
     referred: str = "03325727428"
     referred_waid: str = "923325727428"
     
-    from app.db.sqlite import get_db
     db = get_db()
     
     # Clean database state
@@ -251,7 +216,6 @@ def test_get_referral_count_with_referrals() -> None:
     referred1: str = "03325727501"
     referred2: str = "03325727502"
     
-    from app.db.sqlite import get_db
     db = get_db()
     
     # Clean database state
@@ -272,7 +236,6 @@ def test_get_referral_count_partial_match() -> None:
     referrer2: str = "03325727511"
     referred: str = "03325727512"
     
-    from app.db.sqlite import get_db
     db = get_db()
     
     # Clean database state
@@ -295,7 +258,7 @@ def test_get_referral_count_partial_match() -> None:
 # Integration Test
 # ============================================================================
 
-@patch('app.helpers.referral_tracker.send_hi_message_to_contact')
+@patch('app.helpers.referral_tracker.send_onboarding_msg')
 def test_full_referral_workflow(mock_send: Mock) -> None:
     """Test complete referral workflow from VCARD to database."""
     # Setup
@@ -330,9 +293,8 @@ END:VCARD"""
     assert count >= 1
     
     # Cleanup
-    from app.db.sqlite import get_db
     db = get_db()
     db.execute("DELETE FROM referrals WHERE referrer_phone = ? AND referred_phone = ?",
-               (referrer_phone, "03325727601"))
+               (referrer_phone, "923325727601"))
     db.commit()
 
