@@ -5,7 +5,11 @@ goal tracking summaries for users.
 """
 from datetime import datetime, timedelta
 from app.logic.helpers.look_back_summary import look_back_summary
+<<<<<<< HEAD
 from app.db.data_access import get_user_goals
+=======
+from app.db.data_access.user_goals.get_user_goals import get_user_goals
+>>>>>>> 53ae9b0 (Refactor backend, add Twilio number docs, update docs, and remove @c.us handling from WhatsApp numbers)
 
 def get_monday_before(date: datetime | None = None) -> datetime:
     """

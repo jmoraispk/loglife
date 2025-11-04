@@ -105,6 +105,7 @@ Send WhatsApp messages programmatically.
 ```
 
 **Features:**
+
 - Auto phone formatting (`@c.us` suffix)
 - Client readiness check
 - Retry on frame detachment
@@ -140,15 +141,17 @@ Monitor client status.
 The `/send-message` endpoint enables automated onboarding:
 
 **Flow:**
+
 1. User shares contact → Backend detects VCARD
 2. Backend extracts WAID → Calls `/send-message`
 3. Client sends welcome message → New user receives onboarding
 4. Backend confirms → Original user gets success message
 
 **Configuration:**
+
 - Backend env: `WHATSAPP_API_URL=http://localhost:3000`
 - Client must be running and authenticated
-- See [Backend Documentation](index.md#referral-system) for details
+- See [Backend Documentation](backend.md#referral-system) for details
 
 ---
 

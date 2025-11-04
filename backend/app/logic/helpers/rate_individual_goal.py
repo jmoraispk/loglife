@@ -6,7 +6,11 @@ with validation and database storage.
 from datetime import datetime
 from app.db.sqlite import get_db
 from app.utils.config import STYLE
+<<<<<<< HEAD
 from app.db.data_access import get_user_goals
+=======
+from app.db.data_access.user_goals.get_user_goals import get_user_goals
+>>>>>>> 53ae9b0 (Refactor backend, add Twilio number docs, update docs, and remove @c.us handling from WhatsApp numbers)
 from app.utils.messages import (
     ERROR_RATING_INVALID,
     ERROR_NO_GOALS_ADD_FIRST,

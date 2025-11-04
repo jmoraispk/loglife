@@ -3,7 +3,10 @@
 This module handles incoming user messages, parses commands, and routes them
 to appropriate handlers for goals, ratings, summaries, and help commands.
 """
+<<<<<<< HEAD
 import logging
+=======
+>>>>>>> 53ae9b0 (Refactor backend, add Twilio number docs, update docs, and remove @c.us handling from WhatsApp numbers)
 from app.logic.helpers.format_goals import format_goals
 from app.logic.helpers.format_week_summary import format_week_summary
 from app.logic.helpers.look_back_summary import look_back_summary

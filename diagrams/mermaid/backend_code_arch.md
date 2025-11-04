@@ -121,11 +121,15 @@ graph TB
     end
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     subgraph crud["Data Access<br/>(app/db/data_access/)"]
         data_access_init["__init__.py<br/>Unified Interface"]
         get_goals["user_goals/<br/>__init__.py<br/>get_user_goals.py"]
 =======
     subgraph crud["CRUD Operations<br/>(app/db/CRUD/)"]
+=======
+    subgraph crud["Data Access<br/>(app/db/data_access/)"]
+>>>>>>> 53ae9b0 (Refactor backend, add Twilio number docs, update docs, and remove @c.us handling from WhatsApp numbers)
         get_goals["user_goals/<br/>get_user_goals.py"]
 >>>>>>> 8f0704f (updated backend code arch and replaced it's drawio diagram with mermaid diagram)
     end
@@ -229,6 +233,7 @@ graph TB
 | `contact_detector.py` | Detects VCARD format and extracts WhatsApp IDs | `is_vcard()`, `extract_waid_from_vcard()` |
 | `referral_tracker.py` | Manages referral database operations and workflow | `process_referral()`, `save_referral()`, `get_referral_count()` |
 | `whatsapp_sender.py` | Sends onboarding messages to new referrals | `send_onboarding_msg()` |
+<<<<<<< HEAD
 | `api/whatsapp_api.py` | External WhatsApp API client | `send_whatsapp_message()` |
 
 ### Flask Application (Purple Box)
@@ -241,6 +246,8 @@ graph TB
 | `contact_detector.py` | Detects VCARD format and extracts WhatsApp IDs | `is_contact_shared()`, `extract_waid_from_contact()` |
 | `referral_tracker.py` | Manages referral database operations | `save_referral()`, `get_referral_count()` |
 | `whatsapp_sender.py` | Sends onboarding messages to new referrals | `send_hi_message_to_contact()` |
+=======
+>>>>>>> 53ae9b0 (Refactor backend, add Twilio number docs, update docs, and remove @c.us handling from WhatsApp numbers)
 | `api/whatsapp_api.py` | External WhatsApp API client | `send_whatsapp_message()` |
 
 ### Flask Application (Purple Box)
@@ -275,7 +282,11 @@ graph TB
 |-----------|-------------|
 | `sqlite.py` | Database connection manager with init, get, and close functions |
 <<<<<<< HEAD
+<<<<<<< HEAD
 | Data Access | Unified module interface with `__init__.py` files for clean imports. Contains user goals queries and operations organized by domain |
+=======
+| Data Access | User goals queries and operations |
+>>>>>>> 53ae9b0 (Refactor backend, add Twilio number docs, update docs, and remove @c.us handling from WhatsApp numbers)
 
 ### Utilities (Light Green Box)
 | Component | Description |
