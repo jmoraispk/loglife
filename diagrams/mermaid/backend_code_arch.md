@@ -4,6 +4,7 @@
 This diagram shows the complete backend architecture for the Life Bot application, including the recent additions of **Contact Sharing** and **Referral Tracking** features.
 
 **Recent Refactoring (Code Quality):**
+- Route modularization: Endpoints moved to Blueprint modules (`app/routes/web.py`, `app/routes/webhook.py`)
 - Function naming improvements (VCARD-related functions)
 - Message centralization in `app/utils/messages.py`
 - Type hints modernization (dict/list instead of Dict/List)
@@ -32,17 +33,17 @@ This diagram shows the complete backend architecture for the Life Bot applicatio
 
 ### Contact Sharing Flow (NEW)
 1. User shares contact via WhatsApp → VCARD format received
-2. `/process` endpoint detects VCARD format
+2. `webhook.py` `/process` endpoint detects VCARD format
 3. Extracts WAID (WhatsApp ID) from contact data
 4. Saves referral to database (referrer → referred)
 5. Sends onboarding message to referred contact via WhatsApp API
 6. Returns confirmation message to referrer
 
 ### Regular Message Flow
-1. User sends text message → `/process` endpoint
+1. User sends text message → `webhook.py` `/process` endpoint
 2. Routes to `process_message.py` command parser
 3. Executes appropriate helper function (goals, rate, week, etc.)
-4. Queries database via CRUD operations
+4. Queries database via data access operations
 5. Returns formatted response
 
 ## Diagram
@@ -55,9 +56,13 @@ graph TB
         whatsapp_api_ext["External WhatsApp API<br/>(Port 3000)"]
     end
 
-    subgraph flask["Flask Application (main.py)"]
-        emulator["/emulator<br/>GET Endpoint"]
-        process["/process<br/>POST Endpoint<br/>• Message Router<br/>• Contact Detector"]
+    subgraph flask["Flask Application"]
+        main["main.py<br/>Application Entry Point<br/>• Blueprint Registration<br/>• DB Initialization"]
+        
+        subgraph routes["Route Modules (app/routes/)"]
+            web_routes["web.py<br/>/emulator<br/>GET Endpoint"]
+            webhook_routes["webhook.py<br/>/process<br/>POST Endpoint<br/>• Message Router<br/>• Contact Detector"]
+        end
     end
 
     subgraph contact_referral["Contact & Referral System (app/helpers/)"]
@@ -104,15 +109,16 @@ graph TB
     end
 
     %% External connections
-    browser -->|"GET Request"| emulator
-    whatsapp -->|"JSON POST<br/>{message, from}"| process
+    browser -->|"GET Request"| web_routes
+    whatsapp -->|"JSON POST<br/>{message, from}"| webhook_routes
     
     %% Flask routing
-    emulator -->|"renders"| index
+    main -->|"registers"| routes
+    web_routes -->|"renders"| index
     
     %% Process endpoint flow
-    process -->|"if VCARD"| contact_detector
-    process -->|"else"| process_msg
+    webhook_routes -->|"if VCARD"| contact_detector
+    webhook_routes -->|"else"| process_msg
     
     %% Contact/Referral flow
     contact_detector -->|"extract WAID"| referral_tracker
@@ -128,7 +134,7 @@ graph TB
     helpers -->|"queries"| get_goals
     helpers -->|"reads config"| config_py
     helpers -->|"uses messages"| messages_py
-    process -->|"uses messages"| messages_py
+    webhook_routes -->|"uses messages"| messages_py
     
     %% Database flow
     get_goals -->|"queries"| sqlite
@@ -160,10 +166,11 @@ graph TB
 | `api/whatsapp_api.py` | External WhatsApp API client | `send_whatsapp_message()` |
 
 ### Flask Application (Purple Box)
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/emulator` | GET | Serves web-based emulator interface |
-| `/process` | POST | Main webhook endpoint for message processing and contact detection |
+| Component | Description |
+|-----------|-------------|
+| `main.py` | Application entry point that initializes the Flask app, registers blueprints (web_bp, webhook_bp), and handles database initialization |
+| `app/routes/web.py` | Web routes blueprint containing `/emulator` GET endpoint for the emulator interface |
+| `app/routes/webhook.py` | Webhook routes blueprint containing `/process` POST endpoint for message processing and contact detection |
 
 ### Message Processing (Green Box)
 | Component | Description |

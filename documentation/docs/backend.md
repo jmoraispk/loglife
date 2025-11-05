@@ -177,7 +177,8 @@ backend/
   │   │   ├── helpers/       # Command-specific logic
   │   │   └── process_message.py     # Message routing
   │   ├── routes/            # Flask blueprints and routes
-  │   │   └── web.py         # Emulator route
+  │   │   ├── web.py         # Emulator route (/emulator)
+  │   │   └── webhook.py     # Webhook route (/process)
   │   ├── templates/         # Web UI (emulator)
   │   │   └── index.html     # Emulator interface
   │   └── utils/             # Config, constants, messages
