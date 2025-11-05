@@ -10,7 +10,7 @@
 This WhatsApp client bridges WhatsApp to the Life Bot backend. It provides two main functions:
 
 1. **Message Relay**: Listens for incoming WhatsApp messages, forwards them to the Python backend `/process` endpoint, and replies to the user with the backend's response.
-2. **Automated Messaging API**: Exposes HTTP endpoints to send WhatsApp messages programmatically (used by the referral system for automated onboarding and the reminder system for daily goal reminders).
+2. **Automated Messaging API**: Exposes HTTP endpoints to send WhatsApp messages programmatically (used by the referral system for automated onboarding).
 
 ---
 
@@ -84,7 +84,8 @@ node index.js --reset-session
 ### API Endpoints (Outgoing)
 
 #### POST `/send-message`
-Sends WhatsApp messages programmatically (used by referral system for onboarding and reminder system for daily reminders).
+
+Send WhatsApp messages programmatically.
 
 **Request:**
 ```json
@@ -172,35 +173,7 @@ The `/send-message` endpoint enables automated onboarding:
 
 ### Testing Commands
 
-- **Backend not responding**: Verify the backend is running at `PY_BACKEND_URL` and reachable from the machine.
-- **Message sending fails**: 
-  - Check if WhatsApp client is ready: `curl http://localhost:3000/health`
-  - Verify phone number format (should be digits only, e.g., `923325727426`)
-  - Check logs for specific error messages
-
-### Reminder System Issues *(NEW)*
-
-- **Reminders not being sent**:
-  - Verify reminder cron job is running: `uv run .\cron\reminder.py` (from backend directory)
-  - Check if WhatsApp client is running and connected: `curl http://localhost:3000/health`
-  - Ensure WhatsApp client is authenticated (scan QR code if needed)
-  - Verify goals have reminder times set: check `user_goals.reminder_time` in database
-  - Check user timezone is set: verify `user.timezone` in database
-  - Review cron job logs for errors or database connection issues
-- **Reminders sent at wrong time**:
-  - Verify user timezone is correctly detected and stored in database
-  - Check that reminder time matches user's intended timezone (not server timezone)
-  - Ensure cron job is checking user timezone when comparing times
-
-### System Issues
-
-- **Puppeteer errors on Linux**: Ensure dependencies for Chromium are installed or run Chrome/Chromium via environment configuration.
-- **Port already in use**: Change `PORT` in `.env` or stop conflicting process.
-- **Memory issues**: WhatsApp Web can be memory-intensive; monitor system resources.
-
-### Testing Endpoints
-
-Test the `/send-message` endpoint:
+**Test message sending:**
 ```bash
 curl -X POST http://localhost:3000/send-message \
   -H "Content-Type: application/json" \
