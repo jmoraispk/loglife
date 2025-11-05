@@ -3,6 +3,7 @@
 This module handles incoming user messages, parses commands, and routes them
 to appropriate handlers for goals, ratings, summaries, and help commands.
 """
+import logging
 from app.logic.helpers.format_goals import format_goals
 from app.logic.helpers.format_week_summary import format_week_summary
 from app.logic.helpers.look_back_summary import look_back_summary
@@ -10,13 +11,16 @@ from app.logic.helpers.handle_goal_ratings import handle_goal_ratings
 from app.logic.helpers.add_goal import add_goal
 from app.logic.helpers.rate_individual_goal import rate_individual_goal
 from app.logic.helpers.show_help import show_help
-from app.utils.messages import USAGE_ADD_GOAL, USAGE_RATE, ERROR_UNRECOGNIZED_MESSAGE
+from app.helpers.contact_detector import is_vcard, extract_waid_from_vcard
+from app.helpers.referral_tracker import process_referral
+from app.utils.messages import USAGE_ADD_GOAL, USAGE_RATE, ERROR_UNRECOGNIZED_MESSAGE, REFERRAL_SUCCESS
 
 def process_message(message: str, sender: str) -> str:
     """Process incoming messages and route to appropriate handlers.
     
     Parses user messages and routes them to the appropriate command handlers
-    based on message content. Supports goals, ratings, summaries, and help commands.
+    based on message content. Supports goals, ratings, summaries, help commands,
+    and contact referrals (VCARD format).
 
     Args:
         message (str): The message text from the user
@@ -25,6 +29,20 @@ def process_message(message: str, sender: str) -> str:
     Returns:
         str: Response message to send back to the user
     """
+    # Check if the message is a shared contact (VCARD format)
+    # Contact sharing detection: When users share contacts on WhatsApp, the message contains VCARD data
+    # Example: BEGIN:VCARD\nVERSION:3.0\nN:;0332 5727426;;;\nFN:0332 5727426\nTEL;type=CELL;waid=923325727426:+92 332 5727426\nEND:VCARD
+    if is_vcard(message):
+        # Extract WhatsApp ID from the VCARD data
+        waid: str = extract_waid_from_vcard(message)
+        logging.debug(f"[BACKEND] Contact shared detected, WAID: {waid}")
+        
+        # Process referral: save to database and send onboarding message
+        if waid:
+            process_referral(sender, waid)
+        
+        return REFERRAL_SUCCESS
+    
     user_id: str = sender  # could be phone or group ID
     message: str = message.strip().lower()
 

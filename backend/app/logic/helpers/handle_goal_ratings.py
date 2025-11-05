@@ -5,7 +5,7 @@ validation, and storage in the database.
 """
 from datetime import datetime
 from app.utils.config import STYLE
-from app.db.data_access.user_goals.get_user_goals import get_user_goals
+from app.db.data_access import get_user_goals
 from app.db.sqlite import get_db
 from app.utils.messages import (
     ERROR_NO_GOALS_SET,

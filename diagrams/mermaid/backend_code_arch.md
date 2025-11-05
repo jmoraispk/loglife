@@ -5,6 +5,8 @@ This diagram shows the complete backend architecture for the Life Bot applicatio
 
 **Recent Refactoring (Code Quality):**
 - Route modularization: Endpoints moved to Blueprint modules (`app/routes/web.py`, `app/routes/webhook.py`)
+- VCARD processing moved: Logic migrated from `webhook.py` to `process_message.py` for cleaner separation of concerns
+- Data access module structure: Added `__init__.py` files for unified import interface (`app/db/data_access/`)
 - Function naming improvements (VCARD-related functions)
 - Message centralization in `app/utils/messages.py`
 - Type hints modernization (dict/list instead of Dict/List)
@@ -33,11 +35,12 @@ This diagram shows the complete backend architecture for the Life Bot applicatio
 
 ### Contact Sharing Flow (NEW)
 1. User shares contact via WhatsApp → VCARD format received
-2. `webhook.py` `/process` endpoint detects VCARD format
-3. Extracts WAID (WhatsApp ID) from contact data
-4. Saves referral to database (referrer → referred)
-5. Sends onboarding message to referred contact via WhatsApp API
-6. Returns confirmation message to referrer
+2. `webhook.py` `/process` endpoint receives message
+3. `process_message.py` detects VCARD format
+4. Extracts WAID (WhatsApp ID) from contact data
+5. Saves referral to database (referrer → referred)
+6. Sends onboarding message to referred contact via WhatsApp API
+7. Returns confirmation message to referrer
 
 ### Regular Message Flow
 1. User sends text message → `webhook.py` `/process` endpoint
@@ -61,7 +64,7 @@ graph TB
         
         subgraph routes["Route Modules (app/routes/)"]
             web_routes["web.py<br/>/emulator<br/>GET Endpoint"]
-            webhook_routes["webhook.py<br/>/process<br/>POST Endpoint<br/>• Message Router<br/>• Contact Detector"]
+            webhook_routes["webhook.py<br/>/process<br/>POST Endpoint<br/>• Clean Request Handler"]
         end
     end
 
@@ -73,7 +76,7 @@ graph TB
     end
 
     subgraph logic["Message Processing (app/logic/)"]
-        process_msg["process_message.py<br/>Command Router<br/>• goals, add goal<br/>• rate, week, lookback<br/>• help"]
+        process_msg["process_message.py<br/>Command Router<br/>• VCARD Detection & Processing<br/>• goals, add goal<br/>• rate, week, lookback<br/>• help"]
     end
 
     subgraph helpers["Goal Management Helpers<br/>(app/logic/helpers/)"]
@@ -91,7 +94,8 @@ graph TB
     end
 
     subgraph crud["Data Access<br/>(app/db/data_access/)"]
-        get_goals["user_goals/<br/>get_user_goals.py"]
+        data_access_init["__init__.py<br/>Unified Interface"]
+        get_goals["user_goals/<br/>__init__.py<br/>get_user_goals.py"]
     end
 
     subgraph schema["Database Schema (db/)"]
@@ -117,10 +121,10 @@ graph TB
     web_routes -->|"renders"| index
     
     %% Process endpoint flow
-    webhook_routes -->|"if VCARD"| contact_detector
-    webhook_routes -->|"else"| process_msg
+    webhook_routes -->|"routes to"| process_msg
     
     %% Contact/Referral flow
+    process_msg -->|"if VCARD"| contact_detector
     contact_detector -->|"extract WAID"| referral_tracker
     referral_tracker -->|"save referral"| sqlite
     referral_tracker -->|"trigger onboarding"| whatsapp_sender
@@ -131,7 +135,8 @@ graph TB
     process_msg -->|"calls"| helpers
     
     %% Goal helpers flow
-    helpers -->|"queries"| get_goals
+    helpers -->|"queries"| data_access_init
+    data_access_init -->|"imports from"| get_goals
     helpers -->|"reads config"| config_py
     helpers -->|"uses messages"| messages_py
     webhook_routes -->|"uses messages"| messages_py
@@ -170,12 +175,12 @@ graph TB
 |-----------|-------------|
 | `main.py` | Application entry point that initializes the Flask app, registers blueprints (web_bp, webhook_bp), and handles database initialization |
 | `app/routes/web.py` | Web routes blueprint containing `/emulator` GET endpoint for the emulator interface |
-| `app/routes/webhook.py` | Webhook routes blueprint containing `/process` POST endpoint for message processing and contact detection |
+| `app/routes/webhook.py` | Webhook routes blueprint containing `/process` POST endpoint - clean request handler that routes all messages to process_message.py |
 
 ### Message Processing (Green Box)
 | Component | Description |
 |-----------|-------------|
-| `process_message.py` | Routes commands to appropriate handlers (goals, rate, week, lookback, help, add goal) |
+| `process_message.py` | Main message processor that detects VCARD contacts and routes commands to appropriate handlers (goals, rate, week, lookback, help, add goal) |
 
 ### Goal Management Helpers (Light Green Box)
 | Component | Purpose |
@@ -192,7 +197,7 @@ graph TB
 | Component | Description |
 |-----------|-------------|
 | `sqlite.py` | Database connection manager with init, get, and close functions |
-| Data Access | User goals queries and operations |
+| Data Access | Unified module interface with `__init__.py` files for clean imports. Contains user goals queries and operations organized by domain |
 
 ### Utilities (Light Green Box)
 | Component | Description |

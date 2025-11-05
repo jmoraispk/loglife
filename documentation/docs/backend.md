@@ -76,8 +76,8 @@ Commands are routed via `process_message(message, sender)` in the backend.
 | `[digits]`     | Rate all goals at once                          | 123                        |
 
 ### Command Routing
-- All major commands are processed in `process_message.py` with clear docstring for each.
-- VCARD messages are auto-detected and routed to the referral flow.
+- All major commands are processed with clear docstrings for each
+- VCARD messages are auto-detected and routed to the referral flow
 
 ---
 
@@ -166,7 +166,13 @@ CREATE TABLE IF NOT EXISTS referrals (
 ```text
 backend/
   ├── app/
-  │   ├── db/                # Database connection/init/CRUD
+  │   ├── db/                # Database layer
+  │   │   ├── data_access/   # Data access modules with unified imports
+  │   │   │   ├── __init__.py        # Unified interface
+  │   │   │   └── user_goals/        # User goals domain
+  │   │   │       ├── __init__.py
+  │   │   │       └── get_user_goals.py
+  │   │   └── sqlite.py      # Connection manager
   │   ├── helpers/           # Utility functions
   │   │   ├── api/           # External API integrations
   │   │   │   └── whatsapp_api.py    # WhatsApp messaging API
@@ -175,10 +181,10 @@ backend/
   │   │   └── whatsapp_sender.py     # Automated message sending
   │   ├── logic/             # Main bot logic & helpers
   │   │   ├── helpers/       # Command-specific logic
-  │   │   └── process_message.py     # Message routing
+  │   │   └── process_message.py     # Message routing & VCARD detection
   │   ├── routes/            # Flask blueprints and routes
   │   │   ├── web.py         # Emulator route (/emulator)
-  │   │   └── webhook.py     # Webhook route (/process)
+  │   │   └── webhook.py     # Webhook route (/process) - clean request handler
   │   ├── templates/         # Web UI (emulator)
   │   │   └── index.html     # Emulator interface
   │   └── utils/             # Config, constants, messages

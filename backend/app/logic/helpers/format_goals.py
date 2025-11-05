@@ -3,7 +3,7 @@
 This module provides functions for formatting and displaying user goals
 in a readable format.
 """
-from app.db.data_access.user_goals.get_user_goals import get_user_goals
+from app.db.data_access import get_user_goals
 
 def format_goals(user_id: str) -> str:
     """Format user goals for display.
