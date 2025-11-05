@@ -2,23 +2,16 @@
 
 This module provides functions for adding and managing user goals.
 """
-<<<<<<< HEAD
 import re
-from app.db.sqlite import get_db
+from app.db.sqlite import get_db, fetch_one, execute_query
 from app.utils.messages import (
     DEFAULT_GOAL_EMOJI,
     ERROR_GOAL_ALREADY_EXISTS,
     SUCCESS_GOAL_ADDED
 )
-from app.helpers.state_manager import set_user_state
-=======
-from app.db.sqlite import fetch_one, execute_query
-from app.db.CRUD.user import get_or_create_user
-from app.utils.messages import ERROR_GOAL_ALREADY_EXISTS
-from app.utils.goal_utils import parse_goal_emoji_and_description
 from app.helpers.state_manager import set_user_state, clear_user_state
->>>>>>> 18f54b0 (Refactor, doc, and modularity updates: added docs build guide, improved code structure (imports, docstrings, helpers), refactored reminder system, centralized utilities, and renamed onboarding/timezone funcs.)
 from app.helpers.time_parser import parse_reminder_time, format_time_for_display
+from app.helpers.user_timezone import detect_and_save_user_timezone, update_existing_user_timezone
 
 def add_goal(user_id: str, goal_string: str) -> str:
     """
@@ -31,7 +24,6 @@ def add_goal(user_id: str, goal_string: str) -> str:
     Returns:
         str: Success or error message
     """
-<<<<<<< HEAD
     # Separate emoji from text - find emoji anywhere in the string
     # Simple emoji detection - look for emoji characters anywhere in the string
     emoji_pattern: str = r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF\U00002600-\U000026FF\U00002700-\U000027BF\U0001F900-\U0001F9FF\U0001FA70-\U0001FAFF\U0001F018-\U0001F0F5\U0001F200-\U0001F2FF]+'
@@ -64,13 +56,6 @@ def add_goal(user_id: str, goal_string: str) -> str:
         
         # Check and update timezone for existing user if not set
         update_existing_user_timezone(user_id, cursor, db)
-=======
-    # Parse emoji and description from goal string
-    goal_emoji, goal_description = parse_goal_emoji_and_description(goal_string)
-    
-    # Get or create user with timezone handling
-    user_id_db = get_or_create_user(user_id)
->>>>>>> 18f54b0 (Refactor, doc, and modularity updates: added docs build guide, improved code structure (imports, docstrings, helpers), refactored reminder system, centralized utilities, and renamed onboarding/timezone funcs.)
     
     # Check if goal already exists for this user
     existing_goal = fetch_one("""

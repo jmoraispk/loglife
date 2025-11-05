@@ -9,7 +9,7 @@ import logging
 import threading
 import time
 from datetime import datetime, timedelta
-from typing import Dict, Tuple, Any
+from typing import Any
 from zoneinfo import ZoneInfo
 from flask import Flask
 
@@ -108,7 +108,7 @@ def calculate_next_reminder_seconds(app: Flask) -> float:
             return 60.0
 
 
-def check_and_send_reminders(app: Flask, last_sent_cache: Dict[Tuple[int, str], bool]) -> None:
+def check_and_send_reminders(app: Flask, last_sent_cache: dict[tuple[int, str], bool]) -> None:
     """
     Check for due reminders and send them.
     
@@ -175,7 +175,7 @@ def reminder_worker(app: Flask) -> None:
     Args:
         app: Flask application instance for context management
     """
-    last_sent_cache: Dict[Tuple[int, str], bool] = {}
+    last_sent_cache: dict[tuple[int, str], bool] = {}
     logging.info("[REMINDER] Reminder service started")
     
     while True:

@@ -225,20 +225,9 @@ TEL;type=CELL;waid=923325727426:+92 332 5727426
 END:VCARD"""
     
     waid: str = extract_waid_from_vcard(vcard_message)
-    waid: str = extract_waid_from_vcard(vcard_message)
     assert waid == "923325727426"
 
 
-<<<<<<< HEAD
-=======
-def test_waid_to_phone_conversion() -> None:
-    """Test WAID to phone number conversion."""
-    waid: str = "923325727426"
-    phone: str = convert_waid_to_phone(waid)
-    assert phone == "03325727426"
-
-
->>>>>>> 18f54b0 (Refactor, doc, and modularity updates: added docs build guide, improved code structure (imports, docstrings, helpers), refactored reminder system, centralized utilities, and renamed onboarding/timezone funcs.)
 @patch('app.helpers.referral_tracker.send_onboarding_msg')
 def test_referral_process_integration(mock_send: Mock) -> None:
     """Test complete referral process integration."""

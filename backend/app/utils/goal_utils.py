@@ -4,11 +4,10 @@ This module provides functions for parsing and extracting information from goal 
 including emoji detection and extraction.
 """
 import re
-from typing import Tuple, Optional
 from app.utils.messages import DEFAULT_GOAL_EMOJI
 
 
-def parse_goal_emoji_and_description(goal_string: str) -> Tuple[str, str]:
+def parse_goal_emoji_and_description(goal_string: str) -> tuple[str, str]:
     """
     Parse emoji and description from a goal string.
     
@@ -30,7 +29,7 @@ def parse_goal_emoji_and_description(goal_string: str) -> Tuple[str, str]:
     """
     # Emoji pattern matching common emoji ranges
     emoji_pattern: str = r'[\U0001F600-\U0001F64F\U0001F300-\U0001F5FF\U0001F680-\U0001F6FF\U0001F1E0-\U0001F1FF\U00002600-\U000026FF\U00002700-\U000027BF\U0001F900-\U0001F9FF\U0001FA70-\U0001FAFF\U0001F018-\U0001F0F5\U0001F200-\U0001F2FF]+'
-    match: Optional[re.Match[str]] = re.search(emoji_pattern, goal_string)
+    match: re.Match[str] | None = re.search(emoji_pattern, goal_string)
     
     if match:
         goal_emoji: str = match.group(0)

@@ -60,7 +60,7 @@ def init_db() -> None:
 # Query Helper Functions
 # ============================================================================
 
-def fetch_one(query: str, params: Tuple = ()) -> Optional[sqlite3.Row]:
+def fetch_one(query: str, params: tuple = ()) -> sqlite3.Row | None:
     """
     Execute a SELECT query and return the first row or None.
     
@@ -85,7 +85,7 @@ def fetch_one(query: str, params: Tuple = ()) -> Optional[sqlite3.Row]:
     return cursor.fetchone()
 
 
-def fetch_all(query: str, params: Tuple = ()) -> List[sqlite3.Row]:
+def fetch_all(query: str, params: tuple = ()) -> list[sqlite3.Row]:
     """
     Execute a SELECT query and return all rows.
     
@@ -110,7 +110,7 @@ def fetch_all(query: str, params: Tuple = ()) -> List[sqlite3.Row]:
     return cursor.fetchall()
 
 
-def execute_query(query: str, params: Tuple = ()) -> sqlite3.Cursor:
+def execute_query(query: str, params: tuple = ()) -> sqlite3.Cursor:
     """
     Execute a query (INSERT/UPDATE/DELETE) and commit the transaction.
     
@@ -138,7 +138,7 @@ def execute_query(query: str, params: Tuple = ()) -> sqlite3.Cursor:
     return cursor
 
 
-def execute_many(query: str, params_list: List[Tuple]) -> None:
+def execute_many(query: str, params_list: list[tuple]) -> None:
     """
     Execute a query multiple times with different parameters and commit.
     

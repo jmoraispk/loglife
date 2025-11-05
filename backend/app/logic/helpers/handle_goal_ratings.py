@@ -4,7 +4,6 @@ This module provides functions for handling user goal ratings input,
 validation, and storage in the database.
 """
 from datetime import datetime
-<<<<<<< HEAD
 from app.utils.config import STYLE
 <<<<<<< HEAD
 from app.db.data_access import get_user_goals
@@ -19,6 +18,11 @@ from app.utils.date_utils import storage_date_format
 from app.db.CRUD.user_goals.get_user_goals import get_user_goals
 from app.db.sqlite import fetch_one, execute_query
 >>>>>>> 18f54b0 (Refactor, doc, and modularity updates: added docs build guide, improved code structure (imports, docstrings, helpers), refactored reminder system, centralized utilities, and renamed onboarding/timezone funcs.)
+=======
+from app.db.data_access.user_goals.get_user_goals import get_user_goals
+from app.db.sqlite import get_db, fetch_one, execute_query
+from app.logic.helpers.look_back_summary import storage_date_format
+>>>>>>> 3e62ff8 (fixed pytests tests, and did some fixes after rebasing from feature/contact_referral)
 from app.utils.messages import (
     ERROR_NO_GOALS_SET,
     ERROR_USER_NOT_FOUND,
@@ -60,12 +64,9 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
     today_display: str = now.strftime('%a (%b %d)')  # For display
     
     # Get user ID from database
-<<<<<<< HEAD
+    db = get_db()
     cursor = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
     user = cursor.fetchone()
-=======
-    user = fetch_one("SELECT id FROM user WHERE phone = ?", (user_id,))
->>>>>>> 18f54b0 (Refactor, doc, and modularity updates: added docs build guide, improved code structure (imports, docstrings, helpers), refactored reminder system, centralized utilities, and renamed onboarding/timezone funcs.)
     if not user:
         return ERROR_USER_NOT_FOUND
     user_id_db: int = user['id']
@@ -80,10 +81,6 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
             SELECT id FROM user_goals 
             WHERE user_id = ? AND goal_emoji = ? AND is_active = 1
         """, (user_id_db, goal_emoji))
-<<<<<<< HEAD
-        user_goal = cursor.fetchone()
-=======
->>>>>>> 18f54b0 (Refactor, doc, and modularity updates: added docs build guide, improved code structure (imports, docstrings, helpers), refactored reminder system, centralized utilities, and renamed onboarding/timezone funcs.)
         if not user_goal:
             return ERROR_GOAL_NOT_FOUND_WITH_EMOJI(goal_emoji)
         user_goal_id: int = user_goal['id']

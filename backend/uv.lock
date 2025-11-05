@@ -161,6 +161,7 @@ source = { editable = "." }
 dependencies = [
     { name = "flasgger" },
     { name = "flask" },
+    { name = "phonenumbers" },
     { name = "python-dotenv" },
     { name = "requests" },
 ]
@@ -174,6 +175,7 @@ dev = [
 requires-dist = [
     { name = "flasgger", specifier = ">=0.9.7.1" },
     { name = "flask", specifier = ">=3.1.2" },
+    { name = "phonenumbers", specifier = ">=9.0.17" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.4.2" },
     { name = "python-dotenv", specifier = ">=1.1.1" },
     { name = "requests", specifier = ">=2.32.5" },
@@ -336,6 +338,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/a1/d4/1fc4078c65507b51b96ca8f8c3ba19e6a61c8253c72794544580a7b6c24d/packaging-25.0.tar.gz", hash = "sha256:d443872c98d677bf60f6a1f2f8c1cb748e8fe762d2bf9d3148b5599295b0fc4f", size = 165727 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/20/12/38679034af332785aac8774540895e234f4d07f7545804097de4b666afd8/packaging-25.0-py3-none-any.whl", hash = "sha256:29572ef2b1f17581046b3a2227d5c611fb25ec70ca1ba8554b24b0e69331a484", size = 66469 },
+]
+
+[[package]]
+name = "phonenumbers"
+version = "9.0.17"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d7/d4/d338af7cf393df3785a0c1da81940762673cb7e1097184f48b0c8a47cdf9/phonenumbers-9.0.17.tar.gz", hash = "sha256:4f7e06b2111640cd6b2a8e36d1c2dc3c1af0f5d6ab734a2bcf4c9aec2ad80b53", size = 2298159 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0e/c2/ef7e49c8899390ab2636d04cecb5b1e80e0345b7ef340bd493ca0fdc0619/phonenumbers-9.0.17-py2.py3-none-any.whl", hash = "sha256:180e4ec2e05f6d3150cbd63b1b6f26996f8738cd0657bcc8747fbd10184721ae", size = 2584018 },
 ]
 
 [[package]]

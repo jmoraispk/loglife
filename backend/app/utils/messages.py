@@ -160,22 +160,7 @@ def SUCCESS_GOAL_ADDED(goal_emoji: str, goal_description: str) -> str:
     return f"✅ Added goal: {goal_emoji} {goal_description}"
 
 # Summary messages
-<<<<<<< HEAD
 def SUCCESS_RATINGS_SUBMITTED(today_display: str, goal_emojis: list[str], status: list[str]) -> str:
-=======
-def SUCCESS_RATINGS_SUBMITTED(today_display: str, goal_emojis: List[str], status: List[str]) -> str:
-    """
-    Generate success message when all goal ratings are submitted.
-    
-    Args:
-        today_display (str): Formatted date string for display (e.g., "Mon (Jun 30)")
-        goal_emojis (List[str]): List of emojis for all user goals
-        status (List[str]): List of status symbols for each goal rating
-    
-    Returns:
-        str: Formatted message showing date, goals, and their ratings
-    """
->>>>>>> 18f54b0 (Refactor, doc, and modularity updates: added docs build guide, improved code structure (imports, docstrings, helpers), refactored reminder system, centralized utilities, and renamed onboarding/timezone funcs.)
     return f"📅 {today_display}\n{' '.join(goal_emojis)}\n{' '.join(status)}"
 
 def SUCCESS_INDIVIDUAL_RATING(today_display: str, goal_emoji: str, goal_description: str, status_symbol: str) -> str:

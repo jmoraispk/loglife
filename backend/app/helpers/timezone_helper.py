@@ -5,13 +5,15 @@ using the phonenumbers library. It handles timezone lookup and provides fallback
 behavior for invalid or unrecognized numbers.
 """
 import re
+import logging
+import phonenumbers
+from phonenumbers import timezone as pn_timezone
 
+PHONENUMBERS_AVAILABLE = False
 try:
-    import phonenumbers
-    from phonenumbers import timezone as pn_timezone
+    PHONENUMBERS_AVAILABLE = True
 except ImportError:
-    print("Missing dependency: phonenumbers. Install it with 'pip install phonenumbers'.")
-    exit(1)
+    logging.warning("Missing dependency: phonenumbers. Install it with 'pip install phonenumbers'. Timezone detection will use fallback.")
 
 
 def get_timezone_from_number(number_str: str) -> str:
@@ -24,6 +26,9 @@ def get_timezone_from_number(number_str: str) -> str:
     Returns:
         str: Timezone(s) or "Unknown timezone for this number."
     """
+    if not PHONENUMBERS_AVAILABLE:
+        return "Unknown timezone for this number."
+    
     # Normalize input - remove non-digits and +, then add + if missing
     cleaned = re.sub(r"[^\d+]", "", number_str)
     if not cleaned.startswith("+"):

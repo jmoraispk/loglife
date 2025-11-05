@@ -3,7 +3,6 @@
 This module provides functions for parsing user commands and extracting
 parameters from message strings.
 """
-from typing import Optional, Tuple
 
 
 def parse_lookback_days(message: str, default: int = 7) -> int:
@@ -23,7 +22,7 @@ def parse_lookback_days(message: str, default: int = 7) -> int:
     return default
 
 
-def parse_add_goal_command(message: str) -> Optional[str]:
+def parse_add_goal_command(message: str) -> str | None:
     """
     Parse goal string from "add goal" command.
     
@@ -39,7 +38,7 @@ def parse_add_goal_command(message: str) -> Optional[str]:
     return None
 
 
-def parse_rate_command(message: str) -> Optional[Tuple[int, int]]:
+def parse_rate_command(message: str) -> tuple[int, int] | None:
     """
     Parse goal number and rating from "rate" command.
     
