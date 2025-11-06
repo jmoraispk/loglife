@@ -617,12 +617,10 @@
                 setStatus('error', 'Enter WhatsApp ID');
                 return;
             }
-            // Derive phone like backend does
-            const derivedPhone = waid.startsWith('92') ? ('0' + waid.slice(2)) : waid;
-            // Simple pretty display number for sample country code 92
-            const displayNumber = waid.startsWith('92')
-                ? `+92 ${waid.slice(2,5)} ${waid.slice(5,8)} ${waid.slice(8)}`
-                : waid;
+            // Use WAID as-is (expecting full number with country code)
+            const derivedPhone = waid;
+            // Display number (format for display only)
+            const displayNumber = waid;
             // Construct a VCARD that backend expects
             const vcard = `BEGIN:VCARD\nVERSION:3.0\nN:;${derivedPhone};;;\nFN:${derivedPhone}\nTEL;type=CELL;waid=${waid}:${displayNumber}\nEND:VCARD`;
             const payload = { from: senderEl.value, message: vcard };

@@ -74,12 +74,13 @@ node index.js --reset-session
 ### Message Relay (Incoming)
 
 1. Subscribe to WhatsApp `message` events
-2. Forward to backend `/process` endpoint:
+2. **Extract phone number:** Remove `@c.us` suffix from `msg.from` (e.g., `923325727426@c.us` → `923325727426`)
+3. Forward to backend `/process` endpoint:
    ```json
    { "message": "<text or VCARD>", "from": "<phone>" }
    ```
-3. Receive backend response
-4. Send reply back to WhatsApp chat
+4. Receive backend response
+5. Send reply back to WhatsApp chat (using original `msg.from` with `@c.us` suffix)
 
 ### API Endpoints (Outgoing)
 
@@ -106,10 +107,15 @@ Send WhatsApp messages programmatically.
 
 **Features:**
 
-- Auto phone formatting (`@c.us` suffix)
+- **Auto phone formatting:** Adds `@c.us` suffix automatically if not present (outgoing only)
 - Client readiness check
 - Retry on frame detachment
-- Country code handling
+- **Number format:** Expects full phone number with country code (e.g., `923325727426`)
+
+**Note:** 
+- Incoming messages have `@c.us` removed before forwarding to backend
+- Outgoing messages have `@c.us` added automatically
+- Phone numbers must include country code (no automatic country code addition)
 
 #### GET `/health`
 

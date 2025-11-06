@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from app.db.sqlite import close_db, init_db
 from app.routes.web import web_bp
 from app.routes.webhook import webhook_bp
+from app.helpers.reminder_service import start_reminder_service
 
 # Load environment variables from .env file
 load_dotenv()
@@ -38,6 +39,7 @@ def close_db_connection(exception: Exception | None) -> None:
 
 with app.app_context():
     init_db()
+    start_reminder_service(app)
 
 # Register the web blueprint
 app.register_blueprint(web_bp)
@@ -98,4 +100,4 @@ def process() -> str:
 >>>>>>> 53ae9b0 (Refactor backend, add Twilio number docs, update docs, and remove @c.us handling from WhatsApp numbers)
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=True)
+    app.run(port=5000, debug=False)

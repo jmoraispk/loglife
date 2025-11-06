@@ -139,7 +139,7 @@ def check_and_send_reminders(app: Flask, last_sent_cache: dict[tuple[int, str], 
                 goal_id = goal['goal_id']
                 reminder_hhmm = goal['reminder_time']
                 user_phone = goal['user_phone']
-                tz_name = goal['timezone'] or ''
+                tz_name = goal['user_timezone'] or ''
                 goal_emoji = goal['goal_emoji']
                 goal_description = goal['goal_description']
                 
