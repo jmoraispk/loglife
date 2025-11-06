@@ -4,13 +4,9 @@ This module provides functions for generating formatted summaries
 of goal ratings over specified time periods.
 """
 from datetime import datetime, timedelta
-from app.db.sqlite import get_db
+from app.db.sqlite import get_db, fetch_all
 from app.utils.config import STYLE
-<<<<<<< HEAD
 from app.db.data_access import get_user_goals
-=======
-from app.db.data_access.user_goals.get_user_goals import get_user_goals
->>>>>>> 53ae9b0 (Refactor backend, add Twilio number docs, update docs, and remove @c.us handling from WhatsApp numbers)
 from app.utils.messages import (
     LOOKBACK_NO_GOALS,
     LOOKBACK_USER_NOT_FOUND,
@@ -66,15 +62,13 @@ def look_back_summary(user_id: str, days: int, start: datetime | None = None) ->
         display_date: str = current_date.strftime('%a')  # For display
         
         # Get ratings for this date
-        cursor = db.execute("""
+        ratings_data = fetch_all("""
             SELECT ug.goal_emoji, gr.rating
             FROM user_goals ug
             LEFT JOIN goal_ratings gr ON ug.id = gr.user_goal_id AND gr.date = ?
             WHERE ug.user_id = ? AND ug.is_active = 1
             ORDER BY ug.created_at
         """, (storage_date, user_id_db))
-        
-        ratings_data = cursor.fetchall()
         
         # Create status symbols for each goal
         status_symbols: list[str] = []

@@ -5,24 +5,9 @@ validation, and storage in the database.
 """
 from datetime import datetime
 from app.utils.config import STYLE
-<<<<<<< HEAD
 from app.db.data_access import get_user_goals
-=======
-from app.db.data_access.user_goals.get_user_goals import get_user_goals
->>>>>>> 53ae9b0 (Refactor backend, add Twilio number docs, update docs, and remove @c.us handling from WhatsApp numbers)
-from app.db.sqlite import get_db
-=======
-from typing import Dict, List
-from app.utils.config import STYLE
-from app.utils.date_utils import storage_date_format
-from app.db.CRUD.user_goals.get_user_goals import get_user_goals
-from app.db.sqlite import fetch_one, execute_query
->>>>>>> 18f54b0 (Refactor, doc, and modularity updates: added docs build guide, improved code structure (imports, docstrings, helpers), refactored reminder system, centralized utilities, and renamed onboarding/timezone funcs.)
-=======
-from app.db.data_access.user_goals.get_user_goals import get_user_goals
 from app.db.sqlite import get_db, fetch_one, execute_query
-from app.logic.helpers.look_back_summary import storage_date_format
->>>>>>> 3e62ff8 (fixed pytests tests, and did some fixes after rebasing from feature/contact_referral)
+from app.utils.date_utils import format_date_for_storage
 from app.utils.messages import (
     ERROR_NO_GOALS_SET,
     ERROR_USER_NOT_FOUND,
@@ -51,16 +36,16 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
     
     # Validate input length
     if len(payload) != len(user_goals):
-        return ERROR_INVALID_INPUT_LENGTH(len(user_goals))
+        return ERROR_INVALID_INPUT_LENGTH.replace('<num_goals>', str(len(user_goals)))
 
     # Validate input digits
     if not all(c in "123" for c in payload):
-        return ERROR_INVALID_INPUT_DIGITS(len(user_goals))
+        return ERROR_INVALID_INPUT_DIGITS.replace('<num_goals>', str(len(user_goals)))
 
     # Store ratings
     ratings: list[int] = [int(c) for c in payload]
     now: datetime = datetime.now()
-    today_storage: str = storage_date_format(now)  # For storage
+    today_storage: str = format_date_for_storage(now)  # For storage
     today_display: str = now.strftime('%a (%b %d)')  # For display
     
     # Get user ID from database
@@ -82,7 +67,7 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
             WHERE user_id = ? AND goal_emoji = ? AND is_active = 1
         """, (user_id_db, goal_emoji))
         if not user_goal:
-            return ERROR_GOAL_NOT_FOUND_WITH_EMOJI(goal_emoji)
+            return ERROR_GOAL_NOT_FOUND_WITH_EMOJI.replace('<goal_emoji>', goal_emoji)
         user_goal_id: int = user_goal['id']
         
         # Check if rating already exists for today
@@ -110,4 +95,7 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
     status: list[str] = [STYLE[r] for r in ratings]
 
     # Return success message
-    return SUCCESS_RATINGS_SUBMITTED(today_display, goal_emojis, status)
+    return (SUCCESS_RATINGS_SUBMITTED
+            .replace('<today_display>', today_display)
+            .replace('<goal_emojis>', ' '.join(goal_emojis))
+            .replace('<status>', ' '.join(status)))

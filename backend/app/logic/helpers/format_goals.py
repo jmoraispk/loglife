@@ -3,11 +3,7 @@
 This module provides functions for formatting and displaying user goals
 in a readable format.
 """
-<<<<<<< HEAD
 from app.db.data_access import get_user_goals
-=======
-from app.db.data_access.user_goals.get_user_goals import get_user_goals
->>>>>>> 53ae9b0 (Refactor backend, add Twilio number docs, update docs, and remove @c.us handling from WhatsApp numbers)
 
 def format_goals(user_id: str) -> str:
     """Format user goals for display.
