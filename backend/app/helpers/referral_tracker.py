@@ -60,8 +60,6 @@ def save_referral(referrer_phone: str, referred_phone: str, referred_waid: str) 
         bool: True if saved successfully, False otherwise
     """
     try:
-        db = get_db()
-        
         # Check if referral already exists
         existing = fetch_one("""
             SELECT id FROM referrals 

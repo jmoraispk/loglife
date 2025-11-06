@@ -6,7 +6,6 @@ including goal management, ratings, summaries, and contact/referral handling.
 from unittest.mock import Mock, patch
 from app.logic.process_message import process_message
 from app.helpers.contact_detector import is_vcard, extract_waid_from_vcard
-from app.helpers.referral_tracker import get_referral_count
 from app.helpers.referral_tracker import process_referral
 
 

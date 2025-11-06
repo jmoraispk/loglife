@@ -6,7 +6,7 @@ for consistent date handling and storage.
 from datetime import datetime
 
 
-def storage_date_format(date: datetime) -> str:
+def format_date_for_storage(date: datetime) -> str:
     """
     Standardize date format for storage/indexing in the database.
     

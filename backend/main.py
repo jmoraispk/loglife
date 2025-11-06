@@ -3,17 +3,16 @@
 This Flask application handles incoming webhook requests from messaging platforms,
 processes user messages, and manages goal tracking functionality.
 """
-import os
-from dotenv import load_dotenv
-# Load environment variables from .env file
-load_dotenv()
-
 import logging
 from flask import Flask
+from flasgger import Swagger
+from dotenv import load_dotenv
 from app.db.sqlite import close_db, init_db
 from app.routes.web import web_bp
 from app.routes.webhook import webhook_bp
-from flasgger import Swagger
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(

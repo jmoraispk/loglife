@@ -44,13 +44,13 @@ def look_back_summary(user_id: str, days: int, start: datetime | None = None) ->
     summary: str = "```"
     if start is None:
         start = datetime.now() - timedelta(days=days-1)  # Include today
-        summary += LOOKBACK_HEADER(days)
+        summary += LOOKBACK_HEADER.replace('<days>', str(days))
 
     # Get user goals to determine how many goals to show
     user_goals: list[dict[str, str]] = get_user_goals(user_id)
     
     if not user_goals:
-        return LOOKBACK_NO_GOALS()
+        return LOOKBACK_NO_GOALS
     
     # Get user ID from database
     db = get_db()

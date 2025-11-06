@@ -79,30 +79,6 @@ def save_user_timezone(user_phone: str, timezone: str, db_cursor, db) -> bool:
         return False
 
 
-def detect_and_save_user_timezone(user_phone: str, db_cursor, db) -> bool:
-    """
-    Detect and save timezone for a new user.
-    
-    Args:
-        user_phone (str): User's phone number
-        db_cursor: Database cursor
-        db: Database connection
-        
-    Returns:
-        bool: True if saved successfully, False otherwise
-    """
-    try:
-        logging.debug(f"[TIMEZONE] Detecting and saving timezone for new user: {user_phone}")
-        timezone = detect_user_timezone(user_phone)
-        if timezone:
-            return save_user_timezone(user_phone, timezone, db_cursor, db)
-        return False
-        
-    except Exception as e:
-        logging.error(f"[TIMEZONE] Failed to detect and save timezone for {user_phone}: {str(e)}")
-        return False
-
-
 def update_existing_user_timezone(user_phone, db_cursor, db):
     """
     Update timezone for existing user who doesn't have timezone set.

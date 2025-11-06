@@ -6,12 +6,11 @@ import re
 from app.db.sqlite import get_db, fetch_one, execute_query
 from app.utils.messages import (
     DEFAULT_GOAL_EMOJI,
-    ERROR_GOAL_ALREADY_EXISTS,
-    SUCCESS_GOAL_ADDED
+    ERROR_GOAL_ALREADY_EXISTS
 )
 from app.helpers.state_manager import set_user_state, clear_user_state
 from app.helpers.time_parser import parse_reminder_time, format_time_for_display
-from app.helpers.user_timezone import detect_and_save_user_timezone, update_existing_user_timezone
+from app.helpers.user_timezone import detect_user_timezone, save_user_timezone, update_existing_user_timezone
 
 def add_goal(user_id: str, goal_string: str) -> str:
     """
@@ -50,7 +49,9 @@ def add_goal(user_id: str, goal_string: str) -> str:
         user_id_db = cursor.lastrowid
         
         # Detect and save timezone for new user
-        detect_and_save_user_timezone(user_id, cursor, db)
+        timezone = detect_user_timezone(user_id)
+        if timezone:
+            save_user_timezone(user_id, timezone, cursor, db)
     else:
         user_id_db = user['id']
         
@@ -64,7 +65,7 @@ def add_goal(user_id: str, goal_string: str) -> str:
     """, (user_id_db, goal_emoji))
     
     if existing_goal:
-        return ERROR_GOAL_ALREADY_EXISTS(goal_emoji)
+        return ERROR_GOAL_ALREADY_EXISTS.replace('<goal_emoji>', goal_emoji)
     
     # Add the new goal (without reminder time initially)
     cursor = execute_query("""
