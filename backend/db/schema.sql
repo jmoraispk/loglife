@@ -23,3 +23,12 @@ CREATE TABLE IF NOT EXISTS goal_ratings (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_goal_id) REFERENCES user_goals (id)
 );
+
+CREATE TABLE IF NOT EXISTS referrals (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    referrer_phone TEXT NOT NULL,
+    referred_phone TEXT NOT NULL,
+    referred_waid TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

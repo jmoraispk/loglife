@@ -1,6 +1,11 @@
+"""User goals data access functions.
+
+This module provides CRUD operations for retrieving user goals from the database,
+including user creation and goal retrieval functionality.
+"""
 from app.db.sqlite import get_db
 
-def get_user_goals(user_id: str) -> list:
+def get_user_goals(user_id: str) -> list[dict[str, str]]:
     """Retrieve user goals from the database.
     
     Fetches all active goals for a user from the database. Creates the user
@@ -10,7 +15,7 @@ def get_user_goals(user_id: str) -> list:
         user_id (str): User identifier (phone number)
 
     Returns:
-        list: List of dictionaries containing goal emoji and description
+        List[Dict[str, str]]: List of dictionaries containing goal emoji and description
     """
     db = get_db()
     
@@ -22,9 +27,9 @@ def get_user_goals(user_id: str) -> list:
         # Create user if doesn't exist
         cursor = db.execute("INSERT INTO user (phone) VALUES (?)", (user_id,))
         db.commit()
-        user_id_db = cursor.lastrowid
+        user_id_db: int = cursor.lastrowid
     else:
-        user_id_db = user['id']
+        user_id_db: int = user['id']
     
     # Get user's active goals
     cursor = db.execute("""

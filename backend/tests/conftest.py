@@ -1,10 +1,11 @@
 import pytest
 import sqlite3
+from typing import Generator
 from flask import Flask
-from app.logic import process_message
+from flask import g
 
 @pytest.fixture(autouse=True, scope="function")
-def test_db(monkeypatch):
+def test_db(monkeypatch: pytest.MonkeyPatch) -> Generator[sqlite3.Connection, None, None]:
     """Create an isolated test database for each test function.
     
     This fixture automatically runs for each test function and provides
@@ -19,7 +20,7 @@ def test_db(monkeypatch):
         sqlite3.Connection: Database connection for the test
     """
     # Create in-memory DB
-    conn = sqlite3.connect(":memory:")
+    conn: sqlite3.Connection = sqlite3.connect(":memory:")
     conn.row_factory = sqlite3.Row
 
     # Load schema
@@ -27,12 +28,11 @@ def test_db(monkeypatch):
         conn.executescript(f.read())
 
     # Create a test Flask app
-    app = Flask(__name__)
+    app: Flask = Flask(__name__)
 
     # Set up application context for tests
     with app.app_context():
         # Set the Flask g object to use our test connection
-        from flask import g
         g.db = conn
         
         yield conn

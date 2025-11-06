@@ -1,5 +1,20 @@
+"""Goal rating handling utilities.
+
+This module provides functions for handling user goal ratings input,
+validation, and storage in the database.
+"""
 from datetime import datetime
 from app.utils.config import STYLE
+from app.db.data_access import get_user_goals
+from app.db.sqlite import get_db
+from app.utils.messages import (
+    ERROR_NO_GOALS_SET,
+    ERROR_USER_NOT_FOUND,
+    ERROR_INVALID_INPUT_LENGTH,
+    ERROR_INVALID_INPUT_DIGITS,
+    ERROR_GOAL_NOT_FOUND_WITH_EMOJI,
+    SUCCESS_RATINGS_SUBMITTED
+)
 
 def storage_date_format(date: datetime) -> str:
     """
@@ -25,41 +40,39 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
         str: Response message indicating success or error
     """
     # Get user goals to validate input length
-    from app.db.CRUD.user_goals.get_user_goals import get_user_goals
-    user_goals = get_user_goals(user_id)
+    user_goals: list[dict[str, str]] = get_user_goals(user_id)
     
     if not user_goals:
-        return "❌ No goals set. Please set goals first."
+        return ERROR_NO_GOALS_SET
     
     # Validate input length
     if len(payload) != len(user_goals):
-        return f"❌ Invalid input. Send {len(user_goals)} digits like: 31232"
+        return ERROR_INVALID_INPUT_LENGTH(len(user_goals))
 
     # Validate input digits
     if not all(c in "123" for c in payload):
-        return f"❌ Invalid input. Send {len(user_goals)} digits between 1 and 3"
+        return ERROR_INVALID_INPUT_DIGITS(len(user_goals))
 
     # Store ratings
-    ratings = [int(c) for c in payload]
-    now = datetime.now()
-    today_storage = storage_date_format(now)  # For storage
-    today_display = now.strftime('%a (%b %d)')  # For display
+    ratings: list[int] = [int(c) for c in payload]
+    now: datetime = datetime.now()
+    today_storage: str = storage_date_format(now)  # For storage
+    today_display: str = now.strftime('%a (%b %d)')  # For display
     
     # Get database connection
-    from app.db.sqlite import get_db
     db = get_db()
     
     # Get user ID from database
     cursor = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
     user = cursor.fetchone()
     if not user:
-        return "❌ User not found"
-    user_id_db = user['id']
+        return ERROR_USER_NOT_FOUND
+    user_id_db: int = user['id']
     
     # Store ratings for each goal
     for i, rating in enumerate(ratings):
-        goal = user_goals[i]
-        goal_emoji = goal['emoji']
+        goal: dict[str, str] = user_goals[i]
+        goal_emoji: str = goal['emoji']
         
         # Get user_goal_id
         cursor = db.execute("""
@@ -68,8 +81,8 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
         """, (user_id_db, goal_emoji))
         user_goal = cursor.fetchone()
         if not user_goal:
-            return f"❌ Goal {goal_emoji} not found"
-        user_goal_id = user_goal['id']
+            return ERROR_GOAL_NOT_FOUND_WITH_EMOJI(goal_emoji)
+        user_goal_id: int = user_goal['id']
         
         # Check if rating already exists for today
         cursor = db.execute("""
@@ -94,8 +107,8 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
     db.commit()
     
     # Get goal emojis for display
-    goal_emojis = [goal['emoji'] for goal in user_goals]
-    status = [STYLE[r] for r in ratings]
+    goal_emojis: list[str] = [goal['emoji'] for goal in user_goals]
+    status: list[str] = [STYLE[r] for r in ratings]
 
     # Return success message
-    return f"📅 {today_display}\n{' '.join(goal_emojis)}\n{' '.join(status)}"
+    return SUCCESS_RATINGS_SUBMITTED(today_display, goal_emojis, status)
