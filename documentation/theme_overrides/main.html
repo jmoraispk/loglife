@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {{ super() }}
+  <style>
+    /* Global container with consistent margins */
+    :root {
+      --content-max-width: 1400px;
+      --content-margin: 5%;
+    }
+    
+    /* Header container with matching margins */
+    .md-header__inner {
+      max-width: var(--content-max-width);
+      margin: 0 auto;
+      padding-left: var(--content-margin);
+      padding-right: var(--content-margin);
+    }
+    
+    .custom-nav-buttons {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+      margin-left: auto;
+    }
+    .custom-nav-buttons a {
+      padding: 0.5rem 0.75rem;
+      text-decoration: none;
+      font-size: 0.9rem;
+      white-space: nowrap;
+      color: #ffffff;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      transition: opacity 0.15s ease;
+    }
+    .custom-nav-buttons a:hover {
+      opacity: 0.8;
+    }
+    .custom-nav-buttons a:active {
+      opacity: 0.5;
+      transition: opacity 0.05s ease;
+    }
+    @media screen and (max-width: 76.25em) {
+      .custom-nav-buttons {
+        display: none;
+      }
+    }
+    /* Hide left sidebar navigation */
+    .md-sidebar--primary {
+      display: none !important;
+    }
+    .md-nav--primary {
+      display: none !important;
+    }
+    /* Adjust main content to use full width */
+    .md-main__inner {
+      max-width: 100% !important;
+    }
+    .md-content {
+      max-width: 100% !important;
+    }
+    .md-content__inner {
+      max-width: var(--content-max-width) !important;
+      margin: 0 auto;
+      padding-left: var(--content-margin);
+      padding-right: var(--content-margin);
+    }
+    /* Hide sidebar toggle button */
+    .md-header__button--menu {
+      display: none !important;
+    }
+    /* Hide navigation drawer */
+    .md-nav__source {
+      display: none !important;
+    }
+    .md-nav[data-md-level="0"] {
+      display: none !important;
+    }
+    /* Ensure content takes full width without sidebar */
+    .md-grid {
+      max-width: 100% !important;
+    }
+    .md-main {
+      max-width: 100% !important;
+    }
+    
+    /* Right sidebar (table of contents) margins */
+    .md-sidebar--secondary {
+      right: var(--content-margin) !important;
+    }
+    
+    /* Adjust TOC inner content to respect margins */
+    .md-sidebar--secondary .md-sidebar__scrollwrap {
+      padding-right: 0;
+    }
+    
+    /* Ensure main content and TOC align properly */
+    .md-content {
+      padding-right: 0 !important;
+    }
+    
+    /* Responsive margins for smaller screens */
+    @media screen and (max-width: 1200px) {
+      :root {
+        --content-margin: 4%;
+      }
+    }
+    @media screen and (max-width: 768px) {
+      :root {
+        --content-margin: 3%;
+      }
+    }
+    @media screen and (max-width: 480px) {
+      :root {
+        --content-margin: 2rem;
+      }
+    }
+  </style>
+{% endblock %}
+
+{% block scripts %}
+  {{ super() }}
+  <script>
+    (function() {
+      const headerInner = document.querySelector(".md-header__inner");
+      if (headerInner && !document.querySelector(".custom-nav-buttons")) {
+        const navButtons = document.createElement("nav");
+        navButtons.className = "custom-nav-buttons";
+        navButtons.innerHTML = `
+          <a href="{{ base_url }}">Home</a>
+          <a href="{{ base_url }}/backend">Backend</a>
+          <a href="{{ base_url }}/user-journey">User Journey</a>
+          <a href="{{ base_url }}/whatsapp-client">WhatsApp Client</a>
+          <a href="{{ base_url }}/twilio-whatsapp-number-setup">Twilio Setup</a>
+        `;
+        headerInner.appendChild(navButtons);
+      }
+    })();
+  </script>
+{% endblock %}
+

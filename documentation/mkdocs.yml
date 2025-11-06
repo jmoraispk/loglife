@@ -1,6 +1,7 @@
 site_name: LogLife Docs
 theme:
   name: material
+  custom_dir: theme_overrides
   palette:
     scheme: slate
   features:
