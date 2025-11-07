@@ -6,14 +6,10 @@ processes user messages, and manages goal tracking functionality.
 import logging
 from flask import Flask
 from flasgger import Swagger
-from dotenv import load_dotenv
 from app.db.sqlite import close_db, init_db
 from app.routes.web import web_bp
 from app.routes.webhook import webhook_bp
 from app.helpers.reminder_service import start_reminder_service
-
-# Load environment variables from .env file
-load_dotenv()
 
 # Configure logging
 logging.basicConfig(

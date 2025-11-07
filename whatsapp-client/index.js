@@ -85,21 +85,59 @@ function createClient() {
     });
 
     newClient.on('message', async msg => {
-        // console.log(`📨 Incoming message from ${msg.from}: ${msg.body}`);
         try {
-            // Remove @ and everything after it from the phone number
             const phoneNumber = msg.from.split('@')[0];
+
+            const payload = {
+                from: phoneNumber,
+                message: msg.body || null,
+                messageType: msg.type
+            };
+
+            const shouldDownloadVoice = msg.hasMedia && (msg.type === 'ptt' || msg.type === 'audio');
+            if (shouldDownloadVoice) {
+                try {
+                    const media = await msg.downloadMedia();
+                    if (media) {
+                        const isVoiceMessage = msg.type === 'ptt' || (media.mimetype && media.mimetype.includes('audio/ogg'));
+                        if (isVoiceMessage) {
+                            payload.audio = {
+                                mimetype: media.mimetype,
+                                filename: media.filename || null,
+                                data: media.data,
+                                filesize: media.filesize || null,
+                                duration: msg._data?.duration ?? null,
+                                isVoiceNote: msg.type === 'ptt',
+                            };
+                        }
+                    }
+                } catch (mediaErr) {
+                    console.error('Failed to download media:', mediaErr);
+                }
+            }
+            
             const response = await fetch(process.env.PY_BACKEND_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: msg.body, from: phoneNumber })
-                // TODO: check if images can be sent/received
+                body: JSON.stringify(payload)
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error(`❌ Backend error (${response.status}):`, errorText.substring(0, 500));
+                await newClient.sendMessage(msg.from, 'Sorry, I encountered an error processing your message. Please try again.');
+                return;
+            }
+
             const text = await response.text();
             newClient.sendMessage(msg.from, text);
-            // newClient.sendMessage('923090052353@c.us', text);
         } catch (err) {
-            console.error("Failed to fetch from backend:", err);
+            console.error('Failed to fetch from backend:', err);
+            try {
+                await newClient.sendMessage(msg.from, 'Sorry, I encountered an error. Please try again.');
+            } catch (sendErr) {
+                console.error('Failed to send error message:', sendErr);
+            }
         }
     });
 
