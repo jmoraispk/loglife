@@ -33,10 +33,17 @@ def get_user_goals(user_id: str) -> list[dict[str, str]]:
     
     # Get user's active goals
     goals = fetch_all("""
-        SELECT goal_emoji, goal_description 
+        SELECT goal_emoji, goal_description, boost_level
         FROM user_goals 
         WHERE user_id = ? AND is_active = 1
         ORDER BY created_at
     """, (user_id_db,))
     
-    return [{"emoji": goal['goal_emoji'], "description": goal['goal_description']} for goal in goals]
+    return [
+        {
+            "emoji": goal['goal_emoji'],
+            "description": goal['goal_description'],
+            "boost_level": str(goal['boost_level']),
+        }
+        for goal in goals
+    ]

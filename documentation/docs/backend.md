@@ -69,8 +69,8 @@ Commands are routed via `process_message(message, sender)` in the backend.
 | Command        | Description                                    | Example                    |
 |:-------------- |:-----------------------------------------------|:---------------------------|
 | `help`         | Show all commands / usage help                  | help                       |
-| `goals`        | List your personal goals with reminder times    | goals                      |
-| `add goal ...` | Add a new goal (multi-step: goal → reminder time) | add goal 🏃 Run daily       |
+| `goals`        | List goals with **boost levels** & reminder times | goals                      |
+| `add goal ...` | Add new goal (sets **boost level**, prompts for reminder) | add goal 🏃 Run daily       |
 | `week`         | Show a summary for the current week             | week                       |
 | `lookback [n]` | Show the last n days summary (default 7)        | lookback 5                 |
 | `rate x y`     | Rate goal x with y (1=fail,2=partial,3=success) | rate 2 3                   |
@@ -81,7 +81,7 @@ Commands are routed via `process_message(message, sender)` in the backend.
 When adding a goal, the bot uses **conversation state** to guide setup:
 
 1. **User:** `add goal 🏃 Run daily`
-2. **Bot:** Saves goal → Detects timezone → Prompts for reminder time
+2. **Bot:** Saves goal with **default boost level (1)** → Detects timezone → Prompts for reminder time
 3. **User:** `6:30 AM` (supports: 18:00, 6 PM, 6pm, 6)
 4. **Bot:** Saves reminder time → Confirms setup
 
@@ -161,7 +161,7 @@ Sends daily WhatsApp reminders for goals at user-specified times.
 | Table | Purpose | Key Fields |
 |-------|---------|------------|
 | `user` | User profiles | `phone` (unique), `name`, **`timezone`**, `created_at` |
-| `user_goals` | Goal definitions | `user_id`, `goal_emoji`, `goal_description`, `is_active`, **`reminder_time`** |
+| `user_goals` | Goal definitions | `user_id`, `goal_emoji`, `goal_description`, `is_active`, **`reminder_time`**, **`boost_level`** |
 | `goal_ratings` | Daily ratings | `user_goal_id`, `rating` (1-3), `date` |
 | `referrals` | Referral tracking | `referrer_phone`, `referred_phone`, `referred_waid`, `status` |
 | `user_states` | **Conversation state** | **`user_phone`, `state`, `temp_data`** |
@@ -185,6 +185,7 @@ CREATE TABLE IF NOT EXISTS user_goals (
     goal_description TEXT NOT NULL,
     is_active BOOLEAN DEFAULT 1,
     reminder_time TEXT,
+    boost_level INTEGER NOT NULL DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user (id)
 );
@@ -251,7 +252,7 @@ backend/
   │   ├── templates/         # Web UI (emulator)
   │   │   └── index.html     # Emulator interface
   │   └── utils/             # Config, constants, messages
-  │       ├── config.py       # Goals configuration
+  │       ├── config.py       # Goals config (DEFAULT_BOOST_LEVEL)
   │       └── messages.py     # Centralized user-facing messages
   ├── db/                    # SQLite file and schema
   │   ├── life_bot.db        # Database file

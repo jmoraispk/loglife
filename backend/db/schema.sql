@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS user_goals (
     goal_description TEXT NOT NULL,
     is_active BOOLEAN DEFAULT 1,
     reminder_time TEXT,
+    boost_level INTEGER NOT NULL DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user (id)
 );

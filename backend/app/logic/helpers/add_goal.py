@@ -8,6 +8,7 @@ from app.utils.messages import (
     DEFAULT_GOAL_EMOJI,
     ERROR_GOAL_ALREADY_EXISTS
 )
+from app.utils.config import DEFAULT_BOOST_LEVEL
 from app.helpers.state_manager import set_user_state, clear_user_state
 from app.helpers.time_parser import parse_reminder_time, format_time_for_display
 from app.helpers.user_timezone import detect_user_timezone, save_user_timezone, update_existing_user_timezone
@@ -69,15 +70,19 @@ def add_goal(user_id: str, goal_string: str) -> str:
     
     # Add the new goal (without reminder time initially)
     cursor = execute_query("""
-        INSERT INTO user_goals (user_id, goal_emoji, goal_description, reminder_time) 
-        VALUES (?, ?, ?, NULL)
-    """, (user_id_db, goal_emoji, goal_description))
+        INSERT INTO user_goals (user_id, goal_emoji, goal_description, reminder_time, boost_level) 
+        VALUES (?, ?, ?, NULL, ?)
+    """, (user_id_db, goal_emoji, goal_description, DEFAULT_BOOST_LEVEL))
     goal_id = cursor.lastrowid
     
     # Set user state to wait for reminder time
     set_user_state(user_id, 'waiting_for_reminder_time', str(goal_id))
     
-    return f"✅ Goal added: {goal_emoji} {goal_description}\n\n⏰ What time should I remind you daily? (e.g., 18:00, 6 PM, 6pm)"
+    return (
+        f"✅ Goal added: {goal_emoji} {goal_description}\n"
+        f"🔥 Boost level set to {DEFAULT_BOOST_LEVEL} (default).\n\n"
+        "⏰ What time should I remind you daily? (e.g., 18:00, 6 PM, 6pm)"
+    )
 
 
 def set_reminder_time(user_id: str, time_input: str, goal_id: str) -> str:

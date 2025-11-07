@@ -62,8 +62,8 @@ _Tip: Click the image to zoom._
 
 | Command | Module | Action |
 |---------|--------|--------|
-| `goals` | `format_goals.py` | Display goals with reminder times |
-| `add goal` | `add_goal.py` | Create goal → Set state → Prompt for time |
+| `goals` | `format_goals.py` | Display goals with **boost levels** & reminder times |
+| `add goal` | `add_goal.py` | Create goal with **boost level** → Set state → Prompt for time |
 | `rate X Y` | `rate_individual_goal.py` | Rate specific goal |
 | `123...` | `handle_goal_ratings.py` | Rate all goals |
 | `week` | `format_week_summary.py` | Week summary |

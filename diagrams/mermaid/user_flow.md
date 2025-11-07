@@ -89,8 +89,8 @@ flowchart TB
     
     %% Command Routing
     RouteCommand -->|help| ShowHelp[Show Help Message<br/>All Commands & Examples]
-    RouteCommand -->|goals| GetGoals[Fetch User Goals<br/>from Database]
-    RouteCommand -->|add goal| AddGoal[Parse Goal String<br/>Extract Emoji & Description<br/>Save Goal to Database<br/>Detect User Timezone]
+    RouteCommand -->|goals| GetGoals[Fetch User Goals<br/>from Database<br/>Display with Boost Levels]
+    RouteCommand -->|add goal| AddGoal[Parse Goal String<br/>Extract Emoji & Description<br/>Set Default Boost Level<br/>Save Goal to Database<br/>Detect User Timezone]
     RouteCommand -->|rate X Y| RateGoal[Rate Individual Goal<br/>Validate Rating 1-3<br/>Save to Database]
     RouteCommand -->|digits only| BulkRate[Rate All Goals at Once<br/>Parse Digit String<br/>Save to Database]
     RouteCommand -->|week| WeekSummary[Generate Week Summary<br/>Fetch Ratings for Current Week<br/>Calculate Success Rate]
@@ -193,8 +193,8 @@ Each command type is routed to specific handler:
 | Command | Handler | Database Operation | Notes |
 |---------|---------|-------------------|-------|
 | `help` | `show_help.py` | None (static response) | - |
-| `goals` | `format_goals.py` | SELECT user_goals | - |
-| `add goal 😴 Description` | `add_goal.py` | INSERT INTO user_goals<br/>INSERT INTO user_states | **NEW**: Sets state, prompts for reminder time |
+| `goals` | `format_goals.py` | SELECT user_goals | Shows goals with boost levels |
+| `add goal 😴 Description` | `add_goal.py` | INSERT INTO user_goals<br/>INSERT INTO user_states | Sets default boost level, sets state, prompts for reminder time |
 | `6 PM` (when in reminder state) | `add_goal.py` → `set_reminder_time()` | UPDATE user_goals<br/>DELETE from user_states | **NEW**: Parses time, saves reminder, clears state |
 | `rate 2 3` | `rate_individual_goal.py` | INSERT INTO goal_ratings | - |
 | `123` (digits) | `handle_goal_ratings.py` | INSERT INTO goal_ratings (bulk) | - |
@@ -217,17 +217,19 @@ Each command type is routed to specific handler:
 ### Regular Commands
 ```text
 help                    → Show all commands
-goals                   → List your goals with reminder times
+goals                   → List your goals with boost levels and reminder times
 rate 1 3                → Rate goal #1 as success
 123                     → Rate all goals (1=fail, 2=partial, 3=success)
 week                    → Show current week summary
 lookback 5              → Show last 5 days performance
 ```
 
-### Goal Creation with Reminder (NEW - Multi-Step)
+### Goal Creation with Reminder (Multi-Step)
 ```text
 User: add goal 🏃 Morning run
 Bot:  ✅ Goal added: 🏃 Morning run
+      🔥 Boost level set to 1 (default).
+      
       ⏰ What time should I remind you daily? (e.g., 18:00, 6 PM, 6pm)
       
 User: 6:30 AM
@@ -260,17 +262,17 @@ Bot (at 6:30 AM): ⏰ Reminder: 🏃 Morning run
 ## Database Interactions
 
 ### Tables Used
-1. **user** - User registration with timezone (UPDATED)
-2. **user_goals** - Goal definitions with reminder_time (UPDATED)
+1. **user** - User registration with timezone
+2. **user_goals** - Goal definitions with reminder_time and boost_level
 3. **goal_ratings** - Daily goal ratings
 4. **referrals** - Referral tracking
-5. **user_states** - Conversation state tracking (NEW)
+5. **user_states** - Conversation state tracking
 
 ### CRUD Operations
-- **CREATE**: New users (with timezone), goals (with reminder_time), ratings, referrals, user states
-- **READ**: Fetch goals (with reminder times), ratings for summaries, user states
-- **UPDATE**: Goal reminder times (NEW), user timezones (NEW)
-- **DELETE**: Soft delete for goals (is_active flag), clear user states after completion (NEW)
+- **CREATE**: New users (with timezone), goals (with reminder_time and boost_level), ratings, referrals, user states
+- **READ**: Fetch goals (with reminder times and boost levels), ratings for summaries, user states
+- **UPDATE**: Goal reminder times, user timezones
+- **DELETE**: Soft delete for goals (is_active flag), clear user states after completion
 
 ## External Dependencies
 - **WhatsApp Messaging Platform**: Message delivery

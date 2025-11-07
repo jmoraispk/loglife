@@ -25,6 +25,7 @@ def test_add_goal_and_show_goals() -> None:
     resp2: str = process_message("goals", user)
     assert "😴" in resp2
     assert "sleep early" in resp2.lower()
+    assert "boost 1" in resp2.lower()
 
 def test_rate_goal() -> None:
     """Test rating an individual goal.

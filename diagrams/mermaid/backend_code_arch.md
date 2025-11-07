@@ -29,15 +29,16 @@ This diagram shows the complete backend architecture for the Life Bot applicatio
 
 ### 3. Goal Management
 - Track personal goals with emojis and descriptions
+- **Boost levels**: Each goal has a boost level (default: 1) displayed when listing goals
 - Rate goals individually or in bulk (1-3 scale)
 - View weekly summaries and lookback reports
 
 ### 4. Database Schema
 - `user`: User information with timezone
-- `user_goals`: Goal definitions with reminder times
+- `user_goals`: Goal definitions with reminder times and boost levels
 - `goal_ratings`: Daily goal ratings
 - `referrals`: Referral tracking
-- `user_states`: Conversation state tracking (NEW)
+- `user_states`: Conversation state tracking
 
 ## Architecture Flow
 
@@ -246,8 +247,8 @@ graph TB
 ### Goal Management Helpers (Light Green Box)
 | Component | Purpose |
 |-----------|---------|
-| `format_goals.py` | Display user's goals in formatted list |
-| `add_goal.py` | Add new goals with emoji and description. **Sets up reminder time**: detects user timezone, prompts for reminder time, parses time input, and saves to database |
+| `format_goals.py` | Display user's goals in formatted list with boost levels |
+| `add_goal.py` | Add new goals with emoji and description. Sets default boost level. **Sets up reminder time**: detects user timezone, prompts for reminder time, parses time input, and saves to database |
 | `handle_goal_ratings.py` | Process bulk goal ratings (e.g., "123") |
 | `rate_individual_goal.py` | Rate single goal (e.g., "rate 2 3") |
 | `format_week_summary.py` | Generate weekly goal summary |
@@ -263,14 +264,14 @@ graph TB
 ### Utilities (Light Green Box)
 | Component | Description |
 |-----------|-------------|
-| `config.py` | Goals configuration and styling constants |
+| `config.py` | Goals configuration and styling constants. Defines DEFAULT_BOOST_LEVEL for goal boosting feature |
 | `messages.py` | **Centralized user-facing messages** (welcome, help, errors, success messages). Improves maintainability and simplifies future translation/localization. |
 
 ### Database Schema
 | Table | Description | New/Updated? |
 |-------|-------------|------|
 | `user` | User information (id, name, phone, **timezone**) | **✓ Updated** |
-| `user_goals` | Goal definitions with emoji, description, and **reminder_time** | **✓ Updated** |
+| `user_goals` | Goal definitions with emoji, description, **reminder_time**, and **boost_level** (default: 1) | **✓ Updated** |
 | `goal_ratings` | Daily goal ratings (1-3 scale) | No |
 | `referrals` | Referral tracking (referrer → referred) | No |
 | `user_states` | **User conversation state tracking (user_phone, state, temp_data)** | **✓ New** |

@@ -48,10 +48,10 @@ def init_db() -> None:
     Raises:
         FileNotFoundError: If schema.sql file is not found
     """
-    if not os.path.exists(DATABASE):
+    db: sqlite3.Connection = get_db()
+    if not os.path.exists(DATABASE) or os.path.getsize(DATABASE) == 0:
         schema_path: str = os.path.join(PROJECT_ROOT, "db", "schema.sql")
         with open(schema_path, "r") as f:
-            db: sqlite3.Connection = get_db()
             db.executescript(f.read())
             db.commit()
 
