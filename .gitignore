@@ -1,5 +1,5 @@
 build/*
-backend/goal_bot.egg-info/*
+goal_bot.egg-info/*
 **/__pycache__/**
 whatsapp-client/.wwebjs_auth/**
 whatsapp-client/node_modules/**
@@ -8,3 +8,5 @@ whatsapp-client/package-lock.json
 git_token_server
 whatsapp-client/node_modules
 backend/db/life_bot.db
+.venv
+uv.lock

@@ -16,6 +16,9 @@ dependencies = [
     "python-dotenv>=1.1.1",
     "requests>=2.32.5",
     "ruff>=0.14.3",
+    "mkdocs-glightbox>=0.5.2",
+    "mkdocs-material>=9.6.22",
+    "sqlite-web>=0.6.5",
 ]
 
 [project.optional-dependencies]
@@ -27,5 +30,5 @@ dev = [
 # Exclude 'db' directory to avoid setuptools error about multiple top-level packages
 # Only include 'app' directory as the main application package
 [tool.setuptools.packages.find]
-include = ["app*"]
-exclude = ["db*"]
+include = ["backend.app*"]
+exclude = ["backend.app.db*"]
