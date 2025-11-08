@@ -1,18 +1,35 @@
 # User Flow Diagram
 
 ## Overview
-This diagram illustrates the complete user interaction flow for the Life Bot application, including **regular message processing**, **contact sharing/referral system**, and the new **goal reminder setup flow**.
+This diagram illustrates the complete user interaction flow for the Life Bot application, including **audio journaling**, **regular message processing**, **contact sharing/referral system**, and **goal reminder setup flow**.
 
 ## Key Updates
+- ✅ **Added audio journaling feature (NEW)** - Record voice notes, get transcripts and AI summaries
+- ✅ **Added audio message processing flow (NEW)** - AssemblyAI transcription + OpenAI summarization
+- ✅ **Added real-time status updates (NEW)** - Users notified during transcription and summarization
 - ✅ Added contact sharing detection (VCARD format)
 - ✅ Added referral tracking flow
 - ✅ Added automated onboarding message flow
-- ✅ **Added multi-step goal reminder setup flow (NEW)**
-- ✅ **Added conversation state management (NEW)**
-- ✅ **Added timezone detection and time parsing (NEW)**
+- ✅ Added multi-step goal reminder setup flow
+- ✅ Added conversation state management
+- ✅ Added timezone detection and time parsing
 - ✅ Updated command list to reflect current features
 
 ## User Journey
+
+### Audio Journaling Flow (NEW)
+1. User sends audio message (voice note) via WhatsApp
+2. WhatsApp client detects audio message type ('ptt' or 'audio')
+3. Client downloads audio media and encodes as base64
+4. System receives audio payload with messageType and audio data
+5. Backend immediately sends: "Audio received. Transcribing..."
+6. Audio uploaded to AssemblyAI for transcription
+7. System polls AssemblyAI until transcription completes
+8. Backend sends: "Audio transcribed. Summarizing..."
+9. Transcript sent to OpenAI API (GPT model) for summarization
+10. Backend sends: "Summary stored in Database."
+11. Both transcript and summary saved to database
+12. Backend returns AI-generated summary to user
 
 ### Regular Message Flow
 1. User sends text command via WhatsApp
@@ -48,10 +65,29 @@ flowchart TB
     Start([User Sends WhatsApp Message])
     
     %% Message Type Detection
-    Start --> CheckMessageType{Is Message<br/>VCARD Format?}
+    Start --> CheckMessageType{Message Type?}
+    
+    %% Audio Journaling Flow (NEW)
+    CheckMessageType -->|Audio/Voice Note| ReceiveAudio[Receive Audio Message<br/>messageType: ptt/audio]
+    ReceiveAudio --> DownloadAudio[WhatsApp Client<br/>Downloads Audio Media<br/>Base64 Encode]
+    DownloadAudio --> SendStatus1[Send Status:<br/>'Audio received. Transcribing...']
+    SendStatus1 --> UploadAudio[Upload Audio to<br/>AssemblyAI API<br/>/v2/upload]
+    UploadAudio --> TranscribeAudio[Create Transcription Job<br/>/v2/transcript<br/>Poll for Completion]
+    TranscribeAudio --> CheckTranscript{Transcription<br/>Completed?}
+    CheckTranscript -->|Error| AudioError[Send Error Message<br/>'Failed to transcribe']
+    AudioError --> WaitNext
+    CheckTranscript -->|Success| SendStatus2[Send Status:<br/>'Audio transcribed. Summarizing...']
+    SendStatus2 --> SummarizeText[Send Transcript to<br/>OpenAI API<br/>GPT Model]
+    SummarizeText --> CheckSummary{Summary<br/>Generated?}
+    CheckSummary -->|Error| SummaryError[Send Error Message<br/>'Failed to summarize']
+    SummaryError --> WaitNext
+    CheckSummary -->|Success| SaveJournal[Save to Database<br/>audio_journal_entries<br/>transcript + summary]
+    SaveJournal --> SendStatus3[Send Status:<br/>'Summary stored in Database.']
+    SendStatus3 --> SendSummary[Send AI-Generated<br/>Summary to User]
+    SendSummary --> WaitNext
     
     %% VCARD/Contact Sharing Flow
-    CheckMessageType -->|Yes - Contact Shared| DetectVCard[Detect VCARD Format]
+    CheckMessageType -->|VCARD Contact| DetectVCard[Detect VCARD Format]
     DetectVCard --> ExtractWAID[Extract WhatsApp ID<br/>from Contact Data]
     ExtractWAID --> CheckWAID{WAID<br/>Extracted?}
     CheckWAID -->|Yes| SaveReferral[Save Referral to Database<br/>referrer_phone → referred_phone]
@@ -63,8 +99,8 @@ flowchart TB
     ConfirmReferral --> WaitNext
     ErrorMsg --> WaitNext
     
-    %% Regular Message Flow - Check User State First (NEW)
-    CheckMessageType -->|No - Regular Message| CheckUserState{Is User in<br/>Reminder Setup<br/>State?}
+    %% Regular Message Flow - Check User State First
+    CheckMessageType -->|Text Message| CheckUserState{Is User in<br/>Reminder Setup<br/>State?}
     
     %% Reminder Time Input Flow (NEW)
     CheckUserState -->|Yes| ParseTime[Parse Time Input<br/>Supports: 18:00, 6 PM, 6pm, 6]
@@ -121,15 +157,17 @@ flowchart TB
     classDef referral fill:#fce4ec,stroke:#c2185b,stroke-width:2px
     classDef command fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
     classDef reminder fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
+    classDef audio fill:#e0f2f1,stroke:#004d40,stroke-width:2px
     classDef error fill:#ffebee,stroke:#c62828,stroke-width:2px
     
     class Start,WaitNext startEnd
-    class CheckMessageType,CheckUser,CheckUserState,ValidateCommand,RouteCommand,CheckWAID,CheckSendSuccess,ValidateTime decision
+    class CheckMessageType,CheckUser,CheckUserState,ValidateCommand,RouteCommand,CheckWAID,CheckSendSuccess,ValidateTime,CheckTranscript,CheckSummary decision
     class CreateUser,DetectCommand,FormatResponse,SendResponse process
     class DetectVCard,ExtractWAID,SaveReferral,SendOnboarding,ConfirmReferral referral
     class ShowHelp,GetGoals,RateGoal,BulkRate,WeekSummary,LookbackSummary command
     class AddGoal,SetState,PromptTime,ParseTime,SaveTime,ConfirmReminder reminder
-    class SendHelp,ErrorMsg,TimeError error
+    class ReceiveAudio,DownloadAudio,SendStatus1,UploadAudio,TranscribeAudio,SendStatus2,SummarizeText,SaveJournal,SendStatus3,SendSummary audio
+    class SendHelp,ErrorMsg,TimeError,AudioError,SummaryError error
 ```
 
 ## Flow Details
@@ -137,13 +175,75 @@ flowchart TB
 ### 1. Entry Point
 - **Start**: User sends any type of message via WhatsApp
 - Message is delivered to Flask `/process` endpoint as JSON payload
+- Payload includes: `from`, `message`, `messageType`, `audio` (if applicable)
 
 ### 2. Message Type Detection
-- **VCARD Format Check**: Determines if message is contact sharing (VCARD format)
-  - VCARD Format: `BEGIN:VCARD\n...TEL;type=CELL;waid=...END:VCARD`
-  - Regular Message: Plain text command
+- **Three-way Detection**: Determines message type (Audio, VCARD, or Text)
+  - **Audio/Voice Note**: `messageType` is 'ptt' (push-to-talk) or 'audio'
+  - **VCARD Format**: `BEGIN:VCARD\n...TEL;type=CELL;waid=...END:VCARD`
+  - **Text Message**: Plain text command
 
-### 3. User State Check (NEW - Purple Decision)
+### 3. Audio Journaling Flow (NEW - Teal Nodes)
+When audio message is detected:
+
+1. **Receive Audio**: WhatsApp client detects audio message type
+   - Message types: 'ptt' (voice note) or 'audio' (audio file)
+   - Triggers audio processing workflow
+
+2. **Download Audio**: WhatsApp client downloads media
+   - Downloads audio from WhatsApp servers
+   - Encodes audio data as base64
+   - Includes metadata: mimetype, filename, filesize, duration
+
+3. **Status Update 1**: "Audio received. Transcribing..."
+   - Immediate feedback to user
+   - Sent via WhatsApp API
+
+4. **Upload to AssemblyAI**: Upload audio for transcription
+   - Base64 decode audio data
+   - POST to `https://api.assemblyai.com/v2/upload`
+   - Returns upload URL
+
+5. **Create Transcription Job**: Start transcription
+   - POST to `https://api.assemblyai.com/v2/transcript`
+   - Submits uploaded audio URL
+   - Returns transcript ID
+
+6. **Poll for Completion**: Wait for transcription
+   - GET `https://api.assemblyai.com/v2/transcript/{id}`
+   - Poll every 3 seconds
+   - Status: queued → processing → completed/error
+   - Extract transcript text on completion
+
+7. **Status Update 2**: "Audio transcribed. Summarizing..."
+   - Notifies user of progress
+   - Sent via WhatsApp API
+
+8. **Summarize with OpenAI**: Generate AI summary
+   - Send transcript to OpenAI API
+   - Model: GPT-5-nano
+   - Prompt: "You are a helpful assistant that summarizes audio transcripts."
+   - Returns concise summary text
+
+9. **Save to Database**: Persist journal entry
+   - Insert into `audio_journal_entries` table
+   - Fields: user_id, transcription_text, summary_text, created_at
+   - Links to user via phone number
+
+10. **Status Update 3**: "Summary stored in Database."
+    - Confirms successful storage
+    - Sent via WhatsApp API
+
+11. **Send Summary**: Deliver final result
+    - Format: "Summary:\n{summary_text}"
+    - Sent to user via WhatsApp
+
+12. **Error Handling**:
+    - Transcription errors: "Sorry, something went wrong while processing your audio."
+    - Summary errors: Same error message
+    - Database errors: Logged, error message sent to user
+
+### 4. User State Check (Purple Decision)
 - **Before processing commands**: System checks if user is in a multi-step conversation
 - **Reminder Setup State**: If user is waiting to provide reminder time, prioritize that over command processing
 - **State Management**: Uses `user_states` table to track conversation context
@@ -151,7 +251,7 @@ flowchart TB
   - `waiting_for_reminder_time`: User needs to provide time for newly created goal
   - `normal`: Default state, process commands normally
 
-### 4. Reminder Time Input Flow (NEW - Purple Nodes)
+### 5. Reminder Time Input Flow (Purple Nodes)
 When user is in reminder setup state:
 1. **Parse Time Input**: Accept various formats (18:00, 6 PM, 6pm, 6)
    - Uses regex-based parser in `time_parser.py`
@@ -163,7 +263,7 @@ When user is in reminder setup state:
 4. **Confirm**: Send success message with formatted time
 5. **Background Service**: Reminder service will now send daily WhatsApp messages at specified time
 
-### 5. Contact Sharing Flow (Pink Nodes)
+### 6. Contact Sharing Flow (Pink Nodes)
 When VCARD is detected:
 1. **Extract WAID**: Parse WhatsApp ID from VCARD data using regex pattern `waid=(\d+)`
 2. **Save Referral**: Store referral record in database
@@ -175,7 +275,7 @@ When VCARD is detected:
 4. **Confirm**: Send thank you message to referrer
 5. **Wait**: Return to listening state
 
-### 6. Regular Message Flow (Green/Purple Nodes)
+### 7. Regular Message Flow (Green/Purple Nodes)
 
 #### User Management
 - **Check User**: Query database for existing user by phone number
@@ -206,13 +306,42 @@ Each command type is routed to specific handler:
 - **Send Response**: Deliver formatted message to user via WhatsApp
 - **Wait**: Return to listening state
 
-### 7. Error Handling
+### 8. Error Handling
+- **Audio Transcription Failures (NEW)**: If AssemblyAI transcription fails, send error message to user
+- **Audio Summarization Failures (NEW)**: If OpenAI summarization fails, send error message to user
+- **Audio Processing Errors (NEW)**: Generic error message for any audio processing failure
 - **Invalid VCARD**: If WAID cannot be extracted, send error message
 - **Invalid Command**: Send help message with command list
-- **Invalid Time Format (NEW)**: If time parsing fails, show examples and ask again
+- **Invalid Time Format**: If time parsing fails, show examples and ask again
 - **API Failures**: Log error but confirm referral action to user
 
 ## Command Examples
+
+### Audio Journaling (NEW)
+```text
+[User sends voice note via WhatsApp - e.g., recording about their day]
+
+Bot: Audio received. Transcribing...
+     [Processing... 10-30 seconds depending on audio length]
+
+Bot: Audio transcribed. Summarizing...
+     [Processing... 5-10 seconds]
+
+Bot: Summary stored in Database.
+
+Bot: Summary:
+     Today was a productive day. You completed your morning workout, 
+     had a successful team meeting at work, and spent quality time 
+     with family in the evening. You're feeling accomplished and 
+     grateful for the day's progress.
+     
+[Full transcript and summary are saved to database for future reference]
+```
+
+**Audio Format Support:**
+- Voice notes (ptt - push-to-talk)
+- Audio files
+- Common formats: OGG, MP3, WAV, M4A
 
 ### Regular Commands
 ```text
@@ -267,31 +396,43 @@ Bot (at 6:30 AM): ⏰ Reminder: 🏃 Morning run
 3. **goal_ratings** - Daily goal ratings
 4. **referrals** - Referral tracking
 5. **user_states** - Conversation state tracking
+6. **audio_journal_entries (NEW)** - Audio journal transcripts and summaries
 
 ### CRUD Operations
-- **CREATE**: New users (with timezone), goals (with reminder_time and boost_level), ratings, referrals, user states
-- **READ**: Fetch goals (with reminder times and boost levels), ratings for summaries, user states
+- **CREATE**: New users (with timezone), goals (with reminder_time and boost_level), ratings, referrals, user states, **audio journal entries (NEW)**
+- **READ**: Fetch goals (with reminder times and boost levels), ratings for summaries, user states, **audio journal entries (NEW)**
 - **UPDATE**: Goal reminder times, user timezones
 - **DELETE**: Soft delete for goals (is_active flag), clear user states after completion
 
 ## External Dependencies
-- **WhatsApp Messaging Platform**: Message delivery
+- **WhatsApp Messaging Platform**: Message delivery and audio media download
 - **Flask Backend**: Command processing (port 5000)
 - **SQLite Database**: Data persistence
 - **WhatsApp API Service**: Automated message sending (port 3000)
-- **Background Reminder Service**: Daemon thread for sending daily reminders (NEW)
-- **phonenumbers Library**: Timezone detection from phone numbers (NEW)
+- **AssemblyAI API (NEW)**: Audio transcription service
+- **OpenAI API (NEW)**: Text summarization using GPT models
+- **Background Reminder Service**: Daemon thread for sending daily reminders
+- **phonenumbers Library**: Timezone detection from phone numbers
 
 ## Key Decision Points
-1. **VCARD Detection**: Enables referral vs. command processing
-2. **User State Check (NEW)**: Determines if user is in multi-step conversation (e.g., reminder setup)
-3. **User Existence**: Determines if user creation needed (with timezone detection)
-4. **Command Validation**: Routes to appropriate handler or help message
-5. **Command Type**: Routes to specific execution logic
-6. **Time Validation (NEW)**: Ensures valid time format before saving reminder
+1. **Message Type Detection (NEW)**: Determines if message is Audio, VCARD, or Text
+2. **Audio Processing (NEW)**: Routes audio messages to transcription and summarization pipeline
+3. **VCARD Detection**: Enables referral vs. command processing
+4. **User State Check**: Determines if user is in multi-step conversation (e.g., reminder setup)
+5. **User Existence**: Determines if user creation needed (with timezone detection)
+6. **Command Validation**: Routes to appropriate handler or help message
+7. **Command Type**: Routes to specific execution logic
+8. **Time Validation**: Ensures valid time format before saving reminder
+9. **Transcription Status (NEW)**: Determines if transcription succeeded or failed
+10. **Summarization Status (NEW)**: Determines if AI summary generation succeeded or failed
 
 ## Notes
 - All message processing is synchronous (no async/queue)
+- **Audio processing (NEW)**: Synchronous transcription and summarization with real-time status updates
+- **Audio polling (NEW)**: Polls AssemblyAI every 3 seconds until transcription completes
+- **Audio encoding (NEW)**: Base64 encoding used for audio data transfer between client and backend
+- **AI Summarization (NEW)**: Uses OpenAI GPT-5-nano model for generating concise summaries
+- **Audio storage (NEW)**: Both full transcript and AI summary are persisted to database
 - **Reminder service runs in background daemon thread**, started at application initialization
 - **Reminder service is timezone-aware**: Uses user's detected timezone for accurate scheduling
 - **Efficient reminder scheduling**: Calculates next reminder time and sleeps until due (not constant polling)

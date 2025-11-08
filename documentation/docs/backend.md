@@ -35,6 +35,7 @@ Main dependencies:
 - `python-dotenv`
 - `requests`
 - `phonenumbers` - Timezone detection from phone numbers
+- `openai` - AI summarization for audio journals
 
 Development dependencies (install with `uv sync --extra dev`):
 
@@ -46,12 +47,25 @@ Development dependencies (install with `uv sync --extra dev`):
 
 1. **POST `/process`**
 
-    - Main webhook endpoint for processing incoming messages.
-    - **Request Body:**
+    - Main webhook endpoint for processing incoming messages (text, audio, or VCARD).
+    - **Request Body (Text/VCARD):**
      ```json
      {
        "message": "<message content or VCARD data>",
-       "from": "<sender phone number>"
+       "from": "<sender phone number>",
+       "messageType": "chat"
+     }
+     ```
+    - **Request Body (Audio):**
+     ```json
+     {
+       "from": "<sender phone number>",
+       "messageType": "ptt",
+       "audio": {
+         "data": "<base64 encoded audio>",
+         "mimetype": "audio/ogg",
+         "duration": 15
+       }
      }
      ```
     - **Response:** Plain text string with the bot's reply.
@@ -75,6 +89,18 @@ Commands are routed via `process_message(message, sender)` in the backend.
 | `lookback [n]` | Show the last n days summary (default 7)        | lookback 5                 |
 | `rate x y`     | Rate goal x with y (1=fail,2=partial,3=success) | rate 2 3                   |
 | `[digits]`     | Rate all goals at once                          | 123                        |
+
+### Audio Journaling
+
+Send voice notes to journal your day. The bot transcribes and summarizes your audio automatically.
+
+1. **User:** Sends voice note via WhatsApp
+2. **Bot:** "Audio received. Transcribing..."
+3. **Bot:** "Audio transcribed. Summarizing..."
+4. **Bot:** Returns AI-generated summary
+5. Saves full transcript + summary to database
+
+**Processing:** AssemblyAI (transcription) → OpenAI GPT (summarization) → Database storage
 
 ### Multi-Step Conversation: Goal with Reminders
 
@@ -154,6 +180,45 @@ Sends daily WhatsApp reminders for goals at user-specified times.
 
 ---
 
+## Audio Journaling System
+
+Transcribes and summarizes audio messages using AI.
+
+### Core Modules
+
+| Module | Functions | Purpose |
+|--------|-----------|---------|
+| `process_audio.py` | `process_audio()` | Main workflow orchestrator<br>Status updates & error handling |
+| `helpers/transcribe_audio.py` | `transcribe_audio()` | Upload to AssemblyAI<br>Poll for completion<br>Return transcript |
+| `helpers/summarize_transcript.py` | `summarize_transcript()` | Send to OpenAI API<br>Generate summary |
+| `data_access/audio_journal.py` | `create_audio_journal_entry()` | Save transcript + summary to DB |
+| `utils/api_config.py` | - | AssemblyAI configuration |
+
+### How It Works
+
+1. **Audio Reception:** WhatsApp client detects audio message → Downloads & encodes as base64
+2. **Status Update 1:** "Audio received. Transcribing..."
+3. **Transcription:** Upload to AssemblyAI → Poll every 3s until complete
+4. **Status Update 2:** "Audio transcribed. Summarizing..."
+5. **Summarization:** Send transcript to OpenAI GPT-5-nano → Get summary
+6. **Storage:** Save both transcript and summary to `audio_journal_entries` table
+7. **Status Update 3:** "Summary stored in Database."
+8. **Delivery:** Send AI-generated summary to user
+
+### Supported Audio Formats
+
+- Voice notes (ptt - push-to-talk)
+- Audio files
+- Formats: OGG, MP3, WAV, M4A
+
+### Error Handling
+
+- Transcription failures → User-friendly error message
+- Summarization failures → User-friendly error message
+- All errors logged for debugging
+
+---
+
 ## Database Schema
 
 ### Tables Overview
@@ -164,7 +229,8 @@ Sends daily WhatsApp reminders for goals at user-specified times.
 | `user_goals` | Goal definitions | `user_id`, `goal_emoji`, `goal_description`, `is_active`, **`reminder_time`**, **`boost_level`** |
 | `goal_ratings` | Daily ratings | `user_goal_id`, `rating` (1-3), `date` |
 | `referrals` | Referral tracking | `referrer_phone`, `referred_phone`, `referred_waid`, `status` |
-| `user_states` | **Conversation state** | **`user_phone`, `state`, `temp_data`** |
+| `user_states` | Conversation state | `user_phone`, `state`, `temp_data` |
+| **`audio_journal_entries`** | **Audio journals** | **`user_id`, `transcription_text`, `summary_text`, `created_at`** |
 
 <details>
 <summary>Full Schema SQL</summary>
@@ -214,6 +280,15 @@ CREATE TABLE IF NOT EXISTS user_states (
     temp_data TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS audio_journal_entries (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    transcription_text TEXT,
+    summary_text TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user (id)
+);
 ```
 
 </details>
@@ -228,6 +303,7 @@ backend/
   │   ├── db/                # Database layer
   │   │   ├── data_access/   # Data access modules with unified imports
   │   │   │   ├── __init__.py        # Unified interface
+  │   │   │   ├── audio_journal.py   # Audio journal DB operations
   │   │   │   └── user_goals/        # User goals domain
   │   │   │       ├── __init__.py
   │   │   │       └── get_user_goals.py
@@ -245,6 +321,9 @@ backend/
   │   │   └── user_timezone.py       # User timezone management
   │   ├── logic/             # Main bot logic & helpers
   │   │   ├── helpers/       # Command-specific logic
+  │   │   │   ├── transcribe_audio.py    # AssemblyAI transcription
+  │   │   │   └── summarize_transcript.py # OpenAI summarization
+  │   │   ├── process_audio.py       # Audio processing workflow
   │   │   └── process_message.py     # Message routing & state checking
   │   ├── routes/            # Flask blueprints and routes
   │   │   ├── web.py         # Emulator route (/emulator)
@@ -252,8 +331,9 @@ backend/
   │   ├── templates/         # Web UI (emulator)
   │   │   └── index.html     # Emulator interface
   │   └── utils/             # Config, constants, messages
-  │       ├── config.py       # Goals config (DEFAULT_BOOST_LEVEL)
-  │       └── messages.py     # Centralized user-facing messages
+  │       ├── api_config.py    # External API configuration (AssemblyAI)
+  │       ├── config.py        # Goals config (DEFAULT_BOOST_LEVEL)
+  │       └── messages.py      # Centralized user-facing messages
   ├── db/                    # SQLite file and schema
   │   ├── life_bot.db        # Database file
   │   └── schema.sql         # Database schema (includes user_states)
@@ -271,11 +351,15 @@ Create `.env` in `backend/` directory:
 
 ```ini
 WHATSAPP_API_URL=http://localhost:3000
+ASSEMBLYAI_API_KEY=your_assemblyai_api_key
+OPENAI_API_KEY=your_openai_api_key
 ```
 
 | Variable             | Default                  | Purpose                                         |
 |----------------------|-------------------------|-------------------------------------------------|
 | `WHATSAPP_API_URL`   | `http://localhost:3000` | WhatsApp client endpoint for referral messages   |
+| **`ASSEMBLYAI_API_KEY`** | - | **AssemblyAI API key for audio transcription** |
+| **`OPENAI_API_KEY`** | - | **OpenAI API key for text summarization** |
 
 ### Development
 
@@ -302,6 +386,8 @@ For Basic Operation:
 For Full Feature Set:
 
 - WhatsApp Client service running on port 3000 (for referrals & reminders)
+- **AssemblyAI API account** (for audio transcription)
+- **OpenAI API account** (for AI summarization)
 - See [WhatsApp Client](whatsapp-client.md) documentation
 
 ### Background Services

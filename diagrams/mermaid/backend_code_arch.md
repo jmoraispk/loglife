@@ -1,10 +1,12 @@
 # Backend Code Architecture
 
 ## Overview
-This diagram shows the complete backend architecture for the Life Bot application, including the recent additions of **Contact Sharing**, **Referral Tracking**, and **Goal Reminders** features.
+This diagram shows the complete backend architecture for the Life Bot application, including **Audio Journaling**, **Contact Sharing**, **Referral Tracking**, and **Goal Reminders** features.
 
-**Recent Refactoring (Code Quality):**
+**Recent Additions:**
+- **Audio Journaling Feature**: Complete audio message processing pipeline with transcription and AI summarization
 - Route modularization: Endpoints moved to Blueprint modules (`app/routes/web.py`, `app/routes/webhook.py`)
+- Audio message routing: WhatsApp client detects and downloads audio, backend processes via AssemblyAI and OpenAI
 - VCARD processing moved: Logic migrated from `webhook.py` to `process_message.py` for cleaner separation of concerns
 - Data access module structure: Added `__init__.py` files for unified import interface (`app/db/data_access/`)
 - Function naming improvements (VCARD-related functions)
@@ -14,31 +16,40 @@ This diagram shows the complete backend architecture for the Life Bot applicatio
 
 ## Key Features
 
-### 1. Goal Reminders System (NEW)
+### 1. Audio Journaling System (NEW)
+- **Audio Message Processing**: Users can send audio messages for journaling
+- **Speech-to-Text**: Automatic transcription using AssemblyAI API
+- **AI Summarization**: Transcript summarization using OpenAI GPT models
+- **Real-time Status Updates**: Users receive status messages during processing (receiving, transcribing, summarizing)
+- **Persistent Storage**: Both transcripts and summaries stored in database
+- **Error Handling**: Graceful error handling with user-friendly messages
+
+### 2. Goal Reminders System
 - **Daily Reminders**: Users can set reminder times when adding goals
 - **Timezone Support**: Automatic timezone detection from phone numbers
 - **Flexible Time Input**: Supports multiple formats (18:00, 6 PM, 6pm, etc.)
 - **Background Service**: Efficient thread-based service sends WhatsApp reminders
 - **State Management**: Multi-step conversation flow for reminder setup
 
-### 2. Contact Sharing & Referral System
+### 3. Contact Sharing & Referral System
 - **VCARD Detection**: Automatically detects when users share contacts via WhatsApp
 - **WAID Extraction**: Extracts WhatsApp ID from contact data
 - **Referral Tracking**: Saves referral relationships in database
 - **Auto-Onboarding**: Automatically sends welcome message to referred contacts
 
-### 3. Goal Management
+### 4. Goal Management
 - Track personal goals with emojis and descriptions
 - **Boost levels**: Each goal has a boost level (default: 1) displayed when listing goals
 - Rate goals individually or in bulk (1-3 scale)
 - View weekly summaries and lookback reports
 
-### 4. Database Schema
+### 5. Database Schema
 - `user`: User information with timezone
 - `user_goals`: Goal definitions with reminder times and boost levels
 - `goal_ratings`: Daily goal ratings
 - `referrals`: Referral tracking
 - `user_states`: Conversation state tracking
+- `audio_journal_entries`: Audio journal transcripts and summaries
 
 ## Architecture Flow
 
@@ -64,6 +75,38 @@ This diagram shows the complete backend architecture for the Life Bot applicatio
    - Queries database for due reminders (timezone-aware)
    - Sends WhatsApp message via `whatsapp_api.py`
    - Caches sent reminders to avoid duplicates
+
+### Audio Journaling Flow (NEW)
+1. **Audio Reception**:
+   - User sends audio message (voice note/audio file) via WhatsApp
+   - WhatsApp client detects audio message type ('ptt' or 'audio')
+   - Client downloads media and extracts audio data (base64 encoded)
+   - Sends payload with messageType, audio data, mimetype to backend
+
+2. **Audio Processing**:
+   - `webhook.py` `/process` endpoint receives audio payload
+   - Detects messageType is 'ptt' or 'audio' with audio data
+   - Routes to `process_audio.py` for processing
+   - Sends status message: "Audio received. Transcribing..."
+
+3. **Transcription**:
+   - `process_audio.py` calls `transcribe_audio.py`
+   - Decodes base64 audio data
+   - Uploads audio to AssemblyAI via `/v2/upload` endpoint
+   - Submits transcription job via `/v2/transcript` endpoint
+   - Polls transcription status until completion
+   - Returns transcript text
+
+4. **Summarization**:
+   - Sends status message: "Audio transcribed. Summarizing..."
+   - `process_audio.py` calls `summarize_transcript.py`
+   - Sends transcript to OpenAI API (gpt-5-nano model)
+   - Receives summary text from AI
+
+5. **Storage & Response**:
+   - Saves transcript and summary to `audio_journal_entries` table
+   - Sends status message: "Summary stored in Database."
+   - Returns final summary to user via WhatsApp
 
 ### Contact Sharing Flow
 1. User shares contact via WhatsApp → VCARD format received
@@ -109,6 +152,14 @@ graph TB
         user_timezone["user_timezone.py<br/>• Save User Timezone<br/>• Update Existing Users"]
     end
 
+    subgraph audio_journal["Audio Journaling System (app/logic/) - NEW"]
+        process_audio["process_audio.py<br/>• Audio Processing Workflow<br/>• Status Messaging<br/>• Error Handling"]
+        transcribe_audio["helpers/transcribe_audio.py<br/>• Upload to AssemblyAI<br/>• Poll Transcription<br/>• Return Transcript"]
+        summarize_transcript["helpers/summarize_transcript.py<br/>• OpenAI API Call<br/>• Generate Summary"]
+        audio_journal_data["data_access/audio_journal.py<br/>• create_audio_journal_entry()"]
+        api_config["utils/api_config.py<br/>• AssemblyAI Config<br/>• API Headers"]
+    end
+
     subgraph contact_referral["Contact & Referral System (app/helpers/)"]
         contact_detector["contact_detector.py<br/>• VCARD Detection<br/>• WAID Extraction"]
         referral_tracker["referral_tracker.py<br/>• Save Referrals<br/>• Get Referral Count"]
@@ -135,12 +186,13 @@ graph TB
     end
 
     subgraph crud["Data Access<br/>(app/db/data_access/)"]
-        data_access_init["__init__.py<br/>Unified Interface"]
+        data_access_init["__init__.py<br/>Unified Interface<br/>• get_user_goals<br/>• create_audio_journal_entry"]
         get_goals["user_goals/<br/>__init__.py<br/>get_user_goals.py"]
+        audio_data_access["audio_journal.py<br/>Audio Journal DB Ops"]
     end
 
     subgraph schema["Database Schema (db/)"]
-        schema_sql["schema.sql<br/>• user (+ timezone)<br/>• user_goals (+ reminder_time)<br/>• goal_ratings<br/>• referrals<br/>• user_states"]
+        schema_sql["schema.sql<br/>• user (+ timezone)<br/>• user_goals (+ reminder_time)<br/>• goal_ratings<br/>• referrals<br/>• user_states<br/>• audio_journal_entries"]
         life_bot_db["life_bot.db<br/>SQLite Database"]
     end
 
@@ -155,7 +207,7 @@ graph TB
 
     %% External connections
     browser -->|"GET Request"| web_routes
-    whatsapp -->|"JSON POST<br/>{message, from}"| webhook_routes
+    whatsapp -->|"JSON POST<br/>{message, from, messageType, audio}"| webhook_routes
     
     %% Flask routing
     main -->|"registers"| routes
@@ -163,7 +215,16 @@ graph TB
     web_routes -->|"renders"| index
     
     %% Process endpoint flow
-    webhook_routes -->|"routes to"| process_msg
+    webhook_routes -->|"routes text"| process_msg
+    webhook_routes -->|"routes audio"| process_audio
+    
+    %% Audio journaling flow
+    process_audio -->|"decodes & uploads"| transcribe_audio
+    transcribe_audio -->|"uses config"| api_config
+    process_audio -->|"summarizes"| summarize_transcript
+    process_audio -->|"sends status"| whatsapp_api
+    process_audio -->|"saves entry"| audio_journal_data
+    audio_journal_data -->|"writes to"| sqlite
     
     %% Reminder system flow
     reminder_service -->|"queries goals<br/>with reminder_time"| sqlite
@@ -189,12 +250,14 @@ graph TB
     %% Goal helpers flow
     helpers -->|"queries"| data_access_init
     data_access_init -->|"imports from"| get_goals
+    data_access_init -->|"imports from"| audio_data_access
     helpers -->|"reads config"| config_py
     helpers -->|"uses messages"| messages_py
     webhook_routes -->|"uses messages"| messages_py
     
     %% Database flow
     get_goals -->|"queries"| sqlite
+    audio_data_access -->|"queries"| sqlite
     helpers -->|"saves ratings"| sqlite
     sqlite -->|"connects to"| life_bot_db
     life_bot_db -.->|"schema defined by"| schema_sql
@@ -203,6 +266,7 @@ graph TB
     style external fill:#e1f5fe,stroke:#01579b,stroke-width:2px
     style flask fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
     style reminder_system fill:#e1bee7,stroke:#6a1b9a,stroke-width:2px
+    style audio_journal fill:#e0f2f1,stroke:#004d40,stroke-width:2px
     style contact_referral fill:#fff9c4,stroke:#f57f17,stroke-width:2px
     style logic fill:#e8f5e8,stroke:#1b5e20,stroke-width:2px
     style helpers fill:#f0f8f0,stroke:#1b5e20,stroke-width:1px
@@ -215,7 +279,16 @@ graph TB
 
 ## Component Details
 
-### Reminder System (Purple Box - NEW)
+### Audio Journaling System (Teal Box - NEW)
+| Component | Description | Key Functions |
+|-----------|-------------|---------------|
+| `process_audio.py` | Main audio processing orchestrator that handles the entire workflow | `process_audio()` - coordinates transcription, summarization, storage, and user notifications |
+| `helpers/transcribe_audio.py` | Handles audio transcription using AssemblyAI API | `transcribe_audio()` - uploads audio, creates transcription job, polls for completion |
+| `helpers/summarize_transcript.py` | Summarizes transcripts using OpenAI API | `summarize_transcript()` - sends transcript to GPT model, returns summary |
+| `data_access/audio_journal.py` | Database operations for audio journal entries | `create_audio_journal_entry()` - saves transcript and summary to database |
+| `utils/api_config.py` | Centralizes external API configuration | `ASSEMBLYAI_BASE_URL`, `ASSEMBLYAI_HEADERS` |
+
+### Reminder System (Purple Box)
 | Component | Description | Key Functions |
 |-----------|-------------|---------------|
 | `reminder_service.py` | Background thread service for sending reminders | `start_reminder_service()`, `reminder_worker()`, `check_and_send_reminders()`, `calculate_next_reminder_seconds()` |
@@ -237,7 +310,7 @@ graph TB
 |-----------|-------------|
 | `main.py` | Application entry point that initializes the Flask app, registers blueprints (web_bp, webhook_bp), initializes database, and **starts reminder service thread** |
 | `app/routes/web.py` | Web routes blueprint containing `/emulator` GET endpoint for the emulator interface |
-| `app/routes/webhook.py` | Webhook routes blueprint containing `/process` POST endpoint - clean request handler that routes all messages to process_message.py |
+| `app/routes/webhook.py` | Webhook routes blueprint containing `/process` POST endpoint - routes text messages to `process_message.py` and **audio messages (messageType: 'ptt'/'audio') to `process_audio.py`** |
 
 ### Message Processing (Green Box)
 | Component | Description |
@@ -274,13 +347,18 @@ graph TB
 | `user_goals` | Goal definitions with emoji, description, **reminder_time**, and **boost_level** (default: 1) | **✓ Updated** |
 | `goal_ratings` | Daily goal ratings (1-3 scale) | No |
 | `referrals` | Referral tracking (referrer → referred) | No |
-| `user_states` | **User conversation state tracking (user_phone, state, temp_data)** | **✓ New** |
+| `user_states` | User conversation state tracking (user_phone, state, temp_data) | No |
+| `audio_journal_entries` | **Audio journal entries (user_id, transcription_text, summary_text, created_at)** | **✓ New** |
 
 ## Technology Stack
 - **Backend Framework**: Flask (Python)
 - **Database**: SQLite
-- **External API**: WhatsApp API (Node.js service on port 3000)
+- **External APIs**: 
+  - WhatsApp API (Node.js service on port 3000)
+  - **AssemblyAI API** (audio transcription)
+  - **OpenAI API** (text summarization - GPT-5-nano model)
 - **Message Format**: VCARD for contact sharing
+- **Audio Processing**: Base64 encoding/decoding for audio data transfer
 - **Background Services**: Threading for reminder service (daemon thread)
 - **Timezone Support**: `zoneinfo` and `phonenumbers` libraries for timezone detection
 - **Time Parsing**: Regex-based flexible time input parsing

@@ -83,6 +83,46 @@
         }
         @media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
 
+        .sidebar {
+            position: sticky;
+            top: 100px;
+            align-self: start;
+        }
+
+        .sidebar-scroll {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            max-height: calc(100vh - 140px);
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-scroll::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.4);
+            border-radius: 999px;
+        }
+
+        @media (max-width: 900px) {
+            .sidebar-scroll {
+                max-height: none;
+                overflow: visible;
+                padding-right: 0;
+            }
+            .sidebar {
+                position: static;
+                top: auto;
+            }
+        }
+
         .card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -264,47 +304,78 @@
 
     <div class="container">
         <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Quick Presets</div>
-                    <div class="card-subtitle">Insert a sample message with one click</div>
-                </div>
-                <div class="card-body">
-                    <div class="preset-list">
-                        <button class="preset-btn" data-msg="goals">
-                            <div class="preset-title">Goals</div>
-                            <div class="preset-desc">Shows all current goals</div>
-                        </button>
-                        <div class="preset-row">
-                            <button class="preset-btn" data-msg="add goal 📖 Read 20 pages daily">
-                                <div class="preset-title">Add Goal</div>
-                                <div class="preset-desc">Adds a new daily reading goal</div>
-                            </button>
-                            <button class="preset-btn" data-msg="6 PM">
-                                <div class="preset-title">Reminder Time</div>
-                                <div class="preset-desc">Inserts a sample reminder time</div>
-                            </button>
+            <div class="sidebar">
+                <div class="sidebar-scroll">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Quick Presets</div>
+                            <div class="card-subtitle">Insert a sample message with one click</div>
                         </div>
-                        <button class="preset-btn" data-msg="rate 1 3">
-                            <div class="preset-title">Rate Goal</div>
-                            <div class="preset-desc">Rates a goal with a score</div>
-                        </button>
-                        <button class="preset-btn" data-msg="week">
-                            <div class="preset-title">Weekly Summary</div>
-                            <div class="preset-desc">Generates a progress summary</div>
-                        </button>
-                        <button class="preset-btn" data-msg="31232">
-                            <div class="preset-title">Rate All Goals</div>
-                            <div class="preset-desc">Rate all goals at once</div>
-                        </button>
-                        <button class="preset-btn" data-msg="lookback 7">
-                            <div class="preset-title">Lookback</div>
-                            <div class="preset-desc">Show last 7 days</div>
-                        </button>
-                        <button class="preset-btn" data-msg="help">
-                            <div class="preset-title">Help</div>
-                            <div class="preset-desc">Show available commands</div>
-                        </button>
+                        <div class="card-body">
+                            <div class="preset-list">
+                                <button class="preset-btn" data-msg="goals">
+                                    <div class="preset-title">Goals</div>
+                                    <div class="preset-desc">Shows all current goals</div>
+                                </button>
+                                <div class="preset-row">
+                                    <button class="preset-btn" data-msg="add goal 📖 Read 20 pages daily">
+                                        <div class="preset-title">Add Goal</div>
+                                        <div class="preset-desc">Adds a new daily reading goal</div>
+                                    </button>
+                                    <button class="preset-btn" data-msg="6 PM">
+                                        <div class="preset-title">Reminder Time</div>
+                                        <div class="preset-desc">Inserts a sample reminder time</div>
+                                    </button>
+                                </div>
+                                <button class="preset-btn" data-msg="rate 1 3">
+                                    <div class="preset-title">Rate Goal</div>
+                                    <div class="preset-desc">Rates a goal with a score</div>
+                                </button>
+                                <button class="preset-btn" data-msg="week">
+                                    <div class="preset-title">Weekly Summary</div>
+                                    <div class="preset-desc">Generates a progress summary</div>
+                                </button>
+                                <button class="preset-btn" data-msg="31232">
+                                    <div class="preset-title">Rate All Goals</div>
+                                    <div class="preset-desc">Rate all goals at once</div>
+                                </button>
+                                <button class="preset-btn" data-msg="lookback 7">
+                                    <div class="preset-title">Lookback</div>
+                                    <div class="preset-desc">Show last 7 days</div>
+                                </button>
+                                <button class="preset-btn" data-msg="help">
+                                    <div class="preset-title">Help</div>
+                                    <div class="preset-desc">Show available commands</div>
+                                </button>
+                                <button class="preset-btn" id="testAudioBtn">
+                                    <div class="preset-title">Send Audio</div>
+                                    <div class="preset-desc">Record & send audio</div>
+                                </button>
+                                <button class="preset-btn" id="stopAudioBtn" style="display:none; background: #fee2e2; border-color: #fca5a5;">
+                                    <div class="preset-title">⏹️ Stop Recording</div>
+                                    <div class="preset-desc">Stop and send audio</div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-title">Share Contact</div>
+                            <div class="card-subtitle">Enter WhatsApp ID (number) to emulate VCARD sharing</div>
+                        </div>
+                        <div class="card-body">
+                            <div class="field">
+                                <label class="label" for="waidInput">WhatsApp ID (number)
+                                    <span class="info-badge" title="Include country code, no + or spaces. Example: 923325727426">i</span>
+                                </label>
+                                <input class="input" id="waidInput" name="waidInput" placeholder="e.g., 923325727426" />
+                            </div>
+                            
+                            <div class="actions">
+                                <button type="button" class="btn" id="sendContactBtn">Send Contact</button>
+                                <button type="button" class="btn btn-ghost" id="fillSampleContactBtn">Fill Sample</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -367,30 +438,6 @@
             </div>
         </div>
 
-        <div style="height: 24px"></div>
-
-        <div class="grid">
-            <div class="card">
-                <div class="card-header">
-                    <div class="card-title">Share Contact</div>
-                    <div class="card-subtitle">Enter WhatsApp ID (number) to emulate VCARD sharing</div>
-                </div>
-                <div class="card-body">
-                    <div class="field">
-                        <label class="label" for="waidInput">WhatsApp ID (number)
-                            <span class="info-badge" title="Include country code, no + or spaces. Example: 923325727426">i</span>
-                        </label>
-                        <input class="input" id="waidInput" name="waidInput" placeholder="e.g., 923325727426" />
-                    </div>
-                    
-                    <div class="actions">
-                        <button type="button" class="btn" id="sendContactBtn">Send Contact</button>
-                        <button type="button" class="btn btn-ghost" id="fillSampleContactBtn">Fill Sample</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- <div class="footer">Designed for internal testing • /process endpoint</div> -->
     </div>
 
@@ -417,9 +464,13 @@
         const waidInputEl = byId('waidInput');
         const sendContactBtn = byId('sendContactBtn');
         const fillSampleContactBtn = byId('fillSampleContactBtn');
+        const testAudioBtn = byId('testAudioBtn');
+        const stopAudioBtn = byId('stopAudioBtn');
         
 
         let currentView = 'formatted';
+        let mediaRecorder = null;
+        let audioChunks = [];
 
         // Quick Presets
         document.querySelectorAll('.preset-btn').forEach(btn => {
@@ -679,6 +730,157 @@
                 responseContent.textContent = 'Network error: ' + (err && err.message ? err.message : 'Unknown');
                 setStatus('error', 'Network Error');
             }
+        });
+
+        // Start recording audio
+        testAudioBtn.addEventListener('click', async () => {
+            try {
+                // Request microphone access
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                
+                // Initialize MediaRecorder with appropriate format
+                const options = { mimeType: 'audio/webm;codecs=opus' };
+                
+                // Fallback for browsers that don't support webm/opus
+                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                    options.mimeType = 'audio/webm';
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        options.mimeType = '';  // Let browser choose
+                    }
+                }
+                
+                mediaRecorder = new MediaRecorder(stream, options.mimeType ? options : undefined);
+                audioChunks = [];
+                
+                // Track recording start time for duration
+                const recordingStartTime = Date.now();
+                mediaRecorder.recordingStartTime = recordingStartTime;
+                
+                // Collect audio data
+                mediaRecorder.addEventListener('dataavailable', event => {
+                    audioChunks.push(event.data);
+                });
+                
+                // Start recording
+                mediaRecorder.start();
+                
+                // Update UI
+                testAudioBtn.style.display = 'none';
+                stopAudioBtn.style.display = 'block';
+                setStatus('loading', '🔴 Recording...');
+                statusPill.style.display = 'inline-block';
+                
+            } catch (err) {
+                setStatus('error', 'Microphone access denied');
+                statusPill.style.display = 'inline-block';
+                console.error('Error accessing microphone:', err);
+            }
+        });
+
+        // Stop recording and send audio
+        stopAudioBtn.addEventListener('click', async () => {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                return;
+            }
+            
+            // Calculate duration
+            const recordingDuration = Math.round((Date.now() - mediaRecorder.recordingStartTime) / 1000);
+            
+            // Stop recording
+            mediaRecorder.stop();
+            
+            // Stop all tracks to release the microphone
+            mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            
+            mediaRecorder.addEventListener('stop', async () => {
+                // Get the mimetype that was actually used
+                const actualMimeType = mediaRecorder.mimeType || 'audio/webm';
+                
+                // Create audio blob from chunks
+                const audioBlob = new Blob(audioChunks, { type: actualMimeType });
+                
+                // Convert to base64
+                const reader = new FileReader();
+                reader.readAsDataURL(audioBlob);
+                
+                reader.onloadend = async () => {
+                    const base64Audio = reader.result.split(',')[1]; // Remove data:audio/...;base64, prefix
+                    
+                    // Prepare payload matching WhatsApp client format
+                    const payload = {
+                        from: senderEl.value,
+                        message: null,  // Audio messages have null message body
+                        messageType: 'ptt',  // 'ptt' for voice note (push-to-talk)
+                        audio: {
+                            mimetype: actualMimeType,
+                            filename: null,
+                            data: base64Audio,
+                            filesize: audioBlob.size,
+                            duration: recordingDuration,
+                            isVoiceNote: true
+                        }
+                    };
+                    
+                    // UI loading state
+                    setStatus('loading', 'Sending Audio');
+                    responseBox.style.display = 'block';
+                    previewToggle.style.display = 'inline-flex';
+                    responseContent.textContent = '';
+                    waBubble.textContent = '—';
+                    copyBtn.style.display = 'none';
+                    
+                    // Show current view
+                    if (currentView === 'actual') {
+                        actualView.style.display = 'block';
+                        formattedView.style.display = 'none';
+                    } else {
+                        actualView.style.display = 'none';
+                        formattedView.style.display = 'block';
+                    }
+                    
+                    const start = performance.now();
+                    try {
+                        const res = await fetch('/process', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+                        
+                        const ok = res.ok;
+                        let text = '';
+                        let formattedText = '';
+                        try {
+                            const data = await res.clone().json();
+                            text = JSON.stringify(data, null, 2);
+                            formattedText = (data && (data.message || data.text || data.response)) || text;
+                        } catch {
+                            text = await res.text();
+                            formattedText = text;
+                        }
+                        
+                        const ms = Math.max(1, Math.round(performance.now() - start));
+                        metaStatus.textContent = 'Status: ' + res.status + (ok ? ' OK' : ' ERROR');
+                        metaTime.textContent = 'Time: ' + ms + ' ms';
+                        metaSize.textContent = 'Size: ' + (text || '').length + ' chars';
+                        
+                        responseContent.textContent = text || '(empty response)';
+                        waBubble.innerHTML = toWhatsAppPreview(formattedText);
+                        setStatus(ok ? 'success' : 'error', ok ? 'Success' : 'Error');
+                        copyBtn.style.display = 'inline-block';
+                    } catch (err) {
+                        const ms = Math.max(1, Math.round(performance.now() - start));
+                        metaStatus.textContent = 'Status: NETWORK ERROR';
+                        metaTime.textContent = 'Time: ' + ms + ' ms';
+                        metaSize.textContent = 'Size: 0 chars';
+                        responseContent.textContent = 'Network error: ' + (err && err.message ? err.message : 'Unknown');
+                        setStatus('error', 'Network Error');
+                    } finally {
+                        // Reset UI
+                        testAudioBtn.style.display = 'block';
+                        stopAudioBtn.style.display = 'none';
+                    }
+                };
+            });
         });
 
         
