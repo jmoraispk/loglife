@@ -5,6 +5,7 @@ This module provides webhook endpoints for receiving messages from messaging pla
 import logging
 from flask import Blueprint, request
 from app.logic.process_message import process_message
+from app.logic.process_audio import process_audio
 
 # Create a blueprint for webhook routes
 webhook_bp = Blueprint('webhook', __name__)
@@ -29,8 +30,11 @@ def process() -> str:
               type: string
             from:
               type: string
+            messageType:
+              type: string
+            audio:
+              type: object
           required:
-            - message
             - from
     responses:
       200:
@@ -39,11 +43,16 @@ def process() -> str:
           type: string
     """
     data = request.get_json()
-    message: str = data.get("message", "")
+    message: str = data.get("message") or ""
     sender: str = data.get("from", "")
+    message_type: str = data.get("messageType", "chat")
+    audio_data: dict = data.get("audio")
     
-    # Log incoming request for debugging
-    logging.debug(f"[BACKEND] Received data: {data}")
+    # Handle audio messages
+    if message_type in ['ptt', 'audio'] and audio_data:
+        return process_audio(sender, audio_data)
+    
+    # Log text message processing
     logging.debug(f"[BACKEND] Processing message: '{message}' from: {sender}")
     
     # Process message through the bot logic

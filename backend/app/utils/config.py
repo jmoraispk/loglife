@@ -27,3 +27,6 @@ COLORS: dict[int, str] = {
     2: "🟩",  # Success
     3: "🎉"   # Perfect
 }
+
+# Goal boosting configuration
+DEFAULT_BOOST_LEVEL: int = 1

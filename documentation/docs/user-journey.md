@@ -14,195 +14,107 @@ _Tip: Click the image to zoom._
 
 ## High-level Flow
 
-### Regular Message Flow
-
-- **User sends a WhatsApp message** to the bot.
-- **WhatsApp client** (`whatsapp-client/index.js`) receives the message and forwards it to the backend `/process` endpoint.
-- **Flask backend** (`backend/main.py`) checks the message type:
-  - **If VCARD format** (contact sharing): Routes to referral system
-  - **If regular text**: Routes to `process_message(message, sender)`
-- **Backend returns a formatted reply**, and the WhatsApp client relays it back to the user.
-- **Conversation continues** with the next incoming message.
-
-### Contact Sharing Flow (Referral System)
-
-- **User shares a contact** via WhatsApp (VCARD format).
-- **WhatsApp client** forwards the VCARD data to the backend `/process` endpoint.
-- **Flask backend** (`backend/main.py`) detects VCARD format and routes to contact/referral handlers
-- **Backend returns a confirmation message** to the referrer.
-- **Referred contact receives** an automated welcome message with instructions.
+1. **User sends WhatsApp message** → WhatsApp client (`whatsapp-client/index.js`) forwards to backend `/process` endpoint
+2. **Flask backend** (`backend/main.py`) checks message type:
+   - **Audio/Voice note** (`ptt`/`audio`): Routes to audio journaling system
+   - **VCARD format**: Routes to referral system
+   - **Regular text**: Checks conversation state → Routes to `process_message(message, sender)`
+3. **Backend returns reply** → WhatsApp client relays to user
 
 ---
 
-## Decision Points and Steps
+## Message Processing
 
-### Message Type Detection
+### 1. Message Type Detection
 
-**Is message VCARD format?**
+- **Check 1:** Audio message type (`messageType: ptt/audio`)
+  - **YES:** → Audio Journaling Flow
+- **Check 2:** VCARD pattern (`BEGIN:VCARD...END:VCARD`) via `contact_detector.py`
+  - **YES:** → Contact Sharing Flow
+- **Else:** → Check conversation state
 
-- **Check:** VCARD pattern (`BEGIN:VCARD...END:VCARD`)
-- **Module:** `contact_detector.py` → `is_vcard()`
-- **YES:** Route to Contact Sharing Flow
-- **NO:** Route to Command Processing
+### 2. Audio Journaling Flow
 
-### Contact Sharing Flow
+1. **Download Audio** → WhatsApp client detects audio → Downloads media → Base64 encode
+2. **Status 1** → "Audio received. Transcribing..."
+3. **Transcribe** → Upload to AssemblyAI → Poll every 3s → Extract text via `transcribe_audio.py`
+4. **Status 2** → "Audio transcribed. Summarizing..."
+5. **Summarize** → Send to OpenAI GPT-5-nano → Get summary via `summarize_transcript.py`
+6. **Save** → Store transcript + summary in `audio_journal_entries` via `audio_journal.py`
+7. **Status 3** → "Summary stored in Database."
+8. **Return** → Send AI summary to user
 
-**1. Extract WhatsApp ID**
+**Error Handling:** Transcription/summarization failures → User-friendly error message
 
-- Pattern: `waid=(\d+)` from VCARD data
-- Module: `contact_detector.py` → `extract_waid_from_vcard()`
+### 3. Contact Sharing Flow (Referral System)
 
-**2. Process Referral**
+1. **Extract WAID** from VCARD (`waid=(\d+)`) → `contact_detector.py`
+2. **Process Referral** → Convert to local format → Save to `referrals` table (duplicate check) → `referral_tracker.py`
+3. **Send Welcome** → Automated onboarding via `whatsapp_sender.py` + `api/whatsapp_api.py`
+4. **Confirm** → Success message to referrer
 
-- Convert WAID to local phone format
-- Save to `referrals` table (with duplicate check)
-- Module: `referral_tracker.py` → `process_referral()`
+### 4. Conversation State Check
 
-**3. Automated Onboarding**
+- **Query** `user_states` table via `state_manager.py`
+- **If waiting_for_reminder_time:** → Time Input Flow
+- **Else:** → Command Processing
 
-- Send welcome message to referred contact
-- Module: `whatsapp_sender.py` → `send_onboarding_msg()`
-- Integration: `api/whatsapp_api.py` → `send_whatsapp_message()`
+### 5. Time Input Flow (Multi-Step Reminder Setup)
 
-**4. Confirmation**
+1. **Parse Time** → Accepts `18:00`, `6 PM`, `6:30 PM`, `6pm`, `6` via `time_parser.py`
+2. **Validate** → Hours 0-23, minutes 0-59 (error with format examples if invalid)
+3. **Save** → Update goal's `reminder_time` → Clear state via `add_goal.py`
+4. **Confirm** → Goal active with daily reminders
 
-- Return success message to referrer
+### 6. Command Processing
 
-### Command Processing Flow
+**Flow:**
+- Verify user exists (create if needed with timezone detection)
+- Parse command (`logic/process_message.py`)
+- Validate format (return usage hint if invalid)
+- Execute and return response
 
-**1. User Verification**
-
-- Check if user exists in database
-- Create user record if needed (using phone number)
-- Module: `db/CRUD/user_goals/get_user_goals.py`
-
-**2. Command Detection**
-
-- Parse message text for known commands
-- Supported: `help`, `goals`, `add goal`, `rate`, `[digits]`, `week`, `lookback`
-- Module: `logic/process_message.py`
-
-**3. Command Validation**
-
-- Validate command format and parameters
-- Return error/usage hint if invalid
-- Example: "❌ Usage: add goal 😴 Sleep by 9pm"
-
-**4. Execute Command**
+**Commands:**
 
 | Command | Module | Action |
 |---------|--------|--------|
-| `goals` | `format_goals.py` | Display user's goals |
-| `add goal` | `add_goal.py` | Create new goal |
+| `goals` | `format_goals.py` | Display goals with **boost levels** & reminder times |
+| `add goal` | `add_goal.py` | Create goal with **boost level** → Set state → Prompt for time |
 | `rate X Y` | `rate_individual_goal.py` | Rate specific goal |
 | `123...` | `handle_goal_ratings.py` | Rate all goals |
-| `week` | `format_week_summary.py` | Show week summary |
-| `lookback N` | `look_back_summary.py` | Show N days history |
-
-**5. Return Response**
-
-- Format reply message
-- Send back to WhatsApp client
-- Client relays to user
+| `week` | `format_week_summary.py` | Week summary |
+| `lookback N` | `look_back_summary.py` | N days history |
 
 ---
 
 ## WhatsApp Client Integration
 
-The WhatsApp client bridges WhatsApp Web and the backend. See [WhatsApp Client](whatsapp-client.md) for complete documentation.
+Bridges WhatsApp Web and backend (`whatsapp-client/index.js`). See [WhatsApp Client](whatsapp-client.md) for details.
 
-**Key Responsibilities:**
+**Functions:**
+- Listen for messages (text, audio, VCARD) → Forward to `/process` → Relay responses
+- Download audio media → Base64 encode → Include in payload
+- Expose `/send-message` API for automated messaging
+- Manage session persistence
 
-- Listen for incoming WhatsApp messages
-- Forward messages to backend `/process` endpoint
-- Relay backend responses to users
-- Expose `/send-message` API for automated messages
-- Manage WhatsApp session persistence
-
-**Message Format:**
+**Message Format (Text/VCARD):**
 ```json
 {
   "message": "<text or VCARD data>",
-  "from": "<phone number>"
+  "from": "<phone number>",
+  "messageType": "chat"
 }
 ```
 
-**File:** `whatsapp-client/index.js`
-
----
-
-## Typical User Scenarios
-
-### Goal Management
-
-**Scenario 1: New User**
+**Message Format (Audio):**
+```json
+{
+  "from": "<phone number>",
+  "messageType": "ptt",
+  "audio": {
+    "data": "<base64 encoded audio>",
+    "mimetype": "audio/ogg",
+    "duration": 15
+  }
+}
 ```
-User → "goals"
-Bot  → Creates user record
-Bot  → Shows empty list or guidance
-```
-
-**Scenario 2: Adding Goals**
-```
-User → "add goal 🏃 Exercise daily"
-Bot  → Creates active goal with emoji and description
-Bot  → Confirms addition
-```
-
-**Scenario 3: Rating Goals**
-```
-User → "312" (rate all goals)
-Bot  → Stores ratings for today: goal 1=3, goal 2=1, goal 3=2
-
-User → "rate 2 3" (rate specific goal)
-Bot  → Updates goal #2 rating to 3
-```
-
-**Scenario 4: View Summaries**
-```
-User → "week"
-Bot  → Shows current week with daily status
-
-User → "lookback 5"
-Bot  → Shows last 5 days history
-```
-
-### Referral System
-
-**Scenario 5: Sharing a Contact**
-```
-User shares contact → VCARD data sent to bot
-Bot detects VCARD → Extracts WAID (e.g., 923325727426)
-Bot saves referral → referrer_phone → referred_phone
-Bot sends welcome → Automated onboarding to referred contact
-Bot confirms → "🎉 Thank you for the referral!"
-```
-
-**Scenario 6: Referred User Onboarding**
-```
-New contact receives → "🎯 Welcome to Life Bot! ..."
-Message includes → All commands and quick start guide
-User can start → "goals", "add goal", etc.
-```
-
-**Scenario 7: Duplicate Referral**
-```
-User shares same contact again → System detects duplicate
-Bot skips duplicate save → Referral count stays accurate
-Bot still confirms → Success message to referrer
-```
-
----
-
-## Technical Notes
-
-**Data Persistence:**
-
-- SQLite database stores all data
-- Deleting `life_bot.db` resets all state
-
-**VCARD Format:**
-
-- WhatsApp-specific contact sharing format
-- Contains: `TEL;type=CELL;waid=<number>`
-- System extracts WAID and converts to local format

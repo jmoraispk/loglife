@@ -24,6 +24,8 @@ def format_goals(user_id: str) -> str:
     # Format each goal with its description
     goal_lines: list[str] = []
     for goal in user_goals:
-        goal_lines.append(f"{goal['emoji']} {goal['description']}")
+        goal_lines.append(
+            f"{goal['emoji']} {goal['description']} (boost {goal['boost_level']})"
+        )
     
     return "```" + "\n".join(goal_lines) + "```"

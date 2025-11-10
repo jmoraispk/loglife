@@ -6,7 +6,8 @@ validation, and storage in the database.
 from datetime import datetime
 from app.utils.config import STYLE
 from app.db.data_access import get_user_goals
-from app.db.sqlite import get_db
+from app.db.sqlite import get_db, fetch_one, execute_query
+from app.utils.date_utils import format_date_for_storage
 from app.utils.messages import (
     ERROR_NO_GOALS_SET,
     ERROR_USER_NOT_FOUND,
@@ -15,18 +16,6 @@ from app.utils.messages import (
     ERROR_GOAL_NOT_FOUND_WITH_EMOJI,
     SUCCESS_RATINGS_SUBMITTED
 )
-
-def storage_date_format(date: datetime) -> str:
-    """
-    Standardize date format for storage/indexing in the database.
-    
-    Args:
-        date (datetime): The date to format
-        
-    Returns:
-        str: Date formatted as YYYY-MM-DD for storage
-    """
-    return date.strftime('%Y-%m-%d')
 
 def handle_goal_ratings(payload: str, user_id: str) -> str:
     """
@@ -47,22 +36,20 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
     
     # Validate input length
     if len(payload) != len(user_goals):
-        return ERROR_INVALID_INPUT_LENGTH(len(user_goals))
+        return ERROR_INVALID_INPUT_LENGTH.replace('<num_goals>', str(len(user_goals)))
 
     # Validate input digits
     if not all(c in "123" for c in payload):
-        return ERROR_INVALID_INPUT_DIGITS(len(user_goals))
+        return ERROR_INVALID_INPUT_DIGITS.replace('<num_goals>', str(len(user_goals)))
 
     # Store ratings
     ratings: list[int] = [int(c) for c in payload]
     now: datetime = datetime.now()
-    today_storage: str = storage_date_format(now)  # For storage
+    today_storage: str = format_date_for_storage(now)  # For storage
     today_display: str = now.strftime('%a (%b %d)')  # For display
     
-    # Get database connection
-    db = get_db()
-    
     # Get user ID from database
+    db = get_db()
     cursor = db.execute("SELECT id FROM user WHERE phone = ?", (user_id,))
     user = cursor.fetchone()
     if not user:
@@ -75,40 +62,40 @@ def handle_goal_ratings(payload: str, user_id: str) -> str:
         goal_emoji: str = goal['emoji']
         
         # Get user_goal_id
-        cursor = db.execute("""
+        user_goal = fetch_one("""
             SELECT id FROM user_goals 
             WHERE user_id = ? AND goal_emoji = ? AND is_active = 1
         """, (user_id_db, goal_emoji))
-        user_goal = cursor.fetchone()
         if not user_goal:
-            return ERROR_GOAL_NOT_FOUND_WITH_EMOJI(goal_emoji)
+            return ERROR_GOAL_NOT_FOUND_WITH_EMOJI.replace('<goal_emoji>', goal_emoji)
         user_goal_id: int = user_goal['id']
         
         # Check if rating already exists for today
-        cursor = db.execute("""
+        existing_rating = fetch_one("""
             SELECT id FROM goal_ratings 
             WHERE user_goal_id = ? AND date = ?
         """, (user_goal_id, today_storage))
         
-        if cursor.fetchone():
+        if existing_rating:
             # Update existing rating
-            db.execute("""
+            execute_query("""
                 UPDATE goal_ratings 
                 SET rating = ? 
                 WHERE user_goal_id = ? AND date = ?
             """, (rating, user_goal_id, today_storage))
         else:
             # Insert new rating
-            db.execute("""
+            execute_query("""
                 INSERT INTO goal_ratings (user_goal_id, rating, date) 
                 VALUES (?, ?, ?)
             """, (user_goal_id, rating, today_storage))
-    
-    db.commit()
     
     # Get goal emojis for display
     goal_emojis: list[str] = [goal['emoji'] for goal in user_goals]
     status: list[str] = [STYLE[r] for r in ratings]
 
     # Return success message
-    return SUCCESS_RATINGS_SUBMITTED(today_display, goal_emojis, status)
+    return (SUCCESS_RATINGS_SUBMITTED
+            .replace('<today_display>', today_display)
+            .replace('<goal_emojis>', ' '.join(goal_emojis))
+            .replace('<status>', ' '.join(status)))

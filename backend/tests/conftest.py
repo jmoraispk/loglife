@@ -1,8 +1,16 @@
-import pytest
+"""Pytest configuration and test fixtures.
+
+This module provides shared test fixtures and configuration for all tests,
+including database setup and Flask application context management.
+"""
 import sqlite3
+from pathlib import Path
 from typing import Generator
-from flask import Flask
-from flask import g
+
+import pytest
+from flask import Flask, g
+
+SCHEMA_PATH = Path(__file__).resolve().parents[1] / "db" / "schema.sql"
 
 @pytest.fixture(autouse=True, scope="function")
 def test_db(monkeypatch: pytest.MonkeyPatch) -> Generator[sqlite3.Connection, None, None]:
@@ -24,7 +32,7 @@ def test_db(monkeypatch: pytest.MonkeyPatch) -> Generator[sqlite3.Connection, No
     conn.row_factory = sqlite3.Row
 
     # Load schema
-    with open("db/schema.sql", "r") as f:
+    with open(SCHEMA_PATH, "r", encoding="utf-8") as f:
         conn.executescript(f.read())
 
     # Create a test Flask app

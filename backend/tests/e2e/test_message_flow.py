@@ -6,7 +6,6 @@ including goal management, ratings, summaries, and contact/referral handling.
 from unittest.mock import Mock, patch
 from app.logic.process_message import process_message
 from app.helpers.contact_detector import is_vcard, extract_waid_from_vcard
-from app.helpers.referral_tracker import get_referral_count
 from app.helpers.referral_tracker import process_referral
 
 
@@ -18,10 +17,15 @@ def test_add_goal_and_show_goals() -> None:
     """
     user: str = "12345"
     resp1: str = process_message("add goal 😴 Sleep early", user)
-    assert "✅ Added goal" in resp1
-
+    assert "✅ Goal added" in resp1
+    
+    # Set reminder time to complete the goal addition
+    process_message("18:00", user)
+    
     resp2: str = process_message("goals", user)
-    assert "😴 sleep early" in resp2
+    assert "😴" in resp2
+    assert "sleep early" in resp2.lower()
+    assert "boost 1" in resp2.lower()
 
 def test_rate_goal() -> None:
     """Test rating an individual goal.
@@ -31,6 +35,8 @@ def test_rate_goal() -> None:
     """
     user: str = "99999"
     process_message("add goal 🏃 Run", user)
+    # Set reminder time to complete the goal addition
+    process_message("18:00", user)
     resp: str = process_message("rate 1 3", user)
     assert "🏃" in resp
     assert "✅" in resp
@@ -59,7 +65,9 @@ def test_week_summary() -> None:
     user: str = "22222"
     # Add some goals first
     process_message("add goal 😴 Sleep early", user)
+    process_message("18:00", user)  # Set reminder for first goal
     process_message("add goal 🏃 Exercise", user)
+    process_message("19:00", user)  # Set reminder for second goal
     
     resp: str = process_message("week", user)
     assert "Week" in resp
@@ -75,7 +83,9 @@ def test_lookback_summary() -> None:
     user: str = "33333"
     # Add some goals first
     process_message("add goal 😴 Sleep early", user)
+    process_message("18:00", user)  # Set reminder for first goal
     process_message("add goal 🏃 Exercise", user)
+    process_message("19:00", user)  # Set reminder for second goal
     
     resp: str = process_message("lookback 3", user)
     assert "Last 3 days" in resp
@@ -92,6 +102,7 @@ def test_lookback_default() -> None:
     user: str = "44444"
     # Add some goals first
     process_message("add goal 😴 Sleep early", user)
+    process_message("18:00", user)  # Set reminder to complete goal addition
     
     resp: str = process_message("lookback", user)
     assert "Last 7 days" in resp
@@ -108,7 +119,9 @@ def test_goal_ratings_all_at_once() -> None:
     user: str = "55555"
     # Add two goals
     process_message("add goal 😴 Sleep early", user)
+    process_message("18:00", user)  # Set reminder for first goal
     process_message("add goal 🏃 Exercise", user)
+    process_message("19:00", user)  # Set reminder for second goal
     
     # Rate all goals at once (3=success, 2=partial)
     resp: str = process_message("32", user)
@@ -127,6 +140,7 @@ def test_goal_ratings_invalid_length() -> None:
     user: str = "66666"
     # Add one goal
     process_message("add goal 😴 Sleep early", user)
+    process_message("18:00", user)  # Set reminder to complete goal addition
     
     # Try to rate with wrong number of digits
     resp: str = process_message("32", user)  # Should fail - need 1 digit for 1 goal
@@ -141,6 +155,7 @@ def test_goal_ratings_invalid_digits() -> None:
     user: str = "77777"
     # Add one goal
     process_message("add goal 😴 Sleep early", user)
+    process_message("18:00", user)  # Set reminder to complete goal addition
     
     # Try to rate with invalid digits (4 is not in 1-3 range)
     resp: str = process_message("4", user)  # Should be unrecognized since 4 is not in "123"
@@ -155,10 +170,12 @@ def test_goal_ratings_invalid_digits_within_range() -> None:
     user: str = "77778"
     # Add one goal
     process_message("add goal 😴 Sleep early", user)
+    process_message("18:00", user)  # Set reminder to complete goal addition (use valid time, not 0)
     
-    # Try to rate with digits that are in 1-3 range but invalid (like 0)
-    resp: str = process_message("0", user)  # Should be unrecognized since 0 is not in "123"
-    assert "❌ Unrecognized message" in resp
+    # Try to rate with invalid rating (0 is not in 1-3 range)
+    # After setting reminder, state is cleared, so "rate 1 0" should be processed as rating command
+    resp: str = process_message("rate 1 0", user)  # 0 is invalid rating
+    assert "❌ Rating must be 1, 2, or 3" in resp
 
 def test_no_goals_lookback() -> None:
     """Test lookback command when no goals are set.
@@ -207,7 +224,6 @@ FN:0332 5727426
 TEL;type=CELL;waid=923325727426:+92 332 5727426
 END:VCARD"""
     
-    waid: str = extract_waid_from_vcard(vcard_message)
     waid: str = extract_waid_from_vcard(vcard_message)
     assert waid == "923325727426"
 

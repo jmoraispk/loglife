@@ -9,8 +9,8 @@
 
 This WhatsApp client bridges WhatsApp to the Life Bot backend. It provides two main functions:
 
-1. **Message Relay**: Listens for incoming WhatsApp messages, forwards them to the Python backend `/process` endpoint, and replies to the user with the backend's response.
-2. **Automated Messaging API**: Exposes HTTP endpoints to send WhatsApp messages programmatically (used by the referral system for automated onboarding).
+1. **Message Relay**: Listens for incoming WhatsApp messages (text, audio, VCARD), downloads audio media when needed, forwards to the Python backend `/process` endpoint, and replies to the user with the backend's response.
+2. **Automated Messaging API**: Exposes HTTP endpoints to send WhatsApp messages programmatically (used by the referral system and audio journaling status updates).
 
 ---
 
@@ -74,12 +74,44 @@ node index.js --reset-session
 ### Message Relay (Incoming)
 
 1. Subscribe to WhatsApp `message` events
-2. Forward to backend `/process` endpoint:
-   ```json
-   { "message": "<text or VCARD>", "from": "<phone>" }
-   ```
-3. Receive backend response
-4. Send reply back to WhatsApp chat
+2. **Extract phone number:** Remove `@c.us` suffix from `msg.from` (e.g., `923325727426@c.us` → `923325727426`)
+3. **Build payload:** Include `from`, `message`, and `messageType` (e.g., `chat`, `ptt`, `audio`)
+4. **Audio detection:** Check if `msg.hasMedia` and `msg.type` is `ptt` or `audio`
+   - Download media using `msg.downloadMedia()`
+   - Extract audio data (base64), mimetype, duration, filename
+   - Add to payload as `audio` object
+5. Forward to backend `/process` endpoint (see payload examples below)
+6. **Error handling:** Check response status → Send user-friendly error if backend fails
+7. Receive backend response
+8. Send reply back to WhatsApp chat (using original `msg.from` with `@c.us` suffix)
+
+**Payload Examples:**
+
+Text/VCARD message:
+```json
+{
+  "from": "923325727426",
+  "message": "goals",
+  "messageType": "chat"
+}
+```
+
+Audio message:
+```json
+{
+  "from": "923325727426",
+  "message": null,
+  "messageType": "ptt",
+  "audio": {
+    "mimetype": "audio/ogg; codecs=opus",
+    "filename": null,
+    "data": "<base64 encoded audio>",
+    "filesize": 15840,
+    "duration": 15,
+    "isVoiceNote": true
+  }
+}
+```
 
 ### API Endpoints (Outgoing)
 
@@ -106,10 +138,16 @@ Send WhatsApp messages programmatically.
 
 **Features:**
 
-- Auto phone formatting (`@c.us` suffix)
+- **Auto phone formatting:** Adds `@c.us` suffix automatically if not present (outgoing only)
 - Client readiness check
 - Retry on frame detachment
-- Country code handling
+- **Number format:** Expects full phone number with country code (e.g., `923325727426`)
+
+**Notes:** 
+- Incoming messages have `@c.us` removed before forwarding to backend
+- Outgoing messages have `@c.us` added automatically
+- Phone numbers must include country code (no automatic country code addition)
+- Used for status updates during audio transcription/summarization
 
 #### GET `/health`
 
@@ -125,67 +163,42 @@ Monitor client status.
 }
 ```
 
-### Connection Management
+---
 
-| Feature | Description |
-|---------|-------------|
-| Keep-Alive | Periodic checks every 2 minutes |
-| Auto-Restart | Restart on disconnection/errors |
-| Frame Recovery | Handle WhatsApp Web detachment |
-| Session Persist | LocalAuth saves QR authentication |
+## Message Types
+
+The client handles three types of incoming messages:
+
+| Type | `messageType` | Description | Has Media |
+|------|---------------|-------------|-----------|
+| **Text** | `chat` | Regular text messages | No |
+| **Voice Note** | `ptt` | Push-to-talk voice recordings | Yes |
+| **Audio File** | `audio` | Audio file attachments | Yes |
+| **Contact** | `vcard` | Contact sharing (VCARD format) | No |
+
+**Audio Processing:**
+- Automatically detects voice notes (`ptt`) and audio files (`audio`)
+- Downloads media using `whatsapp-web.js` `downloadMedia()` method
+- Encodes audio as base64 for transmission to backend
+- Includes metadata: mimetype, duration, filesize, filename
+- Identifies voice notes with `isVoiceNote: true`
 
 ---
 
-## Referral System Integration
+## Error Handling
 
-The `/send-message` endpoint enables automated onboarding:
+**Backend Response Errors:**
+- Checks HTTP response status from backend
+- Logs error details (status code, response text up to 500 chars)
+- Sends user-friendly message: "Sorry, I encountered an error processing your message. Please try again."
 
-**Flow:**
+**Media Download Errors:**
+- Catches and logs media download failures
+- Continues processing without audio data
+- Backend handles missing audio gracefully
 
-1. User shares contact → Backend detects VCARD
-2. Backend extracts WAID → Calls `/send-message`
-3. Client sends welcome message → New user receives onboarding
-4. Backend confirms → Original user gets success message
-
-**Configuration:**
-
-- Backend env: `WHATSAPP_API_URL=http://localhost:3000`
-- Client must be running and authenticated
-- See [Backend Documentation](backend.md#referral-system) for details
-
----
-
-## Troubleshooting
-
-### Common Issues
-
-| Issue | Solution |
-|-------|----------|
-| QR not showing | Enlarge terminal or use different emulator |
-| Session/auth problems | Run `node index.js --reset-session` |
-| Auto-disconnect | Check logs for restart attempts (keep-alive handles this) |
-| "detached Frame" errors | Automatic restart; if persistent, manually restart |
-| Backend not responding | Verify backend is running at `PY_BACKEND_URL` |
-| Message sending fails | Check client status: `curl http://localhost:3000/health` |
-| Port already in use | Change `PORT` in `.env` |
-| Puppeteer errors (Linux) | Install Chromium dependencies |
-| Memory issues | Monitor resources (WhatsApp Web is memory-intensive) |
-
-### Testing Commands
-
-**Test message sending:**
-```bash
-curl -X POST http://localhost:3000/send-message \
-  -H "Content-Type: application/json" \
-  -d '{"number":"923325727426","message":"Test"}'
-```
-
-**Check health:**
-```bash
-curl http://localhost:3000/health
-```
-
-**View logs:**
-```bash
-# Check console output for detailed error messages
-```
+**General Errors:**
+- Catches all fetch/network errors
+- Logs to console for debugging
+- Sends fallback error message to user
+- Prevents client crash on individual message failures
