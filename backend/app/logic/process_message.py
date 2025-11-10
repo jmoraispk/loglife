@@ -8,13 +8,11 @@ from app.logic.helpers.format_goals import format_goals
 from app.logic.helpers.format_week_summary import format_week_summary
 from app.logic.helpers.look_back_summary import look_back_summary
 from app.logic.helpers.handle_goal_ratings import handle_goal_ratings
-from app.logic.helpers.add_goal import add_goal, set_reminder_time
+from app.logic.helpers.add_goal import add_goal
 from app.logic.helpers.rate_individual_goal import rate_individual_goal
 from app.logic.helpers.show_help import show_help
-from app.logic.command_parser import parse_add_goal_command, parse_rate_command, is_valid_rating_digits
 from app.helpers.contact_detector import is_vcard, extract_waid_from_vcard
 from app.helpers.referral_tracker import process_referral
-from app.helpers.state_manager import get_user_state
 from app.utils.messages import USAGE_ADD_GOAL, USAGE_RATE, ERROR_UNRECOGNIZED_MESSAGE, REFERRAL_SUCCESS
 
 def process_message(message: str, sender: str) -> str:
@@ -46,52 +44,47 @@ def process_message(message: str, sender: str) -> str:
         return REFERRAL_SUCCESS
     
     user_id: str = sender  # could be phone or group ID
-    message_lower: str = message.strip().lower()
-    message_original: str = message.strip()  # Keep original for reminder time parsing
+    message: str = message.strip().lower()
 
-    # Check commands first (commands should work even when in reminder state)
-    if message_lower.startswith("help"):
+    if message.startswith("help"):
         return show_help()
     
-    if message_lower.startswith("goals"):
+    if message.startswith("goals"):
         return format_goals(user_id)
     
-    if message_lower.startswith("week"):
+    if message.startswith("week"):
         return format_week_summary(user_id)
     
-    if message_lower.startswith("lookback"):
+    if message.startswith("lookback"):
         # Extract number of days from message (e.g., "lookback 5" or "lookback")
-        parts: list[str] = message_lower.split()
+        parts: list[str] = message.split()
         if len(parts) > 1 and parts[1].isdigit():
             days: int = int(parts[1])
         else:
             days = 7  # Default to 7 days
         return look_back_summary(user_id, days)
     
-    if message_lower.startswith("add goal"):
-        goal_string = parse_add_goal_command(message_lower)
-        if goal_string:
+    if message.startswith("add goal"):
+        # Extract the complete goal string (e.g., "add goal 😴 Sleep by 9pm")
+        parts = message.split(" ", 2)  # Split into max 3 parts
+        if len(parts) >= 3:
+            goal_string: str = parts[2]  # Everything after "add goal"
             return add_goal(user_id, goal_string)
-        return USAGE_ADD_GOAL
+        else:
+            return USAGE_ADD_GOAL
     
-    if message_lower.startswith("rate"):
-        parsed = parse_rate_command(message_lower)
-        if parsed:
-            goal_number, rating = parsed
+    if message.startswith("rate"):
+        # Extract goal number and rating (e.g., "rate 2 3")
+        parts = message.split()
+        if len(parts) == 3 and parts[1].isdigit() and parts[2].isdigit():
+            goal_number: int = int(parts[1])
+            rating: int = int(parts[2])
             return rate_individual_goal(user_id, goal_number, rating)
-        return USAGE_RATE
-    
-    # Check if user is waiting for reminder time (only for non-command messages)
-    # This should be checked BEFORE rating digits to prioritize reminder time input
-    user_state = get_user_state(user_id)
-    if user_state and user_state.get('state') == 'waiting_for_reminder_time':
-        goal_id = user_state.get('temp_data')
-        if goal_id:
-            # Treat any non-command message as reminder time input
-            return set_reminder_time(user_id, message_original, goal_id)
+        else:
+            return USAGE_RATE
     
     # Handle goal ratings (digits 1-3) - rate all goals at once
-    if is_valid_rating_digits(message_lower):
-        return handle_goal_ratings(message_lower, user_id)
+    if message.isdigit() and all(c in "123" for c in message):
+        return handle_goal_ratings(message, user_id)
 
     return ERROR_UNRECOGNIZED_MESSAGE

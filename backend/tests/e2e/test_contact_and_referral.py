@@ -6,7 +6,7 @@ This module contains comprehensive tests for:
 - Referral processing and database operations
 - Integration with WhatsApp API for onboarding messages
 """
-from typing import Any
+import pytest
 from unittest.mock import Mock, patch
 from app.helpers.contact_detector import is_vcard, extract_waid_from_vcard
 from app.helpers.referral_tracker import (

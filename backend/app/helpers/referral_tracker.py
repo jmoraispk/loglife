@@ -3,9 +3,10 @@
 This module provides functions for tracking and managing user referrals,
 including saving referral records and counting referrals.
 """
+import sqlite3
 import logging
 from typing import Any
-from app.db.sqlite import get_db, fetch_one, execute_query
+from app.db.sqlite import get_db
 from app.helpers.whatsapp_sender import send_onboarding_msg
 
 
@@ -60,22 +61,27 @@ def save_referral(referrer_phone: str, referred_phone: str, referred_waid: str) 
         bool: True if saved successfully, False otherwise
     """
     try:
+        db = get_db()
+        cursor = db.cursor()
+        
         # Check if referral already exists
-        existing = fetch_one("""
+        cursor.execute("""
             SELECT id FROM referrals 
             WHERE referrer_phone = ? AND referred_phone = ?
         """, (referrer_phone, referred_phone))
         
+        existing = cursor.fetchone()
         if existing:
             logging.debug(f"[REFERRAL] Referral already exists: {referrer_phone} -> {referred_phone}")
             return True  # Return True since referral already exists
         
         # Save new referral
-        execute_query("""
+        cursor.execute("""
             INSERT INTO referrals (referrer_phone, referred_phone, referred_waid, status)
             VALUES (?, ?, ?, 'pending')
         """, (referrer_phone, referred_phone, referred_waid))
         
+        db.commit()
         logging.debug(f"[REFERRAL] Saved new referral: {referrer_phone} -> {referred_phone}")
         return True
         
@@ -99,12 +105,12 @@ def get_referral_count(referrer_phone: str) -> int:
         cursor = db.cursor()
         
         cursor.execute("""
-            SELECT COUNT(*) as count FROM referrals 
+            SELECT COUNT(*) FROM referrals 
             WHERE referrer_phone = ?
         """, (referrer_phone,))
         
-        result = cursor.fetchone()
-        return result['count'] if result else 0
+        count: int = cursor.fetchone()[0]
+        return count
         
     except Exception as e:
         logging.error(f"[REFERRAL] Failed to get referral count: {str(e)}")

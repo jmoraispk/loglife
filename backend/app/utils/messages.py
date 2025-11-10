@@ -76,11 +76,20 @@ ERROR_UNRECOGNIZED_MESSAGE = "❌ Unrecognized message. Type 'help' to see avail
 ERROR_WAID_REQUIRED = "WAID is required"
 
 # Goal-related messages
-ERROR_GOAL_ALREADY_EXISTS = "❌ Goal <goal_emoji> already exists for you."
-ERROR_GOAL_NOT_FOUND_WITH_EMOJI = "❌ Goal <goal_emoji> not found"
-ERROR_INVALID_INPUT_LENGTH = "❌ Invalid input. Send <num_goals> digits like: 31232"
-ERROR_INVALID_INPUT_DIGITS = "❌ Invalid input. Send <num_goals> digits between 1 and 3"
-ERROR_GOAL_NUMBER_RANGE = "❌ Goal number must be between 1 and <max_goals>"
+def ERROR_GOAL_ALREADY_EXISTS(goal_emoji: str) -> str:
+    return f"❌ Goal {goal_emoji} already exists for you."
+
+def ERROR_GOAL_NOT_FOUND_WITH_EMOJI(goal_emoji: str) -> str:
+    return f"❌ Goal {goal_emoji} not found"
+
+def ERROR_INVALID_INPUT_LENGTH(num_goals: int) -> str:
+    return f"❌ Invalid input. Send {num_goals} digits like: 31232"
+
+def ERROR_INVALID_INPUT_DIGITS(num_goals: int) -> str:
+    return f"❌ Invalid input. Send {num_goals} digits between 1 and 3"
+
+def ERROR_GOAL_NUMBER_RANGE(max_goals: int) -> str:
+    return f"❌ Goal number must be between 1 and {max_goals}"
 
 # Rating messages
 ERROR_RATING_INVALID = "❌ Rating must be 1, 2, or 3"
@@ -91,14 +100,23 @@ USAGE_RATE = "❌ Usage: rate 2 3 (goal number and rating 1-3)"
 
 # Success messages
 DEFAULT_GOAL_EMOJI = "🎯"
-SUCCESS_GOAL_ADDED = "✅ Added goal: <goal_emoji> <goal_description>"
+
+def SUCCESS_GOAL_ADDED(goal_emoji: str, goal_description: str) -> str:
+    return f"✅ Added goal: {goal_emoji} {goal_description}"
 
 # Summary messages
-SUCCESS_RATINGS_SUBMITTED = "📅 <today_display>\n<goal_emojis>\n<status>"
-SUCCESS_INDIVIDUAL_RATING = "📅 <today_display>\n<goal_emoji> <goal_description>: <status_symbol>"
+def SUCCESS_RATINGS_SUBMITTED(today_display: str, goal_emojis: list[str], status: list[str]) -> str:
+    return f"📅 {today_display}\n{' '.join(goal_emojis)}\n{' '.join(status)}"
+
+def SUCCESS_INDIVIDUAL_RATING(today_display: str, goal_emoji: str, goal_description: str, status_symbol: str) -> str:
+    return f"📅 {today_display}\n{goal_emoji} {goal_description}: {status_symbol}"
 
 # Look back summary messages
-LOOKBACK_NO_GOALS = "```No goals set. Use 'add goal 😴 Description' to add goals.```"
+def LOOKBACK_NO_GOALS(days: str = "") -> str:
+    return "```No goals set. Use 'add goal 😴 Description' to add goals.```"
+
 LOOKBACK_USER_NOT_FOUND = "```User not found```"
-LOOKBACK_HEADER = "Last <days> days:\n"
+
+def LOOKBACK_HEADER(days: int) -> str:
+    return f"Last {days} days:\n"
 

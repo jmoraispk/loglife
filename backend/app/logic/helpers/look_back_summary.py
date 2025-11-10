@@ -4,7 +4,7 @@ This module provides functions for generating formatted summaries
 of goal ratings over specified time periods.
 """
 from datetime import datetime, timedelta
-from app.db.sqlite import get_db, fetch_all
+from app.db.sqlite import get_db
 from app.utils.config import STYLE
 from app.db.data_access import get_user_goals
 from app.utils.messages import (
@@ -40,13 +40,13 @@ def look_back_summary(user_id: str, days: int, start: datetime | None = None) ->
     summary: str = "```"
     if start is None:
         start = datetime.now() - timedelta(days=days-1)  # Include today
-        summary += LOOKBACK_HEADER.replace('<days>', str(days))
+        summary += LOOKBACK_HEADER(days)
 
     # Get user goals to determine how many goals to show
     user_goals: list[dict[str, str]] = get_user_goals(user_id)
     
     if not user_goals:
-        return LOOKBACK_NO_GOALS
+        return LOOKBACK_NO_GOALS()
     
     # Get user ID from database
     db = get_db()
@@ -62,13 +62,15 @@ def look_back_summary(user_id: str, days: int, start: datetime | None = None) ->
         display_date: str = current_date.strftime('%a')  # For display
         
         # Get ratings for this date
-        ratings_data = fetch_all("""
+        cursor = db.execute("""
             SELECT ug.goal_emoji, gr.rating
             FROM user_goals ug
             LEFT JOIN goal_ratings gr ON ug.id = gr.user_goal_id AND gr.date = ?
             WHERE ug.user_id = ? AND ug.is_active = 1
             ORDER BY ug.created_at
         """, (storage_date, user_id_db))
+        
+        ratings_data = cursor.fetchall()
         
         # Create status symbols for each goal
         status_symbols: list[str] = []

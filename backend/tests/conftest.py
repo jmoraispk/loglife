@@ -1,8 +1,3 @@
-"""Pytest configuration and test fixtures.
-
-This module provides shared test fixtures and configuration for all tests,
-including database setup and Flask application context management.
-"""
 import pytest
 import sqlite3
 from typing import Generator

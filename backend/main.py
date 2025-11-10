@@ -3,17 +3,17 @@
 This Flask application handles incoming webhook requests from messaging platforms,
 processes user messages, and manages goal tracking functionality.
 """
+import os
+from dotenv import load_dotenv
+# Load environment variables from .env file
+load_dotenv()
+
 import logging
 from flask import Flask
-from flasgger import Swagger
-from dotenv import load_dotenv
 from app.db.sqlite import close_db, init_db
 from app.routes.web import web_bp
 from app.routes.webhook import webhook_bp
-from app.helpers.reminder_service import start_reminder_service
-
-# Load environment variables from .env file
-load_dotenv()
+from flasgger import Swagger
 
 # Configure logging
 logging.basicConfig(
@@ -39,7 +39,6 @@ def close_db_connection(exception: Exception | None) -> None:
 
 with app.app_context():
     init_db()
-    start_reminder_service(app)
 
 # Register the web blueprint
 app.register_blueprint(web_bp)
@@ -48,4 +47,4 @@ app.register_blueprint(web_bp)
 app.register_blueprint(webhook_bp)
 
 if __name__ == "__main__":
-    app.run(port=5000, debug=False)
+    app.run(port=5000, debug=True)

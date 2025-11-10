@@ -34,7 +34,6 @@ Main dependencies:
 - `flask`
 - `python-dotenv`
 - `requests`
-- `phonenumbers` - Timezone detection from phone numbers
 
 Development dependencies (install with `uv sync --extra dev`):
 
@@ -69,28 +68,16 @@ Commands are routed via `process_message(message, sender)` in the backend.
 | Command        | Description                                    | Example                    |
 |:-------------- |:-----------------------------------------------|:---------------------------|
 | `help`         | Show all commands / usage help                  | help                       |
-| `goals`        | List your personal goals with reminder times    | goals                      |
-| `add goal ...` | Add a new goal (multi-step: goal → reminder time) | add goal 🏃 Run daily       |
+| `goals`        | List your personal goals                        | goals                      |
+| `add goal ...` | Add a new goal (with emoji/desc)                | add goal 🏃 Run daily       |
 | `week`         | Show a summary for the current week             | week                       |
 | `lookback [n]` | Show the last n days summary (default 7)        | lookback 5                 |
 | `rate x y`     | Rate goal x with y (1=fail,2=partial,3=success) | rate 2 3                   |
 | `[digits]`     | Rate all goals at once                          | 123                        |
 
-### Multi-Step Conversation: Goal with Reminders
-
-When adding a goal, the bot uses **conversation state** to guide setup:
-
-1. **User:** `add goal 🏃 Run daily`
-2. **Bot:** Saves goal → Detects timezone → Prompts for reminder time
-3. **User:** `6:30 AM` (supports: 18:00, 6 PM, 6pm, 6)
-4. **Bot:** Saves reminder time → Confirms setup
-
-The background reminder service sends daily WhatsApp messages at the specified time.
-
 ### Command Routing
 - All major commands are processed with clear docstrings for each
 - VCARD messages are auto-detected and routed to the referral flow
-- **Conversation state tracked** in `user_states` table for multi-step flows
 
 ---
 
@@ -119,52 +106,16 @@ Allows users to share LogLife Bot via WhatsApp contact sharing.
 
 ---
 
-## Reminder System
-
-Sends daily WhatsApp reminders for goals at user-specified times.
-
-### Core Modules
-
-| Module | Functions | Purpose |
-|--------|-----------|---------|
-| `reminder_service.py` | `start_reminder_service()`<br>`reminder_worker()`<br>`check_and_send_reminders()`<br>`calculate_next_reminder_seconds()` | Background thread service<br>Efficient sleep scheduling<br>Send due reminders<br>Calculate next wake time |
-| `state_manager.py` | `set_user_state()`<br>`get_user_state()`<br>`clear_user_state()` | Track multi-step conversations<br>Check conversation context<br>Reset to normal state |
-| `time_parser.py` | `parse_reminder_time()`<br>`format_time_for_display()` | Parse flexible time formats<br>Format time for users |
-| `timezone_helper.py` | `get_timezone_from_number()` | Detect timezone from phone |
-| `user_timezone.py` | `detect_user_timezone()`<br>`save_user_timezone()` | Timezone detection workflow<br>Database operations |
-
-### How It Works
-
-1. **Goal Creation:** User adds goal → System detects timezone from phone number
-2. **Time Setup:** Bot prompts for reminder time → Accepts multiple formats (24h/12h/AM/PM)
-3. **Background Service:** Daemon thread started at app initialization
-4. **Efficient Scheduling:** Calculates next reminder time → Sleeps until due (not constant polling)
-5. **Reminder Delivery:** At reminder time → Sends WhatsApp message in user's timezone
-6. **Deduplication:** Caches sent reminders to prevent duplicates
-
-### Supported Time Formats
-
-| Input | Output | Notes |
-|-------|--------|-------|
-| `18:00` | 6:00 PM | 24-hour format |
-| `6 PM` | 6:00 PM | 12-hour with space |
-| `6:30 PM` | 6:30 PM | With minutes |
-| `6pm` | 6:00 PM | Lowercase |
-| `6` | 6:00 AM | Single digit |
-
----
-
 ## Database Schema
 
 ### Tables Overview
 
 | Table | Purpose | Key Fields |
 |-------|---------|------------|
-| `user` | User profiles | `phone` (unique), `name`, **`timezone`**, `created_at` |
-| `user_goals` | Goal definitions | `user_id`, `goal_emoji`, `goal_description`, `is_active`, **`reminder_time`** |
+| `user` | User profiles | `phone` (unique), `name`, `created_at` |
+| `user_goals` | Goal definitions | `user_id`, `goal_emoji`, `goal_description`, `is_active` |
 | `goal_ratings` | Daily ratings | `user_goal_id`, `rating` (1-3), `date` |
 | `referrals` | Referral tracking | `referrer_phone`, `referred_phone`, `referred_waid`, `status` |
-| `user_states` | **Conversation state** | **`user_phone`, `state`, `temp_data`** |
 
 <details>
 <summary>Full Schema SQL</summary>
@@ -174,7 +125,6 @@ CREATE TABLE IF NOT EXISTS user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NULL,
     phone TEXT UNIQUE NOT NULL,
-    timezone TEXT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -184,7 +134,6 @@ CREATE TABLE IF NOT EXISTS user_goals (
     goal_emoji TEXT NOT NULL,
     goal_description TEXT NOT NULL,
     is_active BOOLEAN DEFAULT 1,
-    reminder_time TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user (id)
 );
@@ -204,13 +153,6 @@ CREATE TABLE IF NOT EXISTS referrals (
     referred_phone TEXT NOT NULL,
     referred_waid TEXT NOT NULL,
     status TEXT DEFAULT 'pending',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE IF NOT EXISTS user_states (
-    user_phone TEXT PRIMARY KEY,
-    state TEXT NOT NULL,
-    temp_data TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 ```
@@ -236,15 +178,10 @@ backend/
   │   │   │   └── whatsapp_api.py    # WhatsApp messaging API
   │   │   ├── contact_detector.py    # VCARD detection & parsing
   │   │   ├── referral_tracker.py    # Referral database operations
-  │   │   ├── whatsapp_sender.py     # Automated message sending
-  │   │   ├── reminder_service.py    # Background reminder service
-  │   │   ├── state_manager.py       # Conversation state tracking
-  │   │   ├── time_parser.py         # Time format parsing
-  │   │   ├── timezone_helper.py     # Timezone detection from phone
-  │   │   └── user_timezone.py       # User timezone management
+  │   │   └── whatsapp_sender.py     # Automated message sending
   │   ├── logic/             # Main bot logic & helpers
   │   │   ├── helpers/       # Command-specific logic
-  │   │   └── process_message.py     # Message routing & state checking
+  │   │   └── process_message.py     # Message routing & VCARD detection
   │   ├── routes/            # Flask blueprints and routes
   │   │   ├── web.py         # Emulator route (/emulator)
   │   │   └── webhook.py     # Webhook route (/process) - clean request handler
@@ -255,8 +192,8 @@ backend/
   │       └── messages.py     # Centralized user-facing messages
   ├── db/                    # SQLite file and schema
   │   ├── life_bot.db        # Database file
-  │   └── schema.sql         # Database schema (includes user_states)
-  ├── main.py                # Flask entrypoint + reminder service starter
+  │   └── schema.sql         # Database schema
+  ├── main.py                # Flask entrypoint
   └── tests/                 # Pytest-based unit/integration tests
 ```
 
@@ -298,20 +235,10 @@ For Basic Operation:
 - Python 3.11+
 - SQLite (included with Python)
 
-For Full Feature Set:
+For Referral System:
 
-- WhatsApp Client service running on port 3000 (for referrals & reminders)
+- WhatsApp Client service running on port 3000
 - See [WhatsApp Client](whatsapp-client.md) documentation
-
-### Background Services
-
-The backend automatically starts:
-
-- **Reminder Service:** Daemon thread for sending daily goal reminders
-  - Starts at app initialization via `main.py`
-  - Runs continuously in background
-  - Timezone-aware scheduling
-  - Efficient sleep-based scheduling (not constant polling)
 
 ### Production Deployment
 
@@ -321,5 +248,3 @@ Run under process manager (e.g., `systemd`):
 cd backend
 uv run main.py
 ```
-
-Note: The reminder service thread will start automatically and run as long as the Flask app is running.

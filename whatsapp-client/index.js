@@ -170,8 +170,11 @@ app.post('/send-message', async (req, res) => {
         // Format number for WhatsApp (add @c.us if not present)
         let formattedNumber = number;
         if (!formattedNumber.includes('@c.us')) {
-            // Remove any non-digit characters (expecting full number with country code)
+            // Remove any non-digit characters and add country code if needed
             formattedNumber = formattedNumber.replace(/\D/g, '');
+            if (!formattedNumber.startsWith('92') && formattedNumber.length === 10) {
+                formattedNumber = '92' + formattedNumber;
+            }
             formattedNumber = formattedNumber + '@c.us';
         }
         

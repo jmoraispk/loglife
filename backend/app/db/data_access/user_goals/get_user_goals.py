@@ -3,7 +3,7 @@
 This module provides CRUD operations for retrieving user goals from the database,
 including user creation and goal retrieval functionality.
 """
-from app.db.sqlite import get_db, fetch_all
+from app.db.sqlite import get_db
 
 def get_user_goals(user_id: str) -> list[dict[str, str]]:
     """Retrieve user goals from the database.
@@ -32,11 +32,13 @@ def get_user_goals(user_id: str) -> list[dict[str, str]]:
         user_id_db: int = user['id']
     
     # Get user's active goals
-    goals = fetch_all("""
+    cursor = db.execute("""
         SELECT goal_emoji, goal_description 
         FROM user_goals 
         WHERE user_id = ? AND is_active = 1
         ORDER BY created_at
     """, (user_id_db,))
+    
+    goals = cursor.fetchall()
     
     return [{"emoji": goal['goal_emoji'], "description": goal['goal_description']} for goal in goals]
