@@ -2,6 +2,7 @@
 
 This module provides database connection management using Flask's application
 context, including connection handling, initialization, and teardown functions.
+Also provides abstracted query helper functions for common database operations.
 """
 import sqlite3
 import os
@@ -53,3 +54,106 @@ def init_db() -> None:
             db: sqlite3.Connection = get_db()
             db.executescript(f.read())
             db.commit()
+
+
+# ============================================================================
+# Query Helper Functions
+# ============================================================================
+
+def fetch_one(query: str, params: tuple = ()) -> sqlite3.Row | None:
+    """
+    Execute a SELECT query and return the first row or None.
+    
+    Abstracted helper function for single-row SELECT queries.
+    Automatically uses get_db() for proper Flask context handling.
+    
+    Args:
+        query (str): SQL SELECT query string
+        params (Tuple): Query parameters for placeholders
+    
+    Returns:
+        Optional[sqlite3.Row]: First row from query result, or None if no results
+                              Row supports both index and column name access
+    
+    Example:
+        user = fetch_one("SELECT id, name FROM users WHERE phone = ?", (phone,))
+        if user:
+            user_id = user['id']  # or user[0]
+    """
+    db = get_db()
+    cursor = db.execute(query, params)
+    return cursor.fetchone()
+
+
+def fetch_all(query: str, params: tuple = ()) -> list[sqlite3.Row]:
+    """
+    Execute a SELECT query and return all rows.
+    
+    Abstracted helper function for multi-row SELECT queries.
+    Automatically uses get_db() for proper Flask context handling.
+    
+    Args:
+        query (str): SQL SELECT query string
+        params (Tuple): Query parameters for placeholders
+    
+    Returns:
+        List[sqlite3.Row]: List of rows from query result (empty list if no results)
+                          Each row supports both index and column name access
+    
+    Example:
+        goals = fetch_all("SELECT * FROM goals WHERE user_id = ?", (user_id,))
+        for goal in goals:
+            emoji = goal['goal_emoji']  # or goal[0]
+    """
+    db = get_db()
+    cursor = db.execute(query, params)
+    return cursor.fetchall()
+
+
+def execute_query(query: str, params: tuple = ()) -> sqlite3.Cursor:
+    """
+    Execute a query (INSERT/UPDATE/DELETE) and commit the transaction.
+    
+    Abstracted helper function for write operations. Automatically commits
+    the transaction after execution. Use get_db() for proper Flask context handling.
+    
+    Args:
+        query (str): SQL query string (INSERT, UPDATE, DELETE, etc.)
+        params (Tuple): Query parameters for placeholders
+    
+    Returns:
+        sqlite3.Cursor: Cursor object with execute results
+                        Use cursor.lastrowid for INSERT queries
+    
+    Example:
+        cursor = execute_query("INSERT INTO users (phone) VALUES (?)", (phone,))
+        user_id = cursor.lastrowid
+        
+        cursor = execute_query("UPDATE goals SET is_active = 0 WHERE id = ?", (goal_id,))
+        rows_affected = cursor.rowcount
+    """
+    db = get_db()
+    cursor = db.execute(query, params)
+    db.commit()
+    return cursor
+
+
+def execute_many(query: str, params_list: list[tuple]) -> None:
+    """
+    Execute a query multiple times with different parameters and commit.
+    
+    Useful for batch insertions or updates. Automatically commits after all executions.
+    
+    Args:
+        query (str): SQL query string to execute multiple times
+        params_list (List[Tuple]): List of parameter tuples, one per execution
+    
+    Example:
+        execute_many(
+            "INSERT INTO ratings (goal_id, rating, date) VALUES (?, ?, ?)",
+            [(1, 3, '2024-01-01'), (2, 2, '2024-01-01')]
+        )
+    """
+    db = get_db()
+    db.executemany(query, params_list)
+    db.commit()

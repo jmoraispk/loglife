@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NULL,
     phone TEXT UNIQUE NOT NULL,
+    timezone TEXT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -11,6 +12,7 @@ CREATE TABLE IF NOT EXISTS user_goals (
     goal_emoji TEXT NOT NULL,
     goal_description TEXT NOT NULL,
     is_active BOOLEAN DEFAULT 1,
+    reminder_time TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user (id)
 );
@@ -30,5 +32,12 @@ CREATE TABLE IF NOT EXISTS referrals (
     referred_phone TEXT NOT NULL,
     referred_waid TEXT NOT NULL,
     status TEXT DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS user_states (
+    user_phone TEXT PRIMARY KEY,
+    state TEXT NOT NULL,
+    temp_data TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
