@@ -1,19 +1,12 @@
 import sqlite3
-import os
-from flask import g
+from app.config import DATABASE_FILE, SCHEMA_FILE
 
-def init_db() -> None:
-    """Initialize database with schema if it doesn't exist.
-    
-    Creates the database file and applies the schema from schema.sql if the
-    database file doesn't already exist.
+def connect():
+    conn = sqlite3.connect(DATABASE_FILE)
+    conn.row_factory = sqlite3.Row
+    return conn
 
-    Raises:
-        FileNotFoundError: If schema.sql file is not found
-    """
-    db: sqlite3.Connection = get_db()
-    if not os.path.exists(DATABASE) or os.path.getsize(DATABASE) == 0:
-        schema_path: str = os.path.join(PROJECT_ROOT, "db", "schema.sql")
-        with open(schema_path, "r") as f:
-            db.executescript(f.read())
-            db.commit()
+def init_db():
+    if not DATABASE_FILE.exists() or DATABASE_FILE.stat().st_size == 0:
+        with sqlite3.connect(DATABASE_FILE) as conn, open(SCHEMA_FILE, "r", encoding="utf-8") as f:
+            conn.executescript(f.read())

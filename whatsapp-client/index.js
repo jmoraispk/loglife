@@ -88,34 +88,37 @@ function createClient() {
         try {
             const phoneNumber = msg.from.split('@')[0];
 
-            const payload = {
-                from: phoneNumber,
-                message: msg.body || null,
-                messageType: msg.type
-            };
+            // console.log(msg);
 
-            const shouldDownloadVoice = msg.hasMedia && (msg.type === 'ptt' || msg.type === 'audio');
-            if (shouldDownloadVoice) {
-                try {
-                    const media = await msg.downloadMedia();
-                    if (media) {
-                        const isVoiceMessage = msg.type === 'ptt' || (media.mimetype && media.mimetype.includes('audio/ogg'));
-                        if (isVoiceMessage) {
-                            payload.audio = {
-                                mimetype: media.mimetype,
-                                filename: media.filename || null,
-                                data: media.data,
-                                filesize: media.filesize || null,
-                                duration: msg._data?.duration ?? null,
-                                isVoiceNote: msg.type === 'ptt',
-                            };
-                        }
-                    }
-                } catch (mediaErr) {
-                    console.error('Failed to download media:', mediaErr);
-                }
-            }
-            
+			// Standardized payload with exactly three top-level keys
+			const payload = {
+				sender: phoneNumber,
+				raw_msg: '',
+				msg_type: msg.type
+			};
+
+			// Populate raw_msg based on message type
+			const isAudio = msg.hasMedia && (msg.type === 'ptt' || msg.type === 'audio');
+			if (isAudio) {
+				try {
+					const media = await msg.downloadMedia();
+					if (media) {
+						// raw_msg should be string only: send base64 data only
+						payload.raw_msg = typeof media.data === 'string' ? media.data : '';
+					} else {
+						payload.raw_msg = '';
+					}
+				} catch (mediaErr) {
+					console.error('Failed to download media:', mediaErr);
+					payload.raw_msg = '';
+				}
+			} else if (msg.type === 'vcard') {
+					payload.raw_msg = JSON.stringify(msg.vCards);
+			} else {
+				// Text/other: send text body as string
+				payload.raw_msg = typeof msg.body === 'string' ? msg.body : '';
+			}
+			
             const response = await fetch(process.env.PY_BACKEND_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

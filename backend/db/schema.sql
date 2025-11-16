@@ -1,38 +1,44 @@
 CREATE TABLE IF NOT EXISTS user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    phone TEXT UNIQUE NOT NULL,
-    timezone TEXT NULL,
+    phone_number TEXT UNIQUE NOT NULL,
+    timezone TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS user_goals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
+    user_id INTEGER NOT NULL,
     goal_emoji TEXT NOT NULL,
     goal_description TEXT NOT NULL,
-    is_active BOOLEAN DEFAULT 1,
-    reminder_time TEXT,
     boost_level INTEGER NOT NULL DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS goal_ratings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_goal_id INTEGER NOT NULL,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 3),
-    date TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_goal_id) REFERENCES user_goals (id)
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_goal_id) REFERENCES user_goals (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS goal_reminders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_goal_id INTEGER NOT NULL,
+    reminder_time DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_goal_id) REFERENCES user_goals(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS referrals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    referrer_user_id INTEGER NOT NULL,
-    referred_user_id INTEGER NOT NULL,
-    status TEXT NOT NULL DEFAULT 'pending',
+    referrer_user_id INTEGER NOT NULL, -- Referrer is the user who sent the invite.
+    referred_user_id INTEGER NOT NULL, -- Referred is the user who received it.
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (referrer_user_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (referred_user_id) REFERENCES user(id) ON DELETE CASCADE,
     UNIQUE (referrer_user_id, referred_user_id)
 );
 
