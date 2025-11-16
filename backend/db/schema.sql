@@ -19,8 +19,8 @@ CREATE TABLE IF NOT EXISTS goal_ratings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_goal_id INTEGER NOT NULL,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 3),
+    rating_date DATETIME NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_goal_id) REFERENCES user_goals (id) ON DELETE CASCADE
 );
 

@@ -1,6 +1,7 @@
 from flask import Blueprint, request
 from app.logic import process_vard
 from app.logic import process_audio
+from app.logic import process_message
 
 webhook_bp = Blueprint('webhook', __name__)
 
@@ -11,6 +12,9 @@ def webhook() -> str:
     sender = data['sender']
     msg_type = data['msg_type']
     raw_msg = data['raw_msg']
+
+    if msg_type == "chat":
+        return process_message(sender, raw_msg)
 
     if msg_type in ("audio", "ptt"):
         return process_audio(sender, raw_msg)
