@@ -1,6 +1,5 @@
 CREATE TABLE IF NOT EXISTS user (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NULL,
     phone TEXT UNIQUE NOT NULL,
     timezone TEXT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -29,18 +28,20 @@ CREATE TABLE IF NOT EXISTS goal_ratings (
 
 CREATE TABLE IF NOT EXISTS referrals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    referrer_phone TEXT NOT NULL,
-    referred_phone TEXT NOT NULL,
-    referred_waid TEXT NOT NULL,
-    status TEXT DEFAULT 'pending',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    referrer_user_id INTEGER NOT NULL,
+    referred_user_id INTEGER NOT NULL,
+    status TEXT NOT NULL DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (referrer_user_id) REFERENCES user(id) ON DELETE CASCADE,
+    UNIQUE (referrer_user_id, referred_user_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_states (
-    user_phone TEXT PRIMARY KEY,
+    user_id INTEGER PRIMARY KEY,
     state TEXT NOT NULL,
     temp_data TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS audio_journal_entries (
@@ -49,5 +50,5 @@ CREATE TABLE IF NOT EXISTS audio_journal_entries (
     transcription_text TEXT,
     summary_text TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
 );
