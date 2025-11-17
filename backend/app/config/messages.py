@@ -89,8 +89,6 @@ ERROR_RATING_INVALID = "❌ Rating must be 1, 2, or 3"
 USAGE_ADD_GOAL = "❌ Usage: add goal 😴 Sleep by 9pm"
 USAGE_RATE = "❌ Usage: rate 2 3 (goal number and rating 1-3)"
 
-# Success messages
-DEFAULT_GOAL_EMOJI = "🎯"
 SUCCESS_GOAL_ADDED = "✅ Added goal: <goal_emoji> <goal_description>"
 
 # Summary messages
@@ -101,9 +99,3 @@ SUCCESS_INDIVIDUAL_RATING = "📅 <today_display>\n<goal_emoji> <goal_descriptio
 LOOKBACK_NO_GOALS = "```No goals set. Use 'add goal 😴 Description' to add goals.```"
 LOOKBACK_USER_NOT_FOUND = "```User not found```"
 LOOKBACK_HEADER = "Last <days> days:\n"
-
-STYLE: dict[int, str] = {
-    1: "❌",  # Failure
-    2: "⚠️",  # Partial
-    3: "✅"   # Success
-}

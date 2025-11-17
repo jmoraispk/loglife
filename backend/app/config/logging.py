@@ -10,14 +10,12 @@ def setup_logging():
     log_level = logging.DEBUG if FLASK_ENV == "development" else logging.INFO
 
     root = logging.getLogger()
-    werkzeug = logging.getLogger("werkzeug")
 
     # Because default root logger level is WARNING, we need to set it to debug and then custom handlers will block irrelevant logs automatically
     root.setLevel(logging.DEBUG)
 
     # Clean defaults
     root.handlers.clear()
-    werkzeug.handlers.clear()
 
     # Development
     if FLASK_ENV == "development":
@@ -29,7 +27,6 @@ def setup_logging():
             )
         )
         root.addHandler(console)
-        werkzeug.addHandler(console)
         return
 
     # Production
@@ -58,6 +55,3 @@ def setup_logging():
 
     # root also receives ERROR logs
     root.addHandler(error_handler)
-
-    # werkzeug traffic goes to access log because Werkzeug logs HTTP requests, not the app errors
-    werkzeug.addHandler(access_handler)

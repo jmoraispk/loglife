@@ -26,6 +26,6 @@ def webhook() -> str:
         return process_audio(sender, raw_msg)
 
     if msg_type == "vcard":
-        return process_vard(sender, raw_msg)
+        return process_vard(user, raw_msg)
     
     return 'Received!'
