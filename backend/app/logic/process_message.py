@@ -1,7 +1,7 @@
 from app.config import ERROR_NO_GOALS_SET, HELP_MESSAGE, ERROR_INVALID_INPUT_LENGTH, SUCCESS_RATINGS_SUBMITTED, USAGE_RATE, SUCCESS_INDIVIDUAL_RATING, STYLE
 from app.db import create_goal, get_user_goals, create_rating, get_rating_by_goal_and_date, update_rating
-from app.helpers import extract_emoji, is_valid_rating_digits
-from datetime import datetime
+from app.helpers import extract_emoji, is_valid_rating_digits, get_monday_before, look_back_summary
+from datetime import datetime, timedelta
 
 def process_message(user: dict, message: str) -> str:
 
@@ -33,10 +33,35 @@ def process_message(user: dict, message: str) -> str:
         return "```" + "\n".join(goal_lines) + "```"
     
     if message == "week":
-        pass
+        start: datetime = get_monday_before()
+        
+        # Create Week Summary Header (E.g. Week 26: Jun 30 - Jul 06)    
+        week_num: str = start.strftime('%W')
+        week_start: str = start.strftime('%b %d')
+        week_end: str = (start + timedelta(days=6)).strftime('%b %d')
+        if week_end.startswith(week_start[:3]):
+            week_end = week_end[4:]
+        
+        summary: str = f"```Week {week_num}: {week_start} - {week_end}\n"
+
+        # Add Goals Header - we'll need to get user goals dynamically
+        user_goals: list[dict] = get_user_goals(user_id)
+        goal_emojis: list[str] = [goal['goal_emoji'] for goal in user_goals]
+        summary += '    ' + ' '.join(goal_emojis) + "\n```"
+
+        # Add Day-by-Day Summary
+        summary += look_back_summary(user_id, 7, start)
+        return summary
 
     if message.startswith("lookback"):
-        pass
+        # Extract number of days from message (e.g., "lookback 5" or "lookback")
+        parts: list[str] = message.split()
+        if len(parts) == 2 and parts[1].isdigit():
+            days: int = int(parts[1])
+        else:
+            days = 7  # Default to 7 days
+        start = datetime.now() - timedelta(days=days-1)  # Include today
+        return look_back_summary(user_id, days, start)
 
     # rate a single goal
     if message.startswith("rate"):
@@ -103,7 +128,6 @@ def process_message(user: dict, message: str) -> str:
             .replace('<goal_emojis>', ' '.join(goal_emojis))
             .replace('<goal_description>', goal["goal_description"])
             .replace('<status>', ' '.join(status)))
-
     
     if message == 'help':
         return HELP_MESSAGE
