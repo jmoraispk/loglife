@@ -8,7 +8,16 @@ def get_all_users():
         # we return after converting to dict to access columns by name instead of index
         return [dict(row) for row in rows]
 
-def get_user(phone_number: str):
+def get_user(user_id: int):
+    with connect() as conn:
+        cur = conn.execute(
+            "SELECT * FROM users WHERE id = ?",
+            (user_id,),
+        )
+        row: sqlite3.Row | None = cur.fetchone()
+        return dict(row) if row else None
+
+def get_user_by_phone_number(phone_number: str) -> dict | None:
     with connect() as conn:
         cur = conn.execute(
             "SELECT * FROM users WHERE phone_number = ?",
@@ -17,7 +26,7 @@ def get_user(phone_number: str):
         row: sqlite3.Row | None = cur.fetchone()
         return dict(row) if row else None
 
-def create_user(phone_number: str, timezone: str):
+def create_user(phone_number: str, timezone: str) -> dict:
     with connect() as conn:
         cur = conn.execute(
             """
@@ -26,7 +35,7 @@ def create_user(phone_number: str, timezone: str):
             """,
             (phone_number, timezone),
         )
-    return get_user(phone_number)
+    return get_user_by_phone_number(phone_number)
 
 # * makes following params keyword-only
 def update_user(user_id: int, *, phone_number=None, timezone=None):

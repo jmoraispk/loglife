@@ -577,7 +577,7 @@
 
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const payload = { from: senderEl.value, message: messageEl.value };
+            const payload = { sender: senderEl.value, msg_type: 'chat', raw_msg: messageEl.value };
 
             // UI loading state
             submitBtn.disabled = true;
@@ -674,7 +674,7 @@
             const displayNumber = waid;
             // Construct a VCARD that backend expects
             const vcard = `BEGIN:VCARD\nVERSION:3.0\nN:;${derivedPhone};;;\nFN:${derivedPhone}\nTEL;type=CELL;waid=${waid}:${displayNumber}\nEND:VCARD`;
-            const payload = { from: senderEl.value, message: vcard };
+            const payload = { sender: senderEl.value, msg_type: 'vcard', raw_msg: vcard };
 
             // UI loading state
             setStatus('loading', 'Sending Contact');
@@ -807,19 +807,7 @@
                     const base64Audio = reader.result.split(',')[1]; // Remove data:audio/...;base64, prefix
                     
                     // Prepare payload matching WhatsApp client format
-                    const payload = {
-                        from: senderEl.value,
-                        message: null,  // Audio messages have null message body
-                        messageType: 'ptt',  // 'ptt' for voice note (push-to-talk)
-                        audio: {
-                            mimetype: actualMimeType,
-                            filename: null,
-                            data: base64Audio,
-                            filesize: audioBlob.size,
-                            duration: recordingDuration,
-                            isVoiceNote: true
-                        }
-                    };
+                    const payload = { sender: senderEl.value, msg_type: 'ptt', raw_msg: base64Audio };
                     
                     // UI loading state
                     setStatus('loading', 'Sending Audio');

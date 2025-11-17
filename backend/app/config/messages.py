@@ -78,7 +78,7 @@ ERROR_WAID_REQUIRED = "WAID is required"
 # Goal-related messages
 ERROR_GOAL_ALREADY_EXISTS = "❌ Goal <goal_emoji> already exists for you."
 ERROR_GOAL_NOT_FOUND_WITH_EMOJI = "❌ Goal <goal_emoji> not found"
-ERROR_INVALID_INPUT_LENGTH = "❌ Invalid input. Send <num_goals> digits like: 31232"
+ERROR_INVALID_INPUT_LENGTH = "❌ Invalid input. Send <num_goals> digits."
 ERROR_INVALID_INPUT_DIGITS = "❌ Invalid input. Send <num_goals> digits between 1 and 3"
 ERROR_GOAL_NUMBER_RANGE = "❌ Goal number must be between 1 and <max_goals>"
 
@@ -94,7 +94,7 @@ DEFAULT_GOAL_EMOJI = "🎯"
 SUCCESS_GOAL_ADDED = "✅ Added goal: <goal_emoji> <goal_description>"
 
 # Summary messages
-SUCCESS_RATINGS_SUBMITTED = "📅 <today_display>\n<goal_emojis>\n<status>"
+SUCCESS_RATINGS_SUBMITTED = "📅 <today_display>\n<goal_emojis> <goal_description>: <status>"
 SUCCESS_INDIVIDUAL_RATING = "📅 <today_display>\n<goal_emoji> <goal_description>: <status_symbol>"
 
 # Look back summary messages

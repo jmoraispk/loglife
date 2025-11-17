@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     phone_number TEXT UNIQUE NOT NULL,
     timezone TEXT NOT NULL,
@@ -12,15 +12,16 @@ CREATE TABLE IF NOT EXISTS user_goals (
     goal_description TEXT NOT NULL,
     boost_level INTEGER NOT NULL DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS goal_ratings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_goal_id INTEGER NOT NULL,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 3),
-    rating_date DATETIME NOT NULL,
+    rating_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_goal_id) REFERENCES user_goals (id) ON DELETE CASCADE
 );
 
@@ -37,8 +38,8 @@ CREATE TABLE IF NOT EXISTS referrals (
     referrer_user_id INTEGER NOT NULL, -- Referrer is the user who sent the invite.
     referred_user_id INTEGER NOT NULL, -- Referred is the user who received it.
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (referrer_user_id) REFERENCES user(id) ON DELETE CASCADE,
-    FOREIGN KEY (referred_user_id) REFERENCES user(id) ON DELETE CASCADE,
+    FOREIGN KEY (referrer_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (referred_user_id) REFERENCES users(id) ON DELETE CASCADE,
     UNIQUE (referrer_user_id, referred_user_id)
 );
 
@@ -47,7 +48,7 @@ CREATE TABLE IF NOT EXISTS user_states (
     state TEXT NOT NULL,
     temp_data TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS audio_journal_entries (
@@ -56,5 +57,5 @@ CREATE TABLE IF NOT EXISTS audio_journal_entries (
     transcription_text TEXT,
     summary_text TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

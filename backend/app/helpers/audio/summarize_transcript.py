@@ -1,12 +1,12 @@
 import requests
 import os
-from app.config import OPENAI_API_URL, OPENAI_CHAT_MODEL, OPENAI_SYSTEM_PROMPT, OPENAI_API_KEY
+from app.config import OPENAI_API_URL, OPENAI_CHAT_MODEL, OPENAI_SUMMARIZATION_SYSTEM_PROMPT, OPENAI_API_KEY
 
 def summarize_transcript(transcript: str) -> str:
     payload = {
         "model": OPENAI_CHAT_MODEL,
         "messages": [
-            {"role": "developer", "content": OPENAI_SYSTEM_PROMPT},
+            {"role": "developer", "content": OPENAI_SUMMARIZATION_SYSTEM_PROMPT},
             {"role": "user", "content": "Hello!"}
         ]
     }
