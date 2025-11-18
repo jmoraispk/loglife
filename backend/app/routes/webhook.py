@@ -3,6 +3,7 @@ from app.logic import process_vard
 from app.logic import process_audio
 from app.logic import process_message
 from app.db import get_user_by_phone_number, create_user
+from app.helpers import get_timezone_from_number
 
 webhook_bp = Blueprint('webhook', __name__)
 
@@ -17,7 +18,10 @@ def webhook() -> str:
     user: dict | None = get_user_by_phone_number(sender)
 
     if not user:
-        user: dict = create_user(sender, 'Asia/Karachi')
+        user_timezone: str | None = get_timezone_from_number(sender)
+        if not user_timezone:
+            user_timezone = 'Asia/Karachi'
+        user: dict = create_user(sender, user_timezone)
 
     if msg_type == "chat":
         return process_message(user, raw_msg)
