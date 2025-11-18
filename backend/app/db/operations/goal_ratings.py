@@ -93,18 +93,3 @@ def update_rating(
 def delete_rating(rating_id: int):
     with connect() as conn:
         conn.execute("DELETE FROM goal_ratings WHERE id = ?", (rating_id,))
-
-def get_goal_ratings_for_date(user_id: int, rating_date: str):
-    with connect() as conn:
-        cur = conn.execute(
-            """
-            SELECT g.goal_emoji, gr.rating
-            FROM user_goals g
-            LEFT JOIN goal_ratings gr ON g.id = gr.user_goal_id AND DATE(gr.rating_date) = DATE(?)
-            WHERE g.user_id = ?
-            ORDER BY g.created_at
-            """,
-            (rating_date, user_id),
-        )
-        rows: list[sqlite3.Row] = cur.fetchall()
-        return [dict(row) for row in rows]

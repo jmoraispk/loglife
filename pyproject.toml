@@ -21,6 +21,7 @@ dev = [
     "mkdocs-glightbox>=0.5.2",
     "mkdocs-material>=9.6.22",
     "sqlite-web>=0.6.5",
+    "tzdata>=2025.2",
 ]
 
 [tool.pytest.ini_options]

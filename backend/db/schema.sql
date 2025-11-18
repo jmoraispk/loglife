@@ -27,9 +27,11 @@ CREATE TABLE IF NOT EXISTS goal_ratings (
 
 CREATE TABLE IF NOT EXISTS goal_reminders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     user_goal_id INTEGER NOT NULL,
     reminder_time DATETIME NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (user_goal_id) REFERENCES user_goals(id) ON DELETE CASCADE
 );
 

@@ -1,21 +1,42 @@
 from app.config import ERROR_NO_GOALS_SET, HELP_MESSAGE, ERROR_INVALID_INPUT_LENGTH, SUCCESS_RATINGS_SUBMITTED, USAGE_RATE, SUCCESS_INDIVIDUAL_RATING, STYLE
-from app.db import create_goal, get_user_goals, create_rating, get_rating_by_goal_and_date, update_rating
-from app.helpers import extract_emoji, is_valid_rating_digits, get_monday_before, look_back_summary
+from app.db import create_goal, get_user_goals, create_rating, get_rating_by_goal_and_date, update_rating, create_user_state, get_user_state, create_goal_reminder, delete_user_state
+from app.helpers import extract_emoji, is_valid_rating_digits, get_monday_before, look_back_summary, is_valid_time_string, parse_time_string
 from datetime import datetime, timedelta
+import json
 
 def process_message(user: dict, message: str) -> str:
 
     message: str = message.lower()
 
-    user_id = user["id"]
+    user_id: int = user["id"]
 
     if 'add goal' in message:
-        raw_goal = message.replace('add goal', '')
+        raw_goal: str = message.replace('add goal', '')
         if raw_goal:
-            goal_emoji = extract_emoji(raw_goal)
-            create_goal(user_id, goal_emoji, raw_goal.replace(goal_emoji, ''))
-            return 'Goal Added successfully! When you would like to be reminded?'
-        return 'Wrong command for adding goal!'
+            goal_emoji: str = extract_emoji(raw_goal)
+            goal_description: str = raw_goal.replace(goal_emoji, '')
+            goal: dict | None = create_goal(user_id, goal_emoji, goal_description)
+            if goal:
+                create_user_state(
+                    user_id,
+                    state='awaiting_reminder_time',
+                    temp_data=json.dumps({'goal_id': goal['id']})
+                )
+                return 'Goal Added successfully! When you would like to be reminded?'
+    
+    if is_valid_time_string(message):
+        normalized_time: str | None = parse_time_string(message)
+        if normalized_time is not None:
+            user_state: dict | None = get_user_state(user_id)
+            if not user_state or user_state["state"] != "awaiting_reminder_time":
+                return "Please add a goal first."
+            
+            temp = json.loads(user_state.get("temp_data") or "{}")
+            goal_id = temp.get("goal_id")
+
+            create_goal_reminder(user_id=user_id, user_goal_id=goal_id, reminder_time=normalized_time)
+            delete_user_state(user_id)
+            return f"Got it! I'll remind you daily at {normalized_time[:-3]}."
     
     if 'remove goal' in message:
         pass

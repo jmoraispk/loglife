@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 from app.config import LOOKBACK_HEADER, LOOKBACK_NO_GOALS, LOOKBACK_USER_NOT_FOUND, STYLE
-from app.db import get_user_goals, get_goal_ratings_for_date
+from app.db import get_user_goals, get_rating_by_goal_and_date
 
 
 def get_monday_before() -> datetime:
@@ -23,7 +23,19 @@ def look_back_summary(user_id: int, days: int, start: datetime) -> str:
         display_date: str = current_date.strftime('%a')  # For display
         
         # Get ratings for this date
-        ratings_data = get_goal_ratings_for_date(user_id, storage_date)
+        ratings_data = []
+        for user_goal in user_goals:
+            user_goal_rating: dict | None = get_rating_by_goal_and_date(user_goal['id'], storage_date)
+            if user_goal_rating:
+                ratings_data.append(
+                    {"goal_emoji": user_goal['goal_emoji'],
+                    "rating": user_goal_rating['rating']}
+                )
+            else:
+                ratings_data.append(
+                    {"goal_emoji": user_goal['goal_emoji'],
+                    "rating": None}
+                )
         
         # Create status symbols for each goal
         status_symbols: list[str] = []

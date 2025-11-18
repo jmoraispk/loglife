@@ -9,7 +9,7 @@ def get_user_goals(user_id: int):
         return [dict(row) for row in rows]
 
 
-def get_goal(goal_id: int):
+def get_goal(goal_id: int) -> dict | None:
     with connect() as conn:
         cur = conn.execute(
             "SELECT * FROM user_goals WHERE id = ?",
@@ -40,7 +40,7 @@ def create_goal(
             (user_id, goal_emoji, goal_description, boost_level),
         )
         goal_id = cur.lastrowid
-        return get_goal(goal_id)
+    return get_goal(goal_id)
 
 
 def update_goal(

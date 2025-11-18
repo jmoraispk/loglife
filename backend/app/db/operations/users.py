@@ -8,7 +8,7 @@ def get_all_users():
         # we return after converting to dict to access columns by name instead of index
         return [dict(row) for row in rows]
 
-def get_user(user_id: int):
+def get_user(user_id: int) -> dict:
     with connect() as conn:
         cur = conn.execute(
             "SELECT * FROM users WHERE id = ?",
