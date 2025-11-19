@@ -1,1 +1,0 @@
-from .reminder import start_reminder_service
