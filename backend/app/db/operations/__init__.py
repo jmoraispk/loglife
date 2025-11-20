@@ -5,4 +5,26 @@ from .referrals import create_referral
 from .goal_reminders import get_all_goal_reminders, create_goal_reminder
 from .user_states import create_user_state, get_user_state, delete_user_state
 
-__all__ = ["get_user_by_phone_number", "create_user", "get_user_goals", "create_referral", "create_user_state"]
+__all__ = [
+    # Users
+    "get_user_by_phone_number",
+    "create_user",
+    "get_user",
+    # User goals
+    "get_user_goals",
+    "get_goal",
+    "create_goal",
+    # Goal ratings
+    "create_rating",
+    "get_rating_by_goal_and_date",
+    "update_rating",
+    # Referrals
+    "create_referral",
+    # Goal reminders
+    "get_all_goal_reminders",
+    "create_goal_reminder",
+    # User states
+    "create_user_state",
+    "get_user_state",
+    "delete_user_state",
+]

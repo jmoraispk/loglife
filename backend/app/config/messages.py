@@ -1,12 +1,14 @@
-"""User-facing messages and text constants.
+"""
+User-facing messages and text constants.
 
 This module contains all user-facing messages, responses, and text strings
 used throughout the application. Centralizing messages makes translation
 and maintenance easier.
 """
 
-
-# Welcome and onboarding messages
+# -----------------------------
+# Welcome and Onboarding Messages
+# -----------------------------
 WELCOME_MESSAGE = """🎯 *Welcome to Life Bot!*
 
 I'm your personal goal tracking assistant. Here's how to get started:
@@ -33,6 +35,9 @@ I'm your personal goal tracking assistant. Here's how to get started:
 
 I'm here to help you build better habits and achieve your goals! What would you like to start with?"""
 
+# -----------------------------
+# Help Messages
+# -----------------------------
 HELP_MESSAGE = """```Life Bot Commands:
 
 📋 GOALS
@@ -55,7 +60,9 @@ Examples:
 • rate 1 3 (rate first goal as success)
 • lookback 3 (show last 3 days)```"""
 
-# Referral messages
+# -----------------------------
+# Referral Messages
+# -----------------------------
 REFERRAL_SUCCESS = """🎉 *Thank you for the referral!*
 
 You've successfully shared a contact with Life Bot. The person you referred will receive an onboarding message to get started with their goal tracking journey.
@@ -67,35 +74,48 @@ You've successfully shared a contact with Life Bot. The person you referred will
 
 Keep up the great work of spreading positive habits! 🌟"""
 
-# Error messages
+# -----------------------------
+# Error Messages
+# -----------------------------
 ERROR_NO_GOALS_SET = "❌ No goals set. Please set goals first."
 ERROR_NO_GOALS_ADD_FIRST = "❌ No goals set. Please add goals first."
 ERROR_USER_NOT_FOUND = "❌ User not found"
 ERROR_GOAL_NOT_FOUND = "❌ Goal not found"
-ERROR_UNRECOGNIZED_MESSAGE = "❌ Unrecognized message. Type 'help' to see available commands."
+ERROR_UNRECOGNIZED_MESSAGE = (
+    "❌ Unrecognized message. Type 'help' to see available commands."
+)
 ERROR_WAID_REQUIRED = "WAID is required"
 
-# Goal-related messages
+# Goal-related errors
 ERROR_GOAL_ALREADY_EXISTS = "❌ Goal <goal_emoji> already exists for you."
 ERROR_GOAL_NOT_FOUND_WITH_EMOJI = "❌ Goal <goal_emoji> not found"
 ERROR_INVALID_INPUT_LENGTH = "❌ Invalid input. Send <num_goals> digits."
 ERROR_INVALID_INPUT_DIGITS = "❌ Invalid input. Send <num_goals> digits between 1 and 3"
 ERROR_GOAL_NUMBER_RANGE = "❌ Goal number must be between 1 and <max_goals>"
 
-# Rating messages
+# Rating errors
 ERROR_RATING_INVALID = "❌ Rating must be 1, 2, or 3"
 
 # Usage messages
 USAGE_ADD_GOAL = "❌ Usage: add goal 😴 Sleep by 9pm"
 USAGE_RATE = "❌ Usage: rate 2 3 (goal number and rating 1-3)"
 
+# -----------------------------
+# Success Messages
+# -----------------------------
 SUCCESS_GOAL_ADDED = "✅ Added goal: <goal_emoji> <goal_description>"
 
-# Summary messages
-SUCCESS_RATINGS_SUBMITTED = "📅 <today_display>\n<goal_emojis> <goal_description>: <status>"
-SUCCESS_INDIVIDUAL_RATING = "📅 <today_display>\n<goal_emoji> <goal_description>: <status_symbol>"
+# Rating messages
+SUCCESS_RATINGS_SUBMITTED = (
+    "📅 <today_display>\n<goal_emojis> <goal_description>: <status>"
+)
+SUCCESS_INDIVIDUAL_RATING = (
+    "📅 <today_display>\n<goal_emoji> <goal_description>: <status_symbol>"
+)
 
-# Look back summary messages
+# -----------------------------
+# Lookback Summary Messages
+# -----------------------------
 LOOKBACK_NO_GOALS = "```No goals set. Use 'add goal 😴 Description' to add goals.```"
 LOOKBACK_USER_NOT_FOUND = "```User not found```"
 LOOKBACK_HEADER = "Last <days> days:\n"

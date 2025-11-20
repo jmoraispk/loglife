@@ -1,1 +1,0 @@
-ssh root@5.161.234.127 'tmux send-keys -t client "node index.js" C-m'

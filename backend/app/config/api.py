@@ -1,4 +1,6 @@
-WHATSAPP_API_URL="http://localhost:3000/send-message"
+"""API configuration constants for external service endpoints."""
+
+WHATSAPP_API_URL = "http://localhost:3000/send-message"
 
 ASSEMBLYAI_BASE_URL = "https://api.assemblyai.com"
 

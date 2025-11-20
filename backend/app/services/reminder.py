@@ -1,50 +1,87 @@
+"""Asynchronous reminder service for user goals.
+
+This module continuously polls stored reminder definitions, calculates the next
+execution window per user timezone, and dispatches WhatsApp notifications when
+their goal schedules align with the current local time. It exposes a daemonized
+worker loop that sleeps between batches based on upcoming reminders, minimizing
+polling overhead while ensuring timely alerts.
+"""
+
+import logging
 import threading
 import time
 from app.db import get_user, get_all_goal_reminders, get_goal
 from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 from app.helpers import send_whatsapp_message
 
+
 def _get_timezone_safe(timezone_str: str) -> ZoneInfo:
-    """Get ZoneInfo, falling back to UTC if timezone is invalid or unknown."""
+    """Get ZoneInfo, falling back to UTC if timezone is invalid or unknown.
+
+    Arguments:
+    timezone_str -- Timezone string in IANA format (e.g., "Asia/Karachi", "America/New_York")
+
+    Returns a ZoneInfo object for the given timezone string, or UTC if the timezone is invalid or unknown.
+    """
+    timezone_str = timezone_str.strip()
     try:
         return ZoneInfo(timezone_str)
-    except Exception:
+    except (ZoneInfoNotFoundError, ValueError):
+        # exc_info=True logs the full traceback of the exception, including the line number where the exception was raised.
+        logging.error(
+            f"Invalid timezone '{timezone_str}', defaulting to UTC", exc_info=True
+        )
         return ZoneInfo("UTC")
 
-def _next_reminder_seconds():
+
+def _next_reminder_seconds() -> float:
+    """Calculates the next reminder execution window in seconds.
+
+    Returns the number of seconds to wait until the next reminder execution window. The minimum wait is 10 seconds and the maximum wait is 1 hour.
+    """
     reminders: list[dict] = get_all_goal_reminders()
+    if not reminders:
+        logging.info("No reminders scheduled; using default wait interval")
     now_utc: datetime = datetime.now(timezone.utc)
     wait_times = []
 
     for reminder in reminders:
         user_id: int = reminder["user_id"]
         user_timezone: str = get_user(user_id)["timezone"]
-        time_str: str = reminder.get("reminder_time")
+        time_str: str = reminder["reminder_time"]
 
         hours_minutes: list[str] = time_str.split(":")
         # Extract hours and minutes as integers
         hours: int = int(hours_minutes[0])
         minutes: int = int(hours_minutes[1])
-        
+
         tz: ZoneInfo = _get_timezone_safe(user_timezone)
-        local_now: datetime = now_utc.astimezone(tz) # current time in user's timezone
+        local_now: datetime = now_utc.astimezone(tz).replace(
+            second=0, microsecond=0
+        )  # current time in user's timezone
         target: datetime = local_now.replace(hour=hours, minute=minutes)
-        
-        if target <= local_now: # target already passed
-            target += timedelta(days=1) # move to next day
+
+        if target <= local_now:  # target already passed
+            target += timedelta(days=1)  # move to next day
 
         wait_times.append((target - local_now).total_seconds())
 
     # default=60 is used in case wait_times is empty
-    next_wait = min(wait_times, default=60)
+    next_wait: float = float(min(wait_times, default=60))
 
-    return max(10, min(3600, next_wait)) # limits the maximum wait to 1 hour and ensures a minimum wait of 10 seconds
+    # Limits the maximum wait to 1 hour and ensures a minimum wait of 10 seconds.
+    # The function could return an int if there are no reminders.
+    bounded_wait: float = float(max(10, min(3600, next_wait)))
+    logging.debug(f"Next reminder check scheduled in {bounded_wait:.0f} seconds")
+    return bounded_wait
+
 
 def _check_reminders():
+    """Checks all reminders and sends notifications when their scheduled time matches the current local time."""
     reminders: list[dict] = get_all_goal_reminders()
     now_utc: datetime = datetime.now(timezone.utc)
-    
+
     for reminder in reminders:
         user_id: int = reminder["user_id"]
         user_goal_id: int = reminder["user_goal_id"]
@@ -53,26 +90,47 @@ def _check_reminders():
         user_goal: dict = get_goal(user_goal_id)
 
         user_timezone: str = user["timezone"]
-        tz: ZoneInfo = ZoneInfo(user_timezone)
+        logging.debug(
+            f"Evaluating reminder {reminder.get('id')} for user {user_id} in timezone {user_timezone}"
+        )
+        tz: ZoneInfo = _get_timezone_safe(user_timezone)
         local_now: datetime = now_utc.astimezone(tz)
-        
+
         time_str: str = reminder.get("reminder_time")
         hours_minutes: list[str] = time_str.split(":")
         # Extract hours and minutes as integers
         hours: int = int(hours_minutes[0])
         minutes: int = int(hours_minutes[1])
-        
+
         # Check if current time matches reminder time (HH:MM)
         if local_now.hour == hours and local_now.minute == minutes:
-            message = f"⏰ Reminder: {user_goal['goal_emoji']} {user_goal['goal_description']}"
-            send_whatsapp_message(user['phone_number'], message)
+            message: str = f"⏰ Reminder: {user_goal['goal_emoji']} {user_goal['goal_description']}"
+            send_whatsapp_message(user["phone_number"], message)
+            logging.info(
+                f"Sent reminder '{user_goal['goal_description']}' to {user['phone_number']}"
+            )
+
 
 def _reminder_worker():
+    """Daemonized worker loop that continuously checks for reminders and sends notifications when their scheduled time matches the current local time."""
     while True:
-        time.sleep(_next_reminder_seconds())
-        _check_reminders()
+        sleep_seconds: float = _next_reminder_seconds()
+        logging.debug(f"Reminder worker sleeping for {sleep_seconds:.0f} seconds")
+        time.sleep(sleep_seconds)
+        try:
+            _check_reminders()
+        except Exception as exc:
+            # exc_info=True logs the full traceback of the exception, including the line number where the exception was raised.
+            logging.error(
+                f"Unhandled error while checking reminders: {exc}", exc_info=True
+            )
 
-def start_reminder_service():
-    t = threading.Thread(target=_reminder_worker, daemon=True) # daemon makes the thread to get killed automatically when main program exits
+
+def start_reminder_service() -> threading.Thread:
+    """Starts the reminder service."""
+    t: threading.Thread = threading.Thread(
+        target=_reminder_worker, daemon=True
+    )  # daemon makes the thread to get killed automatically when main program exits
     t.start()
+    logging.info(f"Reminder service thread {t.name} started (daemon={t.daemon})")
     return t

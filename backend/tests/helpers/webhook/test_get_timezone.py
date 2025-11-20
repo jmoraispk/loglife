@@ -2,6 +2,7 @@
 import pytest
 from app.helpers import get_timezone_from_number
 
+
 @pytest.mark.parametrize(
     "number, expected",
     [
@@ -10,7 +11,7 @@ from app.helpers import get_timezone_from_number
         ("123_some_digits", "UTC"),
         ("no_digits", "UTC"),
         ("", "UTC"),
-    ]
+    ],
 )
 def test_get_timezone_from_number(number, expected):
     assert get_timezone_from_number(number) == expected
