@@ -76,26 +76,7 @@ node index.js --reset-session
 
 ### Outgoing Messages
 
-The client exposes an API endpoint to send messages:
-
-**POST `/send-message`**
-
-```json
-{
-  "number": "923325727426",
-  "message": "Welcome to Life Bot! ..."
-}
-```
-
-Used for:
-
-- Sending status updates during audio transcription
-- Automated referral welcome messages
-- Any programmatic messaging needs
-
-**GET `/health`**
-
-Check if the client is connected and ready.
+The client exposes API endpoints to send messages programmatically. See the [API Documentation](../api/overview.md) for endpoint details.
 
 ---
 
@@ -125,7 +106,5 @@ The client handles errors gracefully:
 - Backend failures → Sends user-friendly error message
 - Media download failures → Logs error and continues
 - Network errors → Sends fallback message without crashing
-
----
 
 ---

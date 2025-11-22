@@ -271,30 +271,10 @@ app.post('/send-message', async (req, res) => {
     }
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-    const payload = { 
-        status: 'OK', 
-        whatsappReady: isClientReady(),
-        timestamp: new Date().toISOString()
-    };
-    if (client && typeof client.getState === 'function') {
-        // best-effort: do not await here to keep health fast
-        client.getState().then(state => {
-            payload.state = state;
-            payload.lastReadyAt = lastReadyAt;
-            res.json(payload);
-        }).catch(() => res.json(payload));
-    } else {
-        res.json(payload);
-    }
-});
-
 // Start server
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📱 Send messages via POST /send-message`);
-    console.log(`🏥 Health check at GET /health`);
 });
 
 // Initialize client for the first time

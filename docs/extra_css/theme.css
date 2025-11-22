@@ -1,0 +1,149 @@
+/* ========================================
+   HEADER STYLES
+   ======================================== */
+
+/* Keep site name "LogLife" visible on scroll */
+.md-header__topic:first-child {
+    display: block !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+}
+
+/* Hide page title in header */
+.md-header__topic + .md-header__topic {
+    display: none !important;
+}
+
+/* Disable header animations */
+.md-header__title,
+.md-header__topic {
+    transition: none !important;
+    transform: none !important;
+}
+
+.md-header__topic {
+    position: static !important;
+}
+
+/* Black header background */
+[data-md-color-scheme="slate"] .md-header {
+    background-color: #000000 !important;
+}
+
+/* Black navigation tabs */
+[data-md-color-scheme="slate"] .md-tabs {
+    background-color: #000000 !important;
+}
+
+/* ========================================
+   MAIN CONTENT AREA
+   ======================================== */
+
+/* Black backgrounds */
+[data-md-color-scheme="slate"] .md-main,
+[data-md-color-scheme="slate"] .md-content,
+[data-md-color-scheme="slate"] .md-sidebar {
+    background-color: #000000 !important;
+}
+
+/* Heading styles */
+[data-md-color-scheme="slate"] .md-content h1,
+[data-md-color-scheme="slate"] .md-content h2,
+[data-md-color-scheme="slate"] .md-content h3,
+[data-md-color-scheme="slate"] .md-content h4,
+[data-md-color-scheme="slate"] .md-content h5,
+[data-md-color-scheme="slate"] .md-content h6 {
+    color: #DEDEDE !important;
+    font-weight: bold !important;
+}
+
+/* ========================================
+   SIDEBAR STYLES
+   ======================================== */
+
+/* Remove gradient/shadow effects */
+[data-md-color-scheme="slate"] .md-sidebar__scrollwrap::before,
+[data-md-color-scheme="slate"] .md-sidebar__scrollwrap::after {
+    display: none !important;
+}
+
+[data-md-color-scheme="slate"] .md-sidebar__scrollwrap {
+    box-shadow: none !important;
+}
+
+/* Left sidebar navigation header */
+[data-md-color-scheme="slate"] .md-sidebar--primary .md-sidebar__inner {
+    background-color: #000000 !important;
+}
+
+/* ========================================
+   NAVIGATION ITEMS
+   ======================================== */
+
+/* Navigation titles (both sidebars) */
+[data-md-color-scheme="slate"] .md-nav__title {
+    box-shadow: none !important;
+    background-color: #000000 !important;
+    color: #DEDEDE !important;
+    margin-bottom: 3px !important;
+    padding-bottom: 12px !important;
+}
+
+/* Add icon before navigation title */
+.md-nav__title::before {
+    content: "";
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    background-image: url('data:image/svg+xml;utf8,<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="%23DEDEDE" stroke-width="2" xmlns="http://www.w3.org/2000/svg"><path d="M2.44434 12.6665H13.5554" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2.44434 3.3335H13.5554" stroke-linecap="round" stroke-linejoin="round"></path><path d="M2.44434 8H7.33323" stroke-linecap="round" stroke-linejoin="round"></path></svg>');
+    background-repeat: no-repeat;
+    background-size: contain;
+    vertical-align: middle;
+}
+
+/* Remove backgrounds, borders, and shadows from nav items */
+[data-md-color-scheme="slate"] .md-nav__item,
+[data-md-color-scheme="slate"] .md-nav__link {
+    background-color: transparent !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Active and hover states */
+[data-md-color-scheme="slate"] .md-nav__item--active > .md-nav__link,
+[data-md-color-scheme="slate"] .md-nav__link--active,
+[data-md-color-scheme="slate"] .md-nav__link:hover {
+    background-color: transparent !important;
+}
+
+/* Remove pseudo-elements (indicators/borders) */
+[data-md-color-scheme="slate"] .md-nav__link::before,
+[data-md-color-scheme="slate"] .md-nav__link::after {
+    display: none !important;
+}
+
+/* ========================================
+   SIDEBAR NAVIGATION COLORS
+   ======================================== */
+
+/* Left sidebar (primary) navigation */
+[data-md-color-scheme="slate"] .md-sidebar--primary .md-nav__link {
+    color: #DEDEDE !important;
+}
+
+/* Right sidebar (secondary) table of contents */
+[data-md-color-scheme="slate"] .md-sidebar--secondary .md-nav__link:hover,
+[data-md-color-scheme="slate"] .md-sidebar--secondary .md-nav__link--active {
+    color: #DEDEDE !important;
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+.md-footer {
+    display: none !important;
+}

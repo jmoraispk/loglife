@@ -45,5 +45,3 @@ Log in to WhatsApp again with the twilio number:
 - Option 2: Use another WhatsApp app (e.g., WhatsApp Business) and log in with the same number.
 
 ---
-
----
