@@ -25,7 +25,6 @@ from app.helpers import (
     is_valid_rating_digits,
     get_monday_before,
     look_back_summary,
-    is_valid_time_string,
     parse_time_string,
 )
 from datetime import datetime, timedelta
@@ -63,21 +62,20 @@ def process_message(user: dict, message: str) -> str:
                 )
                 return "Goal Added successfully! When you would like to be reminded?"
 
-    if is_valid_time_string(message):
-        normalized_time: str | None = parse_time_string(message)
-        if normalized_time is not None:
-            user_state: dict | None = get_user_state(user_id)
-            if not user_state or user_state["state"] != "awaiting_reminder_time":
-                return "Please add a goal first."
+    if parse_time_string(message) is not None:
+        normalized_time: str = parse_time_string(message)
+        user_state: dict | None = get_user_state(user_id)
+        if not user_state or user_state["state"] != "awaiting_reminder_time":
+            return "Please add a goal first."
 
-            temp = json.loads(user_state.get("temp_data") or "{}")
-            goal_id = temp.get("goal_id")
+        temp = json.loads(user_state.get("temp_data") or "{}")
+        goal_id = temp.get("goal_id")
 
-            create_goal_reminder(
-                user_id=user_id, user_goal_id=goal_id, reminder_time=normalized_time
-            )
-            delete_user_state(user_id)
-            return f"Got it! I'll remind you daily at {normalized_time[:-3]}."
+        create_goal_reminder(
+            user_id=user_id, user_goal_id=goal_id, reminder_time=normalized_time
+        )
+        delete_user_state(user_id)
+        return f"Got it! I'll remind you daily at {normalized_time[:-3]}."
 
     if "remove goal" in message:
         pass

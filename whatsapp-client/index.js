@@ -126,18 +126,31 @@ function createClient() {
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`❌ Backend error (${response.status}):`, errorText.substring(0, 500));
-                await newClient.sendMessage(msg.from, 'Sorry, I encountered an error processing your message. Please try again.');
+                try {
+                    const errorData = await response.json();
+                    const errorMessage = errorData?.data?.message || errorData?.message || 'Sorry, I encountered an error processing your message. Please try again.';
+                    console.error(`❌ Backend error (${response.status}):`, JSON.stringify(errorData).substring(0, 500));
+                    await newClient.sendMessage(msg.from, errorMessage);
+                } catch (parseErr) {
+                    const errorText = await response.text();
+                    console.error(`❌ Backend error (${response.status}):`, errorText.substring(0, 500));
+                    await newClient.sendMessage(msg.from, 'Sorry, I encountered an error processing your message. Please try again.');
+                }
                 return;
             }
 
-            const text = await response.text();
-            newClient.sendMessage(msg.from, text);
+            const responseData = await response.json();
+            if (responseData.success && responseData.data && responseData.data.message) {
+                newClient.sendMessage(msg.from, responseData.data.message);
+            } else {
+                // Fallback if response structure is unexpected
+                const fallbackMessage = responseData?.data?.message || responseData?.message || 'Sorry, I encountered an error processing your message. Please try again.';
+                newClient.sendMessage(msg.from, fallbackMessage);
+            }
         } catch (err) {
             console.error('Failed to fetch from backend:', err);
             try {
-                await newClient.sendMessage(msg.from, 'Sorry, I encountered an error. Please try again.');
+                await newClient.sendMessage(msg.from, 'Sorry, I encountered a system error. Please try again.');
             } catch (sendErr) {
                 console.error('Failed to send error message:', sendErr);
             }

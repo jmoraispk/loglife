@@ -31,7 +31,10 @@ def transcribe_audio(audio_data: str) -> str:
         headers={"authorization": ASSEMBLYAI_API_KEY},
         data=audio_bytes,
     )
-    upload_response.raise_for_status()
+    try:
+        upload_response.raise_for_status()
+    except requests.HTTPError as e:
+        raise RuntimeError(f"Audio upload failed: {e}")
 
     upload_url = upload_response.json()["upload_url"]
 
@@ -40,7 +43,10 @@ def transcribe_audio(audio_data: str) -> str:
         headers={"authorization": ASSEMBLYAI_API_KEY},
         json={"audio_url": upload_url},
     )
-    transcript_response.raise_for_status()
+    try:
+        transcript_response.raise_for_status()
+    except requests.HTTPError as e:
+        raise RuntimeError(f"Transcription failed: {e}")
 
     transcript_id = transcript_response.json()["id"]
     polling_endpoint = f"{ASSEMBLYAI_BASE_URL}/v2/transcript/{transcript_id}"
@@ -49,13 +55,16 @@ def transcribe_audio(audio_data: str) -> str:
         poll_response = requests.get(
             polling_endpoint, headers={"authorization": ASSEMBLYAI_API_KEY}
         )
-        poll_response.raise_for_status()
+        try:
+            poll_response.raise_for_status()
+        except requests.HTTPError as e:
+            raise RuntimeError(f"Transcription polling failed: {e}")
         transcript = poll_response.json()
 
-        status = transcript.get("status")
+        status = transcript["status"]
         if status == "completed":
             return transcript
         if status == "error":
-            raise RuntimeError(f"Transcription failed: {transcript.get('error')}")
+            raise RuntimeError(f"Transcription failed: {transcript['error']}")
 
         time.sleep(3)

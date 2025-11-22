@@ -6,7 +6,6 @@ from .text import (
     is_valid_rating_digits,
     get_monday_before,
     look_back_summary,
-    is_valid_time_string,
     parse_time_string,
 )
 from .webhook import get_timezone_from_number
@@ -20,7 +19,6 @@ __all__ = [
     "is_valid_rating_digits",
     "get_monday_before",
     "look_back_summary",
-    "is_valid_time_string",
     "parse_time_string",
     "get_timezone_from_number",
 ]

@@ -4,6 +4,7 @@ from .goal_ratings import create_rating, get_rating_by_goal_and_date, update_rat
 from .referrals import create_referral
 from .goal_reminders import get_all_goal_reminders, create_goal_reminder
 from .user_states import create_user_state, get_user_state, delete_user_state
+from .audio_journal_entries import create_audio_journal_entry
 
 __all__ = [
     # Users
@@ -27,4 +28,6 @@ __all__ = [
     "create_user_state",
     "get_user_state",
     "delete_user_state",
+    # Audio journal entries
+    "create_audio_journal_entry",
 ]

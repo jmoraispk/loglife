@@ -15,6 +15,7 @@ from .operations import (
     get_user_state,
     create_goal_reminder,
     delete_user_state,
+    create_audio_journal_entry,
 )
 
 __all__ = [
@@ -37,4 +38,5 @@ __all__ = [
     "get_user_state",
     "create_goal_reminder",
     "delete_user_state",
+    "create_audio_journal_entry",
 ]

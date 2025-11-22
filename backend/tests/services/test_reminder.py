@@ -1,9 +1,25 @@
+"""
+Tests for the reminder service functionality.
+
+This module tests reminder-related operations including timezone handling,
+reminder scheduling calculations, and reminder notification triggering.
+"""
+
 from zoneinfo import ZoneInfo
 from datetime import datetime, timezone, timedelta
 import backend.app.services.reminder as reminder_module
 
 
 def test_get_timezone_safe():
+    """
+    Test safe timezone parsing with fallback to UTC.
+
+    Verifies that the _get_timezone_safe function correctly handles:
+    - Valid timezone strings
+    - Timezone strings with whitespace
+    - Invalid timezone strings (defaults to UTC)
+    - Empty strings (defaults to UTC)
+    """
     assert reminder_module._get_timezone_safe("America/New_York") == ZoneInfo(
         "America/New_York"
     )
@@ -15,6 +31,17 @@ def test_get_timezone_safe():
 
 
 def test_next_reminder_seconds(mocker):
+    """
+    Test calculation of seconds until next reminder.
+
+    Verifies that the _next_reminder_seconds function correctly:
+    - Calculates wait time for upcoming reminders (30 minutes in future)
+    - Returns default wait time when no reminders are scheduled
+    - Uses mocked data to avoid dependency on actual database state
+
+    Arguments:
+        mocker: pytest-mock fixture for patching dependencies
+    """
     now = datetime.now(timezone.utc)
     # Set a reminder 30 minutes in the future
     reminder_time = (now + timedelta(minutes=30)).strftime("%H:%M")
@@ -40,6 +67,18 @@ def test_next_reminder_seconds(mocker):
 
 
 def test_check_reminders(mocker):
+    """
+    Test reminder checking and notification sending.
+
+    Verifies that the _check_reminders function correctly:
+    - Identifies reminders that are due at the current time
+    - Retrieves user and goal information
+    - Sends WhatsApp notification with proper message format
+    - Includes goal emoji and description in the reminder message
+
+    Arguments:
+        mocker: pytest-mock fixture for patching dependencies
+    """
     now = datetime.now(timezone.utc)
     reminder_time = now.strftime("%H:%M")
 

@@ -39,6 +39,11 @@ def summarize_transcript(transcript: str) -> str:
 
     response = requests.post(OPENAI_API_URL, json=payload, headers=headers)
 
+    try:
+        response.raise_for_status()
+    except requests.HTTPError as e:
+        raise RuntimeError(e)
+
     data = response.json()
 
     return data["choices"][0]["message"]["content"]

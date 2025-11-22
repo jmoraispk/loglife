@@ -1,0 +1,18 @@
+site_name: LogLife Docs
+docs_dir: docs
+theme:
+  name: material
+  custom_dir: docs/theme_overrides
+  palette:
+    scheme: slate
+  features:
+    - content.image.lightbox
+nav:
+  - Backend: backend.md
+  - User Journey: user-journey.md
+  - WhatsApp Client: whatsapp-client.md
+  - Twilio WhatsApp Number Setup: twilio-whatsapp-number-setup.md
+
+plugins:
+  - search
+  - glightbox

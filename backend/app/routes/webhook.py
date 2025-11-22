@@ -66,7 +66,7 @@ def webhook() -> ResponseReturnValue:
 
     if msg_type in ("audio", "ptt"):
         logging.debug(f"Processing audio message for {sender}")
-        response_message = process_audio(sender, raw_msg)
+        response_message = process_audio(sender, user, raw_msg)
 
     if msg_type == "vcard":
         logging.debug(f"Processing vcard message for {sender}")

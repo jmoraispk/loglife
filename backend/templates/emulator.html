@@ -615,8 +615,13 @@
                 try {
                     const data = await res.clone().json();
                     text = JSON.stringify(data, null, 2);
-                    // Best-effort preview: if server returns JSON with "message" or "text"
-                    const previewCandidate = (data && (data.message || data.text || data.response)) || '';
+                    // Extract message from new JSON structure: data.data.message for success, data.message for errors
+                    const previewCandidate = (data && (
+                        (data.data && data.data.message) ||  // New format: success case
+                        data.message ||                      // Error case or old format
+                        data.text || 
+                        data.response
+                    )) || '';
                     if (previewCandidate) {
                         formattedText = previewCandidate;
                     } else {
@@ -707,7 +712,13 @@
                 try {
                     const data = await res.clone().json();
                     text = JSON.stringify(data, null, 2);
-                    formattedText = (data && (data.message || data.text || data.response)) || text;
+                    // Extract message from new JSON structure: data.data.message for success, data.message for errors
+                    formattedText = (data && (
+                        (data.data && data.data.message) ||  // New format: success case
+                        data.message ||                      // Error case or old format
+                        data.text || 
+                        data.response
+                    )) || text;
                 } catch {
                     text = await res.text();
                     formattedText = text;
@@ -840,7 +851,13 @@
                         try {
                             const data = await res.clone().json();
                             text = JSON.stringify(data, null, 2);
-                            formattedText = (data && (data.message || data.text || data.response)) || text;
+                            // Extract message from new JSON structure: data.data.message for success, data.message for errors
+                            formattedText = (data && (
+                                (data.data && data.data.message) ||  // New format: success case
+                                data.message ||                      // Error case or old format
+                                data.text || 
+                                data.response
+                            )) || text;
                         } catch {
                             text = await res.text();
                             formattedText = text;

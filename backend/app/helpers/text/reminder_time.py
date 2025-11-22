@@ -9,11 +9,6 @@ _HH_AM_PM = re.compile(r"^\d{1,2}\s?(am|pm)$", re.IGNORECASE)
 _HH_ONLY = re.compile(r"^\d{1,2}$")
 
 
-def is_valid_time_string(raw: str) -> bool:
-    """Checks whether the raw string can be parsed into a valid time."""
-    return parse_time_string(raw) is not None
-
-
 def parse_time_string(raw: str) -> str | None:
     """Parses user-provided time text into HH:MM:00 format.
 
