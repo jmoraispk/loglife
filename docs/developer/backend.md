@@ -72,10 +72,14 @@ Text commands are processed through a state machine pattern:
 **Key files:**
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 - `app/logic/process_text.py` — Main command routing logic
 =======
 - `app/logic/process_message.py` — Main command routing logic
 >>>>>>> 6323348 (completed updated documentation)
+=======
+- `app/logic/process_text.py` — Main command routing logic
+>>>>>>> d8674ab (some fixes after testing)
 - `app/helpers/text/goal.py` — Goal text parsing utilities
 - `app/helpers/text/rate.py` — Rating command parser
 - `app/helpers/text/week.py` — Week summary formatter

@@ -77,6 +77,7 @@ lookback 30
 When adding a goal, you'll be asked for a reminder time. You can use any of these formats:
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 - `18:00` or `18:30` — 24-hour format
 - `6 PM`, `6:30 PM`, or `10:15 AM` — 12-hour format with AM/PM
 - `6pm` or `6` — Casual format without minutes
@@ -85,6 +86,11 @@ When adding a goal, you'll be asked for a reminder time. You can use any of thes
 - `6 PM` or `6:30 PM` — 12-hour format with AM/PM
 - `6pm` or `6` — Casual format (assumes PM)
 >>>>>>> 6323348 (completed updated documentation)
+=======
+- `18:00` or `18:30` — 24-hour format
+- `6 PM`, `6:30 PM`, or `10:15 AM` — 12-hour format with AM/PM
+- `6pm` or `6` — Casual format without minutes
+>>>>>>> d8674ab (some fixes after testing)
 
 LogLife automatically adjusts reminders to your timezone!
 

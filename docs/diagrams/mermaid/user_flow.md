@@ -137,16 +137,22 @@ flowchart TB
 
 **Time formats you can use:**
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> d8674ab (some fixes after testing)
 - `6:30 AM`, `6:30 PM`, or `10:15 PM` (12-hour with AM/PM)
 - `18:00` or `22:30` (24-hour format)
 - `6pm` or `6am` (hour only with AM/PM)
 - `6` (hour only, 24-hour format)
+<<<<<<< HEAD
 =======
 - `6:30 AM` or `6:30 PM` (with AM/PM)
 - `18:00` (24-hour format)
 - `6pm` or `6am` (casual)
 - `6` (assumes morning)
 >>>>>>> 1b55d27 (added left over pytests, and updated documentation somewhat)
+=======
+>>>>>>> d8674ab (some fixes after testing)
 
 **Your timezone:** Automatically detected from your phone number, so reminders arrive at the right local time.
 
@@ -202,10 +208,14 @@ Bot: ✅ Goal added: 🏃 Morning run
      🔥 Boost level set to 1 (default).
      ⏰ What time should I remind you daily? 
 <<<<<<< HEAD
+<<<<<<< HEAD
         (e.g., 18:00, 6:30 PM, 6pm, 6)
 =======
         (e.g., 18:00, 6 PM, 6pm)
 >>>>>>> 1b55d27 (added left over pytests, and updated documentation somewhat)
+=======
+        (e.g., 18:00, 6:30 PM, 6pm, 6)
+>>>>>>> d8674ab (some fixes after testing)
 
 You: 6:30 AM
 
@@ -285,10 +295,14 @@ Bot: 📱 Life Bot Commands:
 ### 🌟 Key Features
 - **Voice Journaling**: Speech-to-text + AI summaries in under a minute
 <<<<<<< HEAD
+<<<<<<< HEAD
 - **Flexible Time Input**: Type times however you prefer (10:15 PM, 18:00, 6pm, 6, etc.)
 =======
 - **Flexible Time Input**: Type times however you prefer (6pm, 18:00, 6 PM, etc.)
 >>>>>>> 1b55d27 (added left over pytests, and updated documentation somewhat)
+=======
+- **Flexible Time Input**: Type times however you prefer (10:15 PM, 18:00, 6pm, 6, etc.)
+>>>>>>> d8674ab (some fixes after testing)
 - **Progress Tracking**: Simple number-based rating system (1-2-3)
 - **Weekly Insights**: See patterns in your habits and success rates
 - **Easy Sharing**: Invite friends by sharing their contact
