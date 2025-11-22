@@ -23,6 +23,9 @@ def summarize_transcript(transcript: str) -> str:
     transcript -- The transcript text to summarize
 
     Returns the summarized content as a string.
+    
+    Raises:
+    RuntimeError -- If the API request fails due to connection, timeout, or HTTP errors
     """
     payload = {
         "model": OPENAI_CHAT_MODEL,
@@ -37,13 +40,19 @@ def summarize_transcript(transcript: str) -> str:
         "Authorization": f"Bearer {OPENAI_API_KEY}",
     }
 
-    response = requests.post(OPENAI_API_URL, json=payload, headers=headers)
-
     try:
+        # Set timeout to 30 seconds to prevent indefinite hangs
+        response = requests.post(OPENAI_API_URL, json=payload, headers=headers, timeout=30)
         response.raise_for_status()
+        data = response.json()
+        return data["choices"][0]["message"]["content"]
+    except requests.Timeout as e:
+        raise RuntimeError(f"OpenAI API request timed out: {e}")
+    except requests.ConnectionError as e:
+        raise RuntimeError(f"Failed to connect to OpenAI API: {e}")
     except requests.HTTPError as e:
-        raise RuntimeError(e)
-
-    data = response.json()
-
-    return data["choices"][0]["message"]["content"]
+        raise RuntimeError(f"OpenAI API returned an error: {e}")
+    except requests.RequestException as e:
+        raise RuntimeError(f"OpenAI API request failed: {e}")
+    except (KeyError, ValueError) as e:
+        raise RuntimeError(f"Failed to parse OpenAI API response: {e}")

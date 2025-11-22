@@ -38,7 +38,7 @@ def _get_timezone_safe(timezone_str: str) -> ZoneInfo:
 def _next_reminder_seconds() -> float:
     """Calculates the next reminder execution window in seconds.
 
-    Returns the number of seconds to wait until the next reminder execution window. The minimum wait is 10 seconds and the maximum wait is 1 hour.
+    Returns the number of seconds to wait until the next reminder execution window. The minimum wait is 10 seconds and the maximum wait is 60 seconds. This ensures the service remains responsive to newly added reminders.
     """
     reminders: list[dict] = get_all_goal_reminders()
     if not reminders:
@@ -70,9 +70,9 @@ def _next_reminder_seconds() -> float:
     # default=60 is used in case wait_times is empty
     next_wait: float = float(min(wait_times, default=60))
 
-    # Limits the maximum wait to 1 hour and ensures a minimum wait of 10 seconds.
-    # The function could return an int if there are no reminders.
-    bounded_wait: float = float(max(10, min(3600, next_wait)))
+    # Limits the maximum wait to 60 seconds and ensures a minimum wait of 10 seconds.
+    # This ensures the service is responsive to newly added reminders.
+    bounded_wait: float = float(max(10, min(60, next_wait)))
     logging.debug(f"Next reminder check scheduled in {bounded_wait:.0f} seconds")
     return bounded_wait
 

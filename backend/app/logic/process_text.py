@@ -31,7 +31,7 @@ from datetime import datetime, timedelta
 import json
 
 
-def process_message(user: dict, message: str) -> str:
+def process_text(user: dict, message: str) -> str:
     """Routes incoming text commands to the appropriate goal or rating handler.
 
     Handles commands such as adding goals, submitting ratings, configuring
@@ -83,6 +83,9 @@ def process_message(user: dict, message: str) -> str:
     if message == "goals":
         user_goals: list[dict] = get_user_goals(user_id)
 
+        if not user_goals:
+            return ERROR_NO_GOALS_SET
+
         # Format each goal with its description
         goal_lines: list[str] = []
         for goal in user_goals:
@@ -106,6 +109,9 @@ def process_message(user: dict, message: str) -> str:
 
         # Add Goals Header - we'll need to get user goals dynamically
         user_goals: list[dict] = get_user_goals(user_id)
+        if not user_goals:
+            return ERROR_NO_GOALS_SET
+        
         goal_emojis: list[str] = [goal["goal_emoji"] for goal in user_goals]
         summary += "    " + " ".join(goal_emojis) + "\n```"
 
@@ -114,6 +120,11 @@ def process_message(user: dict, message: str) -> str:
         return summary
 
     if message.startswith("lookback"):
+        # Check if user has any goals first
+        user_goals: list[dict] = get_user_goals(user_id)
+        if not user_goals:
+            return ERROR_NO_GOALS_SET
+        
         # Extract number of days from message (e.g., "lookback 5" or "lookback")
         parts: list[str] = message.split()
         if len(parts) == 2 and parts[1].isdigit():
@@ -135,6 +146,10 @@ def process_message(user: dict, message: str) -> str:
         rating_value: int = int(parse_rating[1])
 
         user_goals: list[dict] = get_user_goals(user_id)
+
+        # Check if user has any goals first
+        if not user_goals:
+            return ERROR_NO_GOALS_SET
 
         if not (goal_num <= len(user_goals)):
             return USAGE_RATE

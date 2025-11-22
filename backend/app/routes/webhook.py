@@ -6,7 +6,7 @@ It processes incoming messages (text, audio, or VCARD) and routes them to the ap
 
 from flask import Blueprint, request, jsonify
 from flask.typing import ResponseReturnValue
-from app.logic import process_vard, process_audio, process_message
+from app.logic import process_vard, process_audio, process_text
 from app.db import get_user_by_phone_number, create_user
 from app.helpers import get_timezone_from_number
 import logging
@@ -62,7 +62,7 @@ def webhook() -> ResponseReturnValue:
 
     if msg_type == "chat":
         logging.debug(f"Processing chat message for {sender}: {raw_msg}")
-        response_message = process_message(user, raw_msg)
+        response_message = process_text(user, raw_msg)
 
     if msg_type in ("audio", "ptt"):
         logging.debug(f"Processing audio message for {sender}")
