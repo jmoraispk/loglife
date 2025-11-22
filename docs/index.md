@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # LogLife Documentation
 
 ---
@@ -42,3 +43,10 @@ Set up LogLife locally by following the [Developer Guide](developer/overview/) â
 - [WhatsApp Client API](api/whatsapp-client/) â€” Automated messaging endpoints
 
 ---
+=======
+<meta http-equiv="refresh" content="0; url=backend/" />
+
+# Redirecting...
+
+If you are not redirected automatically, [click here](backend/).
+>>>>>>> 1b55d27 (added left over pytests, and updated documentation somewhat)

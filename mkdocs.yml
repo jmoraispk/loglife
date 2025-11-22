@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 site_name: LogLife
 
 repo_url: https://github.com/jmoraispk/life-bot.git
@@ -43,3 +44,23 @@ extra_css:
 
 extra_javascript:
   - extra_js/open_github_new_tab.js
+=======
+site_name: LogLife Docs
+docs_dir: docs
+theme:
+  name: material
+  custom_dir: docs/theme_overrides
+  palette:
+    scheme: slate
+  features:
+    - content.image.lightbox
+nav:
+  - Backend: backend.md
+  - User Journey: user-journey.md
+  - WhatsApp Client: whatsapp-client.md
+  - Twilio WhatsApp Number Setup: twilio-whatsapp-number-setup.md
+
+plugins:
+  - search
+  - glightbox
+>>>>>>> 1b55d27 (added left over pytests, and updated documentation somewhat)
