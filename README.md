@@ -3,7 +3,7 @@
 
   # LogLife
 
-  **Track your days. Reflect. Grow.**
+  **Log life. Live better.**
 
   <p align="center">
     <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python Version" />
