@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="logos/loglife_original_no_bg_fixed.svg" alt="LogLife Logo" width="400" />
+  <img src="logos/logo_no_bg.svg" alt="LogLife Logo" width="400" />
 
   # LogLife
 
