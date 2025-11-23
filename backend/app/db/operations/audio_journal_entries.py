@@ -82,6 +82,25 @@ def create_audio_journal_entry(
             (user_id, transcription_text, summary_text),
         )
 
+def update_audio_journal_entry(
+    entry_id: int, transcription_text: str, summary_text: str
+):
+    """Updates an existing audio journal entry.
+
+    Arguments:
+    entry_id -- The unique identifier of the entry to update
+    transcription_text -- The new transcribed text
+    summary_text -- The new summarized text
+    """
+    with connect() as conn:
+        conn.execute(
+            """
+            UPDATE audio_journal_entries 
+            SET transcription_text = ?, summary_text = ?
+            WHERE id = ?
+            """,
+            (transcription_text, summary_text, entry_id),
+        )
 
 def delete_audio_journal_entry(entry_id: int):
     """Deletes an audio journal entry record from the database.

@@ -63,7 +63,7 @@ def transcribe_audio(audio_data: str) -> str:
 
         status = transcript["status"]
         if status == "completed":
-            return transcript
+            return transcript["text"]
         if status == "error":
             raise RuntimeError(f"Transcription failed: {transcript['error']}")
 

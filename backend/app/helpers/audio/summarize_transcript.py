@@ -11,6 +11,7 @@ from app.config import (
     OPENAI_SUMMARIZATION_SYSTEM_PROMPT,
     OPENAI_API_KEY,
 )
+import logging
 
 
 def summarize_transcript(transcript: str) -> str:
@@ -27,6 +28,7 @@ def summarize_transcript(transcript: str) -> str:
     Raises:
     RuntimeError -- If the API request fails due to connection, timeout, or HTTP errors
     """
+    logging.debug(f"Incoming transcript: {transcript}")
     payload = {
         "model": OPENAI_CHAT_MODEL,
         "messages": [

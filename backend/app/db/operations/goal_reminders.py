@@ -36,6 +36,21 @@ def get_goal_reminder(reminder_id: int):
         row: sqlite3.Row | None = cur.fetchone()
         return dict(row) if row else None
 
+def get_goal_reminder_by_goal_id(user_goal_id: int) -> dict | None:
+    """Retrieves a goal reminder for a specific user goal.
+
+    Arguments:
+    user_goal_id -- The unique identifier of the user goal
+
+    Returns the reminder record as a dictionary, or None if not found.
+    """
+    with connect() as conn:
+        cur = conn.execute(
+            "SELECT * FROM goal_reminders WHERE user_goal_id = ?",
+            (user_goal_id,),
+        )
+        row: sqlite3.Row | None = cur.fetchone()
+        return dict(row) if row else None
 
 def create_goal_reminder(user_id: int, user_goal_id: int, reminder_time: str) -> dict:
     """Creates a new goal reminder record.
@@ -64,7 +79,7 @@ def update_goal_reminder(
     *,
     user_goal_id: int | None = None,
     reminder_time: str | None = None,
-):
+) -> dict:
     """Updates a goal reminder record with provided fields.
 
     Only the fields that are provided (not None) will be updated. If no fields

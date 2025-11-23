@@ -12,6 +12,7 @@ from app.config import (
 from app.db import (
     create_goal,
     get_user_goals,
+    get_goal,
     create_rating,
     get_rating_by_goal_and_date,
     update_rating,
@@ -19,6 +20,8 @@ from app.db import (
     get_user_state,
     create_goal_reminder,
     delete_user_state,
+    get_goal_reminder_by_goal_id,
+    update_goal_reminder
 )
 from app.helpers import (
     extract_emoji,
@@ -61,8 +64,11 @@ def process_text(user: dict, message: str) -> str:
                     temp_data=json.dumps({"goal_id": goal["id"]}),
                 )
                 return "Goal Added successfully! When you would like to be reminded?"
+    
+    elif message == "enable journaling":
+        return process_text(user, "add goal 📓 journaling")
 
-    if parse_time_string(message) is not None:
+    elif parse_time_string(message) is not None:
         normalized_time: str = parse_time_string(message)
         user_state: dict | None = get_user_state(user_id)
         if not user_state or user_state["state"] != "awaiting_reminder_time":
@@ -75,12 +81,20 @@ def process_text(user: dict, message: str) -> str:
             user_id=user_id, user_goal_id=goal_id, reminder_time=normalized_time
         )
         delete_user_state(user_id)
-        return f"Got it! I'll remind you daily at {normalized_time[:-3]}."
 
-    if "remove goal" in message:
+        # Convert 24-hour format to 12-hour AM/PM format
+        time_obj = datetime.strptime(normalized_time, "%H:%M:%S")
+        display_time = time_obj.strftime("%I:%M %p")
+
+        # Get the goal to display in confirmation
+        goal: dict = get_goal(goal_id)
+
+        return f"Got it! I'll remind you daily at {display_time} for {goal['goal_emoji']} {goal['goal_description']}."
+
+    elif "remove goal" in message:
         pass
 
-    if message == "goals":
+    elif message == "goals":
         user_goals: list[dict] = get_user_goals(user_id)
 
         if not user_goals:
@@ -88,14 +102,49 @@ def process_text(user: dict, message: str) -> str:
 
         # Format each goal with its description
         goal_lines: list[str] = []
-        for goal in user_goals:
+        for i, goal in enumerate(user_goals, 1):
+            # Get reminder for this goal
+            reminder = get_goal_reminder_by_goal_id(goal["id"])
+            time_display = ""
+            if reminder:
+                time_obj = datetime.strptime(reminder["reminder_time"], "%H:%M:%S")
+                time_display = f" ⏰ {time_obj.strftime('%I:%M %p')}"
             goal_lines.append(
-                f"{goal['goal_emoji']} {goal['goal_description']} (boost {goal['boost_level']})"
+                f"{i}. {goal['goal_emoji']} {goal['goal_description']} (boost {goal['boost_level']}) {time_display}"
             )
 
-        return "```" + "\n".join(goal_lines) + "```"
+        response = "```" + "\n".join(goal_lines) + "```"
+        response += "\n\n💡 _Tip: Update reminders with_ `update [goal#] [time]`"
+        return response
+    
+    elif message.startswith("update"):
+        parts = message.replace("update", "").strip().split(" ")
+        if len(parts) != 2:
+            return "Usage: update [goal number] [time]\nExample: update 1 8pm"
+        goal_num: int = int(parts[0])
+        time_input: str = parts[1]
 
-    if message == "week":
+        # Validate and get normalized time
+        normalized_time = parse_time_string(time_input)
+        if not normalized_time:
+            return "Invalid time format. Try: 8pm, 9:30am, 20:00"
+        
+        user_goals: list[dict] = get_user_goals(user_id)
+        if not user_goals or goal_num > len(user_goals) or goal_num < 1:
+            return "Invalid goal number. Type 'goals' to see your goals."
+        
+        goal: dict = user_goals[goal_num - 1]
+
+        reminder = get_goal_reminder_by_goal_id(goal["id"])
+        
+        update_goal_reminder(reminder["id"], reminder_time=normalized_time)
+        
+        time_obj = datetime.strptime(normalized_time, "%H:%M:%S")
+        display_time = time_obj.strftime("%I:%M %p")
+        
+        return f"✅ Reminder updated! I'll remind you at {display_time} for {goal['goal_emoji']} {goal['goal_description']}"
+
+    elif message == "week":
         start: datetime = get_monday_before()
 
         # Create Week Summary Header (E.g. Week 26: Jun 30 - Jul 06)
@@ -119,7 +168,7 @@ def process_text(user: dict, message: str) -> str:
         summary += look_back_summary(user_id, 7, start)
         return summary
 
-    if message.startswith("lookback"):
+    elif message.startswith("lookback"):
         # Check if user has any goals first
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals:
@@ -135,7 +184,7 @@ def process_text(user: dict, message: str) -> str:
         return look_back_summary(user_id, days, start)
 
     # rate a single goal
-    if message.startswith("rate"):
+    elif message.startswith("rate"):
         parse_rating: list[str] = message.replace("rate", "").strip().split(" ")
         if len(parse_rating) != 2:
             return USAGE_RATE
@@ -177,7 +226,7 @@ def process_text(user: dict, message: str) -> str:
         )
 
     # rate all goals at once
-    if is_valid_rating_digits(message):
+    elif is_valid_rating_digits(message):
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals:
             return ERROR_NO_GOALS_SET
@@ -213,7 +262,7 @@ def process_text(user: dict, message: str) -> str:
             .replace("<status>", " ".join(status))
         )
 
-    if message == "help":
+    elif message == "help":
         return HELP_MESSAGE
 
     return "Wrong command!"

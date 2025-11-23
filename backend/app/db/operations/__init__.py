@@ -2,9 +2,9 @@ from .users import get_user_by_phone_number, create_user, get_user
 from .user_goals import get_user_goals, get_goal, create_goal
 from .goal_ratings import create_rating, get_rating_by_goal_and_date, update_rating
 from .referrals import create_referral
-from .goal_reminders import get_all_goal_reminders, create_goal_reminder
+from .goal_reminders import get_all_goal_reminders, create_goal_reminder, get_goal_reminder_by_goal_id, update_goal_reminder
 from .user_states import create_user_state, get_user_state, delete_user_state
-from .audio_journal_entries import create_audio_journal_entry
+from .audio_journal_entries import create_audio_journal_entry, get_user_audio_journal_entries, update_audio_journal_entry
 
 __all__ = [
     # Users
@@ -24,10 +24,14 @@ __all__ = [
     # Goal reminders
     "get_all_goal_reminders",
     "create_goal_reminder",
+    "get_goal_reminder_by_goal_id",
+    "update_goal_reminder",
     # User states
     "create_user_state",
     "get_user_state",
     "delete_user_state",
     # Audio journal entries
     "create_audio_journal_entry",
+    "get_user_audio_journal_entries",
+    "update_audio_journal_entry"
 ]
