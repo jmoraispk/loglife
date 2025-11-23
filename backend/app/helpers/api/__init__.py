@@ -1,5 +1,3 @@
-"""API integration helpers package.
+from .whatsapp_api import send_whatsapp_message
 
-This package contains modules for integrating with external APIs,
-including WhatsApp messaging services and other communication platforms.
-"""
+__all__ = ["send_whatsapp_message"]

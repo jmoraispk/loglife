@@ -88,34 +88,37 @@ function createClient() {
         try {
             const phoneNumber = msg.from.split('@')[0];
 
-            const payload = {
-                from: phoneNumber,
-                message: msg.body || null,
-                messageType: msg.type
-            };
+            // console.log(msg);
 
-            const shouldDownloadVoice = msg.hasMedia && (msg.type === 'ptt' || msg.type === 'audio');
-            if (shouldDownloadVoice) {
-                try {
-                    const media = await msg.downloadMedia();
-                    if (media) {
-                        const isVoiceMessage = msg.type === 'ptt' || (media.mimetype && media.mimetype.includes('audio/ogg'));
-                        if (isVoiceMessage) {
-                            payload.audio = {
-                                mimetype: media.mimetype,
-                                filename: media.filename || null,
-                                data: media.data,
-                                filesize: media.filesize || null,
-                                duration: msg._data?.duration ?? null,
-                                isVoiceNote: msg.type === 'ptt',
-                            };
-                        }
-                    }
-                } catch (mediaErr) {
-                    console.error('Failed to download media:', mediaErr);
-                }
-            }
-            
+			// Standardized payload with exactly three top-level keys
+			const payload = {
+				sender: phoneNumber,
+				raw_msg: '',
+				msg_type: msg.type
+			};
+
+			// Populate raw_msg based on message type
+			const isAudio = msg.hasMedia && (msg.type === 'ptt' || msg.type === 'audio');
+			if (isAudio) {
+				try {
+					const media = await msg.downloadMedia();
+					if (media) {
+						// raw_msg should be string only: send base64 data only
+						payload.raw_msg = typeof media.data === 'string' ? media.data : '';
+					} else {
+						payload.raw_msg = '';
+					}
+				} catch (mediaErr) {
+					console.error('Failed to download media:', mediaErr);
+					payload.raw_msg = '';
+				}
+			} else if (msg.type === 'vcard') {
+					payload.raw_msg = JSON.stringify(msg.vCards);
+			} else {
+				// Text/other: send text body as string
+				payload.raw_msg = typeof msg.body === 'string' ? msg.body : '';
+			}
+			
             const response = await fetch(process.env.PY_BACKEND_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -123,18 +126,31 @@ function createClient() {
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`❌ Backend error (${response.status}):`, errorText.substring(0, 500));
-                await newClient.sendMessage(msg.from, 'Sorry, I encountered an error processing your message. Please try again.');
+                try {
+                    const errorData = await response.json();
+                    const errorMessage = errorData?.data?.message || errorData?.message || 'Sorry, I encountered an error processing your message. Please try again.';
+                    console.error(`❌ Backend error (${response.status}):`, JSON.stringify(errorData).substring(0, 500));
+                    await newClient.sendMessage(msg.from, errorMessage);
+                } catch (parseErr) {
+                    const errorText = await response.text();
+                    console.error(`❌ Backend error (${response.status}):`, errorText.substring(0, 500));
+                    await newClient.sendMessage(msg.from, 'Sorry, I encountered an error processing your message. Please try again.');
+                }
                 return;
             }
 
-            const text = await response.text();
-            newClient.sendMessage(msg.from, text);
+            const responseData = await response.json();
+            if (responseData.success && responseData.data && responseData.data.message) {
+                newClient.sendMessage(msg.from, responseData.data.message);
+            } else {
+                // Fallback if response structure is unexpected
+                const fallbackMessage = responseData?.data?.message || responseData?.message || 'Sorry, I encountered an error processing your message. Please try again.';
+                newClient.sendMessage(msg.from, fallbackMessage);
+            }
         } catch (err) {
             console.error('Failed to fetch from backend:', err);
             try {
-                await newClient.sendMessage(msg.from, 'Sorry, I encountered an error. Please try again.');
+                await newClient.sendMessage(msg.from, 'Sorry, I encountered a system error. Please try again.');
             } catch (sendErr) {
                 console.error('Failed to send error message:', sendErr);
             }
@@ -255,30 +271,10 @@ app.post('/send-message', async (req, res) => {
     }
 });
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-    const payload = { 
-        status: 'OK', 
-        whatsappReady: isClientReady(),
-        timestamp: new Date().toISOString()
-    };
-    if (client && typeof client.getState === 'function') {
-        // best-effort: do not await here to keep health fast
-        client.getState().then(state => {
-            payload.state = state;
-            payload.lastReadyAt = lastReadyAt;
-            res.json(payload);
-        }).catch(() => res.json(payload));
-    } else {
-        res.json(payload);
-    }
-});
-
 // Start server
 app.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📱 Send messages via POST /send-message`);
-    console.log(`🏥 Health check at GET /health`);
 });
 
 // Initialize client for the first time

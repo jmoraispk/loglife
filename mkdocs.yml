@@ -1,0 +1,45 @@
+site_name: LogLife
+
+repo_url: https://github.com/jmoraispk/life-bot.git
+
+docs_dir: docs
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+  features:
+    - content.image.lightbox
+    - navigation.tabs
+    - navigation.sections
+
+nav:
+  - Home: index.md
+  - Usage:
+    - Overview: usage/overview.md
+    - Audio Journaling: usage/audio-journaling.md
+    - Referrals: usage/referrals.md
+    - Managing Goals: usage/managing-goals.md
+  - Developer Guides:
+    - Overview: developer/overview.md
+    - Backend: developer/backend.md
+    - WhatsApp Client: developer/whatsapp-client.md
+    - Twilio WhatsApp Number Setup: developer/twilio-whatsapp-number-setup.md
+  - API Docs:
+    - Overview: api/overview.md
+    - Backend API: api/backend.md
+    - WhatsApp Client API: api/whatsapp-client.md
+
+markdown_extensions:
+  - toc:
+      title: On this page
+
+plugins:
+  - search
+  - glightbox
+
+extra_css:
+  - extra_css/theme.css
+
+extra_javascript:
+  - extra_js/open_github_new_tab.js

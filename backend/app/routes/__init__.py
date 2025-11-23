@@ -1,5 +1,4 @@
-"""Web routes package.
+from .emulator import emulator_bp
+from .webhook import webhook_bp
 
-This package contains Flask route definitions for web endpoints,
-including the emulator interface and webhook handlers.
-"""
+__all__ = ["emulator_bp", "webhook_bp"]

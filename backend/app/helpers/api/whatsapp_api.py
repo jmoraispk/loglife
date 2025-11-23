@@ -1,73 +1,21 @@
-"""WhatsApp API integration utilities.
+"""WhatsApp API integration for sending messages.
 
-This module provides functions for sending messages via the WhatsApp API,
-handling requests, responses, and error management.
+This module provides functionality to send messages through the WhatsApp API.
+It handles communication with the external WhatsApp service endpoint.
 """
+
 import requests
-import logging
-import os
-from typing import Any
+from app.config import WHATSAPP_API_URL
 
 
-def send_whatsapp_message(number: str, message: str) -> dict[str, Any]:
+def send_whatsapp_message(number: str, message: str):
+    """Sends a WhatsApp message to the specified phone number.
+
+    Arguments:
+    number -- The phone number to send the message to
+    message -- The message content to send
     """
-    Sends a WhatsApp message using the external API.
-    
-    Args:
-        number (str): The WhatsApp number to send message to (e.g., "923090052353")
-        message (str): The message content to send
-        
-    Returns:
-        dict[str, Any]: API response containing success status and details
-        
-    Example:
-        response = send_whatsapp_message("923090052353", "Hi there!")
-        if response.get("success"):
-            print("Message sent successfully")
-    """
-    # Get WhatsApp API URL from environment variable
-    api_base_url: str = os.getenv("WHATSAPP_API_URL", "http://localhost:3000")
-    api_url: str = f"{api_base_url}/send-message"
-    
-    payload: dict[str, str] = {
-        "number": number,
-        "message": message
-    }
-    
-    headers: dict[str, str] = {
-        "Content-Type": "application/json"
-    }
-    
-    try:
-        logging.debug(f"[WHATSAPP_API] Sending message to {number}: '{message}'")
-        
-        response: requests.Response = requests.post(api_url, json=payload, headers=headers, timeout=10)
-        response_data: Any = response.json()
-        
-        if response.status_code == 200 and response_data.get("success"):
-            logging.debug(f"[WHATSAPP_API] Message sent successfully to {response_data.get('to')}")
-            return {
-                "success": True,
-                "data": response_data,
-                "message": "Message sent successfully"
-            }
-        else:
-            logging.error(f"[WHATSAPP_API] Failed to send message: {response_data}")
-            return {
-                "success": False,
-                "error": response_data.get("error", "Unknown error"),
-                "status_code": response.status_code
-            }
-            
-    except requests.exceptions.RequestException as e:
-        logging.error(f"[WHATSAPP_API] Request failed: {str(e)}")
-        return {
-            "success": False,
-            "error": f"Request failed: {str(e)}"
-        }
-    except Exception as e:
-        logging.error(f"[WHATSAPP_API] Unexpected error: {str(e)}")
-        return {
-            "success": False,
-            "error": f"Unexpected error: {str(e)}"
-        }
+    payload = {"number": number, "message": message}
+    headers = {"Content-Type": "application/json"}
+
+    requests.post(WHATSAPP_API_URL, json=payload, headers=headers)

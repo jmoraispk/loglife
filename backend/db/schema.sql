@@ -1,46 +1,56 @@
-CREATE TABLE IF NOT EXISTS user (
+CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NULL,
-    phone TEXT UNIQUE NOT NULL,
-    timezone TEXT NULL,
+    phone_number TEXT UNIQUE NOT NULL,
+    timezone TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS user_goals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER,
+    user_id INTEGER NOT NULL,
     goal_emoji TEXT NOT NULL,
     goal_description TEXT NOT NULL,
-    is_active BOOLEAN DEFAULT 1,
-    reminder_time TEXT,
     boost_level INTEGER NOT NULL DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS goal_ratings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_goal_id INTEGER NOT NULL,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 3),
-    date TEXT NOT NULL,
+    rating_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_goal_id) REFERENCES user_goals (id)
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_goal_id) REFERENCES user_goals (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS goal_reminders (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    user_goal_id INTEGER NOT NULL,
+    reminder_time DATETIME NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (user_goal_id) REFERENCES user_goals(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS referrals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    referrer_phone TEXT NOT NULL,
-    referred_phone TEXT NOT NULL,
-    referred_waid TEXT NOT NULL,
-    status TEXT DEFAULT 'pending',
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    referrer_user_id INTEGER NOT NULL, -- Referrer is the user who sent the invite.
+    referred_user_id INTEGER NOT NULL, -- Referred is the user who received it.
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (referrer_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (referred_user_id) REFERENCES users(id) ON DELETE CASCADE,
+    UNIQUE (referrer_user_id, referred_user_id)
 );
 
 CREATE TABLE IF NOT EXISTS user_states (
-    user_phone TEXT PRIMARY KEY,
+    user_id INTEGER PRIMARY KEY,
     state TEXT NOT NULL,
     temp_data TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS audio_journal_entries (
@@ -49,5 +59,5 @@ CREATE TABLE IF NOT EXISTS audio_journal_entries (
     transcription_text TEXT,
     summary_text TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );

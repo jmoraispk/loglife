@@ -10,3 +10,4 @@ whatsapp-client/node_modules
 backend/db/life_bot.db
 .venv
 uv.lock
+backend/logs/
