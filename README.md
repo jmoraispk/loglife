@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://loglife.co">
-    <img src="logos/logo_dark.svg" alt="LogLife Logo" width="400" style="padding: 10px;" />
+    <img src="logos/logo_dark2.svg" alt="LogLife Logo" width="400" style="padding: 10px;" />
   </a>
   
   **Log life. Live better.**
