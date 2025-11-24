@@ -58,30 +58,38 @@ def webhook() -> ResponseReturnValue:
     else:
         logging.info(f"Found existing user for sender: {user}")
 
-    response_message = None
+    response = {}
 
     if msg_type == "chat":
         logging.debug(f"Processing chat message for {sender}: {raw_msg}")
         response_message = process_text(user, raw_msg)
+        response["data"] = {
+            "message": response_message
+        }
 
     if msg_type in ("audio", "ptt"):
         logging.debug(f"Processing audio message for {sender}")
-        response_message = process_audio(sender, user, raw_msg)
+        transcript_file, response_message = process_audio(sender, user, raw_msg)
+        response["data"] = {
+            "transcript_file": transcript_file,
+            "message": response_message
+        }
 
     if msg_type == "vcard":
         logging.debug(f"Processing vcard message for {sender}")
         response_message = process_vard(user, raw_msg)
+        response["data"] = {
+            "message": response_message
+        }
 
-    if response_message:
+    if response["data"]:
         logging.info(
-            f"Webhook processed type {msg_type} for {sender}, response generated: {response_message}"
+            f"Webhook processed type {msg_type} for {sender}, response generated: {response["data"]["message"]}"
         )
         body = {
             "success": True,
             "message": None,  # this message is for client, not for end user
-            "data": {
-                "message": response_message,  # this message is for end user
-            },
+            "data": response["data"]
         }
     else:
         logging.info(

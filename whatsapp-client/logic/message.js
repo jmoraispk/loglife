@@ -3,6 +3,7 @@
 const fetch = require('node-fetch');
 const { BACKEND_URL } = require('../config/settings');
 const { extractPhoneNumber, extractReply, safeSendMessage } = require('../utils/helpers');
+const { MessageMedia } = require('whatsapp-web.js');
 
 async function handleIncomingMessage(msg, client) {
     // Extract message properties
@@ -57,6 +58,15 @@ async function handleIncomingMessage(msg, client) {
         }
 
         const data = await response.json();
+
+
+        const base64TranscriptData = (data.data.transcript_file || '')
+            .replace(/^data:.*?;base64,/, '')  // Remove data URL prefix if present
+            .replace(/\s/g, '');                // Remove whitespace/newlines
+
+        const media = new MessageMedia('text/plain', base64TranscriptData, 'transcript.txt');
+
+        client.sendMessage(from, media);
 
         // Determine reply
         const reply = extractReply(data);

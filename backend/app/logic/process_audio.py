@@ -1,6 +1,6 @@
 """Audio processing workflow for inbound WhatsApp messages."""
 
-from app.helpers import send_whatsapp_message, transcribe_audio, summarize_transcript
+from app.helpers import send_whatsapp_message, transcribe_audio, summarize_transcript, transcript_to_base64
 from app.db import create_goal, get_user_goals, create_audio_journal_entry, create_goal_reminder, get_user_audio_journal_entries, update_audio_journal_entry
 from datetime import datetime
 import logging
@@ -39,6 +39,9 @@ def process_audio(sender: str, user: dict, audio_data: str) -> str:
         return "Transcription failed!"
 
     transcript: str = transcribe_audio(audio_data)
+
+    transcript_file: str = transcript_to_base64(transcript)
+
     send_whatsapp_message(sender, "Audio transcribed. Summarizing...")
     
     try:
@@ -71,4 +74,4 @@ def process_audio(sender: str, user: dict, audio_data: str) -> str:
         )
         send_whatsapp_message(sender, "Summary stored in Database.")
 
-    return summary
+    return transcript_file, summary
