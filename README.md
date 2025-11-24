@@ -1,20 +1,18 @@
 <div align="center">
   <a href="https://loglife.co">
-    <img src="logos/logo_dark.svg" alt="LogLife Logo" width="400" style="padding: 0px;" />
+    <img src="logos/logo_dark.svg" alt="LogLife Logo" width="400" style="padding: 10px;" />
   </a>
-
-  # LogLife
-
+  
   **Log life. Live better.**
-
+ 
   <p align="center">
     <img src="https://img.shields.io/badge/Python-3.11+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python Version" />
     <img src="https://img.shields.io/badge/Node.js-16+-339933?style=flat-square&logo=node.js&logoColor=white" alt="Node Version" />
-    <img src="https://img.shields.io/badge/WhatsApp-Integration-25D366?style=flat-square&logo=whatsapp&logoColor=white" alt="WhatsApp Integration" />
+    <img src="https://img.shields.io/badge/WhatsApp-Supported-25D366?style=flat-square&logo=whatsapp&logoColor=white" alt="WhatsApp Integration" />
+    <img src="https://img.shields.io/badge/Telegram-Soon...-0088CC?style=flat-square&logo=telegram&logoColor=white" alt="Telegram Integration" />
+    <img src="https://img.shields.io/badge/iMessage-Soon...-0A84FF?style=flat-square&logo=apple&logoColor=white" alt="iMessage Integration" />
   </p>
 </div>
-
----
 
 ## 🌿 About LogLife
 
