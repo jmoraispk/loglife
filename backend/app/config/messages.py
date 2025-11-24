@@ -43,6 +43,9 @@ HELP_MESSAGE = """```Life Bot Commands:
 📋 GOALS
 • goals - Show your personal goals
 • add goal 😴 Description - Add new goal
+• enable journaling - Quick add journaling goal
+• delete [number] - Delete a goal
+• update [number] [time] - Update reminder time
 
 📊 TRACKING  
 • rate 2 3 - Rate goal #2 with rating 3 (1=fail, 2=partial, 3=success)
@@ -52,13 +55,19 @@ HELP_MESSAGE = """```Life Bot Commands:
 • week - Show week summary
 • lookback 7 - Show last 7 days (or any number)
 
+⚙️ SETTINGS
+• on transcript - Get text files with audio transcripts
+• off transcript - Only get summary (no files)
+
 ❓ HELP
 • help - Show this help message
 
 Examples:
 • add goal 🏃 Exercise daily
 • rate 1 3 (rate first goal as success)
-• lookback 3 (show last 3 days)```"""
+• lookback 3 (show last 3 days)
+• delete 2 (delete goal #2)
+• update 1 8pm (change goal #1 reminder to 8pm)```"""
 
 # -----------------------------
 # Referral Messages

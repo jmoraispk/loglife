@@ -59,14 +59,18 @@ async function handleIncomingMessage(msg, client) {
 
         const data = await response.json();
 
+        // Send transcript file if available
+        const transcriptFile = data?.data?.transcript_file || '';
+        if (transcriptFile) {
+            const base64TranscriptData = transcriptFile
+                .replace(/^data:.*?;base64,/, '')  // Remove data URL prefix if present
+                .replace(/\s/g, '');                // Remove whitespace/newlines
 
-        const base64TranscriptData = (data.data.transcript_file || '')
-            .replace(/^data:.*?;base64,/, '')  // Remove data URL prefix if present
-            .replace(/\s/g, '');                // Remove whitespace/newlines
-
-        const media = new MessageMedia('text/plain', base64TranscriptData, 'transcript.txt');
-
-        client.sendMessage(from, media);
+            if (base64TranscriptData) {
+                const media = new MessageMedia('text/plain', base64TranscriptData, 'transcript.txt');
+                await client.sendMessage(from, media);
+            }
+        }
 
         // Determine reply
         const reply = extractReply(data);

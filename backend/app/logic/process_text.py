@@ -15,6 +15,7 @@ from app.db import (
     get_user_goals,
     get_goal,
     create_rating,
+    delete_goal,
     get_rating_by_goal_and_date,
     update_rating,
     create_user_state,
@@ -22,7 +23,8 @@ from app.db import (
     create_goal_reminder,
     delete_user_state,
     get_goal_reminder_by_goal_id,
-    update_goal_reminder
+    update_goal_reminder,
+    update_user
 )
 from app.helpers import (
     extract_emoji,
@@ -48,7 +50,7 @@ def process_text(user: dict, message: str) -> str:
 
     Returns the WhatsApp response text to send back to the user.
     """
-    message: str = message.lower()
+    message: str = message.strip().lower()
 
     # Add aliases
     for alias, command in COMMAND_ALIASES.items():
@@ -71,7 +73,29 @@ def process_text(user: dict, message: str) -> str:
                 return "Goal Added successfully! When you would like to be reminded?"
     
     elif message == "enable journaling":
+        # Check if user already has a journaling goal
+        user_goals: list[dict] = get_user_goals(user_id)
+        for goal in user_goals:
+            if goal["goal_emoji"] == "📓" and "journaling" in goal["goal_description"]:
+                return "✅ You already have a journaling goal! Check 'goals' to see it."
+        
         return process_text(user, "add goal 📓 journaling")
+
+    elif message.startswith("delete"):
+        try:
+            goal_num: int = int(message.replace("delete", "").strip())
+        except ValueError:
+            return "Invalid format. Usage: delete [goal number]\nExample: delete 1"
+
+        user_goals: list[dict] = get_user_goals(user_id)
+        if not user_goals or goal_num > len(user_goals) or goal_num < 1:
+            return "Invalid goal number. Type 'goals' to see your goals."
+        
+        goal: dict = user_goals[goal_num - 1]
+
+        delete_goal(goal["id"])
+        
+        return f"✅ Goal deleted: {goal['goal_emoji']} {goal['goal_description']}"
 
     elif parse_time_string(message) is not None:
         normalized_time: str = parse_time_string(message)
@@ -96,9 +120,6 @@ def process_text(user: dict, message: str) -> str:
 
         return f"Got it! I'll remind you daily at {display_time} for {goal['goal_emoji']} {goal['goal_description']}."
 
-    elif "remove goal" in message:
-        pass
-
     elif message == "goals":
         user_goals: list[dict] = get_user_goals(user_id)
 
@@ -119,7 +140,7 @@ def process_text(user: dict, message: str) -> str:
             )
 
         response = "```" + "\n".join(goal_lines) + "```"
-        response += "\n\n💡 _Tip: Update reminders with_ `update [goal#] [time]`"
+        response += "\n\n💡 _Tips:_\n_Update reminders with `update [goal#] [time]`_\n_Delete goals with `delete [goal#]`_"
         return response
     
     elif message.startswith("update"):
@@ -140,14 +161,30 @@ def process_text(user: dict, message: str) -> str:
         
         goal: dict = user_goals[goal_num - 1]
 
-        reminder = get_goal_reminder_by_goal_id(goal["id"])
+        reminder: dict | None = get_goal_reminder_by_goal_id(goal["id"])
         
-        update_goal_reminder(reminder["id"], reminder_time=normalized_time)
+        # Create reminder if it doesn't exist, otherwise update it
+        if reminder is None:
+            create_goal_reminder(
+                user_id=user_id, user_goal_id=goal["id"], reminder_time=normalized_time
+            )
+        else:
+            update_goal_reminder(reminder["id"], reminder_time=normalized_time)
         
         time_obj = datetime.strptime(normalized_time, "%H:%M:%S")
         display_time = time_obj.strftime("%I:%M %p")
         
         return f"✅ Reminder updated! I'll remind you at {display_time} for {goal['goal_emoji']} {goal['goal_description']}"
+    
+    elif "transcript" in message:
+        if "on" in message:
+            update_user(user_id, send_transcript_file=1)
+            return "✅ Transcript files enabled! You'll now receive transcript file with your audio journaling."
+        elif "off" in message:
+            update_user(user_id, send_transcript_file=0)
+            return "✅ Transcript files disabled! You'll only receive the summary message with your audio journaling."
+        else:
+            return "Invalid command. Usage: transcript [on|off]"
 
     elif message == "week":
         start: datetime = get_monday_before()

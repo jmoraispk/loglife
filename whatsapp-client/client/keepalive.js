@@ -1,7 +1,6 @@
 // keep-alive monitoring
 
 const { KEEPALIVE_MS } = require('../config/settings');
-const { restartClient } = require('./restart');
 
 let keepAliveTimer = null;
 
@@ -20,6 +19,8 @@ function startKeepAlive(client, createClientFn) {
 
             if (!state || ["CONFLICT", "UNLAUNCHED", "DISCONNECTED"].includes(state)) {
                 console.warn("⚠️ KeepAlive: bad state:", state);
+                // Lazy load restartClient to avoid circular dependency
+                const { restartClient } = require('./restart');
                 await restartClient(client, createClientFn, "keepalive_bad_state");
             }
 
@@ -27,6 +28,8 @@ function startKeepAlive(client, createClientFn) {
             const msg = String(err?.message || err);
             if (msg.includes("detached Frame")) {
                 console.warn("⚠️ KeepAlive: detached frame, restarting...");
+                // Lazy load restartClient to avoid circular dependency
+                const { restartClient } = require('./restart');
                 await restartClient(client, createClientFn, "keepalive_detached_frame");
             } else {
                 console.warn("⚠️ KeepAlive: getState failed:", msg);

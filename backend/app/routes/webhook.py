@@ -71,9 +71,11 @@ def webhook() -> ResponseReturnValue:
         logging.debug(f"Processing audio message for {sender}")
         transcript_file, response_message = process_audio(sender, user, raw_msg)
         response["data"] = {
-            "transcript_file": transcript_file,
             "message": response_message
         }
+        # Only include transcript file if user has enabled it
+        if user.get("send_transcript_file", 1) == 1:
+            response["data"]["transcript_file"] = transcript_file
 
     if msg_type == "vcard":
         logging.debug(f"Processing vcard message for {sender}")
