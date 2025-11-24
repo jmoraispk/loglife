@@ -77,7 +77,7 @@ Keep up the great work of spreading positive habits! 🌟"""
 # -----------------------------
 # Error Messages
 # -----------------------------
-ERROR_NO_GOALS_SET = "❌ No goals set. Please set goals first."
+ERROR_NO_GOALS_SET = "❌ You don't have any goals yet. Add one with 'add goal 😴 Description'"
 ERROR_INVALID_INPUT_LENGTH = "❌ Invalid input. Send <num_goals> digits."
 
 # Usage messages

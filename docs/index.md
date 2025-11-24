@@ -6,7 +6,7 @@
 
 ## Overview
 
-LogLife is an intelligent WhatsApp bot that helps you track goals, journal your thoughts, and build better habits through simple conversational interactions.
+LogLife is an AI bot to help track goals, journal thoughts, and build better habits through simple conversations.
 
 ---
 
@@ -14,11 +14,11 @@ LogLife is an intelligent WhatsApp bot that helps you track goals, journal your 
 
 **For Users:**
 
-Start using LogLife by exploring the [Usage Guide](usage/overview/) to learn about audio journaling, referrals, and managing your goals.
+Explore the [Usage Guide](usage/overview/) to learn about audio journaling, referrals, and managing goals.
 
 **For Developers:**
 
-Set up LogLife locally by following the [Developer Guide](developer/overview/) — it covers backend setup, WhatsApp client configuration, and system architecture.
+See the [Developer Guide](developer/overview/) - it covers complete local/remote setup and system architecture.
 
 ---
 

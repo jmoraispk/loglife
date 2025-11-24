@@ -12,7 +12,7 @@ The Life Bot backend is built with Python and Flask. It handles goal tracking, a
 - Flask
 - SQLite
 
-![Architecture Diagram](../diagrams/pngs/backend-overview.png)
+![Architecture Diagram](../figures/png/backend-overview.png)
 
 <small>_Tip: Click the image to zoom._</small>
 

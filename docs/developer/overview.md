@@ -6,7 +6,7 @@
 
 Welcome to the LogLife developer documentation! This section provides technical details for developers who want to understand, deploy, or contribute to the LogLife system.
 
-![Architecture Diagram](../diagrams/pngs/system-overview.png)
+![Architecture Diagram](../figures/png/system-overview.png)
 
 <small>_Tip: Click the image to zoom._</small>
 
