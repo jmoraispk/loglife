@@ -12,6 +12,7 @@ from .settings import (
     OPENAI_SUMMARIZATION_SYSTEM_PROMPT,
     DEFAULT_GOAL_EMOJI,
     STYLE,
+    COMMAND_ALIASES
 )
 from .logging import setup_logging
 from .api import WHATSAPP_API_URL, ASSEMBLYAI_BASE_URL, OPENAI_API_URL
@@ -41,6 +42,7 @@ __all__ = [
     "OPENAI_CHAT_MODEL",
     "OPENAI_SUMMARIZATION_SYSTEM_PROMPT",
     "DEFAULT_GOAL_EMOJI",
+    "COMMAND_ALIASES",
     "STYLE",
     # Logging
     "setup_logging",

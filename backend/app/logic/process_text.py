@@ -8,6 +8,7 @@ from app.config import (
     USAGE_RATE,
     SUCCESS_INDIVIDUAL_RATING,
     STYLE,
+    COMMAND_ALIASES
 )
 from app.db import (
     create_goal,
@@ -48,6 +49,10 @@ def process_text(user: dict, message: str) -> str:
     Returns the WhatsApp response text to send back to the user.
     """
     message: str = message.lower()
+
+    # Add aliases
+    for alias, command in COMMAND_ALIASES.items():
+        message = message.replace(alias, command)
 
     user_id: int = user["id"]
 

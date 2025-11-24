@@ -9,7 +9,7 @@ and maintenance easier.
 # -----------------------------
 # Welcome and Onboarding Messages
 # -----------------------------
-WELCOME_MESSAGE = """🎯 *Welcome to Life Bot!*
+WELCOME_MESSAGE = """🎯 *Welcome to LogLife!*
 
 I'm your personal goal tracking assistant. Here's how to get started:
 

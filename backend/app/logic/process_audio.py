@@ -37,8 +37,10 @@ def process_audio(sender: str, user: dict, audio_data: str) -> str:
     except RuntimeError as e:
         logging.error(f"Error transcribing audio: {e}")
         return "Transcription failed!"
+
     transcript: str = transcribe_audio(audio_data)
     send_whatsapp_message(sender, "Audio transcribed. Summarizing...")
+    
     try:
         summary: str = summarize_transcript(transcript)
     except RuntimeError as e:

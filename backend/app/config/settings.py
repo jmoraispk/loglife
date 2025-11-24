@@ -13,3 +13,7 @@ STYLE = {
     2: "⚠️",  # Partial
     3: "✅",  # Success
 }
+
+COMMAND_ALIASES = {
+    "add habit": "add goal"
+}
