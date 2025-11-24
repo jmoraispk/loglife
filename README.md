@@ -1,5 +1,7 @@
 <div align="center">
-  <img src="logos/logo_no_bg.svg" alt="LogLife Logo" width="400" />
+  <a href="https://loglife.co">
+    <img src="logos/logo_dark.svg" alt="LogLife Logo" width="400" style="padding: 0px;" />
+  </a>
 
   # LogLife
 
