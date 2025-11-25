@@ -1,4 +1,5 @@
-from app.helpers import send_whatsapp_message, get_timezone_safe
+from app.helpers.api import send_whatsapp_message
+from app.helpers.services.reminder import get_timezone_safe
 from .transcribe_audio import transcribe_audio
 from .summarize_transcript import summarize_transcript
 from .transcript_to_base64 import transcript_to_base64

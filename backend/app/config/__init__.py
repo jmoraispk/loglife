@@ -1,5 +1,6 @@
 from .paths import (
     TEMPLATES,
+    STATIC,
     LOGS,
     ACCESS_LOG,
     ERROR_LOG,
@@ -34,6 +35,7 @@ from .secrets import ASSEMBLYAI_API_KEY, OPENAI_API_KEY
 __all__ = [
     # Paths
     "TEMPLATES",
+    "STATIC",
     "LOGS",
     "ACCESS_LOG",
     "ERROR_LOG",

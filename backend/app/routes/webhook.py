@@ -4,11 +4,11 @@ This module defines a Flask blueprint for handling inbound WhatsApp messages.
 It processes incoming messages (text, audio, or VCARD) and routes them to the appropriate handlers.
 """
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request
 from flask.typing import ResponseReturnValue
 from app.logic import process_vard, process_audio, process_text
 from app.db import get_user_by_phone_number, create_user
-from app.helpers import get_timezone_from_number
+from app.helpers import get_timezone_from_number, success_response
 import logging
 
 webhook_bp = Blueprint("webhook", __name__)
@@ -22,32 +22,11 @@ def webhook() -> ResponseReturnValue:
     """
     data: dict | None = request.get_json()
 
-    if data is None or not isinstance(data, dict):
-        # Return a JSON error payload so end user don't get technical errors and those must be handled by the client.
-        body = {
-            "success": False,
-            "message": "Invalid JSON payload.",  # this message is for client, not for end user
-            "data": None,
-        }
-        logging.error(f"Webhook received invalid JSON payload: {data}")
-        return jsonify(body), 400
-
     logging.debug(f"Incoming webhook payload: {data}")
 
-    try:
-        sender: str = data["sender"]
-        msg_type: str = data["msg_type"]
-        raw_msg: str = data["raw_msg"]
-    except KeyError as missing:
-        body = {
-            "success": False,
-            # missing.args is a tuple.
-            # missing.args[0] holds the name of the absent field (e.g., "sender").
-            "message": f"Invalid payload: missing {missing.args[0]}",  # this message is for client, not for end user
-            "data": None,
-        }
-        logging.error(f"Webhook payload missing field: {missing.args[0]}")
-        return jsonify(body), 400
+    sender: str = data["sender"]
+    msg_type: str = data["msg_type"]
+    raw_msg: str = data["raw_msg"]
 
     user: dict | None = get_user_by_phone_number(sender)
 
@@ -95,25 +74,21 @@ def webhook() -> ResponseReturnValue:
             "message": response_message
         }
 
-    if response["data"]:
-        logging.info(
-            f"Webhook processed type {msg_type} for {sender}, response generated: {response["data"]["message"]}"
-        )
-        body = {
-            "success": True,
-            "message": None,  # this message is for client, not for end user
-            "data": response["data"]
-        }
-    else:
-        logging.info(
-            f"Webhook processed type {msg_type} for {sender}, no response message generated"
-        )
-        body = {
-            "success": True,
-            "message": None,  # this message is for client, not for end user
-            "data": {
-                "message": "Can't process this type of message.",  # this message is for end user
-            },
-        }
+    # .get() returns None if the key is not found
+    # [] raises a KeyError if the key is not found
+    data = response.get("data")
+    message = data.get("message") if data else None
 
-    return jsonify(body), 200
+    if message:
+        logging.info(
+            f"Webhook processed type {msg_type} for {sender}, "
+            f"response generated: {message}"
+        )
+        return success_response(data=data)
+
+    logging.info(
+        f"Webhook processed type {msg_type} for {sender}, "
+        "no response message generated"
+    )
+
+    return success_response(data={"message": "Can't process this type of message."})

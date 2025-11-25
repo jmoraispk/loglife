@@ -1,10 +1,10 @@
-# Life Bot Backend Documentation
+# LogLife Backend Documentation
 
 ---
 
 ## Overview
 
-The Life Bot backend is built with Python and Flask. It handles goal tracking, audio journaling, referrals, and daily reminders.
+The LogLife backend is built with Python and Flask. It handles goal tracking, audio journaling, referrals, and daily reminders.
 
 **Technology Stack:**
 
@@ -157,7 +157,7 @@ The backend uses SQLite with the following main tables:
 | `user_states` | Conversation state for multi-step flows |
 | `audio_journal_entries` | Audio transcripts and summaries |
 
-**Database file:** `backend/db/life_bot.db`
+**Database file:** `backend/db/loglife.db`
 
 **Schema file:** `backend/db/schema.sql`
 

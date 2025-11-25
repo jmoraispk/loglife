@@ -38,7 +38,7 @@ I'm here to help you build better habits and achieve your goals! What would you 
 # -----------------------------
 # Help Messages
 # -----------------------------
-HELP_MESSAGE = """```Life Bot Commands:
+HELP_MESSAGE = """```LogLife Commands:
 
 📋 GOALS
 • goals - Show your personal goals
@@ -74,7 +74,7 @@ Examples:
 # -----------------------------
 REFERRAL_SUCCESS = """🎉 *Thank you for the referral!*
 
-You've successfully shared a contact with Life Bot. The person you referred will receive an onboarding message to get started with their goal tracking journey.
+You've successfully shared a contact with LogLife. The person you referred will receive an onboarding message to get started with their goal tracking journey.
 
 💡 *What happens next:*
 • They'll get a welcome message with instructions
