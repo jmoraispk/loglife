@@ -12,28 +12,9 @@ import threading
 import time
 from app.db import get_user, get_all_goal_reminders, get_goal
 from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
-from app.helpers import send_whatsapp_message, get_goals_not_tracked_today
+from zoneinfo import ZoneInfo
+from app.helpers import send_whatsapp_message, get_timezone_safe, get_goals_not_tracked_today
 from app.config import REMINDER_MESSAGE, JOURNAL_REMINDER_MESSAGE
-
-
-def _get_timezone_safe(timezone_str: str) -> ZoneInfo:
-    """Get ZoneInfo, falling back to UTC if timezone is invalid or unknown.
-
-    Arguments:
-    timezone_str -- Timezone string in IANA format (e.g., "Asia/Karachi", "America/New_York")
-
-    Returns a ZoneInfo object for the given timezone string, or UTC if the timezone is invalid or unknown.
-    """
-    timezone_str = timezone_str.strip()
-    try:
-        return ZoneInfo(timezone_str)
-    except (ZoneInfoNotFoundError, ValueError):
-        # exc_info=True logs the full traceback of the exception, including the line number where the exception was raised.
-        logging.error(
-            f"Invalid timezone '{timezone_str}', defaulting to UTC", exc_info=True
-        )
-        return ZoneInfo("UTC")
 
 
 def _next_reminder_seconds() -> float:
@@ -57,7 +38,7 @@ def _next_reminder_seconds() -> float:
         hours: int = int(hours_minutes[0])
         minutes: int = int(hours_minutes[1])
 
-        tz: ZoneInfo = _get_timezone_safe(user_timezone)
+        tz: ZoneInfo = get_timezone_safe(user_timezone)
         local_now: datetime = now_utc.astimezone(tz).replace(
             second=0, microsecond=0
         )  # current time in user's timezone
@@ -94,7 +75,7 @@ def _check_reminders():
         logging.debug(
             f"Evaluating reminder {reminder.get('id')} for user {user_id} in timezone {user_timezone}"
         )
-        tz: ZoneInfo = _get_timezone_safe(user_timezone)
+        tz: ZoneInfo = get_timezone_safe(user_timezone)
         local_now: datetime = now_utc.astimezone(tz)
 
         time_str: str = reminder.get("reminder_time")

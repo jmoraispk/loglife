@@ -1,5 +1,20 @@
-from app.db import get_user_goals, get_rating_by_goal_and_date
 from datetime import date
+from app.db import get_user_goals, get_rating_by_goal_and_date
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
+def get_timezone_safe(timezone_str: str) -> ZoneInfo:
+    """Get ZoneInfo, falling back to UTC if timezone is invalid or unknown.
+
+    Arguments:
+    timezone_str -- Timezone string in IANA format (e.g., "Asia/Karachi", "America/New_York")
+
+    Returns a ZoneInfo object for the given timezone string, or UTC if the timezone is invalid or unknown.
+    """
+    timezone_str = timezone_str.strip()
+    try:
+        return ZoneInfo(timezone_str)
+    except (ZoneInfoNotFoundError, ValueError):
+        return ZoneInfo("UTC")
 
 # get goals not yet tracked today
 def get_goals_not_tracked_today(user_id: int) -> list:
