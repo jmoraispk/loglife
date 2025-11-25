@@ -62,7 +62,7 @@ def process_text(user: dict, message: str) -> str:
         raw_goal: str = message.replace("add goal", "")
         if raw_goal:
             goal_emoji: str = extract_emoji(raw_goal)
-            goal_description: str = raw_goal.replace(goal_emoji, "")
+            goal_description: str = raw_goal.replace(goal_emoji, "").strip()
             goal: dict | None = create_goal(user_id, goal_emoji, goal_description)
             if goal:
                 create_user_state(

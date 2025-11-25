@@ -106,3 +106,30 @@ SUCCESS_INDIVIDUAL_RATING = (
 # Lookback Summary Messages
 # -----------------------------
 LOOKBACK_NO_GOALS = "```No goals set. Use 'add goal 😴 Description' to add goals.```"
+
+# -----------------------------
+# Reminder Messages
+# -----------------------------
+REMINDER_MESSAGE = "⏰ Reminder: <goal_emoji> <goal_description>"
+JOURNAL_REMINDER_MESSAGE = """📓 *Time to reflect on your day!*
+
+Take a moment to journal your thoughts, experiences, and feelings.
+
+- *What's on my mind right now?*
+  (I'll dump my thoughts freely — no filter.)
+
+- *Did my day go as I expected?*
+  (I'll notice surprises or patterns.)
+
+- *What's bothering me? Why?*
+  (I'll name it without overthinking.)
+
+- *What mistake or lesson stood out to me today?*
+  (I'll keep it honest, short, and specific.)
+
+- *What's one clear thing I want to do tomorrow?*
+  (I'll set a simple intention without pressure.)
+
+<goals_not_tracked_today>
+
+You can reply with a voice note. 💭"""

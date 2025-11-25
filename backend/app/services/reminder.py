@@ -13,7 +13,8 @@ import time
 from app.db import get_user, get_all_goal_reminders, get_goal
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
-from app.helpers import send_whatsapp_message
+from app.helpers import send_whatsapp_message, get_goals_not_tracked_today
+from app.config import REMINDER_MESSAGE, JOURNAL_REMINDER_MESSAGE
 
 
 def _get_timezone_safe(timezone_str: str) -> ZoneInfo:
@@ -104,7 +105,15 @@ def _check_reminders():
 
         # Check if current time matches reminder time (HH:MM)
         if local_now.hour == hours and local_now.minute == minutes:
-            message: str = f"⏰ Reminder: {user_goal['goal_emoji']} {user_goal['goal_description']}"
+            # Check if this is a journaling reminder
+            if user_goal['goal_emoji'] == "📓" and user_goal['goal_description'] == "journaling":
+                goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
+                if goals_not_tracked_today != []:
+                    message: str = JOURNAL_REMINDER_MESSAGE.replace("<goals_not_tracked_today>", "- *Did you complete the goals?*\n" + "\n".join([f"- {goal['goal_description']}" for goal in goals_not_tracked_today]))
+                else:
+                    message: str = JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
+            else:
+                message: str = REMINDER_MESSAGE.replace("<goal_emoji>", user_goal['goal_emoji']).replace("<goal_description>", user_goal['goal_description'])
             send_whatsapp_message(user["phone_number"], message)
             logging.info(
                 f"Sent reminder '{user_goal['goal_description']}' to {user['phone_number']}"

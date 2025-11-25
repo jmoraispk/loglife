@@ -9,6 +9,7 @@ from .text import (
     parse_time_string,
 )
 from .webhook import get_timezone_from_number
+from .services import get_goals_not_tracked_today
 
 __all__ = [
     "send_whatsapp_message",
@@ -21,5 +22,6 @@ __all__ = [
     "look_back_summary",
     "parse_time_string",
     "get_timezone_from_number",
-    "transcript_to_base64"
+    "transcript_to_base64",
+    "get_goals_not_tracked_today"
 ]
