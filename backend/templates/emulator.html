@@ -411,6 +411,25 @@
             }
         }
 
+        .btn-transcript {
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all .2s ease;
+            font-size: 13px;
+            display: inline-block;
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn-transcript:hover {
+            background: rgba(59, 130, 246, 0.25);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
         .pill {
             padding: 6px 12px;
             border-radius: 999px;
@@ -603,6 +622,53 @@
             messageHistory.push({ content, type, meta, timestamp: Date.now() });
         }
 
+        function addTranscriptMessage(transcriptFile) {
+            clearEmptyState();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message message-bot';
+            
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'btn-transcript';
+            downloadBtn.textContent = 'transcript.txt';
+            downloadBtn.onclick = () => {
+                try {
+                    // Clean the base64 data
+                    const base64Data = transcriptFile
+                        .replace(/^data:.*?;base64,/, '')
+                        .replace(/\s/g, '');
+                    
+                    // Convert base64 to blob
+                    const byteCharacters = atob(base64Data);
+                    const byteNumbers = new Array(byteCharacters.length);
+                    for (let i = 0; i < byteCharacters.length; i++) {
+                        byteNumbers[i] = byteCharacters.charCodeAt(i);
+                    }
+                    const byteArray = new Uint8Array(byteNumbers);
+                    const blob = new Blob([byteArray], { type: 'text/plain' });
+                    
+                    // Create download link
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'transcript.txt';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                } catch (err) {
+                    console.error('Error downloading transcript:', err);
+                    alert('Failed to download transcript file');
+                }
+            };
+            
+            messageDiv.appendChild(downloadBtn);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            messageHistory.push({ type: 'transcript', timestamp: Date.now() });
+        }
+
         function formatMessage(raw) {
             if (!raw) return '';
             let text = String(raw);
@@ -747,9 +813,14 @@
 
                 const ok = res.ok;
                 let formattedText = '';
+                let transcriptFile = null;
                 
                 try {
                     const data = await res.clone().json();
+                    
+                    // Extract transcript file if available
+                    transcriptFile = data?.data?.transcript_file || null;
+                    
                     const previewCandidate = (data && (
                         (data.data && data.data.message) ||
                         data.message ||
@@ -769,6 +840,10 @@
                 const ms = Math.max(1, Math.round(performance.now() - start));
                 
                 if (ok && formattedText) {
+                    // Add transcript file as separate message if available
+                    if (transcriptFile) {
+                        addTranscriptMessage(transcriptFile);
+                    }
                     addMessage(formattedText, 'bot', `${ms}ms`);
                     setStatus('success', 'Success');
                 } else {
@@ -830,9 +905,14 @@
 
                             const ok = res.ok;
                             let formattedText = '';
+                            let transcriptFile = null;
                             
                             try {
                                 const data = await res.clone().json();
+                                
+                                // Extract transcript file if available
+                                transcriptFile = data?.data?.transcript_file || null;
+                                
                                 formattedText = (data && (
                                     (data.data && data.data.message) ||
                                     data.message ||
@@ -846,6 +926,10 @@
                             const ms = Math.max(1, Math.round(performance.now() - start));
                             
                             if (ok && formattedText) {
+                                // Add transcript file as separate message if available
+                                if (transcriptFile) {
+                                    addTranscriptMessage(transcriptFile);
+                                }
                                 addMessage(formattedText, 'bot', `${ms}ms`);
                                 setStatus('success', 'Success');
                             } else {
