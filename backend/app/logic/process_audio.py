@@ -1,7 +1,7 @@
 """Audio processing workflow for inbound WhatsApp messages."""
 
 import logging
-from app.helpers import get_journal_goal_id, process_journal, transcribe_audio, send_whatsapp_message
+from app.helpers import get_journal_goal_id, process_journal, transcribe_audio, send_message
 from .process_text import process_text
 
 def process_audio(sender: str, user: dict, audio_data: str) -> str:
@@ -14,7 +14,7 @@ def process_audio(sender: str, user: dict, audio_data: str) -> str:
     Returns the summarized text generated from the audio.
     """
 
-    send_whatsapp_message(sender, "Audio received. Transcribing...")
+    send_message(sender, "Audio received. Transcribing...")
     
     # Check if journaling enabled
     response = None

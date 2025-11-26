@@ -13,7 +13,7 @@ import time
 from app.db import get_user, get_all_goal_reminders, get_goal
 from datetime import datetime, timedelta, timezone
 from zoneinfo import ZoneInfo
-from app.helpers import send_whatsapp_message, get_timezone_safe, get_goals_not_tracked_today
+from app.helpers import send_message, get_timezone_safe, get_goals_not_tracked_today
 from app.config import REMINDER_MESSAGE, JOURNAL_REMINDER_MESSAGE
 
 
@@ -95,7 +95,7 @@ def _check_reminders():
                     message: str = JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
             else:
                 message: str = REMINDER_MESSAGE.replace("<goal_emoji>", user_goal['goal_emoji']).replace("<goal_description>", user_goal['goal_description'])
-            send_whatsapp_message(user["phone_number"], message)
+            send_message(user["phone_number"], message)
             logging.info(
                 f"Sent reminder '{user_goal['goal_description']}' to {user['phone_number']}"
             )

@@ -1,4 +1,4 @@
-from app.helpers.api import send_whatsapp_message
+from app.helpers.sender import send_message
 from app.helpers.services.reminder import get_timezone_safe
 from .transcribe_audio import transcribe_audio
 from .summarize_transcript import summarize_transcript
@@ -35,15 +35,15 @@ def process_journal(sender: str, user: dict, journaling_goal_id: int, audio_data
             try:
                 transcript: str = transcribe_audio(audio_data)
                 transcript_file: str = transcript_to_base64(transcript)
-
-                send_whatsapp_message(sender, "Audio transcribed. Summarizing...")
+                
+                send_message(sender, "Audio transcribed. Summarizing...")
                 
                 try:
                     summary: str = summarize_transcript(transcript)
                     create_audio_journal_entry(
                         user_id=user["id"], transcription_text=transcript, summary_text=summary
                     )
-                    send_whatsapp_message(sender, "Summary stored in Database.")
+                    send_message(sender, "Summary stored in Database.")
 
                     response = transcript_file, summary
                     

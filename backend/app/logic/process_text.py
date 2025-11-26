@@ -223,7 +223,23 @@ def process_text(user: dict, message: str) -> str:
         else:
             days = 7  # Default to 7 days
         start = datetime.now() - timedelta(days=days - 1)  # Include today
-        return look_back_summary(user_id, days, start)
+        end = datetime.now()
+
+        # Create date range header similar to week command
+        start_date: str = start.strftime("%b %d")
+        end_date: str = end.strftime("%b %d")
+        if end_date.startswith(start_date[:3]):  # Same month
+            end_date = end_date[4:]
+        
+        summary: str = f"```{days} Days: {start_date} - {end_date}\n"
+        
+        # Add Goals Header
+        goal_emojis: list[str] = [goal["goal_emoji"] for goal in user_goals]
+        summary += "    " + " ".join(goal_emojis) + "\n```"
+        
+        # Add Day-by-Day Summary
+        summary += look_back_summary(user_id, days, start)
+        return summary
 
     # rate a single goal
     elif message.startswith("rate"):

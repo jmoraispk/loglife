@@ -6,6 +6,8 @@ It handles communication with the external WhatsApp service endpoint.
 
 import requests
 from app.config import WHATSAPP_API_URL
+import logging
+from flask import g
 
 
 def send_whatsapp_message(number: str, message: str):
@@ -18,4 +20,9 @@ def send_whatsapp_message(number: str, message: str):
     payload = {"number": number, "message": message}
     headers = {"Content-Type": "application/json"}
 
-    requests.post(WHATSAPP_API_URL, json=payload, headers=headers)
+    try:
+        requests.post(WHATSAPP_API_URL, json=payload, headers=headers)
+    except Exception as e:
+        error = f"Error sending WhatsApp message > {e}"
+        logging.error(error)
+        raise RuntimeError(error)

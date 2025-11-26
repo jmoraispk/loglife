@@ -4,11 +4,11 @@ This module defines a Flask blueprint for handling inbound WhatsApp messages.
 It processes incoming messages (text, audio, or VCARD) and routes them to the appropriate handlers.
 """
 
-from flask import Blueprint, request
+from flask import Blueprint, request, g
 from flask.typing import ResponseReturnValue
 from app.logic import process_vard, process_audio, process_text
 from app.db import get_user_by_phone_number, create_user
-from app.helpers import get_timezone_from_number, success_response
+from app.helpers import get_timezone_from_number, success_response, error_response
 import logging
 
 webhook_bp = Blueprint("webhook", __name__)
@@ -27,6 +27,8 @@ def webhook() -> ResponseReturnValue:
     sender: str = data["sender"]
     msg_type: str = data["msg_type"]
     raw_msg: str = data["raw_msg"]
+    # g is a general-purpose namespace for data that exists only for the lifetime of the request
+    g.client_type: str = data["client_type"]
 
     user: dict | None = get_user_by_phone_number(sender)
 
@@ -48,7 +50,13 @@ def webhook() -> ResponseReturnValue:
 
     if msg_type in ("audio", "ptt"):
         logging.debug(f"Processing audio message for {sender}")
-        audio_response = process_audio(sender, user, raw_msg)
+        try:
+            audio_response = process_audio(sender, user, raw_msg)
+        except RuntimeError as e:
+            error = f"Error processing audio > {e}"
+            logging.error(error)
+            return error_response(error)
+        
         if isinstance(audio_response, tuple):
             transcript_file, response_message = audio_response
             # Only include transcript file if user has enabled it

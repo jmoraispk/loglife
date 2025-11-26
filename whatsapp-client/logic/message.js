@@ -20,7 +20,8 @@ async function handleIncomingMessage(msg, client) {
         const payload = {
             sender: phoneNumber,
             raw_msg: '',
-            msg_type: msgType
+            msg_type: msgType,
+            client_type: 'whatsapp'
         };
 
         // Handle Audio

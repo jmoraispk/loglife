@@ -8,16 +8,13 @@
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='favicon.png') }}">
     <style>
         :root {
-            /* Dark Theme Colors */
             --bg: #0d1117;
             --card: #161b22;
             --text: #e6edf3;
             --muted: #8b9eb1;
             --border: #30363d;
-
             --primary: #3b82f6;
             --primary-600: #2563eb;
-
             --accent: linear-gradient(135deg, #3b82f6, #2563eb 60%, #1d4ed8 90%);
             --ring: rgba(37, 99, 235, 0.25);
             --page-padding: clamp(16px, 4vw, 48px);
@@ -36,12 +33,12 @@
                 linear-gradient(135deg, #050421, #13072d 35%, #1c0836 70%, #050421);
             color: var(--text);
             padding: 0 var(--page-padding);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .nav {
-            position: sticky;
-            top: 0;
-            z-index: 10;
             backdrop-filter: saturate(1.2) blur(8px);
             background: #0D0226;
             margin: 0 calc(var(--page-padding) * -1);
@@ -49,7 +46,7 @@
         }
 
         .nav-inner {
-            max-width: 1080px;
+            max-width: 1280px;
             margin: 0 auto;
             padding: 12px 0;
             display: flex;
@@ -70,44 +67,29 @@
         }
 
         .container {
-            max-width: 1080px;
-            margin: 30px auto;
-            padding: 0 0 40px;
+            max-width: 1280px;
+            margin: 0 auto;
             width: 100%;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: 280px 1fr;
+            flex: 1;
+            display: flex;
             gap: 24px;
-        }
-
-        @media (max-width: 900px) {
-            .grid {
-                grid-template-columns: 1fr;
-            }
+            padding: 24px 0;
+            min-height: 0;
         }
 
         .sidebar {
-            position: sticky;
-            top: 100px;
-            align-self: start;
-        }
-
-        .sidebar-scroll {
+            width: 280px;
             display: flex;
             flex-direction: column;
             gap: 24px;
-            max-height: calc(100vh - 140px);
             overflow-y: auto;
-            padding-right: 6px;
         }
 
-        .sidebar-scroll::-webkit-scrollbar {
+        .sidebar::-webkit-scrollbar {
             width: 6px;
         }
 
-        .sidebar-scroll::-webkit-scrollbar-thumb {
+        .sidebar::-webkit-scrollbar-thumb {
             background: rgba(148, 163, 184, 0.25);
             border-radius: 999px;
         }
@@ -119,9 +101,7 @@
             box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
         }
 
-        .card-presets,
-        .card-contact,
-        .card-emulator {
+        .card-transparent {
             background: transparent;
             border: none;
             box-shadow: none;
@@ -133,54 +113,11 @@
 
         .card-title {
             font-weight: 700;
-            font-size: 18px;
-        }
-
-        .card-subtitle {
-            color: var(--muted);
-            font-size: 13px;
-            margin-top: 6px;
+            font-size: 16px;
         }
 
         .card-body {
             padding: 18px;
-        }
-
-        .preset-list {
-            display: grid;
-            gap: 10px;
-        }
-
-        .preset-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-
-        .preset-btn {
-            text-align: left;
-            background: #0D0226;
-            border: 1px solid rgba(108, 88, 190, 0.8);
-            padding: 12px 14px;
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: box-shadow .2s, transform .05s, border-color .2s, background .2s;
-            color: #d5cff6;
-        }
-
-        .preset-btn:hover {
-            border-color: rgba(200, 170, 255, 0.95);
-            background: #120735;
-            box-shadow: 0 0 10px rgba(108, 88, 190, 0.4);
-        }
-
-        .preset-title {
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .preset-desc {
-            display: none;
         }
 
         .field {
@@ -191,57 +128,215 @@
             display: block;
             font-weight: 600;
             margin-bottom: 8px;
+            font-size: 13px;
         }
 
         .input,
-        .textarea {
+        .select {
             width: 100%;
             border: 1.5px solid var(--border);
             background: #0D0226;
             color: var(--text);
             border-radius: var(--radius);
-            padding: 12px 14px;
+            padding: 10px 12px;
             font-size: 14px;
             outline: none;
-            transition: border-color .2s, box-shadow .2s, background .2s;
-        }
-
-        .input::placeholder,
-        .textarea::placeholder {
-            color: #c7bddf;
-            opacity: 1;
+            transition: border-color .2s, box-shadow .2s;
         }
 
         .input:focus,
-        .textarea:focus {
+        .select:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 6px var(--ring);
         }
 
-        .textarea {
-            min-height: 120px;
-            resize: vertical;
+        .select {
+            cursor: pointer;
         }
 
-        .actions {
+        .select option {
+            background: #0D0226;
+            color: var(--text);
+        }
+
+        .chat-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #050421;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius);
+            min-height: 0;
+        }
+
+        .chat-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: #0D0226;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .chat-header-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #ffffff;
+        }
+
+        .chat-header-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-messages::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 999px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            line-height: 1.6;
+            word-wrap: break-word;
+            animation: slideIn 0.2s ease-out;
+            white-space: pre-wrap;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message-user {
+            align-self: flex-end;
+            background: #1e40af;
+            color: #ffffff;
+        }
+
+        .message-bot {
+            align-self: flex-start;
+            background: #1c2430;
+            color: #e6edf3;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            font-size: 14px;
+        }
+
+        .message-event {
+            align-self: flex-start;
+            background: #422006;
+            color: #fbbf24;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            font-size: 13px;
+        }
+
+        .message-meta {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 6px;
+        }
+
+        .message strong {
+            font-weight: 700;
+        }
+
+        .message em {
+            font-style: italic;
+        }
+
+        .message ol {
+            margin: 8px 0;
+            padding-left: 24px;
+        }
+
+        .message ol li {
+            margin: 4px 0;
+            line-height: 1.6;
+        }
+
+        .message ul {
+            margin: 8px 0;
+            padding-left: 24px;
+            list-style-type: none;
+        }
+
+        .message ul li {
+            margin: 4px 0;
+            line-height: 1.6;
+            position: relative;
+        }
+
+        .message ul li::before {
+            content: '-';
+            position: absolute;
+            left: -16px;
+            color: currentColor;
+            opacity: 0.8;
+            font-weight: 600;
+        }
+
+        .chat-input-area {
+            padding: 16px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: #0D0226;
+        }
+
+        .chat-input-wrapper {
             display: flex;
             gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
+            align-items: flex-end;
         }
 
-        .actions.is-inline {
-            flex-wrap: nowrap;
+        .chat-textarea {
+            flex: 1;
+            border: 1.5px solid var(--border);
+            background: #050421;
+            color: var(--text);
+            border-radius: var(--radius);
+            padding: 12px 14px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            min-height: 44px;
+            max-height: 120px;
+            resize: none;
+            font-family: inherit;
         }
 
-        .actions.is-inline .btn {
-            padding: 10px 14px;
-            font-size: 13px;
+        .chat-textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 6px var(--ring);
+        }
+
+        .chat-textarea::placeholder {
+            color: #c7bddf;
+            opacity: 1;
         }
 
         .btn {
             border: 1px solid rgba(255, 255, 255, 0.15);
-            padding: 10px 16px;
+            padding: 0 20px;
             border-radius: var(--radius);
             color: #050421;
             font-weight: 600;
@@ -249,32 +344,79 @@
             transition: transform .05s ease, box-shadow .2s ease, filter .2s ease;
             background: #ffffff;
             box-shadow: none;
+            font-size: 14px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
-        .btn:hover {
+        .btn:hover:not(:disabled) {
             filter: brightness(1.1);
-            box-shadow: none;
         }
 
-        .btn-ghost,
-        .btn-secondary {
-            background: #ffffff;
-            color: #050421;
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-mic {
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: var(--radius);
+            background: #ffffff;
+            color: #050421;
+            cursor: pointer;
+            transition: transform .05s ease, filter .2s ease, background .2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            font-size: 0;
+            flex-shrink: 0;
         }
 
-        .btn-icon {
-            font-size: 18px;
-            line-height: 1;
-            display: inline-block;
+        .btn-mic::before {
+            content: '🎤';
+            font-size: 20px;
+        }
+
+        .btn-mic:hover:not(:disabled) {
+            filter: brightness(1.1);
+        }
+
+        .btn-mic:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-mic.recording {
+            background: #991b1b;
+            border-color: #fca5a5;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .btn-mic.recording::before {
+            content: '⏹';
+            font-size: 20px;
+            color: #ffffff;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
         }
 
         .pill {
-            padding: 6px 10px;
+            padding: 6px 12px;
             border-radius: 999px;
             font-size: 12px;
             font-weight: 700;
+            display: inline-block;
         }
 
         .pill.loading {
@@ -292,90 +434,23 @@
             color: #fee2e2;
         }
 
-        .response-box {
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: var(--radius);
-            background: #0D0226;
-            box-shadow: 0 12px 36px rgba(3, 3, 20, 0.55);
-            overflow: hidden;
-            margin-top: 12px;
-        }
 
-        .response-meta {
+        .empty-state {
+            flex: 1;
             display: flex;
-            gap: 14px;
-            padding: 10px 12px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            color: #d5cff6;
-            background: #120735;
-            font-size: 12px;
+            align-items: center;
+            justify-content: center;
+            color: var(--muted);
+            font-size: 14px;
         }
 
-        .response-view-label {
-            margin-left: auto;
-            padding: 2px 10px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: 999px;
-            font-size: 11px;
-            letter-spacing: 0.05em;
-            color: #d5cff6;
-            display: none;
-        }
-
-        .code {
-            padding: 14px;
-            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco;
-            font-size: 13px;
-            white-space: pre-wrap;
-            max-height: 360px;
-            overflow: auto;
-            background: #050421;
-            color: #f1f4ff;
-        }
-
-        .pane {
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            border-radius: var(--radius);
-            background: #050421;
-        }
-
-        .response-body {
-            background: #050421;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            border-radius: var(--radius);
-            padding: 16px;
-            color: #f8f8ff;
-            line-height: 1.6;
-            box-shadow: 0 4px 24px rgba(3, 3, 20, 0.45);
-        }
-
-        .wa-inline {
-            background: #1c2430;
-            color: #e6edf3;
-        }
-
-        .wa-code {
-            background: #0b1220;
-            color: #e2e8f0;
-            padding: 10px 12px;
-            border-radius: var(--radius);
-            overflow: auto;
-            font-size: 12px;
-        }
-
-        .info-badge {
-            display: inline-block;
-            margin-left: 6px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #30363d;
-            color: #e6edf3;
-            font-size: 11px;
-            font-weight: 800;
-            text-align: center;
-            line-height: 16px;
-            cursor: help;
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -390,193 +465,105 @@
     </div>
 
     <div class="container">
-        <div class="grid">
-            <div class="sidebar">
-                <div class="sidebar-scroll">
-                    <div class="card card-presets">
-                        <div class="card-header">
-                            <div class="card-title">Quick Presets</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="preset-list">
-                                <button class="preset-btn" data-msg="goals">
-                                    <div class="preset-title">Goals</div>
-                                </button>
-                                <div class="preset-row">
-                                    <button class="preset-btn" data-msg="add goal 📖 Read 20 pages daily">
-                                        <div class="preset-title">Add Goal</div>
-                                    </button>
-                                    <button class="preset-btn" data-msg="6 PM">
-                                        <div class="preset-title">Reminder Time</div>
-                                    </button>
-                                </div>
-                                <button class="preset-btn" data-msg="rate 1 3">
-                                    <div class="preset-title">Rate Goal</div>
-                                </button>
-                                <button class="preset-btn" data-msg="week">
-                                    <div class="preset-title">Weekly Summary</div>
-                                </button>
-                                <button class="preset-btn" data-msg="31232">
-                                    <div class="preset-title">Rate All Goals</div>
-                                </button>
-                                <button class="preset-btn" data-msg="lookback 7">
-                                    <div class="preset-title">Lookback</div>
-                                </button>
-                                <button class="preset-btn" data-msg="help">
-                                    <div class="preset-title">Help</div>
-                                </button>
-                                <div class="preset-row">
-                                    <button class="preset-btn" data-msg="update 1 6 PM">
-                                        <div class="preset-title">Update Reminder</div>
-                                    </button>
-                                    <button class="preset-btn" data-msg="delete 1">
-                                        <div class="preset-title">Delete Goal</div>
-                                    </button>
-                                </div>
-                                <div class="preset-row">
-                                    <button class="preset-btn" data-msg="transcript on">
-                                        <div class="preset-title">Enable Transcription</div>
-                                    </button>
-                                    <button class="preset-btn" data-msg="transcript off">
-                                        <div class="preset-title">Disable Transcription</div>
-                                    </button>
-                                </div>
-                                <button class="preset-btn" id="testAudioBtn">
-                                    <div class="preset-title">Send Audio</div>
-                                </button>
-                                <button class="preset-btn" id="stopAudioBtn"
-                                    style="display:none; background: #fee2e2; border-color: #fca5a5;">
-                                    <div class="preset-title">⏹️ Stop Recording</div>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card card-contact">
-                        <div class="card-header">
-                            <div class="card-title">Share Contact</div>
-                        </div>
-                        <div class="card-body">
-                            <div class="field">
-                                <label class="label" for="waidInput">WhatsApp ID (number)
-                                    <span class="info-badge"
-                                        title="Include country code, no + or spaces. Example: 923325727426">i</span>
-                                </label>
-                                <input class="input" id="waidInput" name="waidInput" placeholder="e.g., 923325727426" />
-                            </div>
-
-                            <div class="actions is-inline">
-                                <button type="button" class="btn" id="sendContactBtn">Send Contact</button>
-                                <button type="button" class="btn btn-ghost" id="fillSampleContactBtn">Fill
-                                    Sample</button>
-                            </div>
-                        </div>
+        <div class="sidebar">
+            <!-- Sender Card -->
+            <div class="card card-transparent">
+                <div class="card-header">
+                    <div class="card-title">Settings</div>
+                </div>
+                <div class="card-body">
+                    <div class="field">
+                        <label class="label" for="sender">Sender (from)</label>
+                        <input class="input" type="text" id="sender" name="sender" value="12345678"
+                            placeholder="Enter sender identifier">
                     </div>
                 </div>
             </div>
 
-            <div class="card card-emulator" id="emulatorCard">
+            <!-- Quick Presets -->
+            <div class="card card-transparent">
                 <div class="card-header">
-                    <div class="card-title">Send Test Request</div>
+                    <div class="card-title">Quick Presets</div>
                 </div>
                 <div class="card-body">
-                    <form id="emulatorForm">
-                        <div class="field">
-                            <label class="label" for="sender">Sender (from)</label>
-                            <input class="input" type="text" id="sender" name="sender" value="test_user"
-                                placeholder="Enter sender identifier">
-                        </div>
-                        <div class="field">
-                            <label class="label" for="message">Message</label>
-                            <textarea class="textarea" id="message" name="message"
-                                placeholder="Enter your message here..." required></textarea>
-                        </div>
-                        <div class="actions">
-                            <button type="submit" class="btn" id="submitBtn">Send Request</button>
-                            <button type="button" class="btn btn-secondary" id="resetBtn" title="Reset form"
-                                aria-label="Reset form">
-                                <span class="btn-icon" aria-hidden="true">&#10227;</span>
-                            </button>
-                            <button type="button" class="btn btn-ghost" id="clearBtn" title="Clear message"
-                                aria-label="Clear message">
-                                <span class="btn-icon" aria-hidden="true">&#128465;</span>
-                            </button>
-                        </div>
-                    </form>
-
-                    <div style="height: 14px"></div>
-
-                    <div class="response-toolbar">
-                        <div style="display:flex; align-items:center; gap:12px">
-                            <div id="statusPill" class="pill" style="display:none"></div>
-                            <div class="response-view-label">WhatsApp</div>
-                        </div>
-                    </div>
-
-                    <div id="responseBox" class="response-box" style="display:none">
-                        <div class="response-meta" id="responseMeta">
-                            <div id="metaStatus">Status: –</div>
-                            <div id="metaTime">Time: –</div>
-                            <div id="metaSize">Size: –</div>
-                        </div>
-                        <div style="padding: 12px">
-                            <div class="response-body" id="waBubble">—</div>
-                            <pre id="responseContent" style="display:none"></pre>
-                        </div>
+                    <div class="field">
+                        <label class="label" for="presetSelect">Select a command</label>
+                        <select class="select" id="presetSelect">
+                            <option value="">-- Choose preset --</option>
+                            <option value="goals">Goals</option>
+                            <option value="add goal 📖 Read 20 pages daily">Add Goal</option>
+                            <option value="6 PM">Set Reminder Time</option>
+                            <option value="rate 1 3">Rate Goal</option>
+                            <option value="week">Weekly Summary</option>
+                            <option value="31232">Rate All Goals</option>
+                            <option value="lookback 7">Lookback</option>
+                            <option value="enable journaling">Enable Journaling</option>
+                            <option value="help">Help</option>
+                            <option value="update 1 6PM">Update Reminder</option>
+                            <option value="delete 1">Delete Goal</option>
+                            <option value="transcript on">Enable Transcription</option>
+                            <option value="transcript off">Disable Transcription</option>
+                        </select>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- <div class="footer">Designed for internal testing • /webhook endpoint</div> -->
+        <!-- Chat Container -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <div class="chat-header-title">Chat</div>
+                <div class="chat-header-status">
+                    <span id="statusPill" class="pill" style="display: none;"></span>
+                </div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="empty-state">Send a message to start chatting...</div>
+            </div>
+            <div class="chat-input-area">
+                <form id="chatForm">
+                    <div class="chat-input-wrapper">
+                        <textarea class="chat-textarea" id="messageInput" name="message" rows="1"
+                            placeholder="Type your message here..." required></textarea>
+                        <button type="button" class="btn-mic" id="micBtn" title="Record audio"></button>
+                        <button type="submit" class="btn" id="sendBtn">Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
     <script>
         const byId = (id) => document.getElementById(id);
 
-        const form = byId('emulatorForm');
         const senderEl = byId('sender');
-        const messageEl = byId('message');
-        const submitBtn = byId('submitBtn');
-        const clearBtn = byId('clearBtn');
-        const resetBtn = byId('resetBtn');
+        const messageInput = byId('messageInput');
+        const sendBtn = byId('sendBtn');
+        const micBtn = byId('micBtn');
+        const chatForm = byId('chatForm');
+        const chatMessages = byId('chatMessages');
         const statusPill = byId('statusPill');
-        const responseBox = byId('responseBox');
-        const responseContent = byId('responseContent');
-        const metaStatus = byId('metaStatus');
-        const metaTime = byId('metaTime');
-        const metaSize = byId('metaSize');
-        const waBubble = byId('waBubble');
-        const waidInputEl = byId('waidInput');
-        const sendContactBtn = byId('sendContactBtn');
-        const fillSampleContactBtn = byId('fillSampleContactBtn');
-        const testAudioBtn = byId('testAudioBtn');
-        const stopAudioBtn = byId('stopAudioBtn');
-
+        const presetSelect = byId('presetSelect');
 
         let mediaRecorder = null;
         let audioChunks = [];
+        let messageHistory = [];
+        let isRecording = false;
 
-        // Quick Presets
-        document.querySelectorAll('.preset-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                messageEl.value = btn.getAttribute('data-msg');
-                messageEl.focus();
-            });
+        // Auto-resize textarea
+        messageInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
 
-        clearBtn.addEventListener('click', () => {
-            messageEl.value = '';
-            responseBox.style.display = 'none';
-            document.querySelector('.response-view-label').style.display = 'none';
-            statusPill.style.display = 'none';
-        });
-
-        resetBtn.addEventListener('click', () => {
-            senderEl.value = 'test_user';
-            messageEl.value = '';
-            responseBox.style.display = 'none';
-            document.querySelector('.response-view-label').style.display = 'none';
-            statusPill.style.display = 'none';
+        // Quick Presets Dropdown
+        presetSelect.addEventListener('change', () => {
+            const msg = presetSelect.value;
+            if (msg) {
+                messageInput.value = msg;
+                messageInput.focus();
+                presetSelect.value = ''; // Reset dropdown
+            }
         });
 
         function setStatus(mode, text) {
@@ -585,167 +572,170 @@
             statusPill.style.display = 'inline-block';
         }
 
-        function toWhatsAppPreview(raw) {
+        function hideStatus() {
+            statusPill.style.display = 'none';
+        }
+
+        function clearEmptyState() {
+            const emptyState = chatMessages.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+        }
+
+        function addMessage(content, type = 'bot', meta = null) {
+            clearEmptyState();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message message-${type}`;
+            messageDiv.innerHTML = formatMessage(content);
+            
+            if (meta) {
+                const metaDiv = document.createElement('div');
+                metaDiv.className = 'message-meta';
+                metaDiv.textContent = meta;
+                messageDiv.appendChild(metaDiv);
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            messageHistory.push({ content, type, meta, timestamp: Date.now() });
+        }
+
+        function formatMessage(raw) {
             if (!raw) return '';
-            // Preserve simple formatting that our bot returns (emojis, bullets, lines)
             let text = String(raw);
-            // Remove all backticks from the text
+            
+            // Remove backticks
             text = text.replace(/`/g, '');
-            // Replace markdown-like emphasis with simple HTML
+            
+            // Convert markdown formatting
             text = text
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1<\/strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1<\/em>')
-                .replace(/_(.*?)_/g, '<em>$1<\/em>');
-            // Convert list hyphens to real list for nicer visual if multiple lines
-            if (/^-\s/m.test(text)) {
-                const lines = text.split(/\r?\n/);
-                const items = [];
-                let inList = false;
-                const out = [];
-                for (const line of lines) {
-                    if (/^-\s/.test(line)) {
-                        inList = true;
-                        items.push('<li>' + line.replace(/^-\s*/, '') + '<\/li>');
-                    } else {
-                        if (inList) {
-                            out.push('<ul class="wa-list">' + items.join('') + '<\/ul>');
-                            items.length = 0;
-                            inList = false;
-                        }
-                        out.push(line);
-                    }
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/_(.*?)_/g, '<em>$1</em>');
+            
+            // Split into lines for processing
+            const lines = text.split(/\r?\n/);
+            const out = [];
+            let i = 0;
+            
+            while (i < lines.length) {
+                const line = lines[i];
+                
+                // Skip empty lines at the start
+                if (i === 0 && line.trim() === '') {
+                    i++;
+                    continue;
                 }
-                if (items.length) out.push('<ul class="wa-list">' + items.join('') + '<\/ul>');
-                text = out.join('\n');
-            }
-            // Convert numbered lists to ordered lists
-            if (/^\d+\.\s/m.test(text)) {
-                const lines = text.split(/\r?\n/);
-                const items = [];
-                let inOrdered = false;
-                const out = [];
-                for (const line of lines) {
-                    if (/^\d+\.\s/.test(line)) {
-                        inOrdered = true;
-                        items.push('<li>' + line.replace(/^\d+\.\s*/, '') + '<\/li>');
-                    } else {
-                        if (inOrdered) {
-                            out.push('<ol class="wa-list">' + items.join('') + '<\/ol>');
-                            items.length = 0;
-                            inOrdered = false;
-                        }
-                        out.push(line);
+                
+                // Check for numbered list
+                if (/^\d+\.\s/.test(line)) {
+                    const items = [];
+                    while (i < lines.length && /^\d+\.\s/.test(lines[i])) {
+                        items.push('<li>' + lines[i].replace(/^\d+\.\s*/, '') + '</li>');
+                        i++;
                     }
+                    out.push('<ol>' + items.join('') + '</ol>');
+                    continue;
                 }
-                if (items.length) out.push('<ol class="wa-list">' + items.join('') + '<\/ol>');
-                text = out.join('\n');
+                
+                // Check for bullet list (including custom bullet points with emojis)
+                if (/^[-•]\s/.test(line)) {
+                    const items = [];
+                    while (i < lines.length && /^[-•]\s/.test(lines[i])) {
+                        const itemText = lines[i].replace(/^[-•]\s*/, '');
+                        items.push('<li>' + itemText + '</li>');
+                        i++;
+                    }
+                    out.push('<ul>' + items.join('') + '</ul>');
+                    continue;
+                }
+                
+                // Special formatting for Tips section header
+                if (/^💡\s*Tips:/i.test(line) || /^💡\s*Tip:/i.test(line)) {
+                    out.push('<div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15);"><strong>' + line + '</strong></div>');
+                    i++;
+                    continue;
+                }
+                
+                // Handle lines that start with "Tips:" or "Tip:" without emoji
+                if (/^Tips?:/i.test(line)) {
+                    out.push('<div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.15);"><strong>💡 ' + line + '</strong></div>');
+                    i++;
+                    continue;
+                }
+                
+                // Regular line
+                if (line.trim() !== '') {
+                    out.push(line);
+                }
+                i++;
             }
-            // Replace new lines with <br>
-            text = text.replace(/\r?\n/g, '<br>');
+            
+            // Join with <br> and clean up extra spacing
+            text = out.join('<br>');
+            
+            // Clean up multiple consecutive <br> tags (keep max 2 for paragraph breaks)
+            text = text.replace(/(<br>\s*){3,}/g, '<br><br>');
+            
+            // Remove trailing <br> tags
+            text = text.replace(/(<br>\s*)+$/g, '');
+            
             return text;
         }
 
-        form.addEventListener('submit', async (e) => {
+        function startEventStream() {
+            if (!window.EventSource) {
+                console.warn('EventSource is not supported in this browser.');
+                return null;
+            }
+
+            const source = new EventSource('/events');
+
+            source.onmessage = (event) => {
+                const payload = event.data;
+                if (!payload) return;
+
+                clearEmptyState();
+                addMessage(payload, 'event', 'Server Event');
+                setStatus('loading', 'Processing...');
+            };
+
+            source.onerror = () => {
+                console.error('EventSource error');
+            };
+
+            return source;
+        }
+
+        const eventSource = startEventStream();
+
+        chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const payload = { sender: senderEl.value, msg_type: 'chat', raw_msg: messageEl.value };
+            
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            // Add user message
+            addMessage(message, 'user');
+            
+            const payload = { 
+                sender: senderEl.value, 
+                msg_type: 'chat', 
+                raw_msg: message, 
+                client_type: 'emulator' 
+            };
+
+            // Clear input
+            messageInput.value = '';
+            messageInput.style.height = 'auto';
 
             // UI loading state
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Sending…';
-            setStatus('loading', 'Sending');
-            responseBox.style.display = 'block';
-            document.querySelector('.response-view-label').style.display = 'inline-block';
-            responseContent.textContent = '';
-            waBubble.textContent = '—';
-
-            const start = performance.now();
-            let text = '';
-            let ok = false;
-            let size = 0;
-            try {
-                const res = await fetch('/webhook', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                ok = res.ok;
-                // Try JSON first, fallback to text
-                let formattedText = '';
-                try {
-                    const data = await res.clone().json();
-                    text = JSON.stringify(data, null, 2);
-                    // Extract message from new JSON structure: data.data.message for success, data.message for errors
-                    const previewCandidate = (data && (
-                        (data.data && data.data.message) ||  // New format: success case
-                        data.message ||                      // Error case or old format
-                        data.text ||
-                        data.response
-                    )) || '';
-                    if (previewCandidate) {
-                        formattedText = previewCandidate;
-                    } else {
-                        // If the handler returns JSON-encoded string under body
-                        if (typeof data === 'string') {
-                            formattedText = data;
-                        } else {
-                            formattedText = text;
-                        }
-                    }
-                } catch {
-                    text = await res.text();
-                    formattedText = text;
-                }
-                size = (text || '').length;
-
-                const ms = Math.max(1, Math.round(performance.now() - start));
-                metaStatus.textContent = 'Status: ' + res.status + (ok ? ' OK' : ' ERROR');
-                metaTime.textContent = 'Time: ' + ms + ' ms';
-                metaSize.textContent = 'Size: ' + size + ' chars';
-
-                // Populate both views
-                responseContent.textContent = text || '(empty response)';
-                waBubble.innerHTML = toWhatsAppPreview(formattedText);
-
-                setStatus(ok ? 'success' : 'error', ok ? 'Success' : 'Error');
-            } catch (err) {
-                const ms = Math.max(1, Math.round(performance.now() - start));
-                metaStatus.textContent = 'Status: NETWORK ERROR';
-                metaTime.textContent = 'Time: ' + ms + ' ms';
-                metaSize.textContent = 'Size: 0 chars';
-                responseContent.textContent = 'Network error: ' + (err && err.message ? err.message : 'Unknown');
-                setStatus('error', 'Network Error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Send Request';
-            }
-        });
-
-        fillSampleContactBtn.addEventListener('click', () => {
-            waidInputEl.value = '923325727426';
-            waidInputEl.focus();
-        });
-
-        sendContactBtn.addEventListener('click', async () => {
-            const waid = (waidInputEl.value || '').trim();
-            if (!waid) {
-                setStatus('error', 'Enter WhatsApp ID');
-                return;
-            }
-            // Use WAID as-is (expecting full number with country code)
-            const derivedPhone = waid;
-            // Display number (format for display only)
-            const displayNumber = waid;
-            // Construct a VCARD that backend expects
-            const vcard = `BEGIN:VCARD\nVERSION:3.0\nN:;${derivedPhone};;;\nFN:${derivedPhone}\nTEL;type=CELL;waid=${waid}:${displayNumber}\nEND:VCARD`;
-            const payload = { sender: senderEl.value, msg_type: 'vcard', raw_msg: vcard };
-
-            // UI loading state
-            setStatus('loading', 'Sending Contact');
-            responseBox.style.display = 'block';
-            document.querySelector('.response-view-label').style.display = 'inline-block';
-            responseContent.textContent = '';
-            waBubble.textContent = '—';
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Sending…';
+            setStatus('loading', 'Sending...');
 
             const start = performance.now();
             try {
@@ -756,176 +746,168 @@
                 });
 
                 const ok = res.ok;
-                let text = '';
                 let formattedText = '';
+                
                 try {
                     const data = await res.clone().json();
-                    text = JSON.stringify(data, null, 2);
-                    // Extract message from new JSON structure: data.data.message for success, data.message for errors
-                    formattedText = (data && (
-                        (data.data && data.data.message) ||  // New format: success case
-                        data.message ||                      // Error case or old format
+                    const previewCandidate = (data && (
+                        (data.data && data.data.message) ||
+                        data.message ||
                         data.text ||
                         data.response
-                    )) || text;
+                    )) || '';
+                    
+                    if (previewCandidate) {
+                        formattedText = previewCandidate;
+                    } else {
+                        formattedText = JSON.stringify(data, null, 2);
+                    }
                 } catch {
-                    text = await res.text();
-                    formattedText = text;
+                    formattedText = await res.text();
                 }
 
                 const ms = Math.max(1, Math.round(performance.now() - start));
-                metaStatus.textContent = 'Status: ' + res.status + (ok ? ' OK' : ' ERROR');
-                metaTime.textContent = 'Time: ' + ms + ' ms';
-                metaSize.textContent = 'Size: ' + (text || '').length + ' chars';
+                
+                if (ok && formattedText) {
+                    addMessage(formattedText, 'bot', `${ms}ms`);
+                    setStatus('success', 'Success');
+                } else {
+                    addMessage(formattedText || 'No response', 'bot', `Error • ${ms}ms`);
+                    setStatus('error', 'Error');
+                }
 
-                responseContent.textContent = text || '(empty response)';
-                waBubble.innerHTML = toWhatsAppPreview(formattedText);
-                setStatus(ok ? 'success' : 'error', ok ? 'Success' : 'Error');
+                setTimeout(hideStatus, 3000);
             } catch (err) {
                 const ms = Math.max(1, Math.round(performance.now() - start));
-                metaStatus.textContent = 'Status: NETWORK ERROR';
-                metaTime.textContent = 'Time: ' + ms + ' ms';
-                metaSize.textContent = 'Size: 0 chars';
-                responseContent.textContent = 'Network error: ' + (err && err.message ? err.message : 'Unknown');
+                addMessage('Network error: ' + (err && err.message ? err.message : 'Unknown'), 'bot', `Error • ${ms}ms`);
                 setStatus('error', 'Network Error');
+                setTimeout(hideStatus, 3000);
+            } finally {
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'Send';
             }
         });
 
-        // Start recording audio
-        testAudioBtn.addEventListener('click', async () => {
-            try {
-                // Request microphone access
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-                // Initialize MediaRecorder with appropriate format
-                const options = { mimeType: 'audio/webm;codecs=opus' };
-
-                // Fallback for browsers that don't support webm/opus
-                if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-                    options.mimeType = 'audio/webm';
-                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
-                        options.mimeType = '';  // Let browser choose
-                    }
+        // Mic button for audio recording
+        micBtn.addEventListener('click', async () => {
+            if (isRecording) {
+                // Stop recording
+                if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                    return;
                 }
 
-                mediaRecorder = new MediaRecorder(stream, options.mimeType ? options : undefined);
-                audioChunks = [];
+                const recordingDuration = Math.round((Date.now() - mediaRecorder.recordingStartTime) / 1000);
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
 
-                // Track recording start time for duration
-                const recordingStartTime = Date.now();
-                mediaRecorder.recordingStartTime = recordingStartTime;
+                mediaRecorder.addEventListener('stop', async () => {
+                    const actualMimeType = mediaRecorder.mimeType || 'audio/webm';
+                    const audioBlob = new Blob(audioChunks, { type: actualMimeType });
+                    const reader = new FileReader();
+                    reader.readAsDataURL(audioBlob);
 
-                // Collect audio data
-                mediaRecorder.addEventListener('dataavailable', event => {
-                    audioChunks.push(event.data);
-                });
+                    reader.onloadend = async () => {
+                        const base64Audio = reader.result.split(',')[1];
+                        
+                        addMessage(`🎤 Audio message (${recordingDuration}s)`, 'user');
 
-                // Start recording
-                mediaRecorder.start();
+                        const payload = { 
+                            sender: senderEl.value, 
+                            msg_type: 'ptt', 
+                            raw_msg: base64Audio, 
+                            client_type: 'emulator' 
+                        };
 
-                // Update UI
-                testAudioBtn.style.display = 'none';
-                stopAudioBtn.style.display = 'block';
-                setStatus('loading', '🔴 Recording...');
-                statusPill.style.display = 'inline-block';
+                        setStatus('loading', 'Sending Audio...');
 
-            } catch (err) {
-                setStatus('error', 'Microphone access denied');
-                statusPill.style.display = 'inline-block';
-                console.error('Error accessing microphone:', err);
-            }
-        });
-
-        // Stop recording and send audio
-        stopAudioBtn.addEventListener('click', async () => {
-            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
-                return;
-            }
-
-            // Calculate duration
-            const recordingDuration = Math.round((Date.now() - mediaRecorder.recordingStartTime) / 1000);
-
-            // Stop recording
-            mediaRecorder.stop();
-
-            // Stop all tracks to release the microphone
-            mediaRecorder.stream.getTracks().forEach(track => track.stop());
-
-            mediaRecorder.addEventListener('stop', async () => {
-                // Get the mimetype that was actually used
-                const actualMimeType = mediaRecorder.mimeType || 'audio/webm';
-
-                // Create audio blob from chunks
-                const audioBlob = new Blob(audioChunks, { type: actualMimeType });
-
-                // Convert to base64
-                const reader = new FileReader();
-                reader.readAsDataURL(audioBlob);
-
-                reader.onloadend = async () => {
-                    const base64Audio = reader.result.split(',')[1]; // Remove data:audio/...;base64, prefix
-
-                    // Prepare payload matching WhatsApp client format
-                    const payload = { sender: senderEl.value, msg_type: 'ptt', raw_msg: base64Audio };
-
-                    // UI loading state
-                    setStatus('loading', 'Sending Audio');
-                    responseBox.style.display = 'block';
-                    document.querySelector('.response-view-label').style.display = 'inline-block';
-                    responseContent.textContent = '';
-                    waBubble.textContent = '—';
-
-                    const start = performance.now();
-                    try {
-                        const res = await fetch('/webhook', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(payload)
-                        });
-
-                        const ok = res.ok;
-                        let text = '';
-                        let formattedText = '';
+                        const start = performance.now();
                         try {
-                            const data = await res.clone().json();
-                            text = JSON.stringify(data, null, 2);
-                            // Extract message from new JSON structure: data.data.message for success, data.message for errors
-                            formattedText = (data && (
-                                (data.data && data.data.message) ||  // New format: success case
-                                data.message ||                      // Error case or old format
-                                data.text ||
-                                data.response
-                            )) || text;
-                        } catch {
-                            text = await res.text();
-                            formattedText = text;
+                            const res = await fetch('/webhook', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(payload)
+                            });
+
+                            const ok = res.ok;
+                            let formattedText = '';
+                            
+                            try {
+                                const data = await res.clone().json();
+                                formattedText = (data && (
+                                    (data.data && data.data.message) ||
+                                    data.message ||
+                                    data.text ||
+                                    data.response
+                                )) || JSON.stringify(data, null, 2);
+                            } catch {
+                                formattedText = await res.text();
+                            }
+
+                            const ms = Math.max(1, Math.round(performance.now() - start));
+                            
+                            if (ok && formattedText) {
+                                addMessage(formattedText, 'bot', `${ms}ms`);
+                                setStatus('success', 'Success');
+                            } else {
+                                addMessage(formattedText || 'No response', 'bot', `Error • ${ms}ms`);
+                                setStatus('error', 'Error');
+                            }
+
+                            setTimeout(hideStatus, 3000);
+                        } catch (err) {
+                            const ms = Math.max(1, Math.round(performance.now() - start));
+                            addMessage('Network error: ' + (err && err.message ? err.message : 'Unknown'), 'bot', `Error • ${ms}ms`);
+                            setStatus('error', 'Network Error');
+                            setTimeout(hideStatus, 3000);
+                        } finally {
+                            micBtn.classList.remove('recording');
+                            micBtn.title = 'Record audio';
+                            isRecording = false;
                         }
+                    };
+                });
+            } else {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    const options = { mimeType: 'audio/webm;codecs=opus' };
 
-                        const ms = Math.max(1, Math.round(performance.now() - start));
-                        metaStatus.textContent = 'Status: ' + res.status + (ok ? ' OK' : ' ERROR');
-                        metaTime.textContent = 'Time: ' + ms + ' ms';
-                        metaSize.textContent = 'Size: ' + (text || '').length + ' chars';
-
-                        responseContent.textContent = text || '(empty response)';
-                        waBubble.innerHTML = toWhatsAppPreview(formattedText);
-                        setStatus(ok ? 'success' : 'error', ok ? 'Success' : 'Error');
-                    } catch (err) {
-                        const ms = Math.max(1, Math.round(performance.now() - start));
-                        metaStatus.textContent = 'Status: NETWORK ERROR';
-                        metaTime.textContent = 'Time: ' + ms + ' ms';
-                        metaSize.textContent = 'Size: 0 chars';
-                        responseContent.textContent = 'Network error: ' + (err && err.message ? err.message : 'Unknown');
-                        setStatus('error', 'Network Error');
-                    } finally {
-                        // Reset UI
-                        testAudioBtn.style.display = 'block';
-                        stopAudioBtn.style.display = 'none';
+                    if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                        options.mimeType = 'audio/webm';
+                        if (!MediaRecorder.isTypeSupported(options.mimeType)) {
+                            options.mimeType = '';
+                        }
                     }
-                };
-            });
+
+                    mediaRecorder = new MediaRecorder(stream, options.mimeType ? options : undefined);
+                    audioChunks = [];
+                    mediaRecorder.recordingStartTime = Date.now();
+
+                    mediaRecorder.addEventListener('dataavailable', event => {
+                        audioChunks.push(event.data);
+                    });
+
+                    mediaRecorder.start();
+
+                    micBtn.classList.add('recording');
+                    micBtn.title = 'Stop recording';
+                    isRecording = true;
+                    setStatus('loading', '🔴 Recording...');
+                } catch (err) {
+                    setStatus('error', 'Microphone access denied');
+                    setTimeout(hideStatus, 3000);
+                    console.error('Error accessing microphone:', err);
+                }
+            }
         });
 
-
+        // Enter to send, Shift+Enter for new line
+        messageInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                chatForm.dispatchEvent(new Event('submit'));
+            }
+        });
     </script>
 </body>
 
