@@ -1,12 +1,15 @@
 """Tests for reminder time parsing helpers."""
 
-import pytest
 from app.helpers.text import reminder_time
 
 
-@pytest.mark.parametrize(
-    "message, expected",
-    [
+def test_parse_time_string():
+    """Test parsing of time strings in various formats.
+
+    Verifies support for HH:MM, 12-hour AM/PM, and hour-only formats,
+    and properly rejects invalid time inputs.
+    """
+    test_cases = [
         # Valid HH:MM format
         ("18:00", True),
         ("09:30", True),
@@ -28,17 +31,7 @@ from app.helpers.text import reminder_time
         ("abc", False),  # Not a time
         ("", False),  # Empty string
         ("24", False),  # Hour out of range
-    ],
-)
-def test_parse_time_string(message, expected):
-    """Test parsing of time strings in various formats.
-
-    Verifies support for HH:MM, 12-hour AM/PM, and hour-only formats,
-    and properly rejects invalid time inputs.
-
-    Arguments:
-        message: Time string to parse (parametrized)
-        expected: Whether parsing should succeed (parametrized)
-
-    """
-    assert (reminder_time.parse_time_string(message) is not None) == expected
+    ]
+    
+    for message, expected in test_cases:
+        assert (reminder_time.parse_time_string(message) is not None) == expected

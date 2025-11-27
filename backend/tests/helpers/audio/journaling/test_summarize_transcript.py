@@ -1,24 +1,25 @@
 """Tests for transcript summarization helpers."""
 
-from unittest.mock import MagicMock, patch
-
+import pytest
+from unittest.mock import patch, MagicMock
 from app.helpers.audio.journaling.summarize_transcript import summarize_transcript
 
 
-@patch("app.helpers.audio.journaling.summarize_transcript.requests.post")
-def test_summarize_transcript(mock_post):
+def test_summarize_transcript():
     """Test transcript summarization returns a string."""
     # Arrange
     mock_response = MagicMock()
     mock_response.json.return_value = {
-        "choices": [{"message": {"content": "Summarized text"}}],
+        "choices": [{"message": {"content": "Summarized text"}}]
     }
     mock_response.raise_for_status.return_value = None
-    mock_post.return_value = mock_response
 
-    # Act
-    result = summarize_transcript("long transcript text")
+    with patch("app.helpers.audio.journaling.summarize_transcript.requests.post") as mock_post:
+        mock_post.return_value = mock_response
 
-    # Assert
-    assert result == "Summarized text"
-    mock_post.assert_called_once()
+        # Act
+        result = summarize_transcript("long transcript text")
+
+        # Assert
+        assert result == "Summarized text"
+        mock_post.assert_called_once()

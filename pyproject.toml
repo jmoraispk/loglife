@@ -46,3 +46,8 @@ ignore = [
     "D213", # Multi-line docstring summary should start at the second line (incompatible with D212)
     "COM812", # Trailing comma missing (conflicts with formatter)
 ]
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=7.0.0",
+]

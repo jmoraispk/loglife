@@ -22,24 +22,25 @@ def webhook() -> ResponseReturnValue:
 
     Returns JSON response containing `success`, `message`, and `data`.
     """
-    data: dict = request.get_json()
-
-    sender = data["sender"]
-    msg_type = data["msg_type"]
-    raw_msg = data["raw_msg"]
-    # g is for request-scoped data (global variable)
-    g.client_type = data["client_type"]
-
-    user: dict | None = get_user_by_phone_number(sender)
-    if not user:
-        user_timezone: str = get_timezone_from_number(sender)
-        user: dict = create_user(sender, user_timezone)
-        logging.info(f"Created new user {user} with timezone {user_timezone}")
-    else:
-        logging.info(f"Found existing user for sender: {user}")
-
-    extra_data = {}
     try:
+        data: dict = request.get_json()
+
+        sender = data["sender"]
+        msg_type = data["msg_type"]
+        raw_msg = data["raw_msg"]
+        # g is for request-scoped data (global variable)
+        g.client_type = data["client_type"]
+
+        user: dict | None = get_user_by_phone_number(sender)
+        if not user:
+            user_timezone: str = get_timezone_from_number(sender)
+            user: dict = create_user(sender, user_timezone)
+            logging.info(f"Created new user {user} with timezone {user_timezone}")
+        else:
+            logging.info(f"Found existing user for sender: {user}")
+
+        extra_data = {}
+    
         if msg_type == "chat":
             response_message = process_text(user, raw_msg)
         elif msg_type in ("audio", "ptt"):

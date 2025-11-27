@@ -1,22 +1,14 @@
 """Tests for goal text extraction helpers."""
 
-import pytest
 from app.helpers.text import goal
 
 
-@pytest.mark.parametrize(
-    "text, expected",
-    [
+def test_extract_emoji():
+    """Test emoji extraction from goal text."""
+    test_cases = [
         ("text without emoji", "🎯"),
         ("text with emoji 🍔", "🍔"),
-    ],
-)
-def test_extract_emoji(text, expected):
-    """Test emoji extraction from goal text.
-
-    Arguments:
-        text: Goal text to extract emoji from (parametrized)
-        expected: Expected emoji result (parametrized)
-
-    """
-    assert goal.extract_emoji(text) == expected
+    ]
+    
+    for text, expected in test_cases:
+        assert goal.extract_emoji(text) == expected

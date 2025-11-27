@@ -1,20 +1,18 @@
 """Tests for audio transcription helpers."""
 
 import os
-from unittest.mock import MagicMock, patch
-
+import pytest
+from unittest.mock import patch, MagicMock
 from app.helpers.audio.transcribe_audio import transcribe_audio
 
 FIXTURE_DIR = os.path.dirname(__file__)
 AUDIO_PATH = os.path.join(FIXTURE_DIR, "audio_bytes.txt")
 
 
-@patch("app.helpers.audio.transcribe_audio.requests.post")
-@patch("app.helpers.audio.transcribe_audio.requests.get")
-def test_transcribe_audio(mock_get, mock_post):
+def test_transcribe_audio():
     """Test audio transcription using fixture data."""
     # Arrange
-    with open(AUDIO_PATH) as f:
+    with open(AUDIO_PATH, "r") as f:
         fake_audio = f.read()
 
     # Mock upload response
@@ -32,12 +30,16 @@ def test_transcribe_audio(mock_get, mock_post):
     mock_poll_response.json.return_value = {"status": "completed", "text": "Hello world"}
     mock_poll_response.raise_for_status.return_value = None
 
-    # Configure mock side effects
-    mock_post.side_effect = [mock_upload_response, mock_transcript_response]
-    mock_get.return_value = mock_poll_response
+    with (
+        patch("app.helpers.audio.transcribe_audio.requests.post") as mock_post,
+        patch("app.helpers.audio.transcribe_audio.requests.get") as mock_get
+    ):
+        # Configure mock side effects
+        mock_post.side_effect = [mock_upload_response, mock_transcript_response]
+        mock_get.return_value = mock_poll_response
 
-    # Act
-    result = transcribe_audio(fake_audio)
+        # Act
+        result = transcribe_audio(fake_audio)
 
-    # Assert
-    assert result == "Hello world"
+        # Assert
+        assert result == "Hello world"
