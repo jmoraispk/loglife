@@ -43,11 +43,6 @@ def mock_connect(monkeypatch, test_db):
     instead of the real one.
 
     The key: Patch where connect is USED, not where it's DEFINED.
-
-    Usage in tests:
-        def test_something(mock_connect):
-            # Now any call to connect() uses test_db
-            result = get_all_users()
     """
 
     # Create a context manager that returns the test database

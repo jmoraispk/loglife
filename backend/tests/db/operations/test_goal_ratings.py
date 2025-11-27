@@ -14,9 +14,6 @@ def test_create_rating():
     are properly stored, and validates that ratings outside the valid range
     (0 or 4+) are rejected with an IntegrityError due to CHECK constraint.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create user and goal
     user = users.create_user("+1234567890", "America/New_York")
@@ -53,9 +50,6 @@ def test_get_rating():
     Verifies that existing ratings can be successfully retrieved by ID with
     all expected fields, while non-existent rating IDs properly return None.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create user, goal, and rating
     user = users.create_user("+1234567890", "America/New_York")
@@ -83,9 +77,6 @@ def test_get_rating_by_goal_and_date():
     Verifies that ratings can be retrieved by combining goal ID and date,
     returning the most recent rating for that combination, while non-existent
     goal/date combinations properly return None.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user, goal, and rating
@@ -122,9 +113,6 @@ def test_get_all_ratings():
     Verifies that all rating records are returned with complete field data,
     and that all ratings contain values within the valid range (1-3).
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create user, goals, and ratings
     user = users.create_user("+1234567890", "America/New_York")
@@ -159,9 +147,6 @@ def test_update_rating():
     can be updated independently or together, and that unchanged fields retain
     their original values. Also tests that calling without fields returns the
     existing rating.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user, goals, and rating
@@ -210,9 +195,6 @@ def test_delete_rating():
 
     Verifies that a rating can be successfully deleted by ID and that
     subsequent attempts to retrieve the deleted rating return None.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user, goal, and rating

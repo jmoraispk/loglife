@@ -14,9 +14,6 @@ def test_create_referral():
     constraint, and validates that different referral combinations and reversed
     roles are allowed.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create two users
     referrer = users.create_user("+1234567890", "America/New_York")

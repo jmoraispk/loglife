@@ -17,8 +17,6 @@ def test_next_reminder_seconds(mocker):
     - Returns default wait time when no reminders are scheduled
     - Uses mocked data to avoid dependency on actual database state
 
-    Arguments:
-        mocker: pytest-mock fixture for patching dependencies
 
     """
     now = datetime.now(UTC)
@@ -54,8 +52,6 @@ def test_check_reminders(mocker):
     - Sends WhatsApp notification with proper message format
     - Includes goal emoji and description in the reminder message
 
-    Arguments:
-        mocker: pytest-mock fixture for patching dependencies
 
     """
     now = datetime.now(UTC)

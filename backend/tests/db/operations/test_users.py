@@ -11,9 +11,6 @@ def test_create_user():
     and ensures duplicate phone numbers are properly rejected with an
     IntegrityError due to UNIQUE constraint.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Act
     user = users.create_user(phone_number="+1234567890", timezone="America/New_York")
@@ -36,9 +33,6 @@ def test_get_user():
     Verifies that existing users can be successfully retrieved by ID and
     returns all expected fields, while non-existent user IDs properly
     return None.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create a user first
@@ -66,9 +60,6 @@ def test_get_user_by_phone_number():
     complete user record, while non-existent phone numbers properly return
     None.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange
     users.create_user(phone_number="+1234567890", timezone="America/New_York")
@@ -87,9 +78,6 @@ def test_get_all_users():
     Verifies that all user records are returned with complete field data,
     and that the result set contains all expected users regardless of
     timestamp-based ordering.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create multiple users
@@ -122,9 +110,6 @@ def test_update_user():
     independently or together, and that unchanged fields retain their
     original values.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange
     user = users.create_user("+1234567890", "America/New_York")
@@ -145,9 +130,6 @@ def test_delete_user():
 
     Verifies that a user can be successfully deleted by ID and that
     subsequent attempts to retrieve the deleted user return None.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange

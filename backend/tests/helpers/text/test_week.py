@@ -40,8 +40,6 @@ def test_look_back_summary(mocker):
     formats markdown output properly, and includes goal ratings
     for multiple days in the summary.
 
-    Arguments:
-        mocker: pytest-mock fixture for patching dependencies
 
     """
     # Test with no goals

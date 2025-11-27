@@ -10,9 +10,6 @@ def test_create_audio_journal_entry():
     ensures entries are properly associated with users, and validates that
     multiple entries can be created for the same user.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create a user
     user = users.create_user("+1234567890", "America/New_York")
@@ -50,9 +47,6 @@ def test_get_audio_journal_entry():
     all expected fields (transcription, summary), while non-existent entry
     IDs properly return None.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create user and entry
     user = users.create_user("+1234567890", "America/New_York")
@@ -88,9 +82,6 @@ def test_get_user_audio_journal_entries():
     Verifies that all entries belonging to a user are returned with complete
     field data, entries from different users are properly isolated, and users
     with no entries return an empty list.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create users and entries
@@ -141,9 +132,6 @@ def test_get_all_audio_journal_entries():
 
     Verifies that all journal entry records across all users are returned
     with complete field data.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create users and entries
@@ -215,9 +203,6 @@ def test_delete_audio_journal_entry():
     Verifies that an entry can be successfully deleted by ID, subsequent
     attempts to retrieve the deleted entry return None, and the user's
     entry list is properly updated.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user and entry

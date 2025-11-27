@@ -10,9 +10,6 @@ def test_create_goal():
     levels, ensuring all fields are properly stored and the goal is
     associated with the correct user.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create a user first (foreign key requirement)
     user = users.create_user("+1234567890", "America/New_York")
@@ -50,9 +47,6 @@ def test_get_goal():
     Verifies that existing goals can be successfully retrieved by ID with
     all expected fields, while non-existent goal IDs properly return None.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create user and goal
     user = users.create_user("+1234567890", "America/New_York")
@@ -82,9 +76,6 @@ def test_get_user_goals():
 
     Verifies that all goals belonging to a user are returned with complete
     field data, and that users with no goals return an empty list.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user and multiple goals
@@ -121,9 +112,6 @@ def test_update_goal():
     be updated independently or together, and that unchanged fields retain
     their original values. Also tests that calling without fields returns
     the existing goal.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user and goal
@@ -174,9 +162,6 @@ def test_delete_goal():
 
     Verifies that a goal can be successfully deleted by ID and that
     subsequent attempts to retrieve the deleted goal return None.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user and goal

@@ -10,9 +10,6 @@ def test_create_goal_reminder():
     time, ensuring all fields are properly stored and multiple reminders
     can be created for the same user and goal.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create user and goal
     user = users.create_user("+1234567890", "America/New_York")
@@ -51,9 +48,6 @@ def test_get_goal_reminder():
     Verifies that existing reminders can be successfully retrieved by ID
     with all expected fields, while non-existent reminder IDs properly
     return None.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user, goal, and reminder
@@ -116,9 +110,6 @@ def test_get_all_goal_reminders():
     Verifies that all reminder records are returned with complete field data
     and correct associations to users and goals.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create user, goals, and reminders
     user = users.create_user("+1234567890", "America/New_York")
@@ -153,9 +144,6 @@ def test_update_goal_reminder():
     updated independently or together, and that unchanged fields retain
     their original values. Also tests that calling without fields returns
     the existing reminder.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user, goals, and reminder
@@ -206,9 +194,6 @@ def test_delete_goal_reminder():
 
     Verifies that a reminder can be successfully deleted by ID and that
     subsequent attempts to retrieve the deleted reminder return None.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user, goal, and reminder

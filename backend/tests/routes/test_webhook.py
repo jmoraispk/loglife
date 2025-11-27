@@ -85,4 +85,3 @@ def test_webhook_error_handling(client):
     # error_response defaults to status_code=400
     assert response.status_code == 400
     assert response.json["success"] is False
-

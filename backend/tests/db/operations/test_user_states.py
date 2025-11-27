@@ -10,9 +10,6 @@ def test_create_user_state():
     ensures the upsert mechanism properly updates existing states instead
     of creating duplicates, maintaining only one state per user.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create a user first
     user = users.create_user("+1234567890", "America/New_York")
@@ -59,9 +56,6 @@ def test_get_user_state():
     all fields (state and temp_data), while non-existent user states
     properly return None.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
-
     """
     # Arrange - create user and state
     user = users.create_user("+1234567890", "America/New_York")
@@ -93,9 +87,6 @@ def test_update_user_state():
     independently or together, and that unchanged fields retain their
     original values. Also tests that calling without fields returns the
     existing state.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user and state
@@ -137,9 +128,6 @@ def test_delete_user_state():
 
     Verifies that a user state can be successfully deleted and that
     subsequent attempts to retrieve the deleted state return None.
-
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
 
     """
     # Arrange - create user and state
