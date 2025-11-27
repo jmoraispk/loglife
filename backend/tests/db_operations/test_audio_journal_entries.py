@@ -175,6 +175,35 @@ def test_get_all_audio_journal_entries(mock_connect):
         assert "created_at" in entry
 
 
+def test_update_audio_journal_entry(mock_connect):
+    """
+    Test updating an audio journal entry.
+
+    Verifies that an entry can be successfully updated.
+    """
+    # Arrange - create user and entry
+    user = users.create_user("+1234567890", "America/New_York")
+    audio_journal_entries.create_audio_journal_entry(
+        user_id=user["id"],
+        transcription_text="Old text",
+        summary_text="Old summary",
+    )
+    entries = audio_journal_entries.get_user_audio_journal_entries(user["id"])
+    entry_id = entries[0]["id"]
+
+    # Act - update the entry
+    audio_journal_entries.update_audio_journal_entry(
+        entry_id=entry_id,
+        transcription_text="New text",
+        summary_text="New summary",
+    )
+
+    # Assert entry is updated
+    updated_entry = audio_journal_entries.get_audio_journal_entry(entry_id)
+    assert updated_entry["transcription_text"] == "New text"
+    assert updated_entry["summary_text"] == "New summary"
+
+
 def test_delete_audio_journal_entry(mock_connect):
     """
     Test deleting an audio journal entry from the database.

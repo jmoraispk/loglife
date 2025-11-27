@@ -1,7 +1,7 @@
 """Tests for reminder time parsing helpers."""
 
 import pytest
-from backend.app.helpers.text import reminder_time
+from app.helpers.text import reminder_time
 
 
 @pytest.mark.parametrize(

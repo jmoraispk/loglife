@@ -1,7 +1,7 @@
 """Tests for vcard phone number extraction helpers."""
 
 import pytest
-from backend.app.helpers.vcard import vcard
+from app.helpers.vcard import vcard
 
 
 @pytest.mark.parametrize(

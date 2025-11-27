@@ -75,6 +75,34 @@ def test_get_goal_reminder(mock_connect):
     assert non_existent_reminder is None
 
 
+def test_get_goal_reminder_by_goal_id(mock_connect):
+    """
+    Test retrieving a reminder by its goal ID.
+
+    Verifies that reminders can be retrieved via the goal ID.
+    """
+    # Arrange - create user, goal, and reminder
+    user = users.create_user("+1234567890", "America/New_York")
+    goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
+    created_reminder = goal_reminders.create_goal_reminder(
+        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00"
+    )
+
+    # Test retrieving existing reminder
+    retrieved_reminder = goal_reminders.get_goal_reminder_by_goal_id(goal["id"])
+
+    # Assert existing reminder
+    assert retrieved_reminder is not None
+    assert isinstance(retrieved_reminder, dict)
+    assert retrieved_reminder["id"] == created_reminder["id"]
+    assert retrieved_reminder["user_id"] == user["id"]
+    assert retrieved_reminder["user_goal_id"] == goal["id"]
+
+    # Test retrieving non-existent reminder
+    non_existent_reminder = goal_reminders.get_goal_reminder_by_goal_id(999)
+    assert non_existent_reminder is None
+
+
 def test_get_all_goal_reminders(mock_connect):
     """
     Test retrieving all reminders from the database.

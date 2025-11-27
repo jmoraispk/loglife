@@ -1,7 +1,7 @@
 """Tests for weekly look-back summary helpers."""
 
 from datetime import datetime
-import backend.app.helpers.text.week as week_module
+import app.helpers.text.week as week_module
 
 
 def test_get_monday_before():

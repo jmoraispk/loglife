@@ -2,7 +2,7 @@
 
 import pytest
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from app.db.operations import goal_ratings, user_goals, users
 
 
@@ -92,8 +92,8 @@ def test_get_rating_by_goal_and_date(mock_connect):
     goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
     goal_ratings.create_rating(goal["id"], 3)
 
-    # Get today's date
-    today = datetime.now().strftime("%Y-%m-%d")
+    # Get today's date (UTC to match SQLite CURRENT_TIMESTAMP)
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
     # Test retrieving rating by goal and date
     retrieved_rating = goal_ratings.get_rating_by_goal_and_date(goal["id"], today)

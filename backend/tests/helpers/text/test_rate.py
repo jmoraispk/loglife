@@ -1,7 +1,7 @@
 """Tests for rating validation helpers."""
 
 import pytest
-from backend.app.helpers.text import rate
+from app.helpers.text import rate
 
 
 @pytest.mark.parametrize(

@@ -129,11 +129,12 @@ def test_update_user(mock_connect):
     user = users.create_user("+1234567890", "America/New_York")
 
     # Act
-    updated_user = users.update_user(user["id"], timezone="Europe/Paris")
+    updated_user = users.update_user(user["id"], timezone="Europe/Paris", send_transcript_file=0)
 
     # Assert
     assert updated_user["timezone"] == "Europe/Paris"
     assert updated_user["phone_number"] == "+1234567890"  # unchanged
+    assert updated_user["send_transcript_file"] == 0
 
 
 def test_delete_user(mock_connect):

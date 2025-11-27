@@ -1,7 +1,7 @@
 """Tests for goal text extraction helpers."""
 
 import pytest
-from backend.app.helpers.text import goal
+from app.helpers.text import goal
 
 
 @pytest.mark.parametrize(
