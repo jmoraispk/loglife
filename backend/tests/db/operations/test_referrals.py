@@ -6,7 +6,7 @@ import pytest
 from app.db.operations import referrals, users
 
 
-def test_create_referral(mock_connect):
+def test_create_referral():
     """Test creating a new referral with duplicate prevention.
 
     Verifies successful referral creation linking referrer and referred users,

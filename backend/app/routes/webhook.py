@@ -40,7 +40,7 @@ def webhook() -> ResponseReturnValue:
             logging.info(f"Found existing user for sender: {user}")
 
         extra_data = {}
-    
+
         if msg_type == "chat":
             response_message = process_text(user, raw_msg)
         elif msg_type in ("audio", "ptt"):

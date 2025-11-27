@@ -3,7 +3,7 @@
 from app.db.operations import audio_journal_entries, users
 
 
-def test_create_audio_journal_entry(mock_connect):
+def test_create_audio_journal_entry():
     """Test creating a new audio journal entry.
 
     Verifies successful entry creation with transcription and summary texts,
@@ -43,7 +43,7 @@ def test_create_audio_journal_entry(mock_connect):
     assert len(entries) == 2
 
 
-def test_get_audio_journal_entry(mock_connect):
+def test_get_audio_journal_entry():
     """Test retrieving an audio journal entry by its unique ID.
 
     Verifies that existing entries can be successfully retrieved by ID with
@@ -82,7 +82,7 @@ def test_get_audio_journal_entry(mock_connect):
     assert non_existent_entry is None
 
 
-def test_get_user_audio_journal_entries(mock_connect):
+def test_get_user_audio_journal_entries():
     """Test retrieving all journal entries for a specific user.
 
     Verifies that all entries belonging to a user are returned with complete
@@ -136,7 +136,7 @@ def test_get_user_audio_journal_entries(mock_connect):
     assert len(empty_entries) == 0
 
 
-def test_get_all_audio_journal_entries(mock_connect):
+def test_get_all_audio_journal_entries():
     """Test retrieving all audio journal entries from the database.
 
     Verifies that all journal entry records across all users are returned
@@ -181,7 +181,7 @@ def test_get_all_audio_journal_entries(mock_connect):
         assert "created_at" in entry
 
 
-def test_update_audio_journal_entry(mock_connect):
+def test_update_audio_journal_entry():
     """Test updating an audio journal entry.
 
     Verifies that an entry can be successfully updated.
@@ -209,7 +209,7 @@ def test_update_audio_journal_entry(mock_connect):
     assert updated_entry["summary_text"] == "New summary"
 
 
-def test_delete_audio_journal_entry(mock_connect):
+def test_delete_audio_journal_entry():
     """Test deleting an audio journal entry from the database.
 
     Verifies that an entry can be successfully deleted by ID, subsequent

@@ -8,7 +8,7 @@ from app.db.operations import referrals, users
 from app.logic.process_vcard import process_vard
 
 
-def test_process_vcard_creates_referral(mock_connect):
+def test_process_vcard_creates_referral():
     """Test processing a vcard creates a referral."""
     # Arrange
     referrer = users.create_user("+1234567890", "UTC")
@@ -35,7 +35,7 @@ def test_process_vcard_creates_referral(mock_connect):
         mock_send.assert_called_once()
 
 
-def test_process_vcard_existing_user(mock_connect):
+def test_process_vcard_existing_user():
     """Test processing a vcard for an existing user."""
     # Arrange
     referrer = users.create_user("+1234567890", "UTC")

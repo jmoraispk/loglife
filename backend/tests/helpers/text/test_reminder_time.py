@@ -36,7 +36,7 @@ def test_parse_time_string():
         ("", False),  # Empty string
         ("24", False),  # Hour out of range
     ]
-    
+
     for message, expected in test_cases:
         assert (reminder_time.parse_time_string(message) is not None) == expected
 

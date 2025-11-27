@@ -11,6 +11,6 @@ def test_is_valid_rating_digits():
         ("abc", False),
         ("", False),
     ]
-    
+
     for message, expected in test_cases:
         assert rate.is_valid_rating_digits(message) == expected

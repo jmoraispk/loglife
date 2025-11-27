@@ -3,7 +3,7 @@
 from app.db.operations import goal_reminders, user_goals, users
 
 
-def test_create_goal_reminder(mock_connect):
+def test_create_goal_reminder():
     """Test creating a new goal reminder with specified time.
 
     Verifies successful reminder creation linking user, goal, and reminder
@@ -45,7 +45,7 @@ def test_create_goal_reminder(mock_connect):
     assert reminder2["id"] != reminder["id"]
 
 
-def test_get_goal_reminder(mock_connect):
+def test_get_goal_reminder():
     """Test retrieving a reminder by its unique ID.
 
     Verifies that existing reminders can be successfully retrieved by ID
@@ -81,7 +81,7 @@ def test_get_goal_reminder(mock_connect):
     assert non_existent_reminder is None
 
 
-def test_get_goal_reminder_by_goal_id(mock_connect):
+def test_get_goal_reminder_by_goal_id():
     """Test retrieving a reminder by its goal ID.
 
     Verifies that reminders can be retrieved via the goal ID.
@@ -110,7 +110,7 @@ def test_get_goal_reminder_by_goal_id(mock_connect):
     assert non_existent_reminder is None
 
 
-def test_get_all_goal_reminders(mock_connect):
+def test_get_all_goal_reminders():
     """Test retrieving all reminders from the database.
 
     Verifies that all reminder records are returned with complete field data
@@ -146,7 +146,7 @@ def test_get_all_goal_reminders(mock_connect):
         assert reminder["user_id"] == user["id"]
 
 
-def test_update_goal_reminder(mock_connect):
+def test_update_goal_reminder():
     """Test updating reminder information with optional fields.
 
     Verifies that individual fields (reminder_time, user_goal_id) can be
@@ -201,7 +201,7 @@ def test_update_goal_reminder(mock_connect):
     assert unchanged_reminder["id"] == reminder["id"]
 
 
-def test_delete_goal_reminder(mock_connect):
+def test_delete_goal_reminder():
     """Test deleting a reminder from the database.
 
     Verifies that a reminder can be successfully deleted by ID and that

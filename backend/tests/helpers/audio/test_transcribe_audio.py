@@ -1,8 +1,8 @@
 """Tests for audio transcription helpers."""
 
 import os
-import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from app.helpers.audio.transcribe_audio import transcribe_audio
 
 FIXTURE_DIR = os.path.dirname(__file__)
@@ -12,7 +12,7 @@ AUDIO_PATH = os.path.join(FIXTURE_DIR, "audio_bytes.txt")
 def test_transcribe_audio():
     """Test audio transcription using fixture data."""
     # Arrange
-    with open(AUDIO_PATH, "r") as f:
+    with open(AUDIO_PATH) as f:
         fake_audio = f.read()
 
     # Mock upload response

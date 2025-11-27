@@ -1,7 +1,8 @@
 """Tests for weekly look-back summary helpers."""
 
-from datetime import datetime, timedelta
-from unittest.mock import patch, MagicMock
+from datetime import datetime
+from unittest.mock import patch
+
 import app.helpers.text.week as week_module
 
 
@@ -22,10 +23,10 @@ def test_get_monday_before_edge_cases():
     # Mock datetime.now() to be a Monday
     with patch("app.helpers.text.week.datetime") as mock_datetime:
         # Monday Jan 1st 2024
-        mock_datetime.now.return_value = datetime(2024, 1, 1, 12, 0, 0) 
+        mock_datetime.now.return_value = datetime(2024, 1, 1, 12, 0, 0)
         result = week_module.get_monday_before()
         assert result.date() == datetime(2024, 1, 1).date() # Should be same day
-        
+
         # Sunday Jan 7th 2024
         mock_datetime.now.return_value = datetime(2024, 1, 7, 12, 0, 0)
         result = week_module.get_monday_before()
@@ -33,8 +34,7 @@ def test_get_monday_before_edge_cases():
 
 
 def test_look_back_summary(mocker):
-    """
-    Test look-back summary generation with goals and ratings.
+    """Test look-back summary generation with goals and ratings.
 
     Verifies that the function correctly handles empty goal lists,
     formats markdown output properly, and includes goal ratings
@@ -42,6 +42,7 @@ def test_look_back_summary(mocker):
 
     Arguments:
         mocker: pytest-mock fixture for patching dependencies
+
     """
     # Test with no goals
     mocker.patch.object(week_module, "get_user_goals", return_value=[])

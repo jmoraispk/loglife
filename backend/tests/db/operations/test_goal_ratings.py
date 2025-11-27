@@ -7,7 +7,7 @@ import pytest
 from app.db.operations import goal_ratings, user_goals, users
 
 
-def test_create_rating(mock_connect):
+def test_create_rating():
     """Test creating a new goal rating with constraint validation.
 
     Verifies successful rating creation with values 1-3, ensures all fields
@@ -47,7 +47,7 @@ def test_create_rating(mock_connect):
         goal_ratings.create_rating(goal["id"], 4)
 
 
-def test_get_rating(mock_connect):
+def test_get_rating():
     """Test retrieving a rating by its unique ID.
 
     Verifies that existing ratings can be successfully retrieved by ID with
@@ -77,7 +77,7 @@ def test_get_rating(mock_connect):
     assert non_existent_rating is None
 
 
-def test_get_rating_by_goal_and_date(mock_connect):
+def test_get_rating_by_goal_and_date():
     """Test retrieving a rating by goal ID and date.
 
     Verifies that ratings can be retrieved by combining goal ID and date,
@@ -116,7 +116,7 @@ def test_get_rating_by_goal_and_date(mock_connect):
     assert non_existent_rating is None
 
 
-def test_get_all_ratings(mock_connect):
+def test_get_all_ratings():
     """Test retrieving all ratings from the database.
 
     Verifies that all rating records are returned with complete field data,
@@ -152,7 +152,7 @@ def test_get_all_ratings(mock_connect):
         assert rating["rating"] in [1, 2, 3]
 
 
-def test_update_rating(mock_connect):
+def test_update_rating():
     """Test updating rating information with optional fields.
 
     Verifies that individual fields (rating value, user_goal_id, rating_date)
@@ -205,7 +205,7 @@ def test_update_rating(mock_connect):
     assert unchanged_rating["id"] == rating["id"]
 
 
-def test_delete_rating(mock_connect):
+def test_delete_rating():
     """Test deleting a rating from the database.
 
     Verifies that a rating can be successfully deleted by ID and that

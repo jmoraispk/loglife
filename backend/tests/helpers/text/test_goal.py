@@ -9,6 +9,6 @@ def test_extract_emoji():
         ("text without emoji", "🎯"),
         ("text with emoji 🍔", "🍔"),
     ]
-    
+
     for text, expected in test_cases:
         assert goal.extract_emoji(text) == expected

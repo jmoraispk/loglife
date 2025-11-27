@@ -35,7 +35,7 @@ def test_db():
     conn.close()  # Clean up after test
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def mock_connect(monkeypatch, test_db):
     """Mocks the connect() function in ALL db operations modules.
 

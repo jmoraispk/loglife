@@ -1,6 +1,7 @@
 """Tests for emulator sender helper."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
+
 from app.helpers.sender.emulator_sender import send_emulator_message
 
 

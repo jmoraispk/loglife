@@ -8,7 +8,7 @@ from app.db.operations import goal_ratings, goal_reminders, user_goals, user_sta
 from app.logic.process_text import process_text
 
 
-def test_process_text_add_goal(mock_connect):
+def test_process_text_add_goal():
     """Test adding a new goal."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -29,7 +29,7 @@ def test_process_text_add_goal(mock_connect):
     assert temp["goal_id"] == goals[0]["id"]
 
 
-def test_process_text_set_reminder_time(mock_connect):
+def test_process_text_set_reminder_time():
     """Test setting reminder time after adding a goal."""
     user = users.create_user("+1234567890", "UTC")
     # Setup state as if goal was just added
@@ -53,7 +53,7 @@ def test_process_text_set_reminder_time(mock_connect):
     assert user_states.get_user_state(user["id"]) is None
 
 
-def test_process_text_list_goals(mock_connect):
+def test_process_text_list_goals():
     """Test listing goals."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -70,7 +70,7 @@ def test_process_text_list_goals(mock_connect):
     assert "2. 📚 Read" in response
 
 
-def test_process_text_delete_goal(mock_connect):
+def test_process_text_delete_goal():
     """Test deleting a goal."""
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run 5k")
@@ -81,7 +81,7 @@ def test_process_text_delete_goal(mock_connect):
     assert len(user_goals.get_user_goals(user["id"])) == 0
 
 
-def test_process_text_rate_single_goal(mock_connect):
+def test_process_text_rate_single_goal():
     """Test rating a single goal."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "🏃", "Run 5k")
@@ -97,7 +97,7 @@ def test_process_text_rate_single_goal(mock_connect):
     assert rating["rating"] == 3
 
 
-def test_process_text_rate_all_goals(mock_connect):
+def test_process_text_rate_all_goals():
     """Test rating all goals at once."""
     user = users.create_user("+1234567890", "UTC")
     goal1 = user_goals.create_goal(user["id"], "🏃", "Run")
@@ -116,7 +116,7 @@ def test_process_text_rate_all_goals(mock_connect):
     assert r2["rating"] == 2
 
 
-def test_process_text_update_reminder(mock_connect):
+def test_process_text_update_reminder():
     """Test updating a reminder."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "🏃", "Run")
@@ -131,7 +131,7 @@ def test_process_text_update_reminder(mock_connect):
     assert reminder["reminder_time"] == "22:00:00"
 
 
-def test_process_text_transcript_toggle(mock_connect):
+def test_process_text_transcript_toggle():
     """Test toggling transcript settings."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -144,7 +144,7 @@ def test_process_text_transcript_toggle(mock_connect):
     assert users.get_user(user["id"])["send_transcript_file"] == 0
 
 
-def test_process_text_week_summary(mock_connect):
+def test_process_text_week_summary():
     """Test week summary command."""
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run")
@@ -155,7 +155,7 @@ def test_process_text_week_summary(mock_connect):
     assert "🏃" in response
 
 
-def test_process_text_lookback(mock_connect):
+def test_process_text_lookback():
     """Test lookback command."""
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run")
@@ -166,7 +166,7 @@ def test_process_text_lookback(mock_connect):
     assert "🏃" in response
 
 
-def test_process_text_enable_journaling(mock_connect):
+def test_process_text_enable_journaling():
     """Test enable journaling shortcut."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -183,14 +183,14 @@ def test_process_text_enable_journaling(mock_connect):
     assert "already have a journaling goal" in response
 
 
-def test_process_text_help(mock_connect):
+def test_process_text_help():
     """Test help command."""
     user = users.create_user("+1234567890", "UTC")
     response = process_text(user, "help")
     assert "LogLife Commands" in response
 
 
-def test_process_text_invalid(mock_connect):
+def test_process_text_invalid():
     """Test invalid command."""
     user = users.create_user("+1234567890", "UTC")
     response = process_text(user, "notacommand")

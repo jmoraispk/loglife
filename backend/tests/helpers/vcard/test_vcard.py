@@ -13,7 +13,7 @@ def test_extract_phone_number():
         # Vcard with additional text after
         ("waid=5555555555:END", "5555555555"),
     ]
-    
+
     for vcard_string, expected_phone in test_cases:
         result = vcard.extract_phone_number(vcard_string)
         assert result == expected_phone
