@@ -1,8 +1,7 @@
 """Tests for process_text logic."""
 
-import pytest
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 from app.logic.process_text import process_text
 from app.db.operations import users, user_goals, goal_ratings, user_states, goal_reminders
 from app.config import ERROR_NO_GOALS_SET

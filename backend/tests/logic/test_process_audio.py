@@ -1,6 +1,6 @@
 """Tests for process_audio logic."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from app.logic.process_audio import process_audio
 
 

@@ -1,6 +1,5 @@
 """Tests for transcript summarization helpers."""
 
-import pytest
 from unittest.mock import patch, MagicMock
 from app.helpers.audio.journaling.summarize_transcript import summarize_transcript
 

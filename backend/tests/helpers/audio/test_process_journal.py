@@ -1,8 +1,7 @@
 """Tests for process_journal helper."""
 
-import pytest
 from unittest.mock import patch, MagicMock
-from datetime import datetime, time
+from datetime import datetime
 from zoneinfo import ZoneInfo
 from app.helpers.audio.journaling import process_journal
 

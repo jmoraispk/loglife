@@ -1,7 +1,6 @@
 """Tests for audio transcription helpers."""
 
 import os
-import pytest
 from unittest.mock import patch, MagicMock
 from app.helpers.audio.transcribe_audio import transcribe_audio
 

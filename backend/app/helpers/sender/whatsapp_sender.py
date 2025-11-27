@@ -7,7 +7,6 @@ It handles communication with the external WhatsApp service endpoint.
 import requests
 from app.config import WHATSAPP_API_URL
 import logging
-from flask import g
 
 
 def send_whatsapp_message(number: str, message: str):
