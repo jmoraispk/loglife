@@ -26,7 +26,7 @@ def summarize_transcript(transcript: str) -> str:
     transcript -- The transcript text to summarize
 
     Returns the summarized content as a string.
-    
+
     Raises:
     RuntimeError -- If the API request fails due to connection, timeout, or HTTP errors
 

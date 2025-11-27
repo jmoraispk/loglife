@@ -50,14 +50,14 @@ def test_process_journal_success(
 
     with patch("app.helpers.audio.journaling.datetime") as mock_datetime:
         mock_datetime.now.return_value = datetime(2024, 1, 1, 10, 0, 0)
-        mock_datetime.strptime.side_effect = datetime.strptime # Pass through for strptime
+        mock_datetime.strptime.side_effect = datetime.strptime  # Pass through for strptime
 
         # Need to handle .now(timezone.utc) call and .astimezone
         mock_now_utc = MagicMock()
         mock_now_utc.astimezone.return_value = datetime(2024, 1, 1, 10, 0, 0)
         mock_datetime.now.side_effect = [
-            datetime(2024, 1, 1, 10, 0, 0), # for today str
-            mock_now_utc, # for now_utc
+            datetime(2024, 1, 1, 10, 0, 0),  # for today str
+            mock_now_utc,  # for now_utc
         ]
 
         # The code calls datetime.now().strftime... then datetime.now(timezone.utc)...
@@ -99,7 +99,7 @@ def test_process_journal_too_early(
 ):
     """Test process_journal when it's too early."""
     mock_get_goal_id.return_value = 10
-    mock_get_reminder.return_value = {"reminder_time": "23:59:59"} # Late reminder
+    mock_get_reminder.return_value = {"reminder_time": "23:59:59"}  # Late reminder
     mock_get_user.return_value = {"timezone": "UTC"}
     mock_get_tz.return_value = ZoneInfo("UTC")
 
@@ -109,4 +109,3 @@ def test_process_journal_too_early(
 
     # Assert
     assert response is None
-

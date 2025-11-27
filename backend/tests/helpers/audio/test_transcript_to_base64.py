@@ -12,4 +12,3 @@ def test_transcript_to_base64():
 
     result = transcript_to_base64(text)
     assert result == expected
-

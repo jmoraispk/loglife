@@ -106,7 +106,8 @@ def test_get_rating_by_goal_and_date(mock_connect):
 
     # Test non-existent date
     non_existent_rating = goal_ratings.get_rating_by_goal_and_date(
-        goal["id"], "2020-01-01",
+        goal["id"],
+        "2020-01-01",
     )
     assert non_existent_rating is None
 
@@ -190,7 +191,10 @@ def test_update_rating(mock_connect):
 
     # Test updating all fields
     updated_rating = goal_ratings.update_rating(
-        rating["id"], user_goal_id=goal1["id"], rating=1, rating_date="2024-06-15",
+        rating["id"],
+        user_goal_id=goal1["id"],
+        rating=1,
+        rating_date="2024-06-15",
     )
 
     assert updated_rating["user_goal_id"] == goal1["id"]

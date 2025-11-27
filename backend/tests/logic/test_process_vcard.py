@@ -29,7 +29,7 @@ def test_process_vcard_creates_referral(mock_connect):
         # Note: referrals.create_referral doesn't have a simple getter exposed
         # to check directly easily without custom query, but we can check if it runs without error.
         # Or we can try to create it again and expect IntegrityError if it exists
-        with pytest.raises(Exception): # Should fail unique constraint
+        with pytest.raises(Exception):  # Should fail unique constraint
             referrals.create_referral(referrer["id"], referred["id"])
 
         mock_send.assert_called_once()
@@ -51,4 +51,3 @@ def test_process_vcard_existing_user(mock_connect):
             referrals.create_referral(referrer["id"], existing_user["id"])
 
         mock_send.assert_called_once()
-

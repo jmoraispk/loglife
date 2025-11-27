@@ -135,7 +135,8 @@ def update_rating(
 
     with connect() as conn:
         conn.execute(
-            f"UPDATE goal_ratings SET {', '.join(updates)} WHERE id = ?", params,
+            f"UPDATE goal_ratings SET {', '.join(updates)} WHERE id = ?",
+            params,
         )
 
     return get_rating(rating_id)

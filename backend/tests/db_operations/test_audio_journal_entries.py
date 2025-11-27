@@ -151,13 +151,19 @@ def test_get_all_audio_journal_entries(mock_connect):
     user2 = users.create_user("+9876543210", "Europe/London")
 
     audio_journal_entries.create_audio_journal_entry(
-        user_id=user1["id"], transcription_text="Entry 1", summary_text="Summary 1",
+        user_id=user1["id"],
+        transcription_text="Entry 1",
+        summary_text="Summary 1",
     )
     audio_journal_entries.create_audio_journal_entry(
-        user_id=user1["id"], transcription_text="Entry 2", summary_text="Summary 2",
+        user_id=user1["id"],
+        transcription_text="Entry 2",
+        summary_text="Summary 2",
     )
     audio_journal_entries.create_audio_journal_entry(
-        user_id=user2["id"], transcription_text="Entry 3", summary_text="Summary 3",
+        user_id=user2["id"],
+        transcription_text="Entry 3",
+        summary_text="Summary 3",
     )
 
     # Act
@@ -217,7 +223,9 @@ def test_delete_audio_journal_entry(mock_connect):
     # Arrange - create user and entry
     user = users.create_user("+1234567890", "America/New_York")
     audio_journal_entries.create_audio_journal_entry(
-        user_id=user["id"], transcription_text="Test entry", summary_text="Test summary",
+        user_id=user["id"],
+        transcription_text="Test entry",
+        summary_text="Test summary",
     )
 
     # Get the entry ID

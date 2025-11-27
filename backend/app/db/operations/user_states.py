@@ -57,7 +57,10 @@ def create_user_state(user_id: int, state: str, temp_data: str | None = None) ->
 
 
 def update_user_state(
-    user_id: int, *, state: str | None = None, temp_data: str | None = None,
+    user_id: int,
+    *,
+    state: str | None = None,
+    temp_data: str | None = None,
 ) -> dict | None:
     """Updates a user state record with provided fields.
 
@@ -87,7 +90,8 @@ def update_user_state(
     params.append(user_id)
     with connect() as conn:
         conn.execute(
-            f"UPDATE user_states SET {', '.join(updates)} WHERE user_id = ?", params,
+            f"UPDATE user_states SET {', '.join(updates)} WHERE user_id = ?",
+            params,
         )
 
     return get_user_state(user_id)

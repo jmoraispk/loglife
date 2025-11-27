@@ -19,7 +19,9 @@ def test_create_goal(mock_connect):
 
     # Test successful creation with default boost_level
     goal = user_goals.create_goal(
-        user_id=user["id"], goal_emoji="🎯", goal_description="Learn Python",
+        user_id=user["id"],
+        goal_emoji="🎯",
+        goal_description="Learn Python",
     )
 
     # Assert successful creation
@@ -55,7 +57,9 @@ def test_get_goal(mock_connect):
     # Arrange - create user and goal
     user = users.create_user("+1234567890", "America/New_York")
     created_goal = user_goals.create_goal(
-        user_id=user["id"], goal_emoji="🎯", goal_description="Learn Python",
+        user_id=user["id"],
+        goal_emoji="🎯",
+        goal_description="Learn Python",
     )
 
     # Test retrieving existing goal
@@ -125,7 +129,9 @@ def test_update_goal(mock_connect):
     # Arrange - create user and goal
     user = users.create_user("+1234567890", "America/New_York")
     goal = user_goals.create_goal(
-        user_id=user["id"], goal_emoji="🎯", goal_description="Learn Python",
+        user_id=user["id"],
+        goal_emoji="🎯",
+        goal_description="Learn Python",
     )
 
     # Test updating emoji only
@@ -176,7 +182,9 @@ def test_delete_goal(mock_connect):
     # Arrange - create user and goal
     user = users.create_user("+1234567890", "America/New_York")
     goal = user_goals.create_goal(
-        user_id=user["id"], goal_emoji="🎯", goal_description="Learn Python",
+        user_id=user["id"],
+        goal_emoji="🎯",
+        goal_description="Learn Python",
     )
     goal_id = goal["id"]
 

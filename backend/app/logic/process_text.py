@@ -109,7 +109,9 @@ def process_text(user: dict, message: str) -> str:
         goal_id = temp.get("goal_id")
 
         create_goal_reminder(
-            user_id=user_id, user_goal_id=goal_id, reminder_time=normalized_time,
+            user_id=user_id,
+            user_goal_id=goal_id,
+            reminder_time=normalized_time,
         )
         delete_user_state(user_id)
 
@@ -168,7 +170,9 @@ def process_text(user: dict, message: str) -> str:
         # Create reminder if it doesn't exist, otherwise update it
         if reminder is None:
             create_goal_reminder(
-                user_id=user_id, user_goal_id=goal["id"], reminder_time=normalized_time,
+                user_id=user_id,
+                user_goal_id=goal["id"],
+                reminder_time=normalized_time,
             )
         else:
             update_goal_reminder(reminder["id"], reminder_time=normalized_time)
@@ -265,7 +269,8 @@ def process_text(user: dict, message: str) -> str:
         goal: dict = user_goals[goal_num - 1]
 
         rating: dict | None = get_rating_by_goal_and_date(
-            goal["id"], datetime.now().strftime("%Y-%m-%d"),
+            goal["id"],
+            datetime.now().strftime("%Y-%m-%d"),
         )
 
         if not rating:
@@ -293,16 +298,16 @@ def process_text(user: dict, message: str) -> str:
         # Validate input length
         if len(message) != len(user_goals):
             return ERROR_INVALID_INPUT_LENGTH.replace(
-                "<num_goals>", str(len(user_goals)),
+                "<num_goals>",
+                str(len(user_goals)),
             )
 
-        ratings: list[int] = [
-            int(c) for c in message
-        ]  # convert message to list of ratings
+        ratings: list[int] = [int(c) for c in message]  # convert message to list of ratings
 
         for i, goal in enumerate(user_goals):
             rating: dict | None = get_rating_by_goal_and_date(
-                goal["id"], datetime.now().strftime("%Y-%m-%d"),
+                goal["id"],
+                datetime.now().strftime("%Y-%m-%d"),
             )
             if not rating:
                 create_rating(goal["id"], ratings[i])

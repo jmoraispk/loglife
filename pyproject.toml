@@ -42,4 +42,7 @@ target-version = "py311"
 [tool.ruff.lint]
 select = ["ALL"]
 ignore = [
+    "D203", # 1 blank line required before class docstring (incompatible with D211)
+    "D213", # Multi-line docstring summary should start at the second line (incompatible with D212)
+    "COM812", # Trailing comma missing (conflicts with formatter)
 ]

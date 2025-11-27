@@ -174,7 +174,9 @@ def test_process_text_enable_journaling(mock_connect):
     assert "When you would like to be reminded?" in response
 
     goals = user_goals.get_user_goals(user["id"])
-    assert any(g["goal_emoji"] == "📓" and "journaling" in g["goal_description"] for g in goals)
+    assert any(
+        g["goal_emoji"] == "📓" and "journaling" in g["goal_description"] for g in goals
+    )
 
     # Test duplicate check
     response = process_text(user, "enable journaling")
@@ -193,4 +195,3 @@ def test_process_text_invalid(mock_connect):
     user = users.create_user("+1234567890", "UTC")
     response = process_text(user, "notacommand")
     assert "Wrong command" in response
-

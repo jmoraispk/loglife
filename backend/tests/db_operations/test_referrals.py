@@ -24,7 +24,8 @@ def test_create_referral(mock_connect):
 
     # Test successful creation
     referrals.create_referral(
-        referrer_user_id=referrer["id"], referred_user_id=referred["id"],
+        referrer_user_id=referrer["id"],
+        referred_user_id=referred["id"],
     )
 
     # We can't directly verify the referral was created since the function
@@ -34,18 +35,21 @@ def test_create_referral(mock_connect):
     # Test duplicate referral (should fail UNIQUE constraint)
     with pytest.raises(sqlite3.IntegrityError):
         referrals.create_referral(
-            referrer_user_id=referrer["id"], referred_user_id=referred["id"],
+            referrer_user_id=referrer["id"],
+            referred_user_id=referred["id"],
         )
 
     # Test creating referral with different referred user (should succeed)
     referred2 = users.create_user("+5555555555", "Asia/Tokyo")
     referrals.create_referral(
-        referrer_user_id=referrer["id"], referred_user_id=referred2["id"],
+        referrer_user_id=referrer["id"],
+        referred_user_id=referred2["id"],
     )
 
     # Test creating referral where roles are reversed (should succeed)
     referrals.create_referral(
-        referrer_user_id=referred["id"], referred_user_id=referrer["id"],
+        referrer_user_id=referred["id"],
+        referred_user_id=referrer["id"],
     )
 
     # All successful creations pass

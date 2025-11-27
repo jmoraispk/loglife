@@ -47,7 +47,8 @@ def look_back_summary(user_id: int, days: int, start: datetime) -> str:
         ratings_data = []
         for user_goal in user_goals:
             user_goal_rating: dict | None = get_rating_by_goal_and_date(
-                user_goal["id"], storage_date,
+                user_goal["id"],
+                storage_date,
             )
             if user_goal_rating:
                 ratings_data.append(

@@ -20,7 +20,9 @@ def test_create_goal_reminder(mock_connect):
 
     # Test successful creation
     reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00",
+        user_id=user["id"],
+        user_goal_id=goal["id"],
+        reminder_time="2024-12-25 09:00:00",
     )
 
     # Assert successful creation
@@ -34,7 +36,9 @@ def test_create_goal_reminder(mock_connect):
 
     # Test creating another reminder
     reminder2 = goal_reminders.create_goal_reminder(
-        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-26 10:00:00",
+        user_id=user["id"],
+        user_goal_id=goal["id"],
+        reminder_time="2024-12-26 10:00:00",
     )
 
     assert reminder2["reminder_time"] == "2024-12-26 10:00:00"
@@ -56,7 +60,9 @@ def test_get_goal_reminder(mock_connect):
     user = users.create_user("+1234567890", "America/New_York")
     goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
     created_reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00",
+        user_id=user["id"],
+        user_goal_id=goal["id"],
+        reminder_time="2024-12-25 09:00:00",
     )
 
     # Test retrieving existing reminder
@@ -84,7 +90,9 @@ def test_get_goal_reminder_by_goal_id(mock_connect):
     user = users.create_user("+1234567890", "America/New_York")
     goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
     created_reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00",
+        user_id=user["id"],
+        user_goal_id=goal["id"],
+        reminder_time="2024-12-25 09:00:00",
     )
 
     # Test retrieving existing reminder
@@ -162,7 +170,8 @@ def test_update_goal_reminder(mock_connect):
 
     # Test updating reminder_time only
     updated_reminder = goal_reminders.update_goal_reminder(
-        reminder["id"], reminder_time="2024-12-26 10:00:00",
+        reminder["id"],
+        reminder_time="2024-12-26 10:00:00",
     )
 
     assert updated_reminder["reminder_time"] == "2024-12-26 10:00:00"
@@ -170,7 +179,8 @@ def test_update_goal_reminder(mock_connect):
 
     # Test updating user_goal_id only
     updated_reminder = goal_reminders.update_goal_reminder(
-        reminder["id"], user_goal_id=goal2["id"],
+        reminder["id"],
+        user_goal_id=goal2["id"],
     )
 
     assert updated_reminder["user_goal_id"] == goal2["id"]
@@ -178,7 +188,9 @@ def test_update_goal_reminder(mock_connect):
 
     # Test updating both fields
     updated_reminder = goal_reminders.update_goal_reminder(
-        reminder["id"], user_goal_id=goal1["id"], reminder_time="2024-12-27 11:00:00",
+        reminder["id"],
+        user_goal_id=goal1["id"],
+        reminder_time="2024-12-27 11:00:00",
     )
 
     assert updated_reminder["user_goal_id"] == goal1["id"]
@@ -203,7 +215,9 @@ def test_delete_goal_reminder(mock_connect):
     user = users.create_user("+1234567890", "America/New_York")
     goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
     reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00",
+        user_id=user["id"],
+        user_goal_id=goal["id"],
+        reminder_time="2024-12-25 09:00:00",
     )
     reminder_id = reminder["id"]
 

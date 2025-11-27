@@ -95,9 +95,7 @@ USAGE_RATE = "❌ Usage: rate 2 3 (goal number and rating 1-3)"
 # -----------------------------
 # Success Messages
 # -----------------------------
-SUCCESS_RATINGS_SUBMITTED = (
-    "📅 <today_display>\n<goal_emojis> <goal_description>: <status>"
-)
+SUCCESS_RATINGS_SUBMITTED = "📅 <today_display>\n<goal_emojis> <goal_description>: <status>"
 SUCCESS_INDIVIDUAL_RATING = (
     "📅 <today_display>\n<goal_emoji> <goal_description>: <status_symbol>"
 )

@@ -29,7 +29,9 @@ def test_create_user_state(mock_connect):
 
     # Test creating state with temp_data
     state2 = user_states.create_user_state(
-        user_id=user["id"], state="SETTING_GOAL", temp_data='{"goal_emoji": "🎯"}',
+        user_id=user["id"],
+        state="SETTING_GOAL",
+        temp_data='{"goal_emoji": "🎯"}',
     )
 
     assert state2["state"] == "SETTING_GOAL"
@@ -37,7 +39,9 @@ def test_create_user_state(mock_connect):
 
     # Test upsert behavior - updating existing state
     state3 = user_states.create_user_state(
-        user_id=user["id"], state="RATING_GOALS", temp_data='{"rating": 3}',
+        user_id=user["id"],
+        state="RATING_GOALS",
+        temp_data='{"rating": 3}',
     )
 
     assert state3["state"] == "RATING_GOALS"
@@ -62,7 +66,9 @@ def test_get_user_state(mock_connect):
     # Arrange - create user and state
     user = users.create_user("+1234567890", "America/New_York")
     user_states.create_user_state(
-        user_id=user["id"], state="MAIN_MENU", temp_data='{"key": "value"}',
+        user_id=user["id"],
+        state="MAIN_MENU",
+        temp_data='{"key": "value"}',
     )
 
     # Test retrieving existing state
@@ -104,7 +110,8 @@ def test_update_user_state(mock_connect):
 
     # Test updating temp_data only
     updated_state = user_states.update_user_state(
-        user["id"], temp_data='{"goal_emoji": "🎯"}',
+        user["id"],
+        temp_data='{"goal_emoji": "🎯"}',
     )
 
     assert updated_state["state"] == "SETTING_GOAL"
@@ -112,7 +119,9 @@ def test_update_user_state(mock_connect):
 
     # Test updating both fields
     updated_state = user_states.update_user_state(
-        user["id"], state="RATING_GOALS", temp_data='{"rating": 3}',
+        user["id"],
+        state="RATING_GOALS",
+        temp_data='{"rating": 3}',
     )
 
     assert updated_state["state"] == "RATING_GOALS"

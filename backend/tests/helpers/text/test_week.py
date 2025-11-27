@@ -31,7 +31,9 @@ def test_look_back_summary(mocker):
     # Test with no goals
     mocker.patch.object(week_module, "get_user_goals", return_value=[])
     result = week_module.look_back_summary(
-        user_id=1, days=3, start=datetime(2024, 1, 1),
+        user_id=1,
+        days=3,
+        start=datetime(2024, 1, 1),
     )
     assert "No goals set" in result
 
@@ -44,7 +46,9 @@ def test_look_back_summary(mocker):
         ],
     )
     mocker.patch.object(
-        week_module, "get_rating_by_goal_and_date", return_value={"rating": 3},
+        week_module,
+        "get_rating_by_goal_and_date",
+        return_value={"rating": 3},
     )
 
     start = datetime(2024, 1, 1)

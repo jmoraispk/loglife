@@ -55,7 +55,8 @@ def transcribe_audio(audio_data: str) -> str:
 
     while True:
         poll_response = requests.get(
-            polling_endpoint, headers={"authorization": ASSEMBLYAI_API_KEY},
+            polling_endpoint,
+            headers={"authorization": ASSEMBLYAI_API_KEY},
         )
         try:
             poll_response.raise_for_status()

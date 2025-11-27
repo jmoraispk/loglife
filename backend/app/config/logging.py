@@ -42,12 +42,15 @@ def setup_logging():
 
     # Setup for production
     os.makedirs(
-        LOGS, exist_ok=True,
+        LOGS,
+        exist_ok=True,
     )  # exist_ok=True tells os.makedirs not to raise an error if LOGS already exists. It creates the directory only if needed.
 
     # Configure rotating access log handler for INFO-level logs
     access_handler: RotatingFileHandler = RotatingFileHandler(
-        ACCESS_LOG, maxBytes=10 * 1024 * 1024, backupCount=1,
+        ACCESS_LOG,
+        maxBytes=10 * 1024 * 1024,
+        backupCount=1,
     )  # max file size 10MB, keep only 1 backup
     access_handler.setLevel(logging.INFO)
     access_handler.addFilter(
@@ -59,7 +62,9 @@ def setup_logging():
 
     # Configure rotating error log handler for ERROR-level logs
     error_handler: RotatingFileHandler = RotatingFileHandler(
-        ERROR_LOG, maxBytes=10 * 1024 * 1024, backupCount=1,
+        ERROR_LOG,
+        maxBytes=10 * 1024 * 1024,
+        backupCount=1,
     )  # max file size 10MB, keep only 1 backup
     error_handler.setLevel(
         logging.ERROR,

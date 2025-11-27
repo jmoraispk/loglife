@@ -20,4 +20,3 @@ def test_get_journal_goal_id_not_found(mock_connect):
 
     goal_id = get_journal_goal_id(user["id"])
     assert goal_id is None
-

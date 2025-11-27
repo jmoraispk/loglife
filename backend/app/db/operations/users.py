@@ -78,7 +78,9 @@ def create_user(phone_number: str, timezone: str) -> dict:
     return get_user_by_phone_number(phone_number)
 
 
-def update_user(user_id: int, *, phone_number=None, timezone=None, send_transcript_file=None) -> dict:
+def update_user(
+    user_id: int, *, phone_number=None, timezone=None, send_transcript_file=None
+) -> dict:
     """Updates a user record with provided fields.
 
     Only the fields that are provided (not None) will be updated.

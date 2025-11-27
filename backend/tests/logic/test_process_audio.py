@@ -9,7 +9,9 @@ from app.logic.process_audio import process_audio
 @patch("app.logic.process_audio.transcribe_audio")
 @patch("app.logic.process_audio.process_journal")
 @patch("app.logic.process_audio.send_message")
-def test_process_audio_journaling_handled(mock_send, mock_journal, mock_transcribe, mock_process_text):
+def test_process_audio_journaling_handled(
+    mock_send, mock_journal, mock_transcribe, mock_process_text
+):
     """Test audio processing when handled by journaling."""
     # Arrange
     user = {"id": 1}
@@ -30,7 +32,9 @@ def test_process_audio_journaling_handled(mock_send, mock_journal, mock_transcri
 @patch("app.logic.process_audio.transcribe_audio")
 @patch("app.logic.process_audio.process_journal")
 @patch("app.logic.process_audio.send_message")
-def test_process_audio_transcription_fallback(mock_send, mock_journal, mock_transcribe, mock_process_text):
+def test_process_audio_transcription_fallback(
+    mock_send, mock_journal, mock_transcribe, mock_process_text
+):
     """Test audio processing falling back to transcription."""
     # Arrange
     user = {"id": 1}
@@ -51,7 +55,9 @@ def test_process_audio_transcription_fallback(mock_send, mock_journal, mock_tran
 @patch("app.logic.process_audio.transcribe_audio")
 @patch("app.logic.process_audio.process_journal")
 @patch("app.logic.process_audio.send_message")
-def test_process_audio_transcription_error(mock_send, mock_journal, mock_transcribe, mock_process_text):
+def test_process_audio_transcription_error(
+    mock_send, mock_journal, mock_transcribe, mock_process_text
+):
     """Test handling of transcription errors."""
     # Arrange
     user = {"id": 1}
@@ -63,4 +69,3 @@ def test_process_audio_transcription_error(mock_send, mock_journal, mock_transcr
 
     # Assert
     assert response == "Audio transcription failed!"
-

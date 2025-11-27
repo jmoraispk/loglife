@@ -63,7 +63,9 @@ def get_user_audio_journal_entries(user_id: int) -> list[dict]:
 
 
 def create_audio_journal_entry(
-    user_id: int, transcription_text: str, summary_text: str,
+    user_id: int,
+    transcription_text: str,
+    summary_text: str,
 ):
     """Creates a new audio journal entry record.
 
@@ -86,8 +88,11 @@ def create_audio_journal_entry(
             (user_id, transcription_text, summary_text),
         )
 
+
 def update_audio_journal_entry(
-    entry_id: int, transcription_text: str, summary_text: str,
+    entry_id: int,
+    transcription_text: str,
+    summary_text: str,
 ):
     """Updates an existing audio journal entry.
 
@@ -106,6 +111,7 @@ def update_audio_journal_entry(
             """,
             (transcription_text, summary_text, entry_id),
         )
+
 
 def delete_audio_journal_entry(entry_id: int):
     """Deletes an audio journal entry record from the database.

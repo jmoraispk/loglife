@@ -29,7 +29,8 @@ def process_journal(sender: str, user: dict, audio_data: str) -> str | tuple[str
     tz: ZoneInfo = get_timezone_safe(user_timezone)
     now_utc: datetime = datetime.now(UTC)
     local_now: datetime = now_utc.astimezone(tz).replace(
-        second=0, microsecond=0,
+        second=0,
+        microsecond=0,
     )  # current time in user's timezone
     if reminder_time <= local_now.time():
         # Store in database (update if exists, create if not)
@@ -52,7 +53,9 @@ def process_journal(sender: str, user: dict, audio_data: str) -> str | tuple[str
                 try:
                     summary: str = summarize_transcript(transcript)
                     create_audio_journal_entry(
-                        user_id=user["id"], transcription_text=transcript, summary_text=summary,
+                        user_id=user["id"],
+                        transcription_text=transcript,
+                        summary_text=summary,
                     )
                     send_message(sender, "Summary stored in Database.")
 
