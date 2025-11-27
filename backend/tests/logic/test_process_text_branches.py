@@ -6,6 +6,48 @@ from app.logic.process_text import process_text
 from app.db.operations import users, user_goals, user_states
 
 
+def test_process_text_add_goal_no_emoji(mock_connect):
+    """Test adding a goal with description but no emoji (should use default)."""
+    user = users.create_user("+1234567890", "UTC")
+    
+    # No emoji -> Default emoji ("🎯")
+    response = process_text(user, "add goal Run 5k")
+    assert "Goal Added successfully" in response
+    
+    goals = user_goals.get_user_goals(user["id"])
+    # Should have 1 goal
+    assert len(goals) == 1
+    assert goals[0]["goal_emoji"] == "🎯"
+    assert goals[0]["goal_description"] == "run 5k"
+
+
+def test_process_text_add_goal_only_emoji(mock_connect):
+    """Test adding a goal with only an emoji (should use emoji as description)."""
+    user = users.create_user("+1234567890", "UTC")
+    
+    # Only emoji -> Empty description after extraction, should fallback to emoji
+    response = process_text(user, "add goal 🏃")
+    assert "Goal Added successfully" in response
+    
+    goals = user_goals.get_user_goals(user["id"])
+    assert len(goals) == 1
+    assert goals[0]["goal_emoji"] == "🏃"
+    # Logic updated to use emoji as description if description is empty
+    assert goals[0]["goal_description"] == ""
+
+
+def test_process_text_rate_invalid_values(mock_connect):
+    """Test rate command with values outside 1-3."""
+    user = users.create_user("+1234567890", "UTC")
+    user_goals.create_goal(user["id"], "🏃", "Run")
+    
+    with pytest.raises(Exception): # sqlite3.IntegrityError
+        process_text(user, "rate 1 4")
+        
+    with pytest.raises(Exception):
+        process_text(user, "rate 1 0")
+
+
 def test_process_text_delete_invalid_format(mock_connect):
     """Test delete command with invalid format."""
     user = users.create_user("+1234567890", "UTC")
@@ -103,4 +145,3 @@ def test_process_text_rate_all_invalid_length(mock_connect):
     
     response = process_text(user, "33") # 2 ratings for 1 goal
     assert "Invalid input" in response
-

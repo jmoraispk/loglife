@@ -5,7 +5,7 @@ from unittest.mock import patch
 from datetime import datetime, UTC
 from zoneinfo import ZoneInfo
 from app.helpers.audio.journaling import process_journal
-from app.db.operations import users, user_goals, goal_reminders
+from app.db.operations import users, user_goals, goal_reminders, audio_journal_entries
 
 
 def test_process_journal_success(mock_connect):
@@ -35,6 +35,67 @@ def test_process_journal_success(mock_connect):
         mock_transcribe.assert_called_once()
         mock_summarize.assert_called_once()
         mock_send.assert_called()
+
+
+def test_process_journal_already_exists(mock_connect):
+    """Test process_journal when an entry already exists for today."""
+    user = users.create_user("+1234567890", "UTC")
+    goal = user_goals.create_goal(user["id"], "📓", "journaling")
+    goal_reminders.create_goal_reminder(user["id"], goal["id"], "09:00:00")
+    
+    # Create existing entry
+    audio_journal_entries.create_audio_journal_entry(user["id"], "Old", "Old")
+    
+    # Inject time same day
+    fake_now = datetime.now(UTC) # Uses current date by default in create_audio_journal_entry?
+    # create_audio_journal_entry uses CURRENT_TIMESTAMP which is UTC.
+    # So we need to match the date.
+    
+    # Let's ensure dates match. DB uses UTC.
+    # If I create entry now, it has today's date.
+    # If I pass fake_now as today, it should match.
+    
+    with (
+        patch("app.helpers.audio.journaling.send_message") as mock_send,
+        patch("app.helpers.audio.journaling.transcribe_audio") as mock_transcribe
+    ):
+        # Act
+        response = process_journal("12345", user, "audio_data") # uses datetime.now(UTC) internally if not passed, or I can pass one.
+        # Ideally pass one to be safe.
+        
+        # Assert
+        assert response is None # Should skip processing
+        mock_transcribe.assert_not_called()
+
+
+def test_process_journal_exceptions(mock_connect):
+    """Test exception handling in process_journal."""
+    user = users.create_user("+1234567890", "UTC")
+    goal = user_goals.create_goal(user["id"], "📓", "journaling")
+    goal_reminders.create_goal_reminder(user["id"], goal["id"], "09:00:00")
+    
+    fake_now = datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
+    
+    # Test Transcription Error
+    with (
+        patch("app.helpers.audio.journaling.send_message") as mock_send,
+        patch("app.helpers.audio.journaling.transcribe_audio") as mock_transcribe
+    ):
+        mock_transcribe.side_effect = RuntimeError("API Error")
+        response = process_journal("12345", user, "audio_data", now=fake_now)
+        assert response == "Transcription failed!"
+
+    # Test Summarization Error
+    with (
+        patch("app.helpers.audio.journaling.send_message") as mock_send,
+        patch("app.helpers.audio.journaling.transcribe_audio") as mock_transcribe,
+        patch("app.helpers.audio.journaling.summarize_transcript") as mock_summarize
+    ):
+        mock_transcribe.return_value = "Transcript"
+        mock_summarize.side_effect = RuntimeError("API Error")
+        
+        response = process_journal("12345", user, "audio_data", now=fake_now)
+        assert response == "Summarization failed!"
 
 
 def test_process_journal_no_goal(mock_connect):

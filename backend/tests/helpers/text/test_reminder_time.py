@@ -20,6 +20,10 @@ def test_parse_time_string():
         ("6 PM", True),
         ("12am", True),
         ("11 AM", True),
+        ("12:00 pm", True),
+        ("12:00 am", True),
+        ("12:30 am", True),
+        ("12:30 pm", True),
         # Valid HH only format
         ("0", True),
         ("12", True),
@@ -35,3 +39,14 @@ def test_parse_time_string():
     
     for message, expected in test_cases:
         assert (reminder_time.parse_time_string(message) is not None) == expected
+
+
+def test_parse_time_string_values():
+    """Test that parsed times are correct."""
+    # Test 12 PM/AM specific logic
+    assert reminder_time.parse_time_string("12pm") == "12:00:00"
+    assert reminder_time.parse_time_string("12am") == "00:00:00"
+    assert reminder_time.parse_time_string("12:00 pm") == "12:00:00"
+    assert reminder_time.parse_time_string("12:00 am") == "00:00:00"
+    assert reminder_time.parse_time_string("12:30 pm") == "12:30:00"
+    assert reminder_time.parse_time_string("12:30 am") == "00:30:00"
