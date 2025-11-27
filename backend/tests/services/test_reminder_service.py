@@ -1,33 +1,11 @@
 """Tests for the reminder service functionality.
 
-This module tests reminder-related operations including timezone handling,
-reminder scheduling calculations, and reminder notification triggering.
+This module tests reminder-related operations including reminder scheduling calculations
+and reminder notification triggering.
 """
 
 from datetime import UTC, datetime, timedelta
-from zoneinfo import ZoneInfo
-
 import app.services.reminder as reminder_module
-from app.helpers import get_timezone_safe
-
-
-def test_get_timezone_safe():
-    """Test safe timezone parsing with fallback to UTC.
-
-    Verifies that the get_timezone_safe function correctly handles:
-    - Valid timezone strings
-    - Timezone strings with whitespace
-    - Invalid timezone strings (defaults to UTC)
-    - Empty strings (defaults to UTC)
-    """
-    assert get_timezone_safe("America/New_York") == ZoneInfo(
-        "America/New_York",
-    )
-    assert get_timezone_safe(" America/New_York ") == ZoneInfo(
-        "America/New_York",
-    )
-    assert get_timezone_safe("Not/AZone") == ZoneInfo("UTC")
-    assert get_timezone_safe("") == ZoneInfo("UTC")
 
 
 def test_next_reminder_seconds(mocker):

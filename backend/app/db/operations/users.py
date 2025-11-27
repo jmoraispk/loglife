@@ -6,7 +6,7 @@ It handles creating, reading, updating, and deleting user records.
 
 import sqlite3
 
-from app.db import connect
+from app.db.sqlite import connect
 
 
 def get_all_users() -> list[dict]:

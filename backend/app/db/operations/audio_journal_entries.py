@@ -6,7 +6,7 @@ It handles creating, reading, updating, and deleting audio journal entry records
 
 import sqlite3
 
-from app.db import connect
+from app.db.sqlite import connect
 
 
 def get_all_audio_journal_entries() -> list[dict]:

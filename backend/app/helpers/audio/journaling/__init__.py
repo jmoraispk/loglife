@@ -17,7 +17,7 @@ from .summarize_transcript import summarize_transcript
 from .transcript_to_base64 import transcript_to_base64
 
 
-def process_journal(sender: str, user: dict, audio_data: str) -> str | tuple[str, str]:
+def process_journal(sender: str, user: dict, audio_data: str, now: datetime | None = None) -> str | tuple[str, str]:
     response = None
     journaling_goal_id: int | None = get_journal_goal_id(user["id"])
     if not journaling_goal_id:
@@ -27,14 +27,14 @@ def process_journal(sender: str, user: dict, audio_data: str) -> str | tuple[str
     reminder_time: time = datetime.strptime(reminder_time_str, "%H:%M:%S").time()
     user_timezone: str = get_user(user["id"])["timezone"]
     tz: ZoneInfo = get_timezone_safe(user_timezone)
-    now_utc: datetime = datetime.now(UTC)
+    now_utc: datetime = now if now else datetime.now(UTC)
     local_now: datetime = now_utc.astimezone(tz).replace(
         second=0,
         microsecond=0,
     )  # current time in user's timezone
     if reminder_time <= local_now.time():
         # Store in database (update if exists, create if not)
-        today = datetime.now().strftime("%Y-%m-%d")
+        today = local_now.strftime("%Y-%m-%d")
         user_entries: list[dict] = get_user_audio_journal_entries(user["id"])
         # Find today's entry
         existing_entry = None

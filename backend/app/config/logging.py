@@ -8,7 +8,8 @@ import logging
 import os
 from logging.handlers import RotatingFileHandler
 
-from app.config import ACCESS_LOG, ERROR_LOG, FLASK_ENV, LOGS
+from .paths import ACCESS_LOG, ERROR_LOG, LOGS
+from .settings import FLASK_ENV
 
 
 def _allow_up_to_info(record: logging.LogRecord) -> bool:

@@ -6,7 +6,7 @@ It handles creating, reading, updating, and deleting user state records for stat
 
 import sqlite3
 
-from app.db import connect
+from app.db.sqlite import connect
 
 
 def get_user_state(user_id: int) -> dict | None:
