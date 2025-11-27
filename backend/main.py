@@ -1,4 +1,4 @@
-"""Flask entry point for the Life Bot backend."""
+"""Flask entry point for the LogLife backend."""
 
 from app import create_app
 

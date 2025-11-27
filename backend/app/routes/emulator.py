@@ -1,7 +1,7 @@
 """Blueprint exposing the web-based emulator.
 
 This module defines a Flask blueprint for serving a web-based emulator interface.
-The emulator allows users to interact with the Life Bot in a simulated environment.
+The emulator allows users to interact with the LogLife in a simulated environment.
 """
 
 from flask import render_template, Blueprint

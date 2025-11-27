@@ -9,13 +9,14 @@ and maintenance easier.
 # -----------------------------
 # Welcome and Onboarding Messages
 # -----------------------------
-WELCOME_MESSAGE = """🎯 *Welcome to Life Bot!*
+WELCOME_MESSAGE = """🎯 *Welcome to LogLife!*
 
 I'm your personal goal tracking assistant. Here's how to get started:
 
 📋 *GOALS*
 • `goals` - Show your personal goals
 • `add goal 😴 Description` - Add new goal
+• `enable journaling` - Quick add journaling goal
 
 📊 *TRACKING*
 • `rate 2 3` - Rate goal #2 with rating 3 (1=fail, 2=partial, 3=success)
@@ -38,11 +39,14 @@ I'm here to help you build better habits and achieve your goals! What would you 
 # -----------------------------
 # Help Messages
 # -----------------------------
-HELP_MESSAGE = """```Life Bot Commands:
+HELP_MESSAGE = """```LogLife Commands:
 
 📋 GOALS
 • goals - Show your personal goals
 • add goal 😴 Description - Add new goal
+• enable journaling - Quick add journaling goal
+• delete [number] - Delete a goal
+• update [number] [time] - Update reminder time
 
 📊 TRACKING  
 • rate 2 3 - Rate goal #2 with rating 3 (1=fail, 2=partial, 3=success)
@@ -52,20 +56,26 @@ HELP_MESSAGE = """```Life Bot Commands:
 • week - Show week summary
 • lookback 7 - Show last 7 days (or any number)
 
+⚙️ SETTINGS
+• on transcript - Get text files with audio transcripts
+• off transcript - Only get summary (no files)
+
 ❓ HELP
 • help - Show this help message
 
 Examples:
 • add goal 🏃 Exercise daily
 • rate 1 3 (rate first goal as success)
-• lookback 3 (show last 3 days)```"""
+• lookback 3 (show last 3 days)
+• delete 2 (delete goal #2)
+• update 1 8pm (change goal #1 reminder to 8pm)```"""
 
 # -----------------------------
 # Referral Messages
 # -----------------------------
 REFERRAL_SUCCESS = """🎉 *Thank you for the referral!*
 
-You've successfully shared a contact with Life Bot. The person you referred will receive an onboarding message to get started with their goal tracking journey.
+You've successfully shared a contact with LogLife. The person you referred will receive an onboarding message to get started with their goal tracking journey.
 
 💡 *What happens next:*
 • They'll get a welcome message with instructions
@@ -77,7 +87,7 @@ Keep up the great work of spreading positive habits! 🌟"""
 # -----------------------------
 # Error Messages
 # -----------------------------
-ERROR_NO_GOALS_SET = "❌ No goals set. Please set goals first."
+ERROR_NO_GOALS_SET = "❌ You don't have any goals yet. Add one with 'add goal 😴 Description'"
 ERROR_INVALID_INPUT_LENGTH = "❌ Invalid input. Send <num_goals> digits."
 
 # Usage messages
@@ -97,3 +107,30 @@ SUCCESS_INDIVIDUAL_RATING = (
 # Lookback Summary Messages
 # -----------------------------
 LOOKBACK_NO_GOALS = "```No goals set. Use 'add goal 😴 Description' to add goals.```"
+
+# -----------------------------
+# Reminder Messages
+# -----------------------------
+REMINDER_MESSAGE = "⏰ Reminder: <goal_emoji> <goal_description>"
+JOURNAL_REMINDER_MESSAGE = """📓 *Time to reflect on your day!*
+
+Take a moment to journal your thoughts, experiences, and feelings.
+
+- *What's on my mind right now?*
+  (I'll dump my thoughts freely — no filter.)
+
+- *Did my day go as I expected?*
+  (I'll notice surprises or patterns.)
+
+- *What's bothering me? Why?*
+  (I'll name it without overthinking.)
+
+- *What mistake or lesson stood out to me today?*
+  (I'll keep it honest, short, and specific.)
+
+- *What's one clear thing I want to do tomorrow?*
+  (I'll set a simple intention without pressure.)
+
+<goals_not_tracked_today>
+
+You can reply with a voice note. 💭"""

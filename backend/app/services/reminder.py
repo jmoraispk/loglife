@@ -12,27 +12,9 @@ import threading
 import time
 from app.db import get_user, get_all_goal_reminders, get_goal
 from datetime import datetime, timedelta, timezone
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
-from app.helpers import send_whatsapp_message
-
-
-def _get_timezone_safe(timezone_str: str) -> ZoneInfo:
-    """Get ZoneInfo, falling back to UTC if timezone is invalid or unknown.
-
-    Arguments:
-    timezone_str -- Timezone string in IANA format (e.g., "Asia/Karachi", "America/New_York")
-
-    Returns a ZoneInfo object for the given timezone string, or UTC if the timezone is invalid or unknown.
-    """
-    timezone_str = timezone_str.strip()
-    try:
-        return ZoneInfo(timezone_str)
-    except (ZoneInfoNotFoundError, ValueError):
-        # exc_info=True logs the full traceback of the exception, including the line number where the exception was raised.
-        logging.error(
-            f"Invalid timezone '{timezone_str}', defaulting to UTC", exc_info=True
-        )
-        return ZoneInfo("UTC")
+from zoneinfo import ZoneInfo
+from app.helpers import send_message, get_timezone_safe, get_goals_not_tracked_today
+from app.config import REMINDER_MESSAGE, JOURNAL_REMINDER_MESSAGE
 
 
 def _next_reminder_seconds() -> float:
@@ -56,7 +38,7 @@ def _next_reminder_seconds() -> float:
         hours: int = int(hours_minutes[0])
         minutes: int = int(hours_minutes[1])
 
-        tz: ZoneInfo = _get_timezone_safe(user_timezone)
+        tz: ZoneInfo = get_timezone_safe(user_timezone)
         local_now: datetime = now_utc.astimezone(tz).replace(
             second=0, microsecond=0
         )  # current time in user's timezone
@@ -93,7 +75,7 @@ def _check_reminders():
         logging.debug(
             f"Evaluating reminder {reminder.get('id')} for user {user_id} in timezone {user_timezone}"
         )
-        tz: ZoneInfo = _get_timezone_safe(user_timezone)
+        tz: ZoneInfo = get_timezone_safe(user_timezone)
         local_now: datetime = now_utc.astimezone(tz)
 
         time_str: str = reminder.get("reminder_time")
@@ -104,8 +86,16 @@ def _check_reminders():
 
         # Check if current time matches reminder time (HH:MM)
         if local_now.hour == hours and local_now.minute == minutes:
-            message: str = f"⏰ Reminder: {user_goal['goal_emoji']} {user_goal['goal_description']}"
-            send_whatsapp_message(user["phone_number"], message)
+            # Check if this is a journaling reminder
+            if user_goal['goal_emoji'] == "📓" and user_goal['goal_description'] == "journaling":
+                goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
+                if goals_not_tracked_today != []:
+                    message: str = JOURNAL_REMINDER_MESSAGE.replace("<goals_not_tracked_today>", "- *Did you complete the goals?*\n" + "\n".join([f"- {goal['goal_description']}" for goal in goals_not_tracked_today]))
+                else:
+                    message: str = JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
+            else:
+                message: str = REMINDER_MESSAGE.replace("<goal_emoji>", user_goal['goal_emoji']).replace("<goal_description>", user_goal['goal_description'])
+            send_message(user["phone_number"], message)
             logging.info(
                 f"Sent reminder '{user_goal['goal_description']}' to {user['phone_number']}"
             )

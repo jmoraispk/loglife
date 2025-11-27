@@ -1,5 +1,5 @@
-from .users import get_user_by_phone_number, create_user, get_user
-from .user_goals import get_user_goals, get_goal, create_goal
+from .users import get_user_by_phone_number, create_user, get_user, update_user
+from .user_goals import get_user_goals, get_goal, create_goal, delete_goal
 from .goal_ratings import create_rating, get_rating_by_goal_and_date, update_rating
 from .referrals import create_referral
 from .goal_reminders import get_all_goal_reminders, create_goal_reminder, get_goal_reminder_by_goal_id, update_goal_reminder
@@ -11,10 +11,12 @@ __all__ = [
     "get_user_by_phone_number",
     "create_user",
     "get_user",
+    "update_user",
     # User goals
     "get_user_goals",
     "get_goal",
     "create_goal",
+    "delete_goal",
     # Goal ratings
     "create_rating",
     "get_rating_by_goal_and_date",

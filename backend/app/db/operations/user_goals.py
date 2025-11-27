@@ -8,7 +8,7 @@ import sqlite3
 from app.db import connect
 
 
-def get_user_goals(user_id: int) -> list:
+def get_user_goals(user_id: int) -> list[dict]:
     """Retrieves all goals for a specific user.
 
     Arguments:

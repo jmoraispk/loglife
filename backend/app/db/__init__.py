@@ -2,8 +2,10 @@ from .sqlite import init_db, connect
 from .operations import (
     get_user,
     create_user,
+    update_user,
     get_user_goals,
     create_goal,
+    delete_goal,
     get_user_by_phone_number,
     create_rating,
     get_rating_by_goal_and_date,
@@ -29,8 +31,10 @@ __all__ = [
     # User operations
     "get_user",
     "create_user",
+    "update_user",
     "get_user_goals",
     "create_goal",
+    "delete_goal",
     "get_user_by_phone_number",
     "create_rating",
     "get_rating_by_goal_and_date",

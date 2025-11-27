@@ -4,7 +4,7 @@
 
 ## Overview
 
-This WhatsApp client bridges WhatsApp to the Life Bot backend.
+This WhatsApp client bridges WhatsApp to the LogLife backend.
 
 **Main functions:**
 

@@ -74,7 +74,7 @@ def create_user(phone_number: str, timezone: str) -> dict:
     return get_user_by_phone_number(phone_number)
 
 
-def update_user(user_id: int, *, phone_number=None, timezone=None) -> dict:
+def update_user(user_id: int, *, phone_number=None, timezone=None, send_transcript_file=None) -> dict:
     """Updates a user record with provided fields.
 
     Only the fields that are provided (not None) will be updated.
@@ -83,6 +83,7 @@ def update_user(user_id: int, *, phone_number=None, timezone=None) -> dict:
     user_id -- The unique identifier of the user to update
     phone_number -- Optional new phone number to assign
     timezone -- Optional new timezone to assign
+    send_transcript_file -- Optional setting to enable/disable transcript file (0 or 1)
 
     Returns the updated user record as a dictionary.
     """
@@ -94,6 +95,9 @@ def update_user(user_id: int, *, phone_number=None, timezone=None) -> dict:
     if timezone is not None:
         updates.append("timezone = ?")
         params.append(timezone)
+    if send_transcript_file is not None:
+        updates.append("send_transcript_file = ?")
+        params.append(send_transcript_file)
 
     params.append(user_id)
     with connect() as conn:

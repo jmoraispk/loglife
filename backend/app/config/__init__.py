@@ -1,5 +1,6 @@
 from .paths import (
     TEMPLATES,
+    STATIC,
     LOGS,
     ACCESS_LOG,
     ERROR_LOG,
@@ -12,6 +13,7 @@ from .settings import (
     OPENAI_SUMMARIZATION_SYSTEM_PROMPT,
     DEFAULT_GOAL_EMOJI,
     STYLE,
+    COMMAND_ALIASES
 )
 from .logging import setup_logging
 from .api import WHATSAPP_API_URL, ASSEMBLYAI_BASE_URL, OPENAI_API_URL
@@ -25,12 +27,15 @@ from .messages import (
     USAGE_RATE,
     SUCCESS_INDIVIDUAL_RATING,
     LOOKBACK_NO_GOALS,
+    REMINDER_MESSAGE,
+    JOURNAL_REMINDER_MESSAGE,
 )
 from .secrets import ASSEMBLYAI_API_KEY, OPENAI_API_KEY
 
 __all__ = [
     # Paths
     "TEMPLATES",
+    "STATIC",
     "LOGS",
     "ACCESS_LOG",
     "ERROR_LOG",
@@ -41,6 +46,7 @@ __all__ = [
     "OPENAI_CHAT_MODEL",
     "OPENAI_SUMMARIZATION_SYSTEM_PROMPT",
     "DEFAULT_GOAL_EMOJI",
+    "COMMAND_ALIASES",
     "STYLE",
     # Logging
     "setup_logging",
@@ -58,6 +64,8 @@ __all__ = [
     "USAGE_RATE",
     "SUCCESS_INDIVIDUAL_RATING",
     "LOOKBACK_NO_GOALS",
+    "REMINDER_MESSAGE",
+    "JOURNAL_REMINDER_MESSAGE",
     # Secrets
     "ASSEMBLYAI_API_KEY",
     "OPENAI_API_KEY",
