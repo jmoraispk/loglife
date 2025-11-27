@@ -1,6 +1,7 @@
 """Utility helpers for connecting to the SQLite database and bootstrapping its schema."""
 
 import sqlite3
+
 from app.config import DATABASE_FILE, SCHEMA_FILE
 
 
@@ -16,6 +17,6 @@ def init_db():
     if not DATABASE_FILE.exists() or DATABASE_FILE.stat().st_size == 0:
         with (
             sqlite3.connect(DATABASE_FILE) as conn,
-            open(SCHEMA_FILE, "r", encoding="utf-8") as f,
+            open(SCHEMA_FILE, encoding="utf-8") as f,
         ):
             conn.executescript(f.read())

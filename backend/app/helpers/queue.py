@@ -7,4 +7,3 @@ import queue
 
 # Queue for streaming log messages to clients via SSE
 log_queue = queue.Queue()
-

@@ -1,21 +1,19 @@
 """Tests for goal_ratings database operations."""
 
-import pytest
 import sqlite3
-from datetime import datetime
+from datetime import UTC, datetime
+
+import pytest
 from app.db.operations import goal_ratings, user_goals, users
 
 
-def test_create_rating(mock_connect):
-    """
-    Test creating a new goal rating with constraint validation.
+def test_create_rating():
+    """Test creating a new goal rating with constraint validation.
 
     Verifies successful rating creation with values 1-3, ensures all fields
     are properly stored, and validates that ratings outside the valid range
     (0 or 4+) are rejected with an IntegrityError due to CHECK constraint.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user and goal
     user = users.create_user("+1234567890", "America/New_York")
@@ -46,15 +44,12 @@ def test_create_rating(mock_connect):
         goal_ratings.create_rating(goal["id"], 4)
 
 
-def test_get_rating(mock_connect):
-    """
-    Test retrieving a rating by its unique ID.
+def test_get_rating():
+    """Test retrieving a rating by its unique ID.
 
     Verifies that existing ratings can be successfully retrieved by ID with
     all expected fields, while non-existent rating IDs properly return None.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user, goal, and rating
     user = users.create_user("+1234567890", "America/New_York")
@@ -76,24 +71,21 @@ def test_get_rating(mock_connect):
     assert non_existent_rating is None
 
 
-def test_get_rating_by_goal_and_date(mock_connect):
-    """
-    Test retrieving a rating by goal ID and date.
+def test_get_rating_by_goal_and_date():
+    """Test retrieving a rating by goal ID and date.
 
     Verifies that ratings can be retrieved by combining goal ID and date,
     returning the most recent rating for that combination, while non-existent
     goal/date combinations properly return None.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user, goal, and rating
     user = users.create_user("+1234567890", "America/New_York")
     goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
     goal_ratings.create_rating(goal["id"], 3)
 
-    # Get today's date
-    today = datetime.now().strftime("%Y-%m-%d")
+    # Get today's date (UTC to match SQLite CURRENT_TIMESTAMP)
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
 
     # Test retrieving rating by goal and date
     retrieved_rating = goal_ratings.get_rating_by_goal_and_date(goal["id"], today)
@@ -105,7 +97,8 @@ def test_get_rating_by_goal_and_date(mock_connect):
 
     # Test non-existent date
     non_existent_rating = goal_ratings.get_rating_by_goal_and_date(
-        goal["id"], "2020-01-01"
+        goal["id"],
+        "2020-01-01",
     )
     assert non_existent_rating is None
 
@@ -114,15 +107,12 @@ def test_get_rating_by_goal_and_date(mock_connect):
     assert non_existent_rating is None
 
 
-def test_get_all_ratings(mock_connect):
-    """
-    Test retrieving all ratings from the database.
+def test_get_all_ratings():
+    """Test retrieving all ratings from the database.
 
     Verifies that all rating records are returned with complete field data,
     and that all ratings contain values within the valid range (1-3).
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user, goals, and ratings
     user = users.create_user("+1234567890", "America/New_York")
@@ -150,17 +140,14 @@ def test_get_all_ratings(mock_connect):
         assert rating["rating"] in [1, 2, 3]
 
 
-def test_update_rating(mock_connect):
-    """
-    Test updating rating information with optional fields.
+def test_update_rating():
+    """Test updating rating information with optional fields.
 
     Verifies that individual fields (rating value, user_goal_id, rating_date)
     can be updated independently or together, and that unchanged fields retain
     their original values. Also tests that calling without fields returns the
     existing rating.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user, goals, and rating
     user = users.create_user("+1234567890", "America/New_York")
@@ -189,7 +176,10 @@ def test_update_rating(mock_connect):
 
     # Test updating all fields
     updated_rating = goal_ratings.update_rating(
-        rating["id"], user_goal_id=goal1["id"], rating=1, rating_date="2024-06-15"
+        rating["id"],
+        user_goal_id=goal1["id"],
+        rating=1,
+        rating_date="2024-06-15",
     )
 
     assert updated_rating["user_goal_id"] == goal1["id"]
@@ -200,15 +190,12 @@ def test_update_rating(mock_connect):
     assert unchanged_rating["id"] == rating["id"]
 
 
-def test_delete_rating(mock_connect):
-    """
-    Test deleting a rating from the database.
+def test_delete_rating():
+    """Test deleting a rating from the database.
 
     Verifies that a rating can be successfully deleted by ID and that
     subsequent attempts to retrieve the deleted rating return None.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user, goal, and rating
     user = users.create_user("+1234567890", "America/New_York")

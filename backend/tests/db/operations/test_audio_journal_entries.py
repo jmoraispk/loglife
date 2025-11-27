@@ -3,16 +3,13 @@
 from app.db.operations import audio_journal_entries, users
 
 
-def test_create_audio_journal_entry(mock_connect):
-    """
-    Test creating a new audio journal entry.
+def test_create_audio_journal_entry():
+    """Test creating a new audio journal entry.
 
     Verifies successful entry creation with transcription and summary texts,
     ensures entries are properly associated with users, and validates that
     multiple entries can be created for the same user.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create a user
     user = users.create_user("+1234567890", "America/New_York")
@@ -43,16 +40,13 @@ def test_create_audio_journal_entry(mock_connect):
     assert len(entries) == 2
 
 
-def test_get_audio_journal_entry(mock_connect):
-    """
-    Test retrieving an audio journal entry by its unique ID.
+def test_get_audio_journal_entry():
+    """Test retrieving an audio journal entry by its unique ID.
 
     Verifies that existing entries can be successfully retrieved by ID with
     all expected fields (transcription, summary), while non-existent entry
     IDs properly return None.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user and entry
     user = users.create_user("+1234567890", "America/New_York")
@@ -82,16 +76,13 @@ def test_get_audio_journal_entry(mock_connect):
     assert non_existent_entry is None
 
 
-def test_get_user_audio_journal_entries(mock_connect):
-    """
-    Test retrieving all journal entries for a specific user.
+def test_get_user_audio_journal_entries():
+    """Test retrieving all journal entries for a specific user.
 
     Verifies that all entries belonging to a user are returned with complete
     field data, entries from different users are properly isolated, and users
     with no entries return an empty list.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create users and entries
     user1 = users.create_user("+1234567890", "America/New_York")
@@ -136,28 +127,31 @@ def test_get_user_audio_journal_entries(mock_connect):
     assert len(empty_entries) == 0
 
 
-def test_get_all_audio_journal_entries(mock_connect):
-    """
-    Test retrieving all audio journal entries from the database.
+def test_get_all_audio_journal_entries():
+    """Test retrieving all audio journal entries from the database.
 
     Verifies that all journal entry records across all users are returned
     with complete field data.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create users and entries
     user1 = users.create_user("+1234567890", "America/New_York")
     user2 = users.create_user("+9876543210", "Europe/London")
 
     audio_journal_entries.create_audio_journal_entry(
-        user_id=user1["id"], transcription_text="Entry 1", summary_text="Summary 1"
+        user_id=user1["id"],
+        transcription_text="Entry 1",
+        summary_text="Summary 1",
     )
     audio_journal_entries.create_audio_journal_entry(
-        user_id=user1["id"], transcription_text="Entry 2", summary_text="Summary 2"
+        user_id=user1["id"],
+        transcription_text="Entry 2",
+        summary_text="Summary 2",
     )
     audio_journal_entries.create_audio_journal_entry(
-        user_id=user2["id"], transcription_text="Entry 3", summary_text="Summary 3"
+        user_id=user2["id"],
+        transcription_text="Entry 3",
+        summary_text="Summary 3",
     )
 
     # Act
@@ -175,21 +169,48 @@ def test_get_all_audio_journal_entries(mock_connect):
         assert "created_at" in entry
 
 
-def test_delete_audio_journal_entry(mock_connect):
+def test_update_audio_journal_entry():
+    """Test updating an audio journal entry.
+
+    Verifies that an entry can be successfully updated.
     """
-    Test deleting an audio journal entry from the database.
+    # Arrange - create user and entry
+    user = users.create_user("+1234567890", "America/New_York")
+    audio_journal_entries.create_audio_journal_entry(
+        user_id=user["id"],
+        transcription_text="Old text",
+        summary_text="Old summary",
+    )
+    entries = audio_journal_entries.get_user_audio_journal_entries(user["id"])
+    entry_id = entries[0]["id"]
+
+    # Act - update the entry
+    audio_journal_entries.update_audio_journal_entry(
+        entry_id=entry_id,
+        transcription_text="New text",
+        summary_text="New summary",
+    )
+
+    # Assert entry is updated
+    updated_entry = audio_journal_entries.get_audio_journal_entry(entry_id)
+    assert updated_entry["transcription_text"] == "New text"
+    assert updated_entry["summary_text"] == "New summary"
+
+
+def test_delete_audio_journal_entry():
+    """Test deleting an audio journal entry from the database.
 
     Verifies that an entry can be successfully deleted by ID, subsequent
     attempts to retrieve the deleted entry return None, and the user's
     entry list is properly updated.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user and entry
     user = users.create_user("+1234567890", "America/New_York")
     audio_journal_entries.create_audio_journal_entry(
-        user_id=user["id"], transcription_text="Test entry", summary_text="Test summary"
+        user_id=user["id"],
+        transcription_text="Test entry",
+        summary_text="Test summary",
     )
 
     # Get the entry ID

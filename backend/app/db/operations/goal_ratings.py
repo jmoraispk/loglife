@@ -5,7 +5,8 @@ It handles creating, reading, updating, and deleting goal rating records.
 """
 
 import sqlite3
-from app.db import connect
+
+from app.db.sqlite import connect
 
 
 def get_all_ratings() -> list:
@@ -26,6 +27,7 @@ def get_rating(rating_id: int) -> dict | None:
     rating_id -- The unique identifier of the rating to retrieve
 
     Returns the rating record as a dictionary, or None if not found.
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -47,6 +49,7 @@ def get_rating_by_goal_and_date(user_goal_id: int, rating_date: str) -> dict | N
     rating_date -- Date string in YYYY-MM-DD format
 
     Returns the rating record as a dictionary, or None if not found.
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -72,6 +75,7 @@ def create_rating(user_goal_id: int, rating: int) -> dict | None:
     rating -- The rating value to assign
 
     Returns the newly created rating record as a dictionary.
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -107,6 +111,7 @@ def update_rating(
     rating_date -- Optional new rating date to assign
 
     Returns the updated rating record as a dictionary.
+
     """
     updates = []
     params = []
@@ -130,7 +135,8 @@ def update_rating(
 
     with connect() as conn:
         conn.execute(
-            f"UPDATE goal_ratings SET {', '.join(updates)} WHERE id = ?", params
+            f"UPDATE goal_ratings SET {', '.join(updates)} WHERE id = ?",
+            params,
         )
 
     return get_rating(rating_id)
@@ -141,6 +147,7 @@ def delete_rating(rating_id: int):
 
     Arguments:
     rating_id -- The unique identifier of the rating to delete
+
     """
     with connect() as conn:
         conn.execute("DELETE FROM goal_ratings WHERE id = ?", (rating_id,))

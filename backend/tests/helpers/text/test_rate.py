@@ -1,24 +1,16 @@
 """Tests for rating validation helpers."""
 
-import pytest
-from backend.app.helpers.text import rate
+from app.helpers.text import rate
 
 
-@pytest.mark.parametrize(
-    "message, expected",
-    [
+def test_is_valid_rating_digits():
+    """Test validation of rating digit strings."""
+    test_cases = [
         ("111", True),
         ("141", False),
         ("abc", False),
         ("", False),
-    ],
-)
-def test_is_valid_rating_digits(message, expected):
-    """
-    Test validation of rating digit strings.
+    ]
 
-    Arguments:
-        message: Rating string to validate (parametrized)
-        expected: Whether the rating is valid (parametrized)
-    """
-    assert rate.is_valid_rating_digits(message) == expected
+    for message, expected in test_cases:
+        assert rate.is_valid_rating_digits(message) == expected

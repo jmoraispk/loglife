@@ -5,6 +5,7 @@ including emoji extraction from goal descriptions.
 """
 
 import re
+
 from app.config import DEFAULT_GOAL_EMOJI
 
 # internal variable (not intended for import)
@@ -29,6 +30,7 @@ def extract_emoji(text: str) -> str:
     text -- The text string to search for emoji
 
     Returns the first emoji found, or the default goal emoji if none is found.
+
     """
     match = re.search(_emoji_pattern, text)
     return match.group(0) if match else DEFAULT_GOAL_EMOJI

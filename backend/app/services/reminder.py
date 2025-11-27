@@ -10,11 +10,12 @@ polling overhead while ensuring timely alerts.
 import logging
 import threading
 import time
-from app.db import get_user, get_all_goal_reminders, get_goal
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
-from app.helpers import send_message, get_timezone_safe, get_goals_not_tracked_today
-from app.config import REMINDER_MESSAGE, JOURNAL_REMINDER_MESSAGE
+
+from app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
+from app.db import get_all_goal_reminders, get_goal, get_user
+from app.helpers import get_goals_not_tracked_today, get_timezone_safe, send_message
 
 
 def _next_reminder_seconds() -> float:
@@ -25,7 +26,7 @@ def _next_reminder_seconds() -> float:
     reminders: list[dict] = get_all_goal_reminders()
     if not reminders:
         logging.info("No reminders scheduled; using default wait interval")
-    now_utc: datetime = datetime.now(timezone.utc)
+    now_utc: datetime = datetime.now(UTC)
     wait_times = []
 
     for reminder in reminders:
@@ -40,7 +41,8 @@ def _next_reminder_seconds() -> float:
 
         tz: ZoneInfo = get_timezone_safe(user_timezone)
         local_now: datetime = now_utc.astimezone(tz).replace(
-            second=0, microsecond=0
+            second=0,
+            microsecond=0,
         )  # current time in user's timezone
         target: datetime = local_now.replace(hour=hours, minute=minutes)
 
@@ -62,7 +64,7 @@ def _next_reminder_seconds() -> float:
 def _check_reminders():
     """Checks all reminders and sends notifications when their scheduled time matches the current local time."""
     reminders: list[dict] = get_all_goal_reminders()
-    now_utc: datetime = datetime.now(timezone.utc)
+    now_utc: datetime = datetime.now(UTC)
 
     for reminder in reminders:
         user_id: int = reminder["user_id"]
@@ -73,7 +75,7 @@ def _check_reminders():
 
         user_timezone: str = user["timezone"]
         logging.debug(
-            f"Evaluating reminder {reminder.get('id')} for user {user_id} in timezone {user_timezone}"
+            f"Evaluating reminder {reminder.get('id')} for user {user_id} in timezone {user_timezone}",
         )
         tz: ZoneInfo = get_timezone_safe(user_timezone)
         local_now: datetime = now_utc.astimezone(tz)
@@ -87,17 +89,27 @@ def _check_reminders():
         # Check if current time matches reminder time (HH:MM)
         if local_now.hour == hours and local_now.minute == minutes:
             # Check if this is a journaling reminder
-            if user_goal['goal_emoji'] == "📓" and user_goal['goal_description'] == "journaling":
+            if user_goal["goal_emoji"] == "📓" and user_goal["goal_description"] == "journaling":
                 goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
                 if goals_not_tracked_today != []:
-                    message: str = JOURNAL_REMINDER_MESSAGE.replace("<goals_not_tracked_today>", "- *Did you complete the goals?*\n" + "\n".join([f"- {goal['goal_description']}" for goal in goals_not_tracked_today]))
+                    message: str = JOURNAL_REMINDER_MESSAGE.replace(
+                        "<goals_not_tracked_today>",
+                        "- *Did you complete the goals?*\n"
+                        + "\n".join(
+                            [f"- {goal['goal_description']}" for goal in goals_not_tracked_today]
+                        ),
+                    )
                 else:
-                    message: str = JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
+                    message: str = JOURNAL_REMINDER_MESSAGE.replace(
+                        "\n\n<goals_not_tracked_today>", ""
+                    )
             else:
-                message: str = REMINDER_MESSAGE.replace("<goal_emoji>", user_goal['goal_emoji']).replace("<goal_description>", user_goal['goal_description'])
+                message: str = REMINDER_MESSAGE.replace(
+                    "<goal_emoji>", user_goal["goal_emoji"]
+                ).replace("<goal_description>", user_goal["goal_description"])
             send_message(user["phone_number"], message)
             logging.info(
-                f"Sent reminder '{user_goal['goal_description']}' to {user['phone_number']}"
+                f"Sent reminder '{user_goal['goal_description']}' to {user['phone_number']}",
             )
 
 
@@ -112,14 +124,16 @@ def _reminder_worker():
         except Exception as exc:
             # exc_info=True logs the full traceback of the exception, including the line number where the exception was raised.
             logging.error(
-                f"Unhandled error while checking reminders: {exc}", exc_info=True
+                f"Unhandled error while checking reminders: {exc}",
+                exc_info=True,
             )
 
 
 def start_reminder_service() -> threading.Thread:
     """Starts the reminder service."""
     t: threading.Thread = threading.Thread(
-        target=_reminder_worker, daemon=True
+        target=_reminder_worker,
+        daemon=True,
     )  # daemon makes the thread to get killed automatically when main program exits
     t.start()
     logging.info(f"Reminder service thread {t.name} started (daemon={t.daemon})")

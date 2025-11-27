@@ -5,7 +5,8 @@ It handles creating, reading, updating, and deleting user records.
 """
 
 import sqlite3
-from app.db import connect
+
+from app.db.sqlite import connect
 
 
 def get_all_users() -> list[dict]:
@@ -27,6 +28,7 @@ def get_user(user_id: int) -> dict:
     user_id -- The unique identifier of the user to retrieve
 
     Returns the user record as a dictionary, or None if not found.
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -44,6 +46,7 @@ def get_user_by_phone_number(phone_number: str) -> dict | None:
     phone_number -- The phone number of the user to retrieve
 
     Returns the user record as a dictionary, or None if not found.
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -62,6 +65,7 @@ def create_user(phone_number: str, timezone: str) -> dict:
     timezone -- The timezone of the user
 
     Returns the newly created user record as a dictionary.
+
     """
     with connect() as conn:
         conn.execute(
@@ -74,7 +78,9 @@ def create_user(phone_number: str, timezone: str) -> dict:
     return get_user_by_phone_number(phone_number)
 
 
-def update_user(user_id: int, *, phone_number=None, timezone=None, send_transcript_file=None) -> dict:
+def update_user(
+    user_id: int, *, phone_number=None, timezone=None, send_transcript_file=None
+) -> dict:
     """Updates a user record with provided fields.
 
     Only the fields that are provided (not None) will be updated.
@@ -86,6 +92,7 @@ def update_user(user_id: int, *, phone_number=None, timezone=None, send_transcri
     send_transcript_file -- Optional setting to enable/disable transcript file (0 or 1)
 
     Returns the updated user record as a dictionary.
+
     """
     updates = []
     params = []
@@ -111,6 +118,7 @@ def delete_user(user_id: int):
 
     Arguments:
     user_id -- The unique identifier of the user to delete
+
     """
     with connect() as conn:
         conn.execute("DELETE FROM users WHERE id = ?", (user_id,))

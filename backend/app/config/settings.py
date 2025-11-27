@@ -15,5 +15,5 @@ STYLE = {
 }
 
 COMMAND_ALIASES = {
-    "add habit": "add goal"
+    "add habit": "add goal",
 }

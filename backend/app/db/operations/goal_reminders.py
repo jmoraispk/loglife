@@ -6,7 +6,7 @@ It handles creating, reading, updating, and deleting goal reminder records.
 
 import sqlite3
 
-from app.db import connect
+from app.db.sqlite import connect
 
 
 def get_all_goal_reminders() -> list[dict]:
@@ -27,6 +27,7 @@ def get_goal_reminder(reminder_id: int):
     reminder_id -- The unique identifier of the reminder to retrieve
 
     Returns the reminder record as a dictionary, or None if not found.
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -36,6 +37,7 @@ def get_goal_reminder(reminder_id: int):
         row: sqlite3.Row | None = cur.fetchone()
         return dict(row) if row else None
 
+
 def get_goal_reminder_by_goal_id(user_goal_id: int) -> dict | None:
     """Retrieves a goal reminder for a specific user goal.
 
@@ -43,6 +45,7 @@ def get_goal_reminder_by_goal_id(user_goal_id: int) -> dict | None:
     user_goal_id -- The unique identifier of the user goal
 
     Returns the reminder record as a dictionary, or None if not found.
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -51,6 +54,7 @@ def get_goal_reminder_by_goal_id(user_goal_id: int) -> dict | None:
         )
         row: sqlite3.Row | None = cur.fetchone()
         return dict(row) if row else None
+
 
 def create_goal_reminder(user_id: int, user_goal_id: int, reminder_time: str) -> dict:
     """Creates a new goal reminder record.
@@ -61,6 +65,7 @@ def create_goal_reminder(user_id: int, user_goal_id: int, reminder_time: str) ->
     reminder_time -- The time when the reminder should be triggered
 
     Returns the newly created reminder record as a dictionary.
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -91,6 +96,7 @@ def update_goal_reminder(
     reminder_time -- Optional new reminder time to assign
 
     Returns the updated reminder record as a dictionary.
+
     """
     updates = []
     params = []
@@ -109,7 +115,8 @@ def update_goal_reminder(
     params.append(reminder_id)
     with connect() as conn:
         conn.execute(
-            f"UPDATE goal_reminders SET {', '.join(updates)} WHERE id = ?", params
+            f"UPDATE goal_reminders SET {', '.join(updates)} WHERE id = ?",
+            params,
         )
 
     return get_goal_reminder(reminder_id)
@@ -120,6 +127,7 @@ def delete_goal_reminder(reminder_id: int):
 
     Arguments:
     reminder_id -- The unique identifier of the reminder to delete
+
     """
     with connect() as conn:
         conn.execute("DELETE FROM goal_reminders WHERE id = ?", (reminder_id,))

@@ -5,7 +5,8 @@ It handles creating, reading, updating, and deleting user state records for stat
 """
 
 import sqlite3
-from app.db import connect
+
+from app.db.sqlite import connect
 
 
 def get_user_state(user_id: int) -> dict | None:
@@ -15,6 +16,7 @@ def get_user_state(user_id: int) -> dict | None:
     user_id -- The unique identifier of the user
 
     Returns the user state record as a dictionary, or None if not found.
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -37,6 +39,7 @@ def create_user_state(user_id: int, state: str, temp_data: str | None = None) ->
     temp_data -- Optional temporary data to store with the state
 
     Returns the created or updated user state record as a dictionary.
+
     """
     with connect() as conn:
         conn.execute(
@@ -54,7 +57,10 @@ def create_user_state(user_id: int, state: str, temp_data: str | None = None) ->
 
 
 def update_user_state(
-    user_id: int, *, state: str | None = None, temp_data: str | None = None
+    user_id: int,
+    *,
+    state: str | None = None,
+    temp_data: str | None = None,
 ) -> dict | None:
     """Updates a user state record with provided fields.
 
@@ -67,6 +73,7 @@ def update_user_state(
     temp_data -- Optional new temporary data to assign
 
     Returns the updated user state record as a dictionary, or None if not found.
+
     """
     updates = []
     params = []
@@ -83,7 +90,8 @@ def update_user_state(
     params.append(user_id)
     with connect() as conn:
         conn.execute(
-            f"UPDATE user_states SET {', '.join(updates)} WHERE user_id = ?", params
+            f"UPDATE user_states SET {', '.join(updates)} WHERE user_id = ?",
+            params,
         )
 
     return get_user_state(user_id)
@@ -94,6 +102,7 @@ def delete_user_state(user_id: int):
 
     Arguments:
     user_id -- The unique identifier of the user
+
     """
     with connect() as conn:
         conn.execute("DELETE FROM user_states WHERE user_id = ?", (user_id,))

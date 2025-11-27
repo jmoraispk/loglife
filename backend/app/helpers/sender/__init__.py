@@ -1,6 +1,7 @@
 from flask import g
-from .whatsapp_sender import send_whatsapp_message
+
 from .emulator_sender import send_emulator_message
+from .whatsapp_sender import send_whatsapp_message
 
 
 def send_message(number: str, message: str):

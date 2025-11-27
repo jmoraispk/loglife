@@ -11,3 +11,5 @@ backend/db/loglife.db
 .venv
 uv.lock
 backend/logs/
+.ruff_cache/
+.coverage

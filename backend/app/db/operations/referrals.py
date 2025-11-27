@@ -4,7 +4,7 @@ This module provides operations for managing referral relationships between user
 It handles creating referral records that link referrer and referred users.
 """
 
-from app.db import connect
+from app.db.sqlite import connect
 
 
 def create_referral(referrer_user_id: int, referred_user_id: int) -> None:
@@ -13,6 +13,7 @@ def create_referral(referrer_user_id: int, referred_user_id: int) -> None:
     Arguments:
     referrer_user_id -- The unique identifier of the user who made the referral
     referred_user_id -- The unique identifier of the user who was referred
+
     """
     with connect() as conn:
         cur = conn.execute(

@@ -21,6 +21,7 @@ def parse_time_string(raw: str) -> str | None:
     raw -- The incoming time value as typed by the user
 
     Returns the normalized time string or None if invalid.
+
     """
     cleaned = raw.strip()
     lowered = cleaned.lower()

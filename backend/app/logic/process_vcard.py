@@ -1,10 +1,10 @@
 """Processing logic for referral VCARD payloads."""
 
 import json
-from app.helpers import extract_phone_number
-from app.config import WELCOME_MESSAGE, REFERRAL_SUCCESS
-from app.helpers import send_message
-from app.db import get_user_by_phone_number, create_user, create_referral
+
+from app.config import REFERRAL_SUCCESS, WELCOME_MESSAGE
+from app.db import create_referral, create_user, get_user_by_phone_number
+from app.helpers import extract_phone_number, send_message
 
 
 def process_vard(referrer_user: dict, raw_vcards: str) -> str:
@@ -18,6 +18,7 @@ def process_vard(referrer_user: dict, raw_vcards: str) -> str:
     raw_vcards -- JSON string containing the VCARD data list
 
     Returns the referral success message constant.
+
     """
     vcards: list[str] = json.loads(raw_vcards)
     referrer_user_id: int = referrer_user["id"]

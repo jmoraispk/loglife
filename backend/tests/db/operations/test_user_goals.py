@@ -3,23 +3,22 @@
 from app.db.operations import user_goals, users
 
 
-def test_create_goal(mock_connect):
-    """
-    Test creating a new user goal with emoji and description.
+def test_create_goal():
+    """Test creating a new user goal with emoji and description.
 
     Verifies successful goal creation with both default and custom boost
     levels, ensuring all fields are properly stored and the goal is
     associated with the correct user.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create a user first (foreign key requirement)
     user = users.create_user("+1234567890", "America/New_York")
 
     # Test successful creation with default boost_level
     goal = user_goals.create_goal(
-        user_id=user["id"], goal_emoji="🎯", goal_description="Learn Python"
+        user_id=user["id"],
+        goal_emoji="🎯",
+        goal_description="Learn Python",
     )
 
     # Assert successful creation
@@ -42,20 +41,19 @@ def test_create_goal(mock_connect):
     assert goal2["boost_level"] == 3
 
 
-def test_get_goal(mock_connect):
-    """
-    Test retrieving a goal by its unique ID.
+def test_get_goal():
+    """Test retrieving a goal by its unique ID.
 
     Verifies that existing goals can be successfully retrieved by ID with
     all expected fields, while non-existent goal IDs properly return None.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user and goal
     user = users.create_user("+1234567890", "America/New_York")
     created_goal = user_goals.create_goal(
-        user_id=user["id"], goal_emoji="🎯", goal_description="Learn Python"
+        user_id=user["id"],
+        goal_emoji="🎯",
+        goal_description="Learn Python",
     )
 
     # Test retrieving existing goal
@@ -73,15 +71,12 @@ def test_get_goal(mock_connect):
     assert non_existent_goal is None
 
 
-def test_get_user_goals(mock_connect):
-    """
-    Test retrieving all goals associated with a specific user.
+def test_get_user_goals():
+    """Test retrieving all goals associated with a specific user.
 
     Verifies that all goals belonging to a user are returned with complete
     field data, and that users with no goals return an empty list.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user and multiple goals
     user = users.create_user("+1234567890", "America/New_York")
@@ -110,22 +105,21 @@ def test_get_user_goals(mock_connect):
     assert len(empty_goals) == 0
 
 
-def test_update_goal(mock_connect):
-    """
-    Test updating goal information with optional fields.
+def test_update_goal():
+    """Test updating goal information with optional fields.
 
     Verifies that individual fields (emoji, description, boost_level) can
     be updated independently or together, and that unchanged fields retain
     their original values. Also tests that calling without fields returns
     the existing goal.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user and goal
     user = users.create_user("+1234567890", "America/New_York")
     goal = user_goals.create_goal(
-        user_id=user["id"], goal_emoji="🎯", goal_description="Learn Python"
+        user_id=user["id"],
+        goal_emoji="🎯",
+        goal_description="Learn Python",
     )
 
     # Test updating emoji only
@@ -163,20 +157,19 @@ def test_update_goal(mock_connect):
     assert unchanged_goal["id"] == goal["id"]
 
 
-def test_delete_goal(mock_connect):
-    """
-    Test deleting a goal from the database.
+def test_delete_goal():
+    """Test deleting a goal from the database.
 
     Verifies that a goal can be successfully deleted by ID and that
     subsequent attempts to retrieve the deleted goal return None.
 
-    Arguments:
-        mock_connect: Fixture providing isolated test database connection
     """
     # Arrange - create user and goal
     user = users.create_user("+1234567890", "America/New_York")
     goal = user_goals.create_goal(
-        user_id=user["id"], goal_emoji="🎯", goal_description="Learn Python"
+        user_id=user["id"],
+        goal_emoji="🎯",
+        goal_description="Learn Python",
     )
     goal_id = goal["id"]
 

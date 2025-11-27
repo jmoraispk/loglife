@@ -6,8 +6,10 @@ to AssemblyAI and polling for the transcription results.
 
 import base64
 import time
+
 import requests
-from app.config import ASSEMBLYAI_BASE_URL, ASSEMBLYAI_API_KEY
+
+from app.config import ASSEMBLYAI_API_KEY, ASSEMBLYAI_BASE_URL
 
 
 def transcribe_audio(audio_data: str) -> str:
@@ -23,8 +25,8 @@ def transcribe_audio(audio_data: str) -> str:
 
     Raises:
     RuntimeError if the transcription fails.
-    """
 
+    """
     audio_bytes = base64.b64decode(audio_data)
     upload_response = requests.post(
         f"{ASSEMBLYAI_BASE_URL}/v2/upload",
@@ -53,7 +55,8 @@ def transcribe_audio(audio_data: str) -> str:
 
     while True:
         poll_response = requests.get(
-            polling_endpoint, headers={"authorization": ASSEMBLYAI_API_KEY}
+            polling_endpoint,
+            headers={"authorization": ASSEMBLYAI_API_KEY},
         )
         try:
             poll_response.raise_for_status()

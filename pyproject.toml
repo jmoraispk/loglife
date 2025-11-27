@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "goal_bot"
 version = "0.1.0"
 requires-python = ">=3.11"
-description = "Backend for WhatsApp goal tracking bot"
+description = "General Bot Package for Goal Tracking"
 authors = [{name = "Your Name"}]
 dependencies = [
     "flask>=3.1.2",
@@ -34,3 +34,20 @@ pythonpath = ["backend"]
 [tool.setuptools.packages.find]
 include = ["backend.app*"]
 exclude = ["backend.app.db*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "D203", # 1 blank line required before class docstring (incompatible with D211)
+    "D213", # Multi-line docstring summary should start at the second line (incompatible with D212)
+    "COM812", # Trailing comma missing (conflicts with formatter)
+]
+
+[dependency-groups]
+dev = [
+    "pytest-cov>=7.0.0",
+]
