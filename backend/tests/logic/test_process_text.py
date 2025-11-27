@@ -174,9 +174,7 @@ def test_process_text_enable_journaling():
     assert "When you would like to be reminded?" in response
 
     goals = user_goals.get_user_goals(user["id"])
-    assert any(
-        g["goal_emoji"] == "📓" and "journaling" in g["goal_description"] for g in goals
-    )
+    assert any(g["goal_emoji"] == "📓" and "journaling" in g["goal_description"] for g in goals)
 
     # Test duplicate check
     response = process_text(user, "enable journaling")

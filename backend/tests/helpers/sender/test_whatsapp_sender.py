@@ -31,4 +31,3 @@ def test_send_whatsapp_message_failure():
             send_whatsapp_message("1234567890", "Hello")
 
         assert "Error sending WhatsApp message" in str(exc.value)
-

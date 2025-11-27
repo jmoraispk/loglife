@@ -25,12 +25,12 @@ def test_get_monday_before_edge_cases():
         # Monday Jan 1st 2024
         mock_datetime.now.return_value = datetime(2024, 1, 1, 12, 0, 0)
         result = week_module.get_monday_before()
-        assert result.date() == datetime(2024, 1, 1).date() # Should be same day
+        assert result.date() == datetime(2024, 1, 1).date()  # Should be same day
 
         # Sunday Jan 7th 2024
         mock_datetime.now.return_value = datetime(2024, 1, 7, 12, 0, 0)
         result = week_module.get_monday_before()
-        assert result.date() == datetime(2024, 1, 1).date() # Should be previous Monday
+        assert result.date() == datetime(2024, 1, 1).date()  # Should be previous Monday
 
 
 def test_look_back_summary(mocker):
@@ -44,9 +44,7 @@ def test_look_back_summary(mocker):
     """
     # Test with no goals
     mocker.patch.object(week_module, "get_user_goals", return_value=[])
-    result = week_module.look_back_summary(
-        user_id=1, days=3, start=datetime(2024, 1, 1)
-    )
+    result = week_module.look_back_summary(user_id=1, days=3, start=datetime(2024, 1, 1))
     assert "No goals set" in result
 
     # Test with goals and ratings
@@ -57,9 +55,7 @@ def test_look_back_summary(mocker):
             {"id": 1, "goal_emoji": "💪", "goal_description": "Exercise"},
         ],
     )
-    mocker.patch.object(
-        week_module, "get_rating_by_goal_and_date", return_value={"rating": 3}
-    )
+    mocker.patch.object(week_module, "get_rating_by_goal_and_date", return_value={"rating": 3})
 
     start = datetime(2024, 1, 1)
     result = week_module.look_back_summary(user_id=1, days=2, start=start)

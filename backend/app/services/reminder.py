@@ -89,20 +89,14 @@ def _check_reminders():
         # Check if current time matches reminder time (HH:MM)
         if local_now.hour == hours and local_now.minute == minutes:
             # Check if this is a journaling reminder
-            if (
-                user_goal["goal_emoji"] == "📓"
-                and user_goal["goal_description"] == "journaling"
-            ):
+            if user_goal["goal_emoji"] == "📓" and user_goal["goal_description"] == "journaling":
                 goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
                 if goals_not_tracked_today != []:
                     message: str = JOURNAL_REMINDER_MESSAGE.replace(
                         "<goals_not_tracked_today>",
                         "- *Did you complete the goals?*\n"
                         + "\n".join(
-                            [
-                                f"- {goal['goal_description']}"
-                                for goal in goals_not_tracked_today
-                            ]
+                            [f"- {goal['goal_description']}" for goal in goals_not_tracked_today]
                         ),
                     )
                 else:

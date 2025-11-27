@@ -32,7 +32,7 @@ def test_transcribe_audio():
 
     with (
         patch("app.helpers.audio.transcribe_audio.requests.post") as mock_post,
-        patch("app.helpers.audio.transcribe_audio.requests.get") as mock_get
+        patch("app.helpers.audio.transcribe_audio.requests.get") as mock_get,
     ):
         # Configure mock side effects
         mock_post.side_effect = [mock_upload_response, mock_transcript_response]

@@ -17,7 +17,9 @@ from .summarize_transcript import summarize_transcript
 from .transcript_to_base64 import transcript_to_base64
 
 
-def process_journal(sender: str, user: dict, audio_data: str, now: datetime | None = None) -> str | tuple[str, str]:
+def process_journal(
+    sender: str, user: dict, audio_data: str, now: datetime | None = None
+) -> str | tuple[str, str]:
     response = None
     journaling_goal_id: int | None = get_journal_goal_id(user["id"])
     if not journaling_goal_id:

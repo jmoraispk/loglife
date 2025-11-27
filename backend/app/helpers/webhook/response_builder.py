@@ -14,9 +14,7 @@ def error_response(message: str, data=None, status_code: int = 400) -> tuple[Res
     ), status_code
 
 
-def success_response(
-    message: str = None, status_code: int = 200, **kwargs
-) -> tuple[Response, int]:
+def success_response(message: str = None, status_code: int = 200, **kwargs) -> tuple[Response, int]:
     """Build a success response body."""
     return jsonify(
         {

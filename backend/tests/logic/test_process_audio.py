@@ -14,7 +14,7 @@ def test_process_audio_journaling_handled():
         patch("app.logic.process_audio.process_text") as mock_process_text,
         patch("app.logic.process_audio.transcribe_audio") as mock_transcribe,
         patch("app.logic.process_audio.process_journal") as mock_journal,
-        patch("app.logic.process_audio.send_message") as mock_send
+        patch("app.logic.process_audio.send_message") as mock_send,
     ):
         mock_journal.return_value = "Journaling processed"
 
@@ -38,7 +38,7 @@ def test_process_audio_transcription_fallback():
         patch("app.logic.process_audio.process_text") as mock_process_text,
         patch("app.logic.process_audio.transcribe_audio") as mock_transcribe,
         patch("app.logic.process_audio.process_journal") as mock_journal,
-        patch("app.logic.process_audio.send_message") as mock_send
+        patch("app.logic.process_audio.send_message") as mock_send,
     ):
         mock_journal.return_value = None  # Journaling didn't handle it
         mock_transcribe.return_value = "add goal run"
@@ -62,7 +62,7 @@ def test_process_audio_transcription_error():
         patch("app.logic.process_audio.process_text") as mock_process_text,
         patch("app.logic.process_audio.transcribe_audio") as mock_transcribe,
         patch("app.logic.process_audio.process_journal") as mock_journal,
-        patch("app.logic.process_audio.send_message") as mock_send
+        patch("app.logic.process_audio.send_message") as mock_send,
     ):
         mock_journal.return_value = None
         mock_transcribe.side_effect = RuntimeError("API Error")

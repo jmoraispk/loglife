@@ -24,12 +24,15 @@ def test_webhook_text_message(client):
         with patch("app.routes.webhook.process_text") as mock_process:
             mock_process.return_value = "Response message"
 
-            response = client.post("/webhook", json={
-                "sender": "1234567890",
-                "msg_type": "chat",
-                "raw_msg": "Hello",
-                "client_type": "whatsapp"
-            })
+            response = client.post(
+                "/webhook",
+                json={
+                    "sender": "1234567890",
+                    "msg_type": "chat",
+                    "raw_msg": "Hello",
+                    "client_type": "whatsapp",
+                },
+            )
 
             assert response.status_code == 200
             assert response.json["success"] is True
@@ -38,20 +41,24 @@ def test_webhook_text_message(client):
 
 def test_webhook_new_user(client):
     """Test handling a message from a new user."""
-    with patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user, \
-         patch("app.routes.webhook.create_user") as mock_create_user, \
-         patch("app.routes.webhook.process_text") as mock_process:
-
+    with (
+        patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user,
+        patch("app.routes.webhook.create_user") as mock_create_user,
+        patch("app.routes.webhook.process_text") as mock_process,
+    ):
         mock_get_user.return_value = None
         mock_create_user.return_value = {"id": 1, "phone_number": "1234567890", "timezone": "UTC"}
         mock_process.return_value = "Welcome"
 
-        response = client.post("/webhook", json={
-            "sender": "1234567890",
-            "msg_type": "chat",
-            "raw_msg": "Hello",
-            "client_type": "whatsapp"
-        })
+        response = client.post(
+            "/webhook",
+            json={
+                "sender": "1234567890",
+                "msg_type": "chat",
+                "raw_msg": "Hello",
+                "client_type": "whatsapp",
+            },
+        )
 
         assert response.status_code == 200
         mock_create_user.assert_called_once()
@@ -59,18 +66,22 @@ def test_webhook_new_user(client):
 
 def test_webhook_audio_message(client):
     """Test handling an audio message."""
-    with patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user, \
-         patch("app.routes.webhook.process_audio") as mock_process:
-
+    with (
+        patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user,
+        patch("app.routes.webhook.process_audio") as mock_process,
+    ):
         mock_get_user.return_value = {"id": 1}
         mock_process.return_value = "Audio processed"
 
-        response = client.post("/webhook", json={
-            "sender": "1234567890",
-            "msg_type": "audio",
-            "raw_msg": "base64audio",
-            "client_type": "whatsapp"
-        })
+        response = client.post(
+            "/webhook",
+            json={
+                "sender": "1234567890",
+                "msg_type": "audio",
+                "raw_msg": "base64audio",
+                "client_type": "whatsapp",
+            },
+        )
 
         assert response.status_code == 200
         assert response.json["message"] == "Audio processed"

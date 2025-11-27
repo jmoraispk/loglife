@@ -11,4 +11,3 @@ def test_send_emulator_message():
         message = "Test message"
         send_emulator_message(message)
         mock_queue.put.assert_called_once_with(message)
-

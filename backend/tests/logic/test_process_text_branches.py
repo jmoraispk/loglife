@@ -1,8 +1,8 @@
 """Tests for process_text logic (missing branches)."""
 
+from datetime import datetime
 
 import pytest
-from datetime import datetime
 from app.config import ERROR_NO_GOALS_SET, STYLE
 from app.db.operations import goal_ratings, goal_reminders, user_goals, users
 from app.logic.process_text import process_text
@@ -43,7 +43,7 @@ def test_process_text_rate_invalid_values():
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run")
 
-    with pytest.raises(Exception): # sqlite3.IntegrityError
+    with pytest.raises(Exception):  # sqlite3.IntegrityError
         process_text(user, "rate 1 4")
 
     with pytest.raises(Exception):
@@ -145,8 +145,9 @@ def test_process_text_rate_all_invalid_length():
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run")
 
-    response = process_text(user, "33") # 2 ratings for 1 goal
+    response = process_text(user, "33")  # 2 ratings for 1 goal
     assert "Invalid input" in response
+
 
 def test_process_text_goals_with_reminder():
     """Test listing goals when a reminder is set."""
@@ -155,7 +156,7 @@ def test_process_text_goals_with_reminder():
     goal_reminders.create_goal_reminder(user["id"], goal["id"], "08:00:00")
 
     response = process_text(user, "goals")
-    
+
     assert "🏃 Run" in response
     assert "⏰ 08:00 AM" in response
 
@@ -163,7 +164,7 @@ def test_process_text_goals_with_reminder():
 def test_process_text_week_no_goals():
     """Test week command with no goals."""
     user = users.create_user("+1234567890", "UTC")
-    
+
     response = process_text(user, "week")
     assert response == ERROR_NO_GOALS_SET
 
@@ -171,7 +172,7 @@ def test_process_text_week_no_goals():
 def test_process_text_lookback_no_goals():
     """Test lookback command with no goals."""
     user = users.create_user("+1234567890", "UTC")
-    
+
     response = process_text(user, "lookback")
     assert response == ERROR_NO_GOALS_SET
 
@@ -180,14 +181,14 @@ def test_process_text_rate_update():
     """Test updating an existing rating."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "🏃", "Run")
-    
+
     # Create initial rating
     process_text(user, "rate 1 3")
-    
+
     # Update rating
     response = process_text(user, "rate 1 2")
     assert STYLE[2] in response
-    
+
     today = datetime.now().strftime("%Y-%m-%d")
     rating = goal_ratings.get_rating_by_goal_and_date(goal["id"], today)
     assert rating["rating"] == 2
@@ -198,15 +199,15 @@ def test_process_text_rate_all_update():
     user = users.create_user("+1234567890", "UTC")
     goal1 = user_goals.create_goal(user["id"], "🏃", "Run")
     goal2 = user_goals.create_goal(user["id"], "📚", "Read")
-    
+
     # Create initial ratings
     process_text(user, "32")
-    
+
     # Update ratings - using "13" causes it to be parsed as time (1:00 PM)
     # Use inputs that won't be parsed as time, e.g., "33"
     response = process_text(user, "33")
     assert STYLE[3] in response
-    
+
     today = datetime.now().strftime("%Y-%m-%d")
     r1 = goal_ratings.get_rating_by_goal_and_date(goal1["id"], today)
     r2 = goal_ratings.get_rating_by_goal_and_date(goal2["id"], today)
@@ -219,10 +220,10 @@ def test_process_text_update_create_reminder():
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "🏃", "Run")
     # No reminder created
-    
+
     response = process_text(user, "update 1 10pm")
     assert "Reminder updated" in response
-    
+
     reminder = goal_reminders.get_goal_reminder_by_goal_id(goal["id"])
     assert reminder is not None
     assert reminder["reminder_time"] == "22:00:00"
@@ -233,7 +234,7 @@ def test_process_text_transcript_off_explicit():
     user = users.create_user("+1234567890", "UTC")
     # Default is enabled (1)
     assert users.get_user(user["id"])["send_transcript_file"] == 1
-    
+
     response = process_text(user, "transcript off")
     assert "Transcript files disabled" in response
     assert users.get_user(user["id"])["send_transcript_file"] == 0
@@ -242,7 +243,7 @@ def test_process_text_transcript_off_explicit():
 def test_process_text_transcript_invalid():
     """Test invalid transcript command."""
     user = users.create_user("+1234567890", "UTC")
-    
+
     response = process_text(user, "transcript foo")
     assert "Invalid command" in response
 
@@ -250,7 +251,7 @@ def test_process_text_transcript_invalid():
 def test_process_text_rate_all_no_goals():
     """Test rate all goals command when no goals exist."""
     user = users.create_user("+1234567890", "UTC")
-    
+
     response = process_text(user, "123")
     # "123" is valid digits but no goals to rate
     assert response == ERROR_NO_GOALS_SET

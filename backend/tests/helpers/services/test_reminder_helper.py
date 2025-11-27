@@ -18,4 +18,3 @@ def test_get_timezone_safe():
     assert get_timezone_safe(" America/New_York ") == ZoneInfo("America/New_York")
     assert get_timezone_safe("Not/AZone") == ZoneInfo("UTC")
     assert get_timezone_safe("") == ZoneInfo("UTC")
-

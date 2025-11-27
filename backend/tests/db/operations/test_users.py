@@ -115,9 +115,7 @@ def test_update_user():
     user = users.create_user("+1234567890", "America/New_York")
 
     # Act
-    updated_user = users.update_user(
-        user["id"], timezone="Europe/Paris", send_transcript_file=0
-    )
+    updated_user = users.update_user(user["id"], timezone="Europe/Paris", send_transcript_file=0)
 
     # Assert
     assert updated_user["timezone"] == "Europe/Paris"
