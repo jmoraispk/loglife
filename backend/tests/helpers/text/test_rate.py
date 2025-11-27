@@ -14,11 +14,11 @@ from app.helpers.text import rate
     ],
 )
 def test_is_valid_rating_digits(message, expected):
-    """
-    Test validation of rating digit strings.
+    """Test validation of rating digit strings.
 
     Arguments:
         message: Rating string to validate (parametrized)
         expected: Whether the rating is valid (parametrized)
+
     """
     assert rate.is_valid_rating_digits(message) == expected

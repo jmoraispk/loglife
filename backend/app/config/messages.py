@@ -1,5 +1,4 @@
-"""
-User-facing messages and text constants.
+"""User-facing messages and text constants.
 
 This module contains all user-facing messages, responses, and text strings
 used throughout the application. Centralizing messages makes translation

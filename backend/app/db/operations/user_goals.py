@@ -5,6 +5,7 @@ It handles creating, reading, updating, and deleting user goal records.
 """
 
 import sqlite3
+
 from app.db import connect
 
 
@@ -15,6 +16,7 @@ def get_user_goals(user_id: int) -> list[dict]:
     user_id -- The unique identifier of the user
 
     Returns a list of all user goal records ordered by creation date (newest first).
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -32,6 +34,7 @@ def get_goal(goal_id: int) -> dict | None:
     goal_id -- The unique identifier of the goal to retrieve
 
     Returns the goal record as a dictionary, or None if not found.
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -58,6 +61,7 @@ def create_goal(
     boost_level -- The boost level for the goal (default: 1)
 
     Returns the newly created goal record as a dictionary.
+
     """
     with connect() as conn:
         cur = conn.execute(
@@ -95,6 +99,7 @@ def update_goal(
     boost_level -- Optional new boost level to assign
 
     Returns the updated goal record as a dictionary.
+
     """
     updates = []
     params = []
@@ -127,6 +132,7 @@ def delete_goal(goal_id: int):
 
     Arguments:
     goal_id -- The unique identifier of the goal to delete
+
     """
     with connect() as conn:
         conn.execute("DELETE FROM user_goals WHERE id = ?", (goal_id,))

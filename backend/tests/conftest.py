@@ -1,15 +1,15 @@
 """Pytest configuration and fixtures for database testing."""
 
-import pytest
 import sqlite3
 from contextlib import contextmanager
+
+import pytest
 from app.config.paths import SCHEMA_FILE
 
 
 @pytest.fixture
 def test_db():
-    """
-    Creates a temporary test database for each test.
+    """Creates a temporary test database for each test.
 
     This fixture:
     1. Creates a temporary SQLite database in memory (fast!)
@@ -27,7 +27,7 @@ def test_db():
     conn.row_factory = sqlite3.Row
 
     # Apply your schema
-    with open(SCHEMA_FILE, "r", encoding="utf-8") as f:
+    with open(SCHEMA_FILE, encoding="utf-8") as f:
         conn.executescript(f.read())
 
     yield conn  # Provide the connection to the test
@@ -37,8 +37,7 @@ def test_db():
 
 @pytest.fixture
 def mock_connect(monkeypatch, test_db):
-    """
-    Mocks the connect() function in ALL db operations modules.
+    """Mocks the connect() function in ALL db operations modules.
 
     This ensures your db operations use the test database
     instead of the real one.

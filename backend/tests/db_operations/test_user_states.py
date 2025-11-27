@@ -4,8 +4,7 @@ from app.db.operations import user_states, users
 
 
 def test_create_user_state(mock_connect):
-    """
-    Test creating a new user state with upsert behavior.
+    """Test creating a new user state with upsert behavior.
 
     Verifies successful state creation with or without temp_data, and
     ensures the upsert mechanism properly updates existing states instead
@@ -13,6 +12,7 @@ def test_create_user_state(mock_connect):
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange - create a user first
     user = users.create_user("+1234567890", "America/New_York")
@@ -29,7 +29,7 @@ def test_create_user_state(mock_connect):
 
     # Test creating state with temp_data
     state2 = user_states.create_user_state(
-        user_id=user["id"], state="SETTING_GOAL", temp_data='{"goal_emoji": "🎯"}'
+        user_id=user["id"], state="SETTING_GOAL", temp_data='{"goal_emoji": "🎯"}',
     )
 
     assert state2["state"] == "SETTING_GOAL"
@@ -37,7 +37,7 @@ def test_create_user_state(mock_connect):
 
     # Test upsert behavior - updating existing state
     state3 = user_states.create_user_state(
-        user_id=user["id"], state="RATING_GOALS", temp_data='{"rating": 3}'
+        user_id=user["id"], state="RATING_GOALS", temp_data='{"rating": 3}',
     )
 
     assert state3["state"] == "RATING_GOALS"
@@ -49,8 +49,7 @@ def test_create_user_state(mock_connect):
 
 
 def test_get_user_state(mock_connect):
-    """
-    Test retrieving a user's current state.
+    """Test retrieving a user's current state.
 
     Verifies that existing user states can be successfully retrieved with
     all fields (state and temp_data), while non-existent user states
@@ -58,11 +57,12 @@ def test_get_user_state(mock_connect):
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange - create user and state
     user = users.create_user("+1234567890", "America/New_York")
     user_states.create_user_state(
-        user_id=user["id"], state="MAIN_MENU", temp_data='{"key": "value"}'
+        user_id=user["id"], state="MAIN_MENU", temp_data='{"key": "value"}',
     )
 
     # Test retrieving existing state
@@ -81,8 +81,7 @@ def test_get_user_state(mock_connect):
 
 
 def test_update_user_state(mock_connect):
-    """
-    Test updating user state information with optional fields.
+    """Test updating user state information with optional fields.
 
     Verifies that individual fields (state, temp_data) can be updated
     independently or together, and that unchanged fields retain their
@@ -91,6 +90,7 @@ def test_update_user_state(mock_connect):
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange - create user and state
     user = users.create_user("+1234567890", "America/New_York")
@@ -104,7 +104,7 @@ def test_update_user_state(mock_connect):
 
     # Test updating temp_data only
     updated_state = user_states.update_user_state(
-        user["id"], temp_data='{"goal_emoji": "🎯"}'
+        user["id"], temp_data='{"goal_emoji": "🎯"}',
     )
 
     assert updated_state["state"] == "SETTING_GOAL"
@@ -112,7 +112,7 @@ def test_update_user_state(mock_connect):
 
     # Test updating both fields
     updated_state = user_states.update_user_state(
-        user["id"], state="RATING_GOALS", temp_data='{"rating": 3}'
+        user["id"], state="RATING_GOALS", temp_data='{"rating": 3}',
     )
 
     assert updated_state["state"] == "RATING_GOALS"
@@ -124,14 +124,14 @@ def test_update_user_state(mock_connect):
 
 
 def test_delete_user_state(mock_connect):
-    """
-    Test deleting a user state from the database.
+    """Test deleting a user state from the database.
 
     Verifies that a user state can be successfully deleted and that
     subsequent attempts to retrieve the deleted state return None.
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange - create user and state
     user = users.create_user("+1234567890", "America/New_York")

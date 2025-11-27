@@ -1,16 +1,20 @@
-from ..transcribe_audio import transcribe_audio
-from app.db import create_audio_journal_entry, get_user_audio_journal_entries, get_goal_reminder_by_goal_id, get_user
+import logging
+from datetime import UTC, datetime, time, timezone
+from zoneinfo import ZoneInfo
 
+from app.db import (
+    create_audio_journal_entry,
+    get_goal_reminder_by_goal_id,
+    get_user,
+    get_user_audio_journal_entries,
+)
 from app.helpers.sender import send_message
 from app.helpers.services.reminder import get_timezone_safe
 
+from ..transcribe_audio import transcribe_audio
+from .get_journal_goal_id import get_journal_goal_id
 from .summarize_transcript import summarize_transcript
 from .transcript_to_base64 import transcript_to_base64
-from .get_journal_goal_id import get_journal_goal_id
-
-from datetime import datetime, time, timezone
-from zoneinfo import ZoneInfo
-import logging
 
 
 def process_journal(sender: str, user: dict, audio_data: str) -> str | tuple[str, str]:
@@ -23,9 +27,9 @@ def process_journal(sender: str, user: dict, audio_data: str) -> str | tuple[str
     reminder_time: time = datetime.strptime(reminder_time_str, "%H:%M:%S").time()
     user_timezone: str = get_user(user["id"])["timezone"]
     tz: ZoneInfo = get_timezone_safe(user_timezone)
-    now_utc: datetime = datetime.now(timezone.utc)
+    now_utc: datetime = datetime.now(UTC)
     local_now: datetime = now_utc.astimezone(tz).replace(
-        second=0, microsecond=0
+        second=0, microsecond=0,
     )  # current time in user's timezone
     if reminder_time <= local_now.time():
         # Store in database (update if exists, create if not)
@@ -42,24 +46,24 @@ def process_journal(sender: str, user: dict, audio_data: str) -> str | tuple[str
             try:
                 transcript: str = transcribe_audio(audio_data)
                 transcript_file: str = transcript_to_base64(transcript)
-                
+
                 send_message(sender, "Audio transcribed. Summarizing...")
-                
+
                 try:
                     summary: str = summarize_transcript(transcript)
                     create_audio_journal_entry(
-                        user_id=user["id"], transcription_text=transcript, summary_text=summary
+                        user_id=user["id"], transcription_text=transcript, summary_text=summary,
                     )
                     send_message(sender, "Summary stored in Database.")
 
                     response = transcript_file, summary
-                    
+
                 except RuntimeError as e:
-                    logging.error(f"Error summarizing transcript: {e}")
+                    logging.exception(f"Error summarizing transcript: {e}")
                     response = "Summarization failed!"
-                    
+
             except RuntimeError as e:
-                logging.error(f"Error transcribing audio: {e}")
+                logging.exception(f"Error transcribing audio: {e}")
                 response = "Transcription failed!"
-    
+
     return response

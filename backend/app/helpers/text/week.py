@@ -1,11 +1,12 @@
 """Weekly look-back text helpers for summaries."""
 
 from datetime import datetime, timedelta
+
 from app.config import (
     LOOKBACK_NO_GOALS,
     STYLE,
 )
-from app.db import get_user_goals, get_rating_by_goal_and_date
+from app.db import get_rating_by_goal_and_date, get_user_goals
 
 
 def get_monday_before() -> datetime:
@@ -27,6 +28,7 @@ def look_back_summary(user_id: int, days: int, start: datetime) -> str:
     start -- The starting datetime for the look-back window
 
     Returns a formatted summary string or a predefined message if no goals exist.
+
     """
     summary: str = "```"
 
@@ -45,18 +47,18 @@ def look_back_summary(user_id: int, days: int, start: datetime) -> str:
         ratings_data = []
         for user_goal in user_goals:
             user_goal_rating: dict | None = get_rating_by_goal_and_date(
-                user_goal["id"], storage_date
+                user_goal["id"], storage_date,
             )
             if user_goal_rating:
                 ratings_data.append(
                     {
                         "goal_emoji": user_goal["goal_emoji"],
                         "rating": user_goal_rating["rating"],
-                    }
+                    },
                 )
             else:
                 ratings_data.append(
-                    {"goal_emoji": user_goal["goal_emoji"], "rating": None}
+                    {"goal_emoji": user_goal["goal_emoji"], "rating": None},
                 )
 
         # Create status symbols for each goal

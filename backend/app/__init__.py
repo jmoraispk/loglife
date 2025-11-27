@@ -1,9 +1,10 @@
 """Flask app factory wiring logging, DB, services, and blueprints."""
 
 from flask import Flask
-from app.routes import emulator_bp, webhook_bp, events_bp
-from app.config import setup_logging, TEMPLATES, STATIC
+
+from app.config import STATIC, TEMPLATES, setup_logging
 from app.db import init_db
+from app.routes import emulator_bp, events_bp, webhook_bp
 from app.services import start_reminder_service
 
 

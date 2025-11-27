@@ -1,8 +1,8 @@
 import base64
 
+
 def transcript_to_base64(text: str) -> str:
-    """
-    Converts a string into Base64-encoded data for a .txt file.
+    """Converts a string into Base64-encoded data for a .txt file.
     Returns only the Base64 string.
     """
     file_bytes = text.encode("utf-8")

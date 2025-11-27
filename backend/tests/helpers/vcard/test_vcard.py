@@ -16,12 +16,12 @@ from app.helpers.vcard import vcard
     ],
 )
 def test_extract_phone_number(vcard_string, expected_phone):
-    """
-    Test phone number extraction from vcard strings.
+    """Test phone number extraction from vcard strings.
 
     Arguments:
         vcard_string: Vcard formatted string to extract phone from (parametrized)
         expected_phone: Expected extracted phone number (parametrized)
+
     """
     result = vcard.extract_phone_number(vcard_string)
     assert result == expected_phone

@@ -4,9 +4,11 @@ This module provides functionality to send messages through the WhatsApp API.
 It handles communication with the external WhatsApp service endpoint.
 """
 
-import requests
-from app.config import WHATSAPP_API_URL
 import logging
+
+import requests
+
+from app.config import WHATSAPP_API_URL
 
 
 def send_whatsapp_message(number: str, message: str):
@@ -15,6 +17,7 @@ def send_whatsapp_message(number: str, message: str):
     Arguments:
     number -- The phone number to send the message to
     message -- The message content to send
+
     """
     payload = {"number": number, "message": message}
     headers = {"Content-Type": "application/json"}
@@ -23,5 +26,5 @@ def send_whatsapp_message(number: str, message: str):
         requests.post(WHATSAPP_API_URL, json=payload, headers=headers)
     except Exception as e:
         error = f"Error sending WhatsApp message > {e}"
-        logging.error(error)
+        logging.exception(error)
         raise RuntimeError(error)

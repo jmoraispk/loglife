@@ -1,40 +1,41 @@
 """Message processing logic for inbound WhatsApp text commands."""
 
+import json
+from datetime import datetime, timedelta
+
 from app.config import (
+    COMMAND_ALIASES,
+    ERROR_INVALID_INPUT_LENGTH,
     ERROR_NO_GOALS_SET,
     HELP_MESSAGE,
-    ERROR_INVALID_INPUT_LENGTH,
+    STYLE,
+    SUCCESS_INDIVIDUAL_RATING,
     SUCCESS_RATINGS_SUBMITTED,
     USAGE_RATE,
-    SUCCESS_INDIVIDUAL_RATING,
-    STYLE,
-    COMMAND_ALIASES
 )
 from app.db import (
     create_goal,
-    get_user_goals,
-    get_goal,
-    create_rating,
-    delete_goal,
-    get_rating_by_goal_and_date,
-    update_rating,
-    create_user_state,
-    get_user_state,
     create_goal_reminder,
+    create_rating,
+    create_user_state,
+    delete_goal,
     delete_user_state,
+    get_goal,
     get_goal_reminder_by_goal_id,
+    get_rating_by_goal_and_date,
+    get_user_goals,
+    get_user_state,
     update_goal_reminder,
-    update_user
+    update_rating,
+    update_user,
 )
 from app.helpers import (
     extract_emoji,
-    is_valid_rating_digits,
     get_monday_before,
+    is_valid_rating_digits,
     look_back_summary,
     parse_time_string,
 )
-from datetime import datetime, timedelta
-import json
 
 
 def process_text(user: dict, message: str) -> str:
@@ -49,6 +50,7 @@ def process_text(user: dict, message: str) -> str:
     message -- The incoming text message content
 
     Returns the WhatsApp response text to send back to the user.
+
     """
     message: str = message.strip().lower()
 
@@ -71,14 +73,14 @@ def process_text(user: dict, message: str) -> str:
                     temp_data=json.dumps({"goal_id": goal["id"]}),
                 )
                 return "Goal Added successfully! When you would like to be reminded?"
-    
+
     elif message == "enable journaling":
         # Check if user already has a journaling goal
         user_goals: list[dict] = get_user_goals(user_id)
         for goal in user_goals:
             if goal["goal_emoji"] == "📓" and "journaling" in goal["goal_description"]:
                 return "✅ You already have a journaling goal! Check 'goals' to see it."
-        
+
         return process_text(user, "add goal 📓 journaling")
 
     elif message.startswith("delete"):
@@ -90,11 +92,11 @@ def process_text(user: dict, message: str) -> str:
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals or goal_num > len(user_goals) or goal_num < 1:
             return "Invalid goal number. Type 'goals' to see your goals."
-        
+
         goal: dict = user_goals[goal_num - 1]
 
         delete_goal(goal["id"])
-        
+
         return f"✅ Goal deleted: {goal['goal_emoji']} {goal['goal_description']}"
 
     elif parse_time_string(message) is not None:
@@ -107,7 +109,7 @@ def process_text(user: dict, message: str) -> str:
         goal_id = temp.get("goal_id")
 
         create_goal_reminder(
-            user_id=user_id, user_goal_id=goal_id, reminder_time=normalized_time
+            user_id=user_id, user_goal_id=goal_id, reminder_time=normalized_time,
         )
         delete_user_state(user_id)
 
@@ -136,13 +138,13 @@ def process_text(user: dict, message: str) -> str:
                 time_obj = datetime.strptime(reminder["reminder_time"], "%H:%M:%S")
                 time_display = f" ⏰ {time_obj.strftime('%I:%M %p')}"
             goal_lines.append(
-                f"{i}. {goal['goal_emoji']} {goal['goal_description']} (boost {goal['boost_level']}) {time_display}"
+                f"{i}. {goal['goal_emoji']} {goal['goal_description']} (boost {goal['boost_level']}) {time_display}",
             )
 
         response = "```" + "\n".join(goal_lines) + "```"
         response += "\n\n💡 _Tips:_\n_Update reminders with `update [goal#] [time]`_\n_Delete goals with `delete [goal#]`_"
         return response
-    
+
     elif message.startswith("update"):
         parts = message.replace("update", "").strip().split(" ")
         if len(parts) != 2:
@@ -154,37 +156,36 @@ def process_text(user: dict, message: str) -> str:
         normalized_time = parse_time_string(time_input)
         if not normalized_time:
             return "Invalid time format. Try: 8pm, 9:30am, 20:00"
-        
+
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals or goal_num > len(user_goals) or goal_num < 1:
             return "Invalid goal number. Type 'goals' to see your goals."
-        
+
         goal: dict = user_goals[goal_num - 1]
 
         reminder: dict | None = get_goal_reminder_by_goal_id(goal["id"])
-        
+
         # Create reminder if it doesn't exist, otherwise update it
         if reminder is None:
             create_goal_reminder(
-                user_id=user_id, user_goal_id=goal["id"], reminder_time=normalized_time
+                user_id=user_id, user_goal_id=goal["id"], reminder_time=normalized_time,
             )
         else:
             update_goal_reminder(reminder["id"], reminder_time=normalized_time)
-        
+
         time_obj = datetime.strptime(normalized_time, "%H:%M:%S")
         display_time = time_obj.strftime("%I:%M %p")
-        
+
         return f"✅ Reminder updated! I'll remind you at {display_time} for {goal['goal_emoji']} {goal['goal_description']}"
-    
+
     elif "transcript" in message:
         if "on" in message:
             update_user(user_id, send_transcript_file=1)
             return "✅ Transcript files enabled! You'll now receive transcript file with your audio journaling."
-        elif "off" in message:
+        if "off" in message:
             update_user(user_id, send_transcript_file=0)
             return "✅ Transcript files disabled! You'll only receive the summary message with your audio journaling."
-        else:
-            return "Invalid command. Usage: transcript [on|off]"
+        return "Invalid command. Usage: transcript [on|off]"
 
     elif message == "week":
         start: datetime = get_monday_before()
@@ -202,7 +203,7 @@ def process_text(user: dict, message: str) -> str:
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals:
             return ERROR_NO_GOALS_SET
-        
+
         goal_emojis: list[str] = [goal["goal_emoji"] for goal in user_goals]
         summary += "    " + " ".join(goal_emojis) + "\n```"
 
@@ -215,7 +216,7 @@ def process_text(user: dict, message: str) -> str:
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals:
             return ERROR_NO_GOALS_SET
-        
+
         # Extract number of days from message (e.g., "lookback 5" or "lookback")
         parts: list[str] = message.split()
         if len(parts) == 2 and parts[1].isdigit():
@@ -230,13 +231,13 @@ def process_text(user: dict, message: str) -> str:
         end_date: str = end.strftime("%b %d")
         if end_date.startswith(start_date[:3]):  # Same month
             end_date = end_date[4:]
-        
+
         summary: str = f"```{days} Days: {start_date} - {end_date}\n"
-        
+
         # Add Goals Header
         goal_emojis: list[str] = [goal["goal_emoji"] for goal in user_goals]
         summary += "    " + " ".join(goal_emojis) + "\n```"
-        
+
         # Add Day-by-Day Summary
         summary += look_back_summary(user_id, days, start)
         return summary
@@ -264,7 +265,7 @@ def process_text(user: dict, message: str) -> str:
         goal: dict = user_goals[goal_num - 1]
 
         rating: dict | None = get_rating_by_goal_and_date(
-            goal["id"], datetime.now().strftime("%Y-%m-%d")
+            goal["id"], datetime.now().strftime("%Y-%m-%d"),
         )
 
         if not rating:
@@ -292,7 +293,7 @@ def process_text(user: dict, message: str) -> str:
         # Validate input length
         if len(message) != len(user_goals):
             return ERROR_INVALID_INPUT_LENGTH.replace(
-                "<num_goals>", str(len(user_goals))
+                "<num_goals>", str(len(user_goals)),
             )
 
         ratings: list[int] = [
@@ -301,7 +302,7 @@ def process_text(user: dict, message: str) -> str:
 
         for i, goal in enumerate(user_goals):
             rating: dict | None = get_rating_by_goal_and_date(
-                goal["id"], datetime.now().strftime("%Y-%m-%d")
+                goal["id"], datetime.now().strftime("%Y-%m-%d"),
             )
             if not rating:
                 create_rating(goal["id"], ratings[i])

@@ -4,14 +4,16 @@ This module provides functionality to summarize audio transcripts using OpenAI's
 chat completion API with a configured system prompt.
 """
 
+import logging
+
 import requests
+
 from app.config import (
+    OPENAI_API_KEY,
     OPENAI_API_URL,
     OPENAI_CHAT_MODEL,
     OPENAI_SUMMARIZATION_SYSTEM_PROMPT,
-    OPENAI_API_KEY,
 )
-import logging
 
 
 def summarize_transcript(transcript: str) -> str:
@@ -27,6 +29,7 @@ def summarize_transcript(transcript: str) -> str:
     
     Raises:
     RuntimeError -- If the API request fails due to connection, timeout, or HTTP errors
+
     """
     logging.debug(f"Incoming transcript: {transcript}")
     payload = {

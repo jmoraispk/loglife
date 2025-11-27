@@ -1,8 +1,11 @@
 """Audio processing workflow for inbound WhatsApp messages."""
 
 import logging
-from app.helpers import process_journal, transcribe_audio, send_message
+
+from app.helpers import process_journal, send_message, transcribe_audio
+
 from .process_text import process_text
+
 
 def process_audio(sender: str, user: dict, audio_data: str) -> str:
     """Processes an incoming audio message from a user.
@@ -12,12 +15,12 @@ def process_audio(sender: str, user: dict, audio_data: str) -> str:
     audio_data -- Base64 encoded audio payload
 
     Returns the summarized text generated from the audio.
-    """
 
+    """
     send_message(sender, "Audio received. Transcribing...")
-    
+
     response = process_journal(sender, user, audio_data)
-    
+
     # Transcribe audio if journaling isn't processed by the following reasons:
     # - journaling not enabled
     # - time not reached for journaling
@@ -28,7 +31,7 @@ def process_audio(sender: str, user: dict, audio_data: str) -> str:
             logging.debug(f"Transcript: {transcript}")
             response = process_text(user, transcript)
         except RuntimeError as e:
-            logging.error(f"Error transcribing audio: {e}")
+            logging.exception(f"Error transcribing audio: {e}")
             response = "Audio transcription failed!"
 
     return response

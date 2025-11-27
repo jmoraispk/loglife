@@ -31,8 +31,7 @@ from app.helpers.text import reminder_time
     ],
 )
 def test_parse_time_string(message, expected):
-    """
-    Test parsing of time strings in various formats.
+    """Test parsing of time strings in various formats.
 
     Verifies support for HH:MM, 12-hour AM/PM, and hour-only formats,
     and properly rejects invalid time inputs.
@@ -40,5 +39,6 @@ def test_parse_time_string(message, expected):
     Arguments:
         message: Time string to parse (parametrized)
         expected: Whether parsing should succeed (parametrized)
+
     """
     assert (reminder_time.parse_time_string(message) is not None) == expected

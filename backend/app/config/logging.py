@@ -4,10 +4,11 @@ Sets up console logging for development and rotating file handlers for
 production access/error logs with environment-aware levels and filters.
 """
 
-import os
 import logging
+import os
 from logging.handlers import RotatingFileHandler
-from app.config import FLASK_ENV, LOGS, ACCESS_LOG, ERROR_LOG
+
+from app.config import ACCESS_LOG, ERROR_LOG, FLASK_ENV, LOGS
 
 
 def _allow_up_to_info(record: logging.LogRecord) -> bool:
@@ -34,37 +35,37 @@ def setup_logging():
         console: logging.StreamHandler = logging.StreamHandler()
         console.setLevel(log_level)
         console.setFormatter(
-            logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+            logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s"),
         )
         root.addHandler(console)
         return
 
     # Setup for production
     os.makedirs(
-        LOGS, exist_ok=True
+        LOGS, exist_ok=True,
     )  # exist_ok=True tells os.makedirs not to raise an error if LOGS already exists. It creates the directory only if needed.
 
     # Configure rotating access log handler for INFO-level logs
     access_handler: RotatingFileHandler = RotatingFileHandler(
-        ACCESS_LOG, maxBytes=10 * 1024 * 1024, backupCount=1
+        ACCESS_LOG, maxBytes=10 * 1024 * 1024, backupCount=1,
     )  # max file size 10MB, keep only 1 backup
     access_handler.setLevel(logging.INFO)
     access_handler.addFilter(
-        _allow_up_to_info
+        _allow_up_to_info,
     )  # only INFO logs will be processed by the access handler
     access_handler.setFormatter(
-        logging.Formatter("%(asctime)s [%(levelname)s]: %(message)s")
+        logging.Formatter("%(asctime)s [%(levelname)s]: %(message)s"),
     )
 
     # Configure rotating error log handler for ERROR-level logs
     error_handler: RotatingFileHandler = RotatingFileHandler(
-        ERROR_LOG, maxBytes=10 * 1024 * 1024, backupCount=1
+        ERROR_LOG, maxBytes=10 * 1024 * 1024, backupCount=1,
     )  # max file size 10MB, keep only 1 backup
     error_handler.setLevel(
-        logging.ERROR
+        logging.ERROR,
     )  # only ERROR logs will be processed by the error handler
     error_handler.setFormatter(
-        logging.Formatter("%(asctime)s [%(levelname)s]: %(message)s")
+        logging.Formatter("%(asctime)s [%(levelname)s]: %(message)s"),
     )
 
     # root receives everything at or above INFO that is not ERROR

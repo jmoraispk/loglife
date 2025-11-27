@@ -12,11 +12,11 @@ from app.helpers.text import goal
     ],
 )
 def test_extract_emoji(text, expected):
-    """
-    Test emoji extraction from goal text.
+    """Test emoji extraction from goal text.
 
     Arguments:
         text: Goal text to extract emoji from (parametrized)
         expected: Expected emoji result (parametrized)
+
     """
     assert goal.extract_emoji(text) == expected

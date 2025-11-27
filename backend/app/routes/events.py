@@ -5,6 +5,7 @@ using Server-Sent Events protocol.
 """
 
 from flask import Blueprint, Response
+
 from app.helpers import log_queue
 
 events_bp = Blueprint("events", __name__)
@@ -16,6 +17,7 @@ def events():
     
     Returns:
         Response: SSE stream with log messages
+
     """
     def stream():
         while True:

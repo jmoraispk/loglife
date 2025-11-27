@@ -1,18 +1,18 @@
-"""
-Tests for the reminder service functionality.
+"""Tests for the reminder service functionality.
 
 This module tests reminder-related operations including timezone handling,
 reminder scheduling calculations, and reminder notification triggering.
 """
 
+from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
-from datetime import datetime, timezone, timedelta
+
 import app.services.reminder as reminder_module
 from app.helpers import get_timezone_safe
 
+
 def test_get_timezone_safe():
-    """
-    Test safe timezone parsing with fallback to UTC.
+    """Test safe timezone parsing with fallback to UTC.
 
     Verifies that the get_timezone_safe function correctly handles:
     - Valid timezone strings
@@ -21,18 +21,17 @@ def test_get_timezone_safe():
     - Empty strings (defaults to UTC)
     """
     assert get_timezone_safe("America/New_York") == ZoneInfo(
-        "America/New_York"
+        "America/New_York",
     )
     assert get_timezone_safe(" America/New_York ") == ZoneInfo(
-        "America/New_York"
+        "America/New_York",
     )
     assert get_timezone_safe("Not/AZone") == ZoneInfo("UTC")
     assert get_timezone_safe("") == ZoneInfo("UTC")
 
 
 def test_next_reminder_seconds(mocker):
-    """
-    Test calculation of seconds until next reminder.
+    """Test calculation of seconds until next reminder.
 
     Verifies that the _next_reminder_seconds function correctly:
     - Calculates wait time for upcoming reminders (capped at 60s)
@@ -41,8 +40,9 @@ def test_next_reminder_seconds(mocker):
 
     Arguments:
         mocker: pytest-mock fixture for patching dependencies
+
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     # Set a reminder 30 minutes in the future
     reminder_time = (now + timedelta(minutes=30)).strftime("%H:%M")
 
@@ -67,8 +67,7 @@ def test_next_reminder_seconds(mocker):
 
 
 def test_check_reminders(mocker):
-    """
-    Test reminder checking and notification sending.
+    """Test reminder checking and notification sending.
 
     Verifies that the _check_reminders function correctly:
     - Identifies reminders that are due at the current time
@@ -78,8 +77,9 @@ def test_check_reminders(mocker):
 
     Arguments:
         mocker: pytest-mock fixture for patching dependencies
+
     """
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     reminder_time = now.strftime("%H:%M")
 
     # Mock data
@@ -87,7 +87,7 @@ def test_check_reminders(mocker):
         reminder_module,
         "get_all_goal_reminders",
         return_value=[
-            {"id": 1, "user_id": 1, "user_goal_id": 10, "reminder_time": reminder_time}
+            {"id": 1, "user_id": 1, "user_goal_id": 10, "reminder_time": reminder_time},
         ],
     )
     mocker.patch.object(

@@ -5,8 +5,7 @@ from app.db.operations import users
 
 
 def test_create_user(mock_connect):
-    """
-    Test creating a new user with unique phone number.
+    """Test creating a new user with unique phone number.
 
     Verifies successful user creation with valid phone number and timezone,
     and ensures duplicate phone numbers are properly rejected with an
@@ -14,6 +13,7 @@ def test_create_user(mock_connect):
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Act
     user = users.create_user(phone_number="+1234567890", timezone="America/New_York")
@@ -31,8 +31,7 @@ def test_create_user(mock_connect):
 
 
 def test_get_user(mock_connect):
-    """
-    Test retrieving a user by their unique ID.
+    """Test retrieving a user by their unique ID.
 
     Verifies that existing users can be successfully retrieved by ID and
     returns all expected fields, while non-existent user IDs properly
@@ -40,10 +39,11 @@ def test_get_user(mock_connect):
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange - create a user first
     created_user = users.create_user(
-        phone_number="+1234567890", timezone="America/New_York"
+        phone_number="+1234567890", timezone="America/New_York",
     )
 
     # Act
@@ -59,8 +59,7 @@ def test_get_user(mock_connect):
 
 
 def test_get_user_by_phone_number(mock_connect):
-    """
-    Test retrieving a user by their phone number.
+    """Test retrieving a user by their phone number.
 
     Verifies that users can be looked up by phone number and returns the
     complete user record, while non-existent phone numbers properly return
@@ -68,6 +67,7 @@ def test_get_user_by_phone_number(mock_connect):
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange
     users.create_user(phone_number="+1234567890", timezone="America/New_York")
@@ -81,8 +81,7 @@ def test_get_user_by_phone_number(mock_connect):
 
 
 def test_get_all_users(mock_connect):
-    """
-    Test retrieving all users from the database.
+    """Test retrieving all users from the database.
 
     Verifies that all user records are returned with complete field data,
     and that the result set contains all expected users regardless of
@@ -90,6 +89,7 @@ def test_get_all_users(mock_connect):
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange - create multiple users
     users.create_user("+1111111111", "America/New_York")
@@ -115,8 +115,7 @@ def test_get_all_users(mock_connect):
 
 
 def test_update_user(mock_connect):
-    """
-    Test updating user information with optional fields.
+    """Test updating user information with optional fields.
 
     Verifies that individual fields (phone_number, timezone) can be updated
     independently or together, and that unchanged fields retain their
@@ -124,6 +123,7 @@ def test_update_user(mock_connect):
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange
     user = users.create_user("+1234567890", "America/New_York")
@@ -138,14 +138,14 @@ def test_update_user(mock_connect):
 
 
 def test_delete_user(mock_connect):
-    """
-    Test deleting a user from the database.
+    """Test deleting a user from the database.
 
     Verifies that a user can be successfully deleted by ID and that
     subsequent attempts to retrieve the deleted user return None.
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange
     user = users.create_user("+1234567890", "America/New_York")

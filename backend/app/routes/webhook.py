@@ -4,12 +4,14 @@ This module defines a Flask blueprint for handling inbound WhatsApp messages.
 It processes incoming messages (text, audio, or VCARD) and routes them to the appropriate handlers.
 """
 
-from flask import Blueprint, request, g
-from flask.typing import ResponseReturnValue
-from app.logic import process_vard, process_audio, process_text
-from app.db import get_user_by_phone_number, create_user
-from app.helpers import get_timezone_from_number, success_response, error_response
 import logging
+
+from flask import Blueprint, g, request
+from flask.typing import ResponseReturnValue
+
+from app.db import create_user, get_user_by_phone_number
+from app.helpers import error_response, get_timezone_from_number, success_response
+from app.logic import process_audio, process_text, process_vard
 
 webhook_bp = Blueprint("webhook", __name__)
 
@@ -35,7 +37,7 @@ def webhook() -> ResponseReturnValue:
         logging.info(f"Created new user {user} with timezone {user_timezone}")
     else:
         logging.info(f"Found existing user for sender: {user}")
-    
+
     extra_data = {}
     try:
         if msg_type == "chat":
@@ -53,10 +55,10 @@ def webhook() -> ResponseReturnValue:
 
         logging.info(
             f"Webhook processed type {msg_type} for {sender}, "
-            f"response generated: {response_message}"
+            f"response generated: {response_message}",
         )
         return success_response(message=response_message, **extra_data)
     except Exception as e:
         error = f"Error processing webhook > {e}"
-        logging.error(error)
+        logging.exception(error)
         return error_response(error)

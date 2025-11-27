@@ -1,6 +1,7 @@
 """Tests for transcript summarization helpers."""
 
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
+
 from app.helpers.audio.journaling.summarize_transcript import summarize_transcript
 
 
@@ -10,7 +11,7 @@ def test_summarize_transcript(mock_post):
     # Arrange
     mock_response = MagicMock()
     mock_response.json.return_value = {
-        "choices": [{"message": {"content": "Summarized text"}}]
+        "choices": [{"message": {"content": "Summarized text"}}],
     }
     mock_response.raise_for_status.return_value = None
     mock_post.return_value = mock_response

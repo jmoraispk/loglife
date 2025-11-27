@@ -1,5 +1,5 @@
 """Helper functions for building webhook response bodies."""
-from flask import jsonify, Response
+from flask import Response, jsonify
 
 
 def error_response(message: str, data=None, status_code: int = 400) -> tuple[Response, int]:

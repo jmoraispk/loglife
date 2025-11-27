@@ -4,8 +4,7 @@ from app.db.operations import goal_reminders, user_goals, users
 
 
 def test_create_goal_reminder(mock_connect):
-    """
-    Test creating a new goal reminder with specified time.
+    """Test creating a new goal reminder with specified time.
 
     Verifies successful reminder creation linking user, goal, and reminder
     time, ensuring all fields are properly stored and multiple reminders
@@ -13,6 +12,7 @@ def test_create_goal_reminder(mock_connect):
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange - create user and goal
     user = users.create_user("+1234567890", "America/New_York")
@@ -20,7 +20,7 @@ def test_create_goal_reminder(mock_connect):
 
     # Test successful creation
     reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00"
+        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00",
     )
 
     # Assert successful creation
@@ -34,7 +34,7 @@ def test_create_goal_reminder(mock_connect):
 
     # Test creating another reminder
     reminder2 = goal_reminders.create_goal_reminder(
-        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-26 10:00:00"
+        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-26 10:00:00",
     )
 
     assert reminder2["reminder_time"] == "2024-12-26 10:00:00"
@@ -42,8 +42,7 @@ def test_create_goal_reminder(mock_connect):
 
 
 def test_get_goal_reminder(mock_connect):
-    """
-    Test retrieving a reminder by its unique ID.
+    """Test retrieving a reminder by its unique ID.
 
     Verifies that existing reminders can be successfully retrieved by ID
     with all expected fields, while non-existent reminder IDs properly
@@ -51,12 +50,13 @@ def test_get_goal_reminder(mock_connect):
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange - create user, goal, and reminder
     user = users.create_user("+1234567890", "America/New_York")
     goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
     created_reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00"
+        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00",
     )
 
     # Test retrieving existing reminder
@@ -76,8 +76,7 @@ def test_get_goal_reminder(mock_connect):
 
 
 def test_get_goal_reminder_by_goal_id(mock_connect):
-    """
-    Test retrieving a reminder by its goal ID.
+    """Test retrieving a reminder by its goal ID.
 
     Verifies that reminders can be retrieved via the goal ID.
     """
@@ -85,7 +84,7 @@ def test_get_goal_reminder_by_goal_id(mock_connect):
     user = users.create_user("+1234567890", "America/New_York")
     goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
     created_reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00"
+        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00",
     )
 
     # Test retrieving existing reminder
@@ -104,14 +103,14 @@ def test_get_goal_reminder_by_goal_id(mock_connect):
 
 
 def test_get_all_goal_reminders(mock_connect):
-    """
-    Test retrieving all reminders from the database.
+    """Test retrieving all reminders from the database.
 
     Verifies that all reminder records are returned with complete field data
     and correct associations to users and goals.
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange - create user, goals, and reminders
     user = users.create_user("+1234567890", "America/New_York")
@@ -140,8 +139,7 @@ def test_get_all_goal_reminders(mock_connect):
 
 
 def test_update_goal_reminder(mock_connect):
-    """
-    Test updating reminder information with optional fields.
+    """Test updating reminder information with optional fields.
 
     Verifies that individual fields (reminder_time, user_goal_id) can be
     updated independently or together, and that unchanged fields retain
@@ -150,6 +148,7 @@ def test_update_goal_reminder(mock_connect):
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange - create user, goals, and reminder
     user = users.create_user("+1234567890", "America/New_York")
@@ -163,7 +162,7 @@ def test_update_goal_reminder(mock_connect):
 
     # Test updating reminder_time only
     updated_reminder = goal_reminders.update_goal_reminder(
-        reminder["id"], reminder_time="2024-12-26 10:00:00"
+        reminder["id"], reminder_time="2024-12-26 10:00:00",
     )
 
     assert updated_reminder["reminder_time"] == "2024-12-26 10:00:00"
@@ -171,7 +170,7 @@ def test_update_goal_reminder(mock_connect):
 
     # Test updating user_goal_id only
     updated_reminder = goal_reminders.update_goal_reminder(
-        reminder["id"], user_goal_id=goal2["id"]
+        reminder["id"], user_goal_id=goal2["id"],
     )
 
     assert updated_reminder["user_goal_id"] == goal2["id"]
@@ -179,7 +178,7 @@ def test_update_goal_reminder(mock_connect):
 
     # Test updating both fields
     updated_reminder = goal_reminders.update_goal_reminder(
-        reminder["id"], user_goal_id=goal1["id"], reminder_time="2024-12-27 11:00:00"
+        reminder["id"], user_goal_id=goal1["id"], reminder_time="2024-12-27 11:00:00",
     )
 
     assert updated_reminder["user_goal_id"] == goal1["id"]
@@ -191,20 +190,20 @@ def test_update_goal_reminder(mock_connect):
 
 
 def test_delete_goal_reminder(mock_connect):
-    """
-    Test deleting a reminder from the database.
+    """Test deleting a reminder from the database.
 
     Verifies that a reminder can be successfully deleted by ID and that
     subsequent attempts to retrieve the deleted reminder return None.
 
     Arguments:
         mock_connect: Fixture providing isolated test database connection
+
     """
     # Arrange - create user, goal, and reminder
     user = users.create_user("+1234567890", "America/New_York")
     goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
     reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00"
+        user_id=user["id"], user_goal_id=goal["id"], reminder_time="2024-12-25 09:00:00",
     )
     reminder_id = reminder["id"]
 

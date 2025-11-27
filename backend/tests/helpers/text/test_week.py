@@ -1,6 +1,7 @@
 """Tests for weekly look-back summary helpers."""
 
 from datetime import datetime
+
 import app.helpers.text.week as week_module
 
 
@@ -17,8 +18,7 @@ def test_get_monday_before():
 
 
 def test_look_back_summary(mocker):
-    """
-    Test look-back summary generation with goals and ratings.
+    """Test look-back summary generation with goals and ratings.
 
     Verifies that the function correctly handles empty goal lists,
     formats markdown output properly, and includes goal ratings
@@ -26,11 +26,12 @@ def test_look_back_summary(mocker):
 
     Arguments:
         mocker: pytest-mock fixture for patching dependencies
+
     """
     # Test with no goals
     mocker.patch.object(week_module, "get_user_goals", return_value=[])
     result = week_module.look_back_summary(
-        user_id=1, days=3, start=datetime(2024, 1, 1)
+        user_id=1, days=3, start=datetime(2024, 1, 1),
     )
     assert "No goals set" in result
 
@@ -43,7 +44,7 @@ def test_look_back_summary(mocker):
         ],
     )
     mocker.patch.object(
-        week_module, "get_rating_by_goal_and_date", return_value={"rating": 3}
+        week_module, "get_rating_by_goal_and_date", return_value={"rating": 3},
     )
 
     start = datetime(2024, 1, 1)

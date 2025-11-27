@@ -13,6 +13,7 @@ def get_journal_goal_id(user_id: int) -> int | None:
     user_id -- The unique identifier of the user
     
     Returns the goal ID if journaling goal exists, None otherwise.
+
     """
     user_goals = get_user_goals(user_id)
     for goal in user_goals:
