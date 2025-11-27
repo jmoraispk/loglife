@@ -16,6 +16,7 @@ I'm your personal goal tracking assistant. Here's how to get started:
 📋 *GOALS*
 • `goals` - Show your personal goals
 • `add goal 😴 Description` - Add new goal
+• `enable journaling` - Quick add journaling goal
 
 📊 *TRACKING*
 • `rate 2 3` - Rate goal #2 with rating 3 (1=fail, 2=partial, 3=success)

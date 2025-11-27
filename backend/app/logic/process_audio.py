@@ -1,7 +1,7 @@
 """Audio processing workflow for inbound WhatsApp messages."""
 
 import logging
-from app.helpers import get_journal_goal_id, process_journal, transcribe_audio, send_message
+from app.helpers import process_journal, transcribe_audio, send_message
 from .process_text import process_text
 
 def process_audio(sender: str, user: dict, audio_data: str) -> str:
@@ -16,13 +16,12 @@ def process_audio(sender: str, user: dict, audio_data: str) -> str:
 
     send_message(sender, "Audio received. Transcribing...")
     
-    # Check if journaling enabled
-    response = None
-    journaling_goal_id: int | None = get_journal_goal_id(user["id"])
-    if journaling_goal_id:
-        response = process_journal(sender, user, journaling_goal_id, audio_data)
+    response = process_journal(sender, user, audio_data)
     
-    # Transcribe audio if journaling isn't enabled, time not reached for journaling or journlaing already done for that day
+    # Transcribe audio if journaling isn't processed by the following reasons:
+    # - journaling not enabled
+    # - time not reached for journaling
+    # - journlaing already done for that day
     if response is None:
         try:
             transcript: str = transcribe_audio(audio_data)
@@ -30,6 +29,6 @@ def process_audio(sender: str, user: dict, audio_data: str) -> str:
             response = process_text(user, transcript)
         except RuntimeError as e:
             logging.error(f"Error transcribing audio: {e}")
-            response = "Transcription failed!"
+            response = "Audio transcription failed!"
 
     return response

@@ -20,83 +20,43 @@ def webhook() -> ResponseReturnValue:
 
     Returns JSON response containing `success`, `message`, and `data`.
     """
-    data: dict | None = request.get_json()
+    data: dict = request.get_json()
 
-    logging.debug(f"Incoming webhook payload: {data}")
-
-    sender: str = data["sender"]
-    msg_type: str = data["msg_type"]
-    raw_msg: str = data["raw_msg"]
-    # g is a general-purpose namespace for data that exists only for the lifetime of the request
-    g.client_type: str = data["client_type"]
+    sender = data["sender"]
+    msg_type = data["msg_type"]
+    raw_msg = data["raw_msg"]
+    # g is for request-scoped data (global variable)
+    g.client_type = data["client_type"]
 
     user: dict | None = get_user_by_phone_number(sender)
-
     if not user:
         user_timezone: str = get_timezone_from_number(sender)
         user: dict = create_user(sender, user_timezone)
         logging.info(f"Created new user {user} with timezone {user_timezone}")
     else:
         logging.info(f"Found existing user for sender: {user}")
-
-    response = {}
-
-    if msg_type == "chat":
-        logging.debug(f"Processing chat message for {sender}: {raw_msg}")
-        response_message = process_text(user, raw_msg)
-        response["data"] = {
-            "message": response_message
-        }
-
-    if msg_type in ("audio", "ptt"):
-        logging.debug(f"Processing audio message for {sender}")
-        try:
+    
+    extra_data = {}
+    try:
+        if msg_type == "chat":
+            response_message = process_text(user, raw_msg)
+        elif msg_type in ("audio", "ptt"):
             audio_response = process_audio(sender, user, raw_msg)
-        except RuntimeError as e:
-            error = f"Error processing audio > {e}"
-            logging.error(error)
-            return error_response(error)
-        
-        if isinstance(audio_response, tuple):
-            transcript_file, response_message = audio_response
-            # Only include transcript file if user has enabled it
-            if user.get("send_transcript_file", 1) == 1:
-                response["data"] = {
-                    "transcript_file": transcript_file,
-                    "message": response_message
-                }
+            if isinstance(audio_response, tuple):
+                extra_data["transcript_file"], response_message = audio_response
             else:
-                response["data"] = {
-                    "message": response_message
-                }
+                response_message = audio_response
+        elif msg_type == "vcard":
+            response_message = process_vard(user, raw_msg)
         else:
-            response_message = audio_response
-            response["data"] = {
-                "message": response_message
-            }
+            response_message = "Can't process this type of message."
 
-    if msg_type == "vcard":
-        logging.debug(f"Processing vcard message for {sender}")
-        response_message = process_vard(user, raw_msg)
-        response["data"] = {
-            "message": response_message
-        }
-
-    # .get() returns None if the key is not found
-    # [] raises a KeyError if the key is not found
-    data = response.get("data")
-    message = data.get("message") if data else None
-
-    if message:
         logging.info(
             f"Webhook processed type {msg_type} for {sender}, "
-            f"response generated: {message}"
+            f"response generated: {response_message}"
         )
-        return success_response(data=data)
-
-    logging.info(
-        f"Webhook processed type {msg_type} for {sender}, "
-        "no response message generated"
-    )
-
-    return success_response(data={"message": "Can't process this type of message."})
+        return success_response(message=response_message, **extra_data)
+    except Exception as e:
+        error = f"Error processing webhook > {e}"
+        logging.error(error)
+        return error_response(error)

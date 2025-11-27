@@ -53,7 +53,11 @@ async function handleIncomingMessage(msg, client) {
 
         // Handle backend response errors
         if (!response.ok) {
-            const fallback = `Server error (${response.status}). Try again later.`;
+            // Log technical details for developers
+            console.error(`Backend error: ${response.status} ${response.statusText}`);
+            
+            // Send user-friendly message
+            const fallback = "Sorry, something went wrong. Please try again later.";
             await client.sendMessage(from, fallback);
             return;
         }
