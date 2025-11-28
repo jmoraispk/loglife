@@ -1,21 +1,21 @@
 """Database operations for user states.
 
-This module provides CRUD operations for managing user conversation states in the database.
-It handles creating, reading, updating, and deleting user state records for state machine management.
+This module provides CRUD operations for managing user conversation states in the
+database. It handles creating, reading, updating, and deleting user state records
+for state machine management.
 """
-
-import sqlite3
 
 from app.db.sqlite import connect
 
 
 def get_user_state(user_id: int) -> dict | None:
-    """Retrieves the current state for a specific user.
+    """Retrieve the current state for a specific user.
 
-    Arguments:
-    user_id -- The unique identifier of the user
+    Args:
+        user_id: The unique identifier of the user
 
-    Returns the user state record as a dictionary, or None if not found.
+    Returns:
+        The user state record as a dictionary, or None if not found.
 
     """
     with connect() as conn:
@@ -23,22 +23,23 @@ def get_user_state(user_id: int) -> dict | None:
             "SELECT * FROM user_states WHERE user_id = ?",
             (user_id,),
         )
-        row: sqlite3.Row | None = cur.fetchone()
+        row = cur.fetchone()
         return dict(row) if row else None
 
 
 def create_user_state(user_id: int, state: str, temp_data: str | None = None) -> dict:
-    """Creates or updates a user state record.
+    """Create or update a user state record.
 
     If a state already exists for the user, it will be updated with the new values.
     Otherwise, a new state record is created.
 
-    Arguments:
-    user_id -- The unique identifier of the user
-    state -- The state value to set
-    temp_data -- Optional temporary data to store with the state
+    Args:
+        user_id: The unique identifier of the user
+        state: The state value to set
+        temp_data: Optional temporary data to store with the state
 
-    Returns the created or updated user state record as a dictionary.
+    Returns:
+        The created or updated user state record as a dictionary.
 
     """
     with connect() as conn:
@@ -62,17 +63,18 @@ def update_user_state(
     state: str | None = None,
     temp_data: str | None = None,
 ) -> dict | None:
-    """Updates a user state record with provided fields.
+    """Update a user state record with provided fields.
 
     Only the fields that are provided (not None) will be updated. If no fields
     are provided, the function returns the existing state without modification.
 
-    Arguments:
-    user_id -- The unique identifier of the user
-    state -- Optional new state value to assign
-    temp_data -- Optional new temporary data to assign
+    Args:
+        user_id: The unique identifier of the user
+        state: Optional new state value to assign
+        temp_data: Optional new temporary data to assign
 
-    Returns the updated user state record as a dictionary, or None if not found.
+    Returns:
+        The updated user state record as a dictionary, or None if not found.
 
     """
     updates = []
@@ -89,19 +91,22 @@ def update_user_state(
 
     params.append(user_id)
     with connect() as conn:
+        # Note: This is safe from SQL injection because updates are built
+        # from a controlled whitelist and all values are parameterized
+        query = f"UPDATE user_states SET {', '.join(updates)} WHERE user_id = ?"  # noqa: S608
         conn.execute(
-            f"UPDATE user_states SET {', '.join(updates)} WHERE user_id = ?",
+            query,
             params,
         )
 
     return get_user_state(user_id)
 
 
-def delete_user_state(user_id: int):
-    """Deletes a user state record from the database.
+def delete_user_state(user_id: int) -> None:
+    """Delete a user state record from the database.
 
-    Arguments:
-    user_id -- The unique identifier of the user
+    Args:
+        user_id: The unique identifier of the user
 
     """
     with connect() as conn:

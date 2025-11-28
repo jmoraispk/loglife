@@ -24,12 +24,13 @@ _emoji_pattern: str = (
 
 
 def extract_emoji(text: str) -> str:
-    """Extracts the first emoji from the given text.
+    """Extract the first emoji from the given text.
 
-    Arguments:
-    text -- The text string to search for emoji
+    Args:
+        text: The text string to search for emoji
 
-    Returns the first emoji found, or the default goal emoji if none is found.
+    Returns:
+        The first emoji found, or the default goal emoji if none is found.
 
     """
     match = re.search(_emoji_pattern, text)

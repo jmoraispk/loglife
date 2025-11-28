@@ -7,7 +7,7 @@ import pytest
 from app.db.operations import goal_ratings, user_goals, users
 
 
-def test_create_rating():
+def test_create_rating() -> None:
     """Test creating a new goal rating with constraint validation.
 
     Verifies successful rating creation with values 1-3, ensures all fields
@@ -44,7 +44,7 @@ def test_create_rating():
         goal_ratings.create_rating(goal["id"], 4)
 
 
-def test_get_rating():
+def test_get_rating() -> None:
     """Test retrieving a rating by its unique ID.
 
     Verifies that existing ratings can be successfully retrieved by ID with
@@ -71,7 +71,7 @@ def test_get_rating():
     assert non_existent_rating is None
 
 
-def test_get_rating_by_goal_and_date():
+def test_get_rating_by_goal_and_date() -> None:
     """Test retrieving a rating by goal ID and date.
 
     Verifies that ratings can be retrieved by combining goal ID and date,
@@ -107,7 +107,7 @@ def test_get_rating_by_goal_and_date():
     assert non_existent_rating is None
 
 
-def test_get_all_ratings():
+def test_get_all_ratings() -> None:
     """Test retrieving all ratings from the database.
 
     Verifies that all rating records are returned with complete field data,
@@ -140,7 +140,7 @@ def test_get_all_ratings():
         assert rating["rating"] in [1, 2, 3]
 
 
-def test_update_rating():
+def test_update_rating() -> None:
     """Test updating rating information with optional fields.
 
     Verifies that individual fields (rating value, user_goal_id, rating_date)
@@ -190,7 +190,7 @@ def test_update_rating():
     assert unchanged_rating["id"] == rating["id"]
 
 
-def test_delete_rating():
+def test_delete_rating() -> None:
     """Test deleting a rating from the database.
 
     Verifies that a rating can be successfully deleted by ID and that

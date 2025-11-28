@@ -5,8 +5,8 @@ production access/error logs with environment-aware levels and filters.
 """
 
 import logging
-import os
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
 
 from .paths import ACCESS_LOG, ERROR_LOG, LOGS
 from .settings import FLASK_ENV
@@ -17,15 +17,17 @@ def _allow_up_to_info(record: logging.LogRecord) -> bool:
     return record.levelno <= logging.INFO
 
 
-def setup_logging():
-    """Sets up logging for the Flask app."""
+def setup_logging() -> None:
+    """Set up logging for the Flask app."""
     log_level: int = logging.DEBUG if FLASK_ENV == "development" else logging.INFO
 
     # The global logger all other loggers inherit from.
-    # Assigning it to root lets us configure the default handlers, level, etc., so every logger in the app follows those settings unless overridden.
+    # Assigning it to root lets us configure the default handlers, level, etc.,
+    # so every logger in the app follows those settings unless overridden.
     root = logging.getLogger()
 
-    # Because default root logger level is WARNING, we need to set it to debug and then custom handlers will block irrelevant logs automatically
+    # Because default root logger level is WARNING, we need to set it to debug
+    # and then custom handlers will block irrelevant logs automatically
     root.setLevel(logging.DEBUG)
 
     # Clean default handlers, so we can add our own.
@@ -42,10 +44,9 @@ def setup_logging():
         return
 
     # Setup for production
-    os.makedirs(
-        LOGS,
-        exist_ok=True,
-    )  # exist_ok=True tells os.makedirs not to raise an error if LOGS already exists. It creates the directory only if needed.
+    # exist_ok=True tells mkdir not to raise an error if LOGS already exists.
+    # It creates the directory only if needed.
+    Path(LOGS).mkdir(parents=True, exist_ok=True)
 
     # Configure rotating access log handler for INFO-level logs
     access_handler: RotatingFileHandler = RotatingFileHandler(

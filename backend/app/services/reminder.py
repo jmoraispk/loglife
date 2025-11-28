@@ -7,25 +7,34 @@ worker loop that sleeps between batches based on upcoming reminders, minimizing
 polling overhead while ensuring timely alerts.
 """
 
+from __future__ import annotations
+
 import logging
 import threading
 import time
 from datetime import UTC, datetime, timedelta
-from zoneinfo import ZoneInfo
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from zoneinfo import ZoneInfo
 
 from app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
 from app.db import get_all_goal_reminders, get_goal, get_user
 from app.helpers import get_goals_not_tracked_today, get_timezone_safe, send_message
 
+logger = logging.getLogger(__name__)
+
 
 def _next_reminder_seconds() -> float:
-    """Calculates the next reminder execution window in seconds.
+    """Calculate the next reminder execution window in seconds.
 
-    Returns the number of seconds to wait until the next reminder execution window. The minimum wait is 10 seconds and the maximum wait is 60 seconds. This ensures the service remains responsive to newly added reminders.
+    Return the number of seconds to wait until the next reminder execution
+    window. The minimum wait is 10 seconds and the maximum wait is 60 seconds.
+    This ensures the service remains responsive to newly added reminders.
     """
     reminders: list[dict] = get_all_goal_reminders()
     if not reminders:
-        logging.info("No reminders scheduled; using default wait interval")
+        logger.info("No reminders scheduled; using default wait interval")
     now_utc: datetime = datetime.now(UTC)
     wait_times = []
 
@@ -57,12 +66,16 @@ def _next_reminder_seconds() -> float:
     # Limits the maximum wait to 60 seconds and ensures a minimum wait of 10 seconds.
     # This ensures the service is responsive to newly added reminders.
     bounded_wait: float = float(max(10, min(60, next_wait)))
-    logging.debug(f"Next reminder check scheduled in {bounded_wait:.0f} seconds")
+    logger.debug("Next reminder check scheduled in %d seconds", bounded_wait)
     return bounded_wait
 
 
-def _check_reminders():
-    """Checks all reminders and sends notifications when their scheduled time matches the current local time."""
+def _check_reminders() -> None:
+    """Check all reminders and send notifications when scheduled time matches.
+
+    Send notifications to users when their scheduled reminder times match the
+    current local time in their timezone.
+    """
     reminders: list[dict] = get_all_goal_reminders()
     now_utc: datetime = datetime.now(UTC)
 
@@ -74,10 +87,13 @@ def _check_reminders():
         user_goal: dict = get_goal(user_goal_id)
 
         user_timezone: str = user["timezone"]
-        logging.debug(
-            f"Evaluating reminder {reminder.get('id')} for user {user_id} in timezone {user_timezone}",
+        logger.debug(
+            "Evaluating reminder %s for user %s in timezone %s",
+            reminder.get("id"),
+            user_id,
+            user_timezone,
         )
-        tz: ZoneInfo = get_timezone_safe(user_timezone)
+        tz = get_timezone_safe(user_timezone)
         local_now: datetime = now_utc.astimezone(tz)
 
         time_str: str = reminder.get("reminder_time")
@@ -108,33 +124,40 @@ def _check_reminders():
                     "<goal_emoji>", user_goal["goal_emoji"]
                 ).replace("<goal_description>", user_goal["goal_description"])
             send_message(user["phone_number"], message)
-            logging.info(
-                f"Sent reminder '{user_goal['goal_description']}' to {user['phone_number']}",
+            logger.info(
+                "Sent reminder '%s' to %s",
+                user_goal["goal_description"],
+                user["phone_number"],
             )
 
 
-def _reminder_worker():
-    """Daemonized worker loop that continuously checks for reminders and sends notifications when their scheduled time matches the current local time."""
+def _reminder_worker() -> None:
+    """Run daemonized worker loop for checking and sending reminders.
+
+    Continuously check for reminders and send notifications when their
+    scheduled time matches the current local time.
+    """
     while True:
         sleep_seconds: float = _next_reminder_seconds()
-        logging.debug(f"Reminder worker sleeping for {sleep_seconds:.0f} seconds")
+        logger.debug("Reminder worker sleeping for %d seconds", sleep_seconds)
         time.sleep(sleep_seconds)
         try:
             _check_reminders()
-        except Exception as exc:
-            # exc_info=True logs the full traceback of the exception, including the line number where the exception was raised.
-            logging.error(
-                f"Unhandled error while checking reminders: {exc}",
-                exc_info=True,
-            )
+        except Exception:
+            # Logs the full traceback including the line number.
+            logger.exception("Unhandled error while checking reminders")
 
 
 def start_reminder_service() -> threading.Thread:
-    """Starts the reminder service."""
+    """Start the reminder service in a daemon thread.
+
+    Create and start a daemon thread that will automatically exit when the
+    main program exits.
+    """
     t: threading.Thread = threading.Thread(
         target=_reminder_worker,
         daemon=True,
-    )  # daemon makes the thread to get killed automatically when main program exits
+    )
     t.start()
-    logging.info(f"Reminder service thread {t.name} started (daemon={t.daemon})")
+    logger.info("Reminder service thread %s started (daemon=%s)", t.name, t.daemon)
     return t

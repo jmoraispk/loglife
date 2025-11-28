@@ -4,23 +4,28 @@ This module defines a Flask blueprint for streaming log events to clients
 using Server-Sent Events protocol.
 """
 
-from flask import Blueprint, Response
-
 from app.helpers import log_queue
+from flask import Blueprint, Response
 
 events_bp = Blueprint("events", __name__)
 
 
 @events_bp.route("/events")
-def events():
+def events() -> Response:
     """Stream log events using Server-Sent Events (SSE).
 
     Returns:
-        Response: SSE stream with log messages
+        SSE stream with log messages
 
     """
 
-    def stream():
+    def stream() -> str:
+        """Generate SSE stream of log messages.
+
+        Yields:
+            Log messages in SSE format.
+
+        """
         while True:
             msg = log_queue.get()
             yield f"data: {msg}\n\n"

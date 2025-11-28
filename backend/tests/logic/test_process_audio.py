@@ -5,7 +5,7 @@ from unittest.mock import patch
 from app.logic.process_audio import process_audio
 
 
-def test_process_audio_journaling_handled():
+def test_process_audio_journaling_handled() -> None:
     """Test audio processing when handled by journaling."""
     # Arrange
     user = {"id": 1}
@@ -29,7 +29,7 @@ def test_process_audio_journaling_handled():
         mock_process_text.assert_not_called()
 
 
-def test_process_audio_transcription_fallback():
+def test_process_audio_transcription_fallback() -> None:
     """Test audio processing falling back to transcription."""
     # Arrange
     user = {"id": 1}
@@ -38,7 +38,7 @@ def test_process_audio_transcription_fallback():
         patch("app.logic.process_audio.process_text") as mock_process_text,
         patch("app.logic.process_audio.transcribe_audio") as mock_transcribe,
         patch("app.logic.process_audio.process_journal") as mock_journal,
-        patch("app.logic.process_audio.send_message") as mock_send,
+        patch("app.logic.process_audio.send_message"),
     ):
         mock_journal.return_value = None  # Journaling didn't handle it
         mock_transcribe.return_value = "add goal run"
@@ -53,16 +53,16 @@ def test_process_audio_transcription_fallback():
         mock_process_text.assert_called_once_with(user, "add goal run")
 
 
-def test_process_audio_transcription_error():
+def test_process_audio_transcription_error() -> None:
     """Test handling of transcription errors."""
     # Arrange
     user = {"id": 1}
 
     with (
-        patch("app.logic.process_audio.process_text") as mock_process_text,
+        patch("app.logic.process_audio.process_text"),
         patch("app.logic.process_audio.transcribe_audio") as mock_transcribe,
         patch("app.logic.process_audio.process_journal") as mock_journal,
-        patch("app.logic.process_audio.send_message") as mock_send,
+        patch("app.logic.process_audio.send_message"),
     ):
         mock_journal.return_value = None
         mock_transcribe.side_effect = RuntimeError("API Error")

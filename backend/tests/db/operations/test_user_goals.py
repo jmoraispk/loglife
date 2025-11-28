@@ -3,7 +3,7 @@
 from app.db.operations import user_goals, users
 
 
-def test_create_goal():
+def test_create_goal() -> None:
     """Test creating a new user goal with emoji and description.
 
     Verifies successful goal creation with both default and custom boost
@@ -41,7 +41,7 @@ def test_create_goal():
     assert goal2["boost_level"] == 3
 
 
-def test_get_goal():
+def test_get_goal() -> None:
     """Test retrieving a goal by its unique ID.
 
     Verifies that existing goals can be successfully retrieved by ID with
@@ -71,7 +71,7 @@ def test_get_goal():
     assert non_existent_goal is None
 
 
-def test_get_user_goals():
+def test_get_user_goals() -> None:
     """Test retrieving all goals associated with a specific user.
 
     Verifies that all goals belonging to a user are returned with complete
@@ -105,7 +105,7 @@ def test_get_user_goals():
     assert len(empty_goals) == 0
 
 
-def test_update_goal():
+def test_update_goal() -> None:
     """Test updating goal information with optional fields.
 
     Verifies that individual fields (emoji, description, boost_level) can
@@ -157,7 +157,7 @@ def test_update_goal():
     assert unchanged_goal["id"] == goal["id"]
 
 
-def test_delete_goal():
+def test_delete_goal() -> None:
     """Test deleting a goal from the database.
 
     Verifies that a goal can be successfully deleted by ID and that

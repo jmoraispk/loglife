@@ -3,7 +3,7 @@
 from app.helpers.text import goal
 
 
-def test_extract_emoji():
+def test_extract_emoji() -> None:
     """Test emoji extraction from goal text."""
     test_cases = [
         ("text without emoji", "🎯"),

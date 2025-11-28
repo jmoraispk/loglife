@@ -4,29 +4,29 @@ This module provides CRUD operations for managing goal reminders in the database
 It handles creating, reading, updating, and deleting goal reminder records.
 """
 
-import sqlite3
-
 from app.db.sqlite import connect
 
 
 def get_all_goal_reminders() -> list[dict]:
-    """Retrieves all goal reminders from the database.
+    """Retrieve all goal reminders from the database.
 
-    Returns a list of all goal reminder records ordered by creation date (newest first).
+    Return a list of all goal reminder records ordered by creation date
+    (newest first).
     """
     with connect() as conn:
         cur = conn.execute("SELECT * FROM goal_reminders ORDER BY created_at DESC")
-        rows: list[sqlite3.Row] = cur.fetchall()
+        rows = cur.fetchall()
         return [dict(row) for row in rows]
 
 
-def get_goal_reminder(reminder_id: int):
-    """Retrieves a goal reminder by its ID.
+def get_goal_reminder(reminder_id: int) -> dict | None:
+    """Retrieve a goal reminder by its ID.
 
-    Arguments:
-    reminder_id -- The unique identifier of the reminder to retrieve
+    Args:
+        reminder_id: The unique identifier of the reminder to retrieve
 
-    Returns the reminder record as a dictionary, or None if not found.
+    Returns:
+        The reminder record as a dictionary, or None if not found.
 
     """
     with connect() as conn:
@@ -34,17 +34,18 @@ def get_goal_reminder(reminder_id: int):
             "SELECT * FROM goal_reminders WHERE id = ?",
             (reminder_id,),
         )
-        row: sqlite3.Row | None = cur.fetchone()
+        row = cur.fetchone()
         return dict(row) if row else None
 
 
 def get_goal_reminder_by_goal_id(user_goal_id: int) -> dict | None:
-    """Retrieves a goal reminder for a specific user goal.
+    """Retrieve a goal reminder for a specific user goal.
 
-    Arguments:
-    user_goal_id -- The unique identifier of the user goal
+    Args:
+        user_goal_id: The unique identifier of the user goal
 
-    Returns the reminder record as a dictionary, or None if not found.
+    Returns:
+        The reminder record as a dictionary, or None if not found.
 
     """
     with connect() as conn:
@@ -52,19 +53,20 @@ def get_goal_reminder_by_goal_id(user_goal_id: int) -> dict | None:
             "SELECT * FROM goal_reminders WHERE user_goal_id = ?",
             (user_goal_id,),
         )
-        row: sqlite3.Row | None = cur.fetchone()
+        row = cur.fetchone()
         return dict(row) if row else None
 
 
 def create_goal_reminder(user_id: int, user_goal_id: int, reminder_time: str) -> dict:
-    """Creates a new goal reminder record.
+    """Create a new goal reminder record.
 
-    Arguments:
-    user_id -- The unique identifier of the user
-    user_goal_id -- The unique identifier of the user goal
-    reminder_time -- The time when the reminder should be triggered
+    Args:
+        user_id: The unique identifier of the user
+        user_goal_id: The unique identifier of the user goal
+        reminder_time: The time when the reminder should be triggered
 
-    Returns the newly created reminder record as a dictionary.
+    Returns:
+        The newly created reminder record as a dictionary.
 
     """
     with connect() as conn:
@@ -85,17 +87,18 @@ def update_goal_reminder(
     user_goal_id: int | None = None,
     reminder_time: str | None = None,
 ) -> dict:
-    """Updates a goal reminder record with provided fields.
+    """Update a goal reminder record with provided fields.
 
     Only the fields that are provided (not None) will be updated. If no fields
     are provided, the function returns the existing reminder without modification.
 
-    Arguments:
-    reminder_id -- The unique identifier of the reminder to update
-    user_goal_id -- Optional new user goal ID to assign
-    reminder_time -- Optional new reminder time to assign
+    Args:
+        reminder_id: The unique identifier of the reminder to update
+        user_goal_id: Optional new user goal ID to assign
+        reminder_time: Optional new reminder time to assign
 
-    Returns the updated reminder record as a dictionary.
+    Returns:
+        The updated reminder record as a dictionary.
 
     """
     updates = []
@@ -114,19 +117,22 @@ def update_goal_reminder(
 
     params.append(reminder_id)
     with connect() as conn:
+        # Note: This is safe from SQL injection because updates are built
+        # from a controlled whitelist and all values are parameterized
+        query = f"UPDATE goal_reminders SET {', '.join(updates)} WHERE id = ?"  # noqa: S608
         conn.execute(
-            f"UPDATE goal_reminders SET {', '.join(updates)} WHERE id = ?",
+            query,
             params,
         )
 
     return get_goal_reminder(reminder_id)
 
 
-def delete_goal_reminder(reminder_id: int):
-    """Deletes a goal reminder record from the database.
+def delete_goal_reminder(reminder_id: int) -> None:
+    """Delete a goal reminder record from the database.
 
-    Arguments:
-    reminder_id -- The unique identifier of the reminder to delete
+    Args:
+        reminder_id: The unique identifier of the reminder to delete
 
     """
     with connect() as conn:

@@ -3,7 +3,7 @@
 from app.helpers.vcard import vcard
 
 
-def test_extract_phone_number():
+def test_extract_phone_number() -> None:
     """Test phone number extraction from vcard strings."""
     test_cases = [
         # Simple vcard with phone number

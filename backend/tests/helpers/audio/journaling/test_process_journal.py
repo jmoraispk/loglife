@@ -7,7 +7,7 @@ from app.db.operations import audio_journal_entries, goal_reminders, user_goals,
 from app.helpers.audio.journaling import process_journal
 
 
-def test_process_journal_success():
+def test_process_journal_success() -> None:
     """Test successful journal processing with real DB and injected time."""
     # Arrange - Setup DB state
     user = users.create_user("+1234567890", "UTC")
@@ -36,7 +36,7 @@ def test_process_journal_success():
         mock_send.assert_called()
 
 
-def test_process_journal_already_exists():
+def test_process_journal_already_exists() -> None:
     """Test process_journal when an entry already exists for today."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "📓", "journaling")
@@ -45,17 +45,11 @@ def test_process_journal_already_exists():
     # Create existing entry
     audio_journal_entries.create_audio_journal_entry(user["id"], "Old", "Old")
 
-    # Inject time same day
-    fake_now = datetime.now(UTC)  # Uses current date by default in create_audio_journal_entry?
-    # create_audio_journal_entry uses CURRENT_TIMESTAMP which is UTC.
-    # So we need to match the date.
-
-    # Let's ensure dates match. DB uses UTC.
-    # If I create entry now, it has today's date.
-    # If I pass fake_now as today, it should match.
+    # Create audio journal entry uses CURRENT_TIMESTAMP which is UTC.
+    # The entry will have today's date.
 
     with (
-        patch("app.helpers.audio.journaling.send_message") as mock_send,
+        patch("app.helpers.audio.journaling.send_message"),
         patch("app.helpers.audio.journaling.transcribe_audio") as mock_transcribe,
     ):
         # Act
@@ -69,7 +63,7 @@ def test_process_journal_already_exists():
         mock_transcribe.assert_not_called()
 
 
-def test_process_journal_exceptions():
+def test_process_journal_exceptions() -> None:
     """Test exception handling in process_journal."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "📓", "journaling")
@@ -79,7 +73,7 @@ def test_process_journal_exceptions():
 
     # Test Transcription Error
     with (
-        patch("app.helpers.audio.journaling.send_message") as mock_send,
+        patch("app.helpers.audio.journaling.send_message"),
         patch("app.helpers.audio.journaling.transcribe_audio") as mock_transcribe,
     ):
         mock_transcribe.side_effect = RuntimeError("API Error")
@@ -88,7 +82,7 @@ def test_process_journal_exceptions():
 
     # Test Summarization Error
     with (
-        patch("app.helpers.audio.journaling.send_message") as mock_send,
+        patch("app.helpers.audio.journaling.send_message"),
         patch("app.helpers.audio.journaling.transcribe_audio") as mock_transcribe,
         patch("app.helpers.audio.journaling.summarize_transcript") as mock_summarize,
     ):
@@ -99,7 +93,7 @@ def test_process_journal_exceptions():
         assert response == "Summarization failed!"
 
 
-def test_process_journal_no_goal():
+def test_process_journal_no_goal() -> None:
     """Test process_journal when no journaling goal exists."""
     user = users.create_user("+1234567890", "UTC")
     # No journaling goal created
@@ -108,7 +102,7 @@ def test_process_journal_no_goal():
     assert response is None
 
 
-def test_process_journal_too_early():
+def test_process_journal_too_early() -> None:
     """Test process_journal when it's too early."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "📓", "journaling")

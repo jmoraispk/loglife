@@ -1,3 +1,5 @@
+"""Database operations module for SQLite interactions."""
+
 from .operations import (
     create_audio_journal_entry,
     create_goal,
@@ -25,30 +27,28 @@ from .operations import (
 from .sqlite import connect, init_db
 
 __all__ = [
-    # SQLite functions
-    "init_db",
     "connect",
-    # User operations
-    "get_user",
-    "create_user",
-    "update_user",
-    "get_user_goals",
+    "create_audio_journal_entry",
     "create_goal",
-    "delete_goal",
-    "get_user_by_phone_number",
+    "create_goal_reminder",
     "create_rating",
-    "get_rating_by_goal_and_date",
-    "update_rating",
     "create_referral",
+    "create_user",
+    "create_user_state",
+    "delete_goal",
+    "delete_user_state",
     "get_all_goal_reminders",
     "get_goal",
-    "create_user_state",
-    "get_user_state",
-    "create_goal_reminder",
-    "delete_user_state",
-    "create_audio_journal_entry",
-    "get_user_audio_journal_entries",
-    "update_audio_journal_entry",
     "get_goal_reminder_by_goal_id",
+    "get_rating_by_goal_and_date",
+    "get_user",
+    "get_user_audio_journal_entries",
+    "get_user_by_phone_number",
+    "get_user_goals",
+    "get_user_state",
+    "init_db",
+    "update_audio_journal_entry",
     "update_goal_reminder",
+    "update_rating",
+    "update_user",
 ]

@@ -6,7 +6,7 @@ import pytest
 from app.helpers.sender.whatsapp_sender import send_whatsapp_message
 
 
-def test_send_whatsapp_message_success():
+def test_send_whatsapp_message_success() -> None:
     """Test successful WhatsApp message sending."""
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -22,7 +22,7 @@ def test_send_whatsapp_message_success():
         assert args[1]["json"]["message"] == "Hello"
 
 
-def test_send_whatsapp_message_failure():
+def test_send_whatsapp_message_failure() -> None:
     """Test WhatsApp message sending failure."""
     with patch("app.helpers.sender.whatsapp_sender.requests.post") as mock_post:
         mock_post.side_effect = Exception("Connection error")

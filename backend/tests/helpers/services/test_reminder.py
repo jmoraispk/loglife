@@ -5,7 +5,7 @@ from zoneinfo import ZoneInfo
 from app.helpers.services.reminder import get_timezone_safe
 
 
-def test_get_timezone_safe():
+def test_get_timezone_safe() -> None:
     """Test safe timezone parsing with fallback to UTC.
 
     Verifies that the get_timezone_safe function correctly handles:

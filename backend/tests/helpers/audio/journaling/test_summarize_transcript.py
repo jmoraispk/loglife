@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from app.helpers.audio.journaling.summarize_transcript import summarize_transcript
 
 
-def test_summarize_transcript():
+def test_summarize_transcript() -> None:
     """Test transcript summarization returns a string."""
     # Arrange
     mock_response = MagicMock()

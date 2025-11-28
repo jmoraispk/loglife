@@ -4,7 +4,7 @@ from app.db.operations import user_goals, users
 from app.helpers.audio.journaling.get_journal_goal_id import get_journal_goal_id
 
 
-def test_get_journal_goal_id_found():
+def test_get_journal_goal_id_found() -> None:
     """Test retrieving existing journal goal ID."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "📓", "journaling")
@@ -13,7 +13,7 @@ def test_get_journal_goal_id_found():
     assert goal_id == goal["id"]
 
 
-def test_get_journal_goal_id_not_found():
+def test_get_journal_goal_id_not_found() -> None:
     """Test retrieving journal goal ID when it doesn't exist."""
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "run")

@@ -1,3 +1,5 @@
+"""Business logic module for processing different types of messages."""
+
 from .process_audio import process_audio
 from .process_text import process_text
 from .process_vcard import process_vard

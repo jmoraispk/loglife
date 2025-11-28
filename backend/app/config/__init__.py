@@ -1,3 +1,5 @@
+"""Configuration module for the Flask app."""
+
 from .api import ASSEMBLYAI_BASE_URL, OPENAI_API_URL, WHATSAPP_API_URL
 from .logging import setup_logging
 from .messages import (
@@ -33,40 +35,34 @@ from .settings import (
 )
 
 __all__ = [
-    # Paths
-    "TEMPLATES",
-    "STATIC",
-    "LOGS",
     "ACCESS_LOG",
-    "ERROR_LOG",
+    "ASSEMBLYAI_API_KEY",
+    "ASSEMBLYAI_BASE_URL",
+    "COMMAND_ALIASES",
     "DATABASE_FILE",
-    "SCHEMA_FILE",
-    # Settings
+    "DEFAULT_GOAL_EMOJI",
+    "ERROR_INVALID_INPUT_LENGTH",
+    "ERROR_LOG",
+    "ERROR_NO_GOALS_SET",
     "FLASK_ENV",
+    "HELP_MESSAGE",
+    "JOURNAL_REMINDER_MESSAGE",
+    "LOGS",
+    "LOOKBACK_NO_GOALS",
+    "OPENAI_API_KEY",
+    "OPENAI_API_URL",
     "OPENAI_CHAT_MODEL",
     "OPENAI_SUMMARIZATION_SYSTEM_PROMPT",
-    "DEFAULT_GOAL_EMOJI",
-    "COMMAND_ALIASES",
-    "STYLE",
-    # Logging
-    "setup_logging",
-    # APIs
-    "WHATSAPP_API_URL",
-    "ASSEMBLYAI_BASE_URL",
-    "OPENAI_API_URL",
-    # Messages
-    "WELCOME_MESSAGE",
     "REFERRAL_SUCCESS",
-    "HELP_MESSAGE",
-    "ERROR_NO_GOALS_SET",
-    "ERROR_INVALID_INPUT_LENGTH",
-    "SUCCESS_RATINGS_SUBMITTED",
-    "USAGE_RATE",
-    "SUCCESS_INDIVIDUAL_RATING",
-    "LOOKBACK_NO_GOALS",
     "REMINDER_MESSAGE",
-    "JOURNAL_REMINDER_MESSAGE",
-    # Secrets
-    "ASSEMBLYAI_API_KEY",
-    "OPENAI_API_KEY",
+    "SCHEMA_FILE",
+    "STATIC",
+    "STYLE",
+    "SUCCESS_INDIVIDUAL_RATING",
+    "SUCCESS_RATINGS_SUBMITTED",
+    "TEMPLATES",
+    "USAGE_RATE",
+    "WELCOME_MESSAGE",
+    "WHATSAPP_API_URL",
+    "setup_logging",
 ]

@@ -8,11 +8,11 @@ from app.db.sqlite import connect
 
 
 def create_referral(referrer_user_id: int, referred_user_id: int) -> None:
-    """Creates a new referral record linking a referrer to a referred user.
+    """Create a new referral record linking a referrer to a referred user.
 
-    Arguments:
-    referrer_user_id -- The unique identifier of the user who made the referral
-    referred_user_id -- The unique identifier of the user who was referred
+    Args:
+        referrer_user_id: The unique identifier of the user who made the referral
+        referred_user_id: The unique identifier of the user who was referred
 
     """
     with connect() as conn:

@@ -5,17 +5,19 @@ from unittest.mock import patch
 import pytest
 from app.routes.webhook import webhook_bp
 from flask import Flask
+from flask.testing import FlaskClient
 
 
 @pytest.fixture
-def client():
+def client() -> FlaskClient:
+    """Flask test client fixture."""
     app = Flask(__name__)
     app.register_blueprint(webhook_bp)
     with app.test_client() as client:
         yield client
 
 
-def test_webhook_text_message(client):
+def test_webhook_text_message(client: FlaskClient) -> None:
     """Test handling a text message via webhook."""
     # Mock user lookup/creation
     with patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user:
@@ -39,7 +41,7 @@ def test_webhook_text_message(client):
             assert response.json["message"] == "Response message"
 
 
-def test_webhook_new_user(client):
+def test_webhook_new_user(client: FlaskClient) -> None:
     """Test handling a message from a new user."""
     with (
         patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user,
@@ -64,7 +66,7 @@ def test_webhook_new_user(client):
         mock_create_user.assert_called_once()
 
 
-def test_webhook_audio_message(client):
+def test_webhook_audio_message(client: FlaskClient) -> None:
     """Test handling an audio message."""
     with (
         patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user,
@@ -87,7 +89,7 @@ def test_webhook_audio_message(client):
         assert response.json["message"] == "Audio processed"
 
 
-def test_webhook_error_handling(client):
+def test_webhook_error_handling(client: FlaskClient) -> None:
     """Test error handling in webhook."""
     # Sending invalid JSON (missing fields) should raise KeyError
     response = client.post("/webhook", json={})

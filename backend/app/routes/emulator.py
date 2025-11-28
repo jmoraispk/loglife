@@ -13,6 +13,11 @@ emulator_bp = Blueprint("emulator", __name__)
     "/emulator",
     strict_slashes=False,
 )  # strict_slashes=False lets the emulator route match both /emulator and /emulator/
-def emulator():
-    """Renders the emulator template."""
+def emulator() -> str:
+    """Render the emulator template.
+
+    Returns:
+        The rendered emulator HTML template.
+
+    """
     return render_template("emulator.html")
