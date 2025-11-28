@@ -181,6 +181,33 @@ def test_process_text_enable_journaling() -> None:
     assert "already have a journaling goal" in response
 
 
+def test_process_text_journal_prompts() -> None:
+    """Test journal prompts command."""
+    user = users.create_user("+1234567890", "UTC")
+
+    # Create goals
+    goal1 = user_goals.create_goal(user["id"], "🏃", "Run")
+    goal2 = user_goals.create_goal(user["id"], "📚", "Read")
+
+    # Case 1: Goals not tracked
+    response = process_text(user, "journal prompts")
+    assert "Time to reflect on your day" in response
+    assert "Did you complete the goals?" in response
+    assert "Run" in response
+    assert "Read" in response
+
+    # Case 2: One goal tracked
+    goal_ratings.create_rating(goal1["id"], 3)
+    response = process_text(user, "journal prompts")
+    assert "Run" not in response
+    assert "Read" in response
+
+    # Case 3: All goals tracked
+    goal_ratings.create_rating(goal2["id"], 3)
+    response = process_text(user, "journal prompts")
+    assert "Did you complete the goals?" not in response
+
+
 def test_process_text_help() -> None:
     """Test help command."""
     user = users.create_user("+1234567890", "UTC")

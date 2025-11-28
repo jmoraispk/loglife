@@ -8,6 +8,7 @@ from app.config import (
     ERROR_INVALID_INPUT_LENGTH,
     ERROR_NO_GOALS_SET,
     HELP_MESSAGE,
+    JOURNAL_REMINDER_MESSAGE,
     STYLE,
     SUCCESS_INDIVIDUAL_RATING,
     SUCCESS_RATINGS_SUBMITTED,
@@ -31,6 +32,7 @@ from app.db import (
 )
 from app.helpers import (
     extract_emoji,
+    get_goals_not_tracked_today,
     get_monday_before,
     is_valid_rating_digits,
     look_back_summary,
@@ -85,6 +87,22 @@ def process_text(user: dict, message: str) -> str:
                 return "✅ You already have a journaling goal! Check 'goals' to see it."
 
         return process_text(user, "add goal 📓 journaling")
+
+    elif "journal prompts" in message:
+        goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
+        if goals_not_tracked_today:
+            return JOURNAL_REMINDER_MESSAGE.replace(
+                "<goals_not_tracked_today>",
+                "- *Did you complete the goals?*\n"
+                + "\n".join(
+                    [
+                        f"- {goal['goal_description']}"
+                        for goal in goals_not_tracked_today
+                    ]
+                ),
+            )
+
+        return JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
 
     elif message.startswith("delete"):
         try:
