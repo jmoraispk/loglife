@@ -5,7 +5,34 @@ from datetime import UTC, datetime
 
 from app.config import ERROR_NO_GOALS_SET
 from app.db.operations import goal_ratings, goal_reminders, user_goals, user_states, users
-from app.logic.process_text import process_text
+from app.logic.process_text import _extract_emoji, _is_valid_rating, process_text
+
+
+def test_internal_extract_emoji() -> None:
+    """Test internal _extract_emoji function."""
+    test_cases = [
+        ("text without emoji", "🎯"),
+        ("text with emoji 🍔", "🍔"),
+        ("🏃 Run 5k", "🏃"),
+        ("Multiple emojis 🏃 📚", "🏃"),
+    ]
+    for text, expected in test_cases:
+        assert _extract_emoji(text) == expected
+
+
+def test_internal_is_valid_rating() -> None:
+    """Test internal _is_valid_rating function."""
+    test_cases = [
+        ("111", True),
+        ("123", True),
+        ("321", True),
+        ("141", False),  # 4 is invalid
+        ("abc", False),
+        ("", False),
+        ("1 1", False),  # Spaces not allowed
+    ]
+    for message, expected in test_cases:
+        assert _is_valid_rating(message) == expected
 
 
 def test_process_text_add_goal() -> None:
