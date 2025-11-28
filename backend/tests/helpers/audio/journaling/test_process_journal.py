@@ -12,6 +12,8 @@ def test_process_journal_success() -> None:
     """Test successful journal processing with real DB."""
     # Arrange - Setup DB state
     user = users.create_user("+1234567890", "UTC")
+    # Ensure send_transcript_file is enabled (default)
+    assert user["send_transcript_file"] == 1
 
     with (
         patch(f"{MODULE}.send_message") as mock_send,
@@ -25,11 +27,36 @@ def test_process_journal_success() -> None:
         response = process_journal("12345", user, "audio_data")
 
         # Assert
-        assert response is not None
+        assert isinstance(response, tuple)
         assert response[1] == "Summary"
         mock_transcribe.assert_called_once()
         mock_summarize.assert_called_once()
         mock_send.assert_called()
+
+
+def test_process_journal_no_transcript_file() -> None:
+    """Test successful journal processing when transcript file is disabled."""
+    # Arrange
+    user = users.create_user("+1987654321", "UTC")
+    users.update_user(user["id"], send_transcript_file=0)
+    user = users.get_user(user["id"]) # Refresh user data
+
+    with (
+        patch(f"{MODULE}.send_message"),
+        patch(f"{MODULE}.summarize_transcript") as mock_summarize,
+        patch(f"{MODULE}.transcribe_audio") as mock_transcribe,
+        patch(f"{MODULE}.transcript_to_base64") as mock_base64,
+    ):
+        mock_transcribe.return_value = "Transcript"
+        mock_summarize.return_value = "Summary"
+
+        # Act
+        response = process_journal("12345", user, "audio_data")
+
+        # Assert
+        assert isinstance(response, str)
+        assert response == "Summary"
+        mock_base64.assert_not_called()
 
 
 def test_process_journal_exceptions() -> None:
