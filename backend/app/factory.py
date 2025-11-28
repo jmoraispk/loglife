@@ -1,11 +1,10 @@
 """Flask app factory."""
 
-from flask import Flask
-
 from app.config import STATIC, TEMPLATES, setup_logging
 from app.db import init_db
 from app.routes import emulator_bp, events_bp, webhook_bp
 from app.services import start_reminder_service
+from flask import Flask
 
 
 def create_app() -> Flask:
