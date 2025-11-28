@@ -62,7 +62,7 @@ def _extract_emoji(text: str) -> str:
     return match.group(0) if match else DEFAULT_GOAL_EMOJI
 
 
-def _is_valid_rating_digits(message: str) -> bool:
+def _is_valid_rating(message: str) -> bool:
     """Check whether the message contains only valid rating digits."""
     return message.isdigit() and all(m in "123" for m in message)
 
@@ -359,7 +359,7 @@ def process_text(user: dict, message: str) -> str:
         )
 
     # rate all goals at once
-    elif _is_valid_rating_digits(message):
+    elif _is_valid_rating(message):
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals:
             return ERROR_NO_GOALS_SET
