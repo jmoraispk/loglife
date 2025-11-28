@@ -28,7 +28,12 @@ nav:
     - Twilio WhatsApp Number Setup: developer/twilio-whatsapp-number-setup.md
   - API Docs:
     - Overview: api/overview.md
-    - Backend API: api/backend.md
+    - Backend API:
+      - Overview: api/backend/index.md
+      - Routes: api/backend/routes.md
+      - Business Logic: api/backend/logic.md
+      - Services: api/backend/services.md
+      - Database Operations: api/backend/database.md
     - WhatsApp Client API: api/whatsapp-client.md
 
 markdown_extensions:
@@ -41,6 +46,12 @@ markdown_extensions:
 plugins:
   - search
   - glightbox
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [backend]
+          options:
+            docstring_style: google
 
 extra_css:
   - extra_css/theme.css
