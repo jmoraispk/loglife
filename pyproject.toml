@@ -31,6 +31,7 @@ dev = [
     
     # Tests
     "pytest>=8.4.2",
+    "pytest-cov>=7.0.0",  # Summaries of line coverage in tests 
     "sqlite-web>=0.6.5",  # Web database
 ]
 
@@ -68,7 +69,3 @@ ignore = [
     "PLR0915", # Too many statements (command router)
 ]
 
-[dependency-groups]
-dev = [
-    "pytest-cov>=7.0.0",
-]
