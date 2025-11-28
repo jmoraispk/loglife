@@ -9,8 +9,10 @@ requires-python = ">=3.11"
 description = "General Bot Package for Goal Tracking"
 authors = [{name = "Your Name"}]
 dependencies = [
-    "flask>=3.1.2",
+    # Application dependencies
     "phonenumbers>=9.0.17",
+    # ChatIO dependencies
+    "flask>=3.1.2",
     "requests>=2.32.5",
 ]
 
