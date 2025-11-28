@@ -88,7 +88,7 @@ def process_text(user: dict, message: str) -> str:
 
         return process_text(user, "add goal 📓 journaling")
 
-    elif "journal prompts" in message:
+    elif "journal prompts" in message or "journal now" in message:
         goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
         if goals_not_tracked_today:
             return JOURNAL_REMINDER_MESSAGE.replace(

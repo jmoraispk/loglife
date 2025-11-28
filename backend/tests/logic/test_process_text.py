@@ -208,6 +208,26 @@ def test_process_text_journal_prompts() -> None:
     assert "Did you complete the goals?" not in response
 
 
+def test_process_text_journal_now() -> None:
+    """Test journal now command."""
+    user = users.create_user("+1234567890", "UTC")
+
+    # Create goals
+    goal1 = user_goals.create_goal(user["id"], "🏃", "Run")
+
+    # Case 1: Goals not tracked
+    response = process_text(user, "journal now")
+    assert "Time to reflect on your day" in response
+    assert "Did you complete the goals?" in response
+    assert "Run" in response
+
+    # Case 2: Goal tracked
+    goal_ratings.create_rating(goal1["id"], 3)
+    response = process_text(user, "journal now")
+    assert "Time to reflect on your day" in response
+    assert "Did you complete the goals?" not in response
+
+
 def test_process_text_help() -> None:
     """Test help command."""
     user = users.create_user("+1234567890", "UTC")
