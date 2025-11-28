@@ -22,6 +22,10 @@
 
 - Create a WhatsApp account on a local number first, then change the number in Settings to the Twilio number.
 
+!!! tip "Assigning a Display Name"
+    You can go to **Settings** and assign a name to your Twilio WhatsApp number.
+    This ensures that when people receive a message, they see a display name, not just the number.
+
 ## Step 4: Verify the Number
 
 - Twilio gets the verification code. Input the code in WhatsApp to complete number verification.

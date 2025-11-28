@@ -33,6 +33,9 @@ nav:
 markdown_extensions:
   - toc:
       title: On this page
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
 
 plugins:
   - search
