@@ -4,7 +4,6 @@ from datetime import UTC, datetime
 from unittest.mock import patch
 
 import app.helpers.text.week as week_module
-import pytest_mock
 
 
 def test_get_monday_before() -> None:
@@ -34,40 +33,34 @@ def test_get_monday_before_edge_cases() -> None:
         assert result.date() == datetime(2024, 1, 1, tzinfo=UTC).date()  # Should be previous Monday
 
 
-def test_look_back_summary(mocker: pytest_mock.MockerFixture) -> None:
+def test_look_back_summary() -> None:
     """Test look-back summary generation with goals and ratings.
 
     Verifies that the function correctly handles empty goal lists,
     formats markdown output properly, and includes goal ratings
     for multiple days in the summary.
-
-
     """
     # Test with no goals
-    mocker.patch.object(week_module, "get_user_goals", return_value=[])
-    result = week_module.look_back_summary(
-        user_id=1, days=3, start=datetime(2024, 1, 1, tzinfo=UTC)
-    )
-    assert "No goals set" in result
+    with patch.object(week_module, "get_user_goals", return_value=[]) as mock_get_goals:
+        result = week_module.look_back_summary(
+            user_id=1, days=3, start=datetime(2024, 1, 1, tzinfo=UTC)
+        )
+        assert "No goals set" in result
 
-    # Test with goals and ratings
-    mocker.patch.object(
-        week_module,
-        "get_user_goals",
-        return_value=[
+        # Test with goals and ratings
+        mock_get_goals.return_value = [
             {"id": 1, "goal_emoji": "💪", "goal_description": "Exercise"},
-        ],
-    )
-    mocker.patch.object(week_module, "get_rating_by_goal_and_date", return_value={"rating": 3})
+        ]
 
-    start = datetime(2024, 1, 1, tzinfo=UTC)
-    result = week_module.look_back_summary(user_id=1, days=2, start=start)
+        with patch.object(week_module, "get_rating_by_goal_and_date", return_value={"rating": 3}):
+            start = datetime(2024, 1, 1, tzinfo=UTC)
+            result = week_module.look_back_summary(user_id=1, days=2, start=start)
 
-    # Check markdown format
-    assert result.startswith("```")
-    assert result.endswith("```")
-    # Check days are included
-    assert "Mon" in result
-    assert "Tue" in result
-    # Check status symbol
-    assert "✅" in result
+            # Check markdown format
+            assert result.startswith("```")
+            assert result.endswith("```")
+            # Check days are included
+            assert "Mon" in result
+            assert "Tue" in result
+            # Check status symbol
+            assert "✅" in result

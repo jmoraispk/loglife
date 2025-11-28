@@ -18,13 +18,19 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8.4.2",
+    # Linting & formatting
     "ruff>=0.14.3",
-    "mkdocs-glightbox>=0.5.2",
-    "mkdocs-material>=9.6.22",
-    "sqlite-web>=0.6.5",
-    "tzdata>=2025.2",
-    "pytest-mock>=3.15.1",
+    
+    # Docs
+    "mkdocs-material>=9.6.22",  # Theme
+    "mkdocs-glightbox>=0.5.2",  # "Click image to zoom" feature
+    
+    # Cross-platform
+    "tzdata>=2025.2",  # Timezone data (needed for timezones in Windows)
+    
+    # Tests
+    "pytest>=8.4.2",
+    "sqlite-web>=0.6.5",  # Web database
 ]
 
 [tool.pytest.ini_options]
