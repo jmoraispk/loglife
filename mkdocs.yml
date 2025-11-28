@@ -22,6 +22,7 @@ nav:
     - Managing Goals: usage/managing-goals.md
   - Developer Guides:
     - Overview: developer/overview.md
+    - Essentials: developer/essentials.md
     - Backend: developer/backend.md
     - WhatsApp Client: developer/whatsapp-client.md
     - Twilio WhatsApp Number Setup: developer/twilio-whatsapp-number-setup.md
