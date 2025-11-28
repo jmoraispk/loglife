@@ -1,10 +1,17 @@
 """Processing logic for referral VCARD payloads."""
 
 import json
+import re
 
 from app.config import REFERRAL_SUCCESS, WELCOME_MESSAGE
 from app.db import create_referral, create_user, get_user_by_phone_number
-from app.helpers import extract_phone_number, send_message
+from app.helpers import send_message
+
+
+def _extract_phone_number(vcard_str: str) -> str:
+    """Extract phone_number from a vcard string."""
+    match: re.Match[str] = re.search(r"waid=([0-9]+)", vcard_str)
+    return match.group(1)
 
 
 def process_vard(referrer_user: dict, raw_vcards: str) -> str:
@@ -25,7 +32,7 @@ def process_vard(referrer_user: dict, raw_vcards: str) -> str:
     referrer_user_id: int = referrer_user["id"]
 
     for vcard in vcards:
-        referred_phone_number = extract_phone_number(vcard)
+        referred_phone_number = _extract_phone_number(vcard)
         referred_user: dict | None = get_user_by_phone_number(referred_phone_number)
         if not referred_user:
             referred_user: dict = create_user(referred_phone_number, "Asia/Karachi")
