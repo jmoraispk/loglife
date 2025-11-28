@@ -1,6 +1,5 @@
 """Helper utilities for the application."""
 
-from app.helpers.audio.journaling import process_journal
 from app.helpers.audio.transcribe_audio import transcribe_audio
 from app.helpers.queue import log_queue
 from app.helpers.sender import send_message
@@ -25,7 +24,6 @@ __all__ = [
     "log_queue",
     "look_back_summary",
     "parse_time_string",
-    "process_journal",
     "send_message",
     "success_response",
     "transcribe_audio",
