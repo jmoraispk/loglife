@@ -1,7 +1,7 @@
 """Message processing logic for inbound WhatsApp text commands."""
 
 import json
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from app.config import (
     COMMAND_ALIASES,
@@ -37,19 +37,22 @@ from app.helpers import (
     parse_time_string,
 )
 
+MIN_PARTS_EXPECTED = 2
+
 
 def process_text(user: dict, message: str) -> str:
-    """Routes incoming text commands to the appropriate goal or rating handler.
+    """Route incoming text commands to the appropriate goal or rating handler.
 
-    Handles commands such as adding goals, submitting ratings, configuring
-    reminder times, and generating look-back summaries. Maintains temporary
+    Handle commands such as adding goals, submitting ratings, configuring
+    reminder times, and generating look-back summaries. Maintain temporary
     state for multi-step flows (e.g., goal reminder setup).
 
-    Arguments:
-    user -- The user record dict for the message sender
-    message -- The incoming text message content
+    Args:
+        user: The user record dict for the message sender
+        message: The incoming text message content
 
-    Returns the WhatsApp response text to send back to the user.
+    Returns:
+        The WhatsApp response text to send back to the user.
 
     """
     message: str = message.strip().lower()
@@ -116,13 +119,18 @@ def process_text(user: dict, message: str) -> str:
         delete_user_state(user_id)
 
         # Convert 24-hour format to 12-hour AM/PM format
-        time_obj = datetime.strptime(normalized_time, "%H:%M:%S")
+        time_obj = datetime.strptime(normalized_time, "%H:%M:%S").time()  # noqa: DTZ007
         display_time = time_obj.strftime("%I:%M %p")
 
         # Get the goal to display in confirmation
         goal: dict = get_goal(goal_id)
 
-        return f"Got it! I'll remind you daily at {display_time} for {goal['goal_emoji']} {goal['goal_description']}."
+        goal_desc = goal["goal_description"]
+        goal_emoji = goal["goal_emoji"]
+        return (
+            f"Got it! I'll remind you daily at {display_time} for "
+            f"{goal_emoji} {goal_desc}."
+        )
 
     elif message == "goals":
         user_goals: list[dict] = get_user_goals(user_id)
@@ -137,19 +145,28 @@ def process_text(user: dict, message: str) -> str:
             reminder = get_goal_reminder_by_goal_id(goal["id"])
             time_display = ""
             if reminder:
-                time_obj = datetime.strptime(reminder["reminder_time"], "%H:%M:%S")
+                time_obj = datetime.strptime(  # noqa: DTZ007
+                    reminder["reminder_time"], "%H:%M:%S"
+                ).time()
                 time_display = f" ⏰ {time_obj.strftime('%I:%M %p')}"
+            goal_desc = goal["goal_description"]
+            goal_emoji = goal["goal_emoji"]
+            boost = goal["boost_level"]
             goal_lines.append(
-                f"{i}. {goal['goal_emoji']} {goal['goal_description']} (boost {goal['boost_level']}) {time_display}",
+                f"{i}. {goal_emoji} {goal_desc} (boost {boost}) {time_display}"
             )
 
         response = "```" + "\n".join(goal_lines) + "```"
-        response += "\n\n💡 _Tips:_\n_Update reminders with `update [goal#] [time]`_\n_Delete goals with `delete [goal#]`_"
+        response += (
+            "\n\n💡 _Tips:_\n"
+            "_Update reminders with `update [goal#] [time]`_\n"
+            "_Delete goals with `delete [goal#]`_"
+        )
         return response
 
     elif message.startswith("update"):
         parts = message.replace("update", "").strip().split(" ")
-        if len(parts) != 2:
+        if len(parts) != MIN_PARTS_EXPECTED:
             return "Usage: update [goal number] [time]\nExample: update 1 8pm"
         goal_num: int = int(parts[0])
         time_input: str = parts[1]
@@ -177,18 +194,29 @@ def process_text(user: dict, message: str) -> str:
         else:
             update_goal_reminder(reminder["id"], reminder_time=normalized_time)
 
-        time_obj = datetime.strptime(normalized_time, "%H:%M:%S")
+        time_obj = datetime.strptime(normalized_time, "%H:%M:%S").time()  # noqa: DTZ007
         display_time = time_obj.strftime("%I:%M %p")
 
-        return f"✅ Reminder updated! I'll remind you at {display_time} for {goal['goal_emoji']} {goal['goal_description']}"
+        goal_emoji = goal["goal_emoji"]
+        goal_desc = goal["goal_description"]
+        return (
+            f"✅ Reminder updated! I'll remind you at {display_time} for "
+            f"{goal_emoji} {goal_desc}"
+        )
 
     elif "transcript" in message:
         if "on" in message:
             update_user(user_id, send_transcript_file=1)
-            return "✅ Transcript files enabled! You'll now receive transcript file with your audio journaling."
+            return (
+                "✅ Transcript files enabled! You'll now receive transcript "
+                "file with your audio journaling."
+            )
         if "off" in message:
             update_user(user_id, send_transcript_file=0)
-            return "✅ Transcript files disabled! You'll only receive the summary message with your audio journaling."
+            return (
+                "✅ Transcript files disabled! You'll only receive the summary "
+                "message with your audio journaling."
+            )
         return "Invalid command. Usage: transcript [on|off]"
 
     elif message == "week":
@@ -223,12 +251,12 @@ def process_text(user: dict, message: str) -> str:
 
         # Extract number of days from message (e.g., "lookback 5" or "lookback")
         parts: list[str] = message.split()
-        if len(parts) == 2 and parts[1].isdigit():
+        if len(parts) == MIN_PARTS_EXPECTED and parts[1].isdigit():
             days: int = int(parts[1])
         else:
             days = 7  # Default to 7 days
-        start = datetime.now() - timedelta(days=days - 1)  # Include today
-        end = datetime.now()
+        start = datetime.now(tz=UTC) - timedelta(days=days - 1)  # Include today
+        end = datetime.now(tz=UTC)
 
         # Create date range header similar to week command
         start_date: str = start.strftime("%b %d")
@@ -249,7 +277,7 @@ def process_text(user: dict, message: str) -> str:
     # rate a single goal
     elif message.startswith("rate"):
         parse_rating: list[str] = message.replace("rate", "").strip().split(" ")
-        if len(parse_rating) != 2:
+        if len(parse_rating) != MIN_PARTS_EXPECTED:
             return USAGE_RATE
 
         goal_num: int = int(parse_rating[0])
@@ -268,17 +296,15 @@ def process_text(user: dict, message: str) -> str:
 
         goal: dict = user_goals[goal_num - 1]
 
-        rating: dict | None = get_rating_by_goal_and_date(
-            goal["id"],
-            datetime.now().strftime("%Y-%m-%d"),
-        )
+        today_str = datetime.now(tz=UTC).strftime("%Y-%m-%d")
+        rating: dict | None = get_rating_by_goal_and_date(goal["id"], today_str)
 
         if not rating:
             create_rating(goal["id"], rating_value)
         else:
             update_rating(rating["id"], user_goal_id=goal["id"], rating=rating_value)
 
-        today_display: str = datetime.now().strftime("%a (%b %d)")  # For display
+        today_display: str = datetime.now(tz=UTC).strftime("%a (%b %d)")  # For display
 
         status_symbol: str = STYLE[rating_value]
 
@@ -304,17 +330,15 @@ def process_text(user: dict, message: str) -> str:
 
         ratings: list[int] = [int(c) for c in message]  # convert message to list of ratings
 
+        today_str = datetime.now(tz=UTC).strftime("%Y-%m-%d")
         for i, goal in enumerate(user_goals):
-            rating: dict | None = get_rating_by_goal_and_date(
-                goal["id"],
-                datetime.now().strftime("%Y-%m-%d"),
-            )
+            rating: dict | None = get_rating_by_goal_and_date(goal["id"], today_str)
             if not rating:
                 create_rating(goal["id"], ratings[i])
             else:
                 update_rating(rating["id"], user_goal_id=goal["id"], rating=ratings[i])
 
-        today_display: str = datetime.now().strftime("%a (%b %d)")  # For display
+        today_display: str = datetime.now(tz=UTC).strftime("%a (%b %d)")  # For display
         goal_emojis: list[str] = [goal["goal_emoji"] for goal in user_goals]
         status: list[str] = [STYLE[r] for r in ratings]
 

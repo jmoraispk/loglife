@@ -1,14 +1,14 @@
 """Tests for process_text logic."""
 
 import json
-from datetime import datetime
+from datetime import UTC, datetime
 
 from app.config import ERROR_NO_GOALS_SET
 from app.db.operations import goal_ratings, goal_reminders, user_goals, user_states, users
 from app.logic.process_text import process_text
 
 
-def test_process_text_add_goal():
+def test_process_text_add_goal() -> None:
     """Test adding a new goal."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -29,7 +29,7 @@ def test_process_text_add_goal():
     assert temp["goal_id"] == goals[0]["id"]
 
 
-def test_process_text_set_reminder_time():
+def test_process_text_set_reminder_time() -> None:
     """Test setting reminder time after adding a goal."""
     user = users.create_user("+1234567890", "UTC")
     # Setup state as if goal was just added
@@ -53,7 +53,7 @@ def test_process_text_set_reminder_time():
     assert user_states.get_user_state(user["id"]) is None
 
 
-def test_process_text_list_goals():
+def test_process_text_list_goals() -> None:
     """Test listing goals."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -70,7 +70,7 @@ def test_process_text_list_goals():
     assert "2. 📚 Read" in response
 
 
-def test_process_text_delete_goal():
+def test_process_text_delete_goal() -> None:
     """Test deleting a goal."""
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run 5k")
@@ -81,7 +81,7 @@ def test_process_text_delete_goal():
     assert len(user_goals.get_user_goals(user["id"])) == 0
 
 
-def test_process_text_rate_single_goal():
+def test_process_text_rate_single_goal() -> None:
     """Test rating a single goal."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "🏃", "Run 5k")
@@ -92,12 +92,12 @@ def test_process_text_rate_single_goal():
     assert "Run 5k" in response
 
     # Verify rating created
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
     rating = goal_ratings.get_rating_by_goal_and_date(goal["id"], today)
     assert rating["rating"] == 3
 
 
-def test_process_text_rate_all_goals():
+def test_process_text_rate_all_goals() -> None:
     """Test rating all goals at once."""
     user = users.create_user("+1234567890", "UTC")
     goal1 = user_goals.create_goal(user["id"], "🏃", "Run")
@@ -109,14 +109,14 @@ def test_process_text_rate_all_goals():
     assert "⚠️" in response  # Partial symbol
 
     # Verify ratings
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
     r1 = goal_ratings.get_rating_by_goal_and_date(goal1["id"], today)
     r2 = goal_ratings.get_rating_by_goal_and_date(goal2["id"], today)
     assert r1["rating"] == 3
     assert r2["rating"] == 2
 
 
-def test_process_text_update_reminder():
+def test_process_text_update_reminder() -> None:
     """Test updating a reminder."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "🏃", "Run")
@@ -131,7 +131,7 @@ def test_process_text_update_reminder():
     assert reminder["reminder_time"] == "22:00:00"
 
 
-def test_process_text_transcript_toggle():
+def test_process_text_transcript_toggle() -> None:
     """Test toggling transcript settings."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -144,7 +144,7 @@ def test_process_text_transcript_toggle():
     assert users.get_user(user["id"])["send_transcript_file"] == 0
 
 
-def test_process_text_week_summary():
+def test_process_text_week_summary() -> None:
     """Test week summary command."""
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run")
@@ -155,7 +155,7 @@ def test_process_text_week_summary():
     assert "🏃" in response
 
 
-def test_process_text_lookback():
+def test_process_text_lookback() -> None:
     """Test lookback command."""
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run")
@@ -166,7 +166,7 @@ def test_process_text_lookback():
     assert "🏃" in response
 
 
-def test_process_text_enable_journaling():
+def test_process_text_enable_journaling() -> None:
     """Test enable journaling shortcut."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -181,14 +181,14 @@ def test_process_text_enable_journaling():
     assert "already have a journaling goal" in response
 
 
-def test_process_text_help():
+def test_process_text_help() -> None:
     """Test help command."""
     user = users.create_user("+1234567890", "UTC")
     response = process_text(user, "help")
     assert "LogLife Commands" in response
 
 
-def test_process_text_invalid():
+def test_process_text_invalid() -> None:
     """Test invalid command."""
     user = users.create_user("+1234567890", "UTC")
     response = process_text(user, "notacommand")

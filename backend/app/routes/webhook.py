@@ -6,21 +6,24 @@ It processes incoming messages (text, audio, or VCARD) and routes them to the ap
 
 import logging
 
-from flask import Blueprint, g, request
-from flask.typing import ResponseReturnValue
-
 from app.db import create_user, get_user_by_phone_number
 from app.helpers import error_response, get_timezone_from_number, success_response
 from app.logic import process_audio, process_text, process_vard
+from flask import Blueprint, g, request
+from flask.typing import ResponseReturnValue
 
 webhook_bp = Blueprint("webhook", __name__)
+
+logger = logging.getLogger(__name__)
 
 
 @webhook_bp.route("/webhook", methods=["POST"])
 def webhook() -> ResponseReturnValue:
-    """Handles inbound WhatsApp messages.
+    """Handle inbound WhatsApp messages.
 
-    Returns JSON response containing `success`, `message`, and `data`.
+    Returns:
+        JSON response containing `success`, `message`, and `data`.
+
     """
     try:
         data: dict = request.get_json()
@@ -35,9 +38,9 @@ def webhook() -> ResponseReturnValue:
         if not user:
             user_timezone: str = get_timezone_from_number(sender)
             user: dict = create_user(sender, user_timezone)
-            logging.info(f"Created new user {user} with timezone {user_timezone}")
+            logger.info("Created new user %s with timezone %s", user, user_timezone)
         else:
-            logging.info(f"Found existing user for sender: {user}")
+            logger.info("Found existing user for sender: %s", user)
 
         extra_data = {}
 
@@ -54,12 +57,14 @@ def webhook() -> ResponseReturnValue:
         else:
             response_message = "Can't process this type of message."
 
-        logging.info(
-            f"Webhook processed type {msg_type} for {sender}, "
-            f"response generated: {response_message}",
+        logger.info(
+            "Webhook processed type %s for %s, response generated: %s",
+            msg_type,
+            sender,
+            response_message,
         )
         return success_response(message=response_message, **extra_data)
     except Exception as e:
         error = f"Error processing webhook > {e}"
-        logging.exception(error)
+        logger.exception(error)
         return error_response(error)

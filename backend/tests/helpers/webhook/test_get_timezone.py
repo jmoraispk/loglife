@@ -7,7 +7,7 @@ which extracts timezone information based on phone number patterns.
 from app.helpers import get_timezone_from_number
 
 
-def test_get_timezone_from_number():
+def test_get_timezone_from_number() -> None:
     """Test timezone detection from various phone number formats.
 
     Verifies that the function correctly identifies timezones from valid

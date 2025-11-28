@@ -8,16 +8,17 @@ from app.helpers import extract_phone_number, send_message
 
 
 def process_vard(referrer_user: dict, raw_vcards: str) -> str:
-    """Creates referral users from VCARD attachments.
+    """Create referral users from VCARD attachments.
 
-    Parses the incoming VCARD JSON payload, ensures each contact exists as a
-    user, links referrals, and sends a welcome message to each referred number.
+    Parse the incoming VCARD JSON payload, ensure each contact exists as a
+    user, link referrals, and send a welcome message to each referred number.
 
-    Arguments:
-    referrer_user -- The user dict of the person sharing the VCARDs
-    raw_vcards -- JSON string containing the VCARD data list
+    Args:
+        referrer_user: The user dict of the person sharing the VCARDs
+        raw_vcards: JSON string containing the VCARD data list
 
-    Returns the referral success message constant.
+    Returns:
+        The referral success message constant.
 
     """
     vcards: list[str] = json.loads(raw_vcards)

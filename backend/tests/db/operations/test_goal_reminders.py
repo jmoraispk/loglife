@@ -3,7 +3,7 @@
 from app.db.operations import goal_reminders, user_goals, users
 
 
-def test_create_goal_reminder():
+def test_create_goal_reminder() -> None:
     """Test creating a new goal reminder with specified time.
 
     Verifies successful reminder creation linking user, goal, and reminder
@@ -42,7 +42,7 @@ def test_create_goal_reminder():
     assert reminder2["id"] != reminder["id"]
 
 
-def test_get_goal_reminder():
+def test_get_goal_reminder() -> None:
     """Test retrieving a reminder by its unique ID.
 
     Verifies that existing reminders can be successfully retrieved by ID
@@ -75,7 +75,7 @@ def test_get_goal_reminder():
     assert non_existent_reminder is None
 
 
-def test_get_goal_reminder_by_goal_id():
+def test_get_goal_reminder_by_goal_id() -> None:
     """Test retrieving a reminder by its goal ID.
 
     Verifies that reminders can be retrieved via the goal ID.
@@ -104,7 +104,7 @@ def test_get_goal_reminder_by_goal_id():
     assert non_existent_reminder is None
 
 
-def test_get_all_goal_reminders():
+def test_get_all_goal_reminders() -> None:
     """Test retrieving all reminders from the database.
 
     Verifies that all reminder records are returned with complete field data
@@ -137,7 +137,7 @@ def test_get_all_goal_reminders():
         assert reminder["user_id"] == user["id"]
 
 
-def test_update_goal_reminder():
+def test_update_goal_reminder() -> None:
     """Test updating reminder information with optional fields.
 
     Verifies that individual fields (reminder_time, user_goal_id) can be
@@ -189,7 +189,7 @@ def test_update_goal_reminder():
     assert unchanged_reminder["id"] == reminder["id"]
 
 
-def test_delete_goal_reminder():
+def test_delete_goal_reminder() -> None:
     """Test deleting a reminder from the database.
 
     Verifies that a reminder can be successfully deleted by ID and that

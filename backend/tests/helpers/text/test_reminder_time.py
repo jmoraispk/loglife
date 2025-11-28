@@ -3,7 +3,7 @@
 from app.helpers.text import reminder_time
 
 
-def test_parse_time_string():
+def test_parse_time_string() -> None:
     """Test parsing of time strings in various formats.
 
     Verifies support for HH:MM, 12-hour AM/PM, and hour-only formats,
@@ -41,7 +41,7 @@ def test_parse_time_string():
         assert (reminder_time.parse_time_string(message) is not None) == expected
 
 
-def test_parse_time_string_values():
+def test_parse_time_string_values() -> None:
     """Test that parsed times are correct."""
     # Test 12 PM/AM specific logic
     assert reminder_time.parse_time_string("12pm") == "12:00:00"

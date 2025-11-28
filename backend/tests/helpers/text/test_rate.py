@@ -3,7 +3,7 @@
 from app.helpers.text import rate
 
 
-def test_is_valid_rating_digits():
+def test_is_valid_rating_digits() -> None:
     """Test validation of rating digit strings."""
     test_cases = [
         ("111", True),

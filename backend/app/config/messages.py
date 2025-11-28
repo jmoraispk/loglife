@@ -33,7 +33,8 @@ I'm your personal goal tracking assistant. Here's how to get started:
 • `rate 1 3` (rate first goal as success)
 • `lookback 3` (show last 3 days)
 
-I'm here to help you build better habits and achieve your goals! What would you like to start with?"""
+I'm here to help you build better habits and achieve your goals!
+What would you like to start with?"""
 
 # -----------------------------
 # Help Messages
@@ -47,7 +48,7 @@ HELP_MESSAGE = """```LogLife Commands:
 • delete [number] - Delete a goal
 • update [number] [time] - Update reminder time
 
-📊 TRACKING  
+📊 TRACKING
 • rate 2 3 - Rate goal #2 with rating 3 (1=fail, 2=partial, 3=success)
 • 31232 - Rate all goals at once
 
@@ -74,7 +75,9 @@ Examples:
 # -----------------------------
 REFERRAL_SUCCESS = """🎉 *Thank you for the referral!*
 
-You've successfully shared a contact with LogLife. The person you referred will receive an onboarding message to get started with their goal tracking journey.
+You've successfully shared a contact with LogLife. The person you referred
+will receive an onboarding message to get started with their goal tracking
+journey.
 
 💡 *What happens next:*
 • They'll get a welcome message with instructions

@@ -1,6 +1,7 @@
 """Tests for process_vcard logic."""
 
 import json
+import sqlite3
 from unittest.mock import patch
 
 import pytest
@@ -8,7 +9,7 @@ from app.db.operations import referrals, users
 from app.logic.process_vcard import process_vard
 
 
-def test_process_vcard_creates_referral():
+def test_process_vcard_creates_referral() -> None:
     """Test processing a vcard creates a referral."""
     # Arrange
     referrer = users.create_user("+1234567890", "UTC")
@@ -29,13 +30,13 @@ def test_process_vcard_creates_referral():
         # Note: referrals.create_referral doesn't have a simple getter exposed
         # to check directly easily without custom query, but we can check if it runs without error.
         # Or we can try to create it again and expect IntegrityError if it exists
-        with pytest.raises(Exception):  # Should fail unique constraint
+        with pytest.raises(sqlite3.IntegrityError):
             referrals.create_referral(referrer["id"], referred["id"])
 
         mock_send.assert_called_once()
 
 
-def test_process_vcard_existing_user():
+def test_process_vcard_existing_user() -> None:
     """Test processing a vcard for an existing user."""
     # Arrange
     referrer = users.create_user("+1234567890", "UTC")
@@ -47,7 +48,7 @@ def test_process_vcard_existing_user():
         process_vard(referrer, vcards)
 
         # Verify referral created (would fail if tried to create again)
-        with pytest.raises(Exception):
+        with pytest.raises(sqlite3.IntegrityError):
             referrals.create_referral(referrer["id"], existing_user["id"])
 
         mock_send.assert_called_once()

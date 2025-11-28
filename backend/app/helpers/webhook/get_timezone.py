@@ -5,17 +5,21 @@ from phonenumbers import PhoneNumber, timezone
 
 
 def get_timezone_from_number(number: str) -> str:
-    """Extracts the timezone associated with a phone number.
+    """Extract the timezone associated with a phone number.
 
-    Parses the given phone number and determines its geographic timezone using
-    the phonenumbers library. Automatically handles E.164 format by prepending
-    '+' if missing. Returns 'UTC' as a fallback if the number cannot be parsed
+    Parse the given phone number and determine its geographic timezone using
+    the phonenumbers library. Automatically handle E.164 format by prepending
+    '+' if missing. Return 'UTC' as a fallback if the number cannot be parsed
     or no timezone is found.
 
-    Arguments:
-    number -- Phone number string, with or without '+' prefix (e.g., "923186491240" or "+923186491240")
+    Args:
+        number: Phone number string, with or without '+' prefix
+            (e.g., "923186491240" or "+923186491240")
 
-    Returns a Timezone string in IANA format (e.g., "Asia/Karachi", "America/New_York") or "UTC" if the number is invalid or no timezone can be determined.
+    Returns:
+        A timezone string in IANA format (e.g., "Asia/Karachi",
+        "America/New_York") or "UTC" if the number is invalid or no timezone
+        can be determined.
 
     """
     try:

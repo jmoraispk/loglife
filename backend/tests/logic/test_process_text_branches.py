@@ -1,6 +1,7 @@
 """Tests for process_text logic (missing branches)."""
 
-from datetime import datetime
+import sqlite3
+from datetime import UTC, datetime
 
 import pytest
 from app.config import ERROR_NO_GOALS_SET, STYLE
@@ -8,7 +9,7 @@ from app.db.operations import goal_ratings, goal_reminders, user_goals, users
 from app.logic.process_text import process_text
 
 
-def test_process_text_add_goal_no_emoji():
+def test_process_text_add_goal_no_emoji() -> None:
     """Test adding a goal with description but no emoji (should use default)."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -23,7 +24,7 @@ def test_process_text_add_goal_no_emoji():
     assert goals[0]["goal_description"] == "run 5k"
 
 
-def test_process_text_add_goal_only_emoji():
+def test_process_text_add_goal_only_emoji() -> None:
     """Test adding a goal with only an emoji (should use emoji as description)."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -38,19 +39,19 @@ def test_process_text_add_goal_only_emoji():
     assert goals[0]["goal_description"] == ""
 
 
-def test_process_text_rate_invalid_values():
+def test_process_text_rate_invalid_values() -> None:
     """Test rate command with values outside 1-3."""
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run")
 
-    with pytest.raises(Exception):  # sqlite3.IntegrityError
+    with pytest.raises(sqlite3.IntegrityError):
         process_text(user, "rate 1 4")
 
-    with pytest.raises(Exception):
+    with pytest.raises(sqlite3.IntegrityError):
         process_text(user, "rate 1 0")
 
 
-def test_process_text_delete_invalid_format():
+def test_process_text_delete_invalid_format() -> None:
     """Test delete command with invalid format."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -58,7 +59,7 @@ def test_process_text_delete_invalid_format():
     assert "Invalid format" in response
 
 
-def test_process_text_delete_invalid_number():
+def test_process_text_delete_invalid_number() -> None:
     """Test delete command with invalid goal number."""
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run")
@@ -70,7 +71,7 @@ def test_process_text_delete_invalid_number():
     assert "Invalid goal number" in response
 
 
-def test_process_text_reminder_no_state():
+def test_process_text_reminder_no_state() -> None:
     """Test sending time without being in awaiting_reminder_time state."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -78,7 +79,7 @@ def test_process_text_reminder_no_state():
     assert "Please add a goal first" in response
 
 
-def test_process_text_update_invalid_format():
+def test_process_text_update_invalid_format() -> None:
     """Test update command with invalid format."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -89,7 +90,7 @@ def test_process_text_update_invalid_format():
     assert "Usage: update" in response
 
 
-def test_process_text_update_invalid_time():
+def test_process_text_update_invalid_time() -> None:
     """Test update command with invalid time."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -97,7 +98,7 @@ def test_process_text_update_invalid_time():
     assert "Invalid time format" in response
 
 
-def test_process_text_update_invalid_goal():
+def test_process_text_update_invalid_goal() -> None:
     """Test update command with invalid goal number."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -105,7 +106,7 @@ def test_process_text_update_invalid_goal():
     assert "Invalid goal number" in response
 
 
-def test_process_text_lookback_default():
+def test_process_text_lookback_default() -> None:
     """Test lookback command defaults to 7 days."""
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run")
@@ -114,7 +115,7 @@ def test_process_text_lookback_default():
     assert "7 Days" in response
 
 
-def test_process_text_rate_invalid_format():
+def test_process_text_rate_invalid_format() -> None:
     """Test rate command with invalid format."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -125,7 +126,7 @@ def test_process_text_rate_invalid_format():
     assert "Usage: rate" in response
 
 
-def test_process_text_rate_invalid_goal():
+def test_process_text_rate_invalid_goal() -> None:
     """Test rate command with invalid goal number."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -140,7 +141,7 @@ def test_process_text_rate_invalid_goal():
     assert "Usage: rate" in response
 
 
-def test_process_text_rate_all_invalid_length():
+def test_process_text_rate_all_invalid_length() -> None:
     """Test rating all goals with invalid length string."""
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run")
@@ -149,7 +150,7 @@ def test_process_text_rate_all_invalid_length():
     assert "Invalid input" in response
 
 
-def test_process_text_goals_with_reminder():
+def test_process_text_goals_with_reminder() -> None:
     """Test listing goals when a reminder is set."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "🏃", "Run")
@@ -161,7 +162,7 @@ def test_process_text_goals_with_reminder():
     assert "⏰ 08:00 AM" in response
 
 
-def test_process_text_week_no_goals():
+def test_process_text_week_no_goals() -> None:
     """Test week command with no goals."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -169,7 +170,7 @@ def test_process_text_week_no_goals():
     assert response == ERROR_NO_GOALS_SET
 
 
-def test_process_text_lookback_no_goals():
+def test_process_text_lookback_no_goals() -> None:
     """Test lookback command with no goals."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -177,7 +178,7 @@ def test_process_text_lookback_no_goals():
     assert response == ERROR_NO_GOALS_SET
 
 
-def test_process_text_rate_update():
+def test_process_text_rate_update() -> None:
     """Test updating an existing rating."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "🏃", "Run")
@@ -189,12 +190,12 @@ def test_process_text_rate_update():
     response = process_text(user, "rate 1 2")
     assert STYLE[2] in response
 
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
     rating = goal_ratings.get_rating_by_goal_and_date(goal["id"], today)
     assert rating["rating"] == 2
 
 
-def test_process_text_rate_all_update():
+def test_process_text_rate_all_update() -> None:
     """Test updating existing ratings via rate all command."""
     user = users.create_user("+1234567890", "UTC")
     goal1 = user_goals.create_goal(user["id"], "🏃", "Run")
@@ -208,14 +209,14 @@ def test_process_text_rate_all_update():
     response = process_text(user, "33")
     assert STYLE[3] in response
 
-    today = datetime.now().strftime("%Y-%m-%d")
+    today = datetime.now(UTC).strftime("%Y-%m-%d")
     r1 = goal_ratings.get_rating_by_goal_and_date(goal1["id"], today)
     r2 = goal_ratings.get_rating_by_goal_and_date(goal2["id"], today)
     assert r1["rating"] == 3
     assert r2["rating"] == 3
 
 
-def test_process_text_update_create_reminder():
+def test_process_text_update_create_reminder() -> None:
     """Test update command creating a reminder when none exists."""
     user = users.create_user("+1234567890", "UTC")
     goal = user_goals.create_goal(user["id"], "🏃", "Run")
@@ -229,10 +230,10 @@ def test_process_text_update_create_reminder():
     assert reminder["reminder_time"] == "22:00:00"
 
 
-def test_process_text_transcript_off_explicit():
+def test_process_text_transcript_off_explicit() -> None:
     """Test transcript off explicitly to ensure coverage."""
     user = users.create_user("+1234567890", "UTC")
-    # Default is enabled (1)
+    # Verify default: transcript is enabled
     assert users.get_user(user["id"])["send_transcript_file"] == 1
 
     response = process_text(user, "transcript off")
@@ -240,7 +241,7 @@ def test_process_text_transcript_off_explicit():
     assert users.get_user(user["id"])["send_transcript_file"] == 0
 
 
-def test_process_text_transcript_invalid():
+def test_process_text_transcript_invalid() -> None:
     """Test invalid transcript command."""
     user = users.create_user("+1234567890", "UTC")
 
@@ -248,7 +249,7 @@ def test_process_text_transcript_invalid():
     assert "Invalid command" in response
 
 
-def test_process_text_rate_all_no_goals():
+def test_process_text_rate_all_no_goals() -> None:
     """Test rate all goals command when no goals exist."""
     user = users.create_user("+1234567890", "UTC")
 

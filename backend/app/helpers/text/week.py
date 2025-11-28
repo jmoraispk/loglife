@@ -1,6 +1,6 @@
 """Weekly look-back text helpers for summaries."""
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 from app.config import (
     LOOKBACK_NO_GOALS,
@@ -10,24 +10,30 @@ from app.db import get_rating_by_goal_and_date, get_user_goals
 
 
 def get_monday_before() -> datetime:
-    """Calculates the Monday of the current week."""
-    reference_date: datetime = datetime.now()
+    """Calculate the Monday of the current week.
+
+    Returns:
+        The datetime of the Monday of the current week.
+
+    """
+    reference_date: datetime = datetime.now(tz=UTC)
     days_since_monday: int = reference_date.weekday()
     return reference_date - timedelta(days=days_since_monday)
 
 
 def look_back_summary(user_id: int, days: int, start: datetime) -> str:
-    """Builds a multi-day look-back summary for a user's goals.
+    """Build a multi-day look-back summary for a user's goals.
 
-    Collects the user's goals and ratings, then composes a Markdown-style block
+    Collect the user's goals and ratings, then compose a Markdown-style block
     where each line represents a day and shows the status symbols for all goals.
 
-    Arguments:
-    user_id -- The unique identifier of the user
-    days -- Number of days to include in the summary
-    start -- The starting datetime for the look-back window
+    Args:
+        user_id: The unique identifier of the user
+        days: Number of days to include in the summary
+        start: The starting datetime for the look-back window
 
-    Returns a formatted summary string or a predefined message if no goals exist.
+    Returns:
+        A formatted summary string or a predefined message if no goals exist.
 
     """
     summary: str = "```"

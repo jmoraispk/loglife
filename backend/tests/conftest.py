@@ -1,15 +1,17 @@
 """Pytest configuration and fixtures for database testing."""
 
 import sqlite3
+from collections.abc import Generator
 from contextlib import contextmanager
+from pathlib import Path
 
 import pytest
 from app.config.paths import SCHEMA_FILE
 
 
 @pytest.fixture
-def test_db():
-    """Creates a temporary test database for each test.
+def test_db() -> Generator[sqlite3.Connection, None, None]:
+    """Create a temporary test database for each test.
 
     This fixture:
     1. Creates a temporary SQLite database in memory (fast!)
@@ -27,7 +29,7 @@ def test_db():
     conn.row_factory = sqlite3.Row
 
     # Apply your schema
-    with open(SCHEMA_FILE, encoding="utf-8") as f:
+    with Path(SCHEMA_FILE).open(encoding="utf-8") as f:
         conn.executescript(f.read())
 
     yield conn  # Provide the connection to the test
@@ -36,18 +38,19 @@ def test_db():
 
 
 @pytest.fixture(autouse=True)
-def mock_connect(monkeypatch, test_db):
-    """Mocks the connect() function in ALL db operations modules.
+def mock_connect(
+    monkeypatch: pytest.MonkeyPatch, test_db: sqlite3.Connection
+) -> sqlite3.Connection:
+    """Mock the connect() function in ALL db operations modules.
 
-    This ensures your db operations use the test database
-    instead of the real one.
+    Ensure your db operations use the test database instead of the real one.
 
     The key: Patch where connect is USED, not where it's DEFINED.
     """
 
     # Create a context manager that returns the test database
     @contextmanager
-    def mock_connect_func():
+    def mock_connect_func() -> Generator[sqlite3.Connection, None, None]:
         try:
             yield test_db
             test_db.commit()  # Commit transaction on success

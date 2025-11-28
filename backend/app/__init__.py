@@ -1,15 +1,14 @@
 """Flask app factory wiring logging, DB, services, and blueprints."""
 
-from flask import Flask
-
 from app.config import STATIC, TEMPLATES, setup_logging
 from app.db import init_db
 from app.routes import emulator_bp, events_bp, webhook_bp
 from app.services import start_reminder_service
+from flask import Flask
 
 
-def create_app():
-    """Builds the Flask app with logging, DB, services, and blueprints."""
+def create_app() -> Flask:
+    """Build the Flask app with logging, DB, services, and blueprints."""
     app = Flask(__name__, template_folder=TEMPLATES, static_folder=STATIC)
 
     setup_logging()

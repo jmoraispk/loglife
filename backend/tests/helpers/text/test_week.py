@@ -1,15 +1,16 @@
 """Tests for weekly look-back summary helpers."""
 
-from datetime import datetime
+from datetime import UTC, datetime
 from unittest.mock import patch
 
 import app.helpers.text.week as week_module
+import pytest_mock
 
 
-def test_get_monday_before():
+def test_get_monday_before() -> None:
     """Test that get_monday_before returns a Monday in the current week."""
     result = week_module.get_monday_before()
-    now = datetime.now()
+    now = datetime.now(UTC)
     assert (
         result.weekday() == 0
     )  # Check that the result is a Monday (weekday() returns 0 for Monday)
@@ -18,22 +19,22 @@ def test_get_monday_before():
     assert (now - result).days <= 6
 
 
-def test_get_monday_before_edge_cases():
+def test_get_monday_before_edge_cases() -> None:
     """Test get_monday_before on specific days."""
     # Mock datetime.now() to be a Monday
     with patch("app.helpers.text.week.datetime") as mock_datetime:
         # Monday Jan 1st 2024
-        mock_datetime.now.return_value = datetime(2024, 1, 1, 12, 0, 0)
+        mock_datetime.now.return_value = datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC)
         result = week_module.get_monday_before()
-        assert result.date() == datetime(2024, 1, 1).date()  # Should be same day
+        assert result.date() == datetime(2024, 1, 1, tzinfo=UTC).date()  # Should be same day
 
         # Sunday Jan 7th 2024
-        mock_datetime.now.return_value = datetime(2024, 1, 7, 12, 0, 0)
+        mock_datetime.now.return_value = datetime(2024, 1, 7, 12, 0, 0, tzinfo=UTC)
         result = week_module.get_monday_before()
-        assert result.date() == datetime(2024, 1, 1).date()  # Should be previous Monday
+        assert result.date() == datetime(2024, 1, 1, tzinfo=UTC).date()  # Should be previous Monday
 
 
-def test_look_back_summary(mocker):
+def test_look_back_summary(mocker: pytest_mock.MockerFixture) -> None:
     """Test look-back summary generation with goals and ratings.
 
     Verifies that the function correctly handles empty goal lists,
@@ -44,7 +45,9 @@ def test_look_back_summary(mocker):
     """
     # Test with no goals
     mocker.patch.object(week_module, "get_user_goals", return_value=[])
-    result = week_module.look_back_summary(user_id=1, days=3, start=datetime(2024, 1, 1))
+    result = week_module.look_back_summary(
+        user_id=1, days=3, start=datetime(2024, 1, 1, tzinfo=UTC)
+    )
     assert "No goals set" in result
 
     # Test with goals and ratings
@@ -57,7 +60,7 @@ def test_look_back_summary(mocker):
     )
     mocker.patch.object(week_module, "get_rating_by_goal_and_date", return_value={"rating": 3})
 
-    start = datetime(2024, 1, 1)
+    start = datetime(2024, 1, 1, tzinfo=UTC)
     result = week_module.look_back_summary(user_id=1, days=2, start=start)
 
     # Check markdown format

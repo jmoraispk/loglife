@@ -1,10 +1,12 @@
 """Tests for user database operations."""
 
+import sqlite3
+
 import pytest
 from app.db.operations import users
 
 
-def test_create_user():
+def test_create_user() -> None:
     """Test creating a new user with unique phone number.
 
     Verifies successful user creation with valid phone number and timezone,
@@ -23,11 +25,11 @@ def test_create_user():
     assert user["id"] is not None
 
     # Act & Assert
-    with pytest.raises(Exception):  # SQLite will raise IntegrityError
+    with pytest.raises(sqlite3.IntegrityError):
         users.create_user("+1234567890", "Europe/London")
 
 
-def test_get_user():
+def test_get_user() -> None:
     """Test retrieving a user by their unique ID.
 
     Verifies that existing users can be successfully retrieved by ID and
@@ -53,7 +55,7 @@ def test_get_user():
     assert user is None
 
 
-def test_get_user_by_phone_number():
+def test_get_user_by_phone_number() -> None:
     """Test retrieving a user by their phone number.
 
     Verifies that users can be looked up by phone number and returns the
@@ -72,7 +74,7 @@ def test_get_user_by_phone_number():
     assert user["phone_number"] == "+1234567890"
 
 
-def test_get_all_users():
+def test_get_all_users() -> None:
     """Test retrieving all users from the database.
 
     Verifies that all user records are returned with complete field data,
@@ -103,7 +105,7 @@ def test_get_all_users():
         assert "created_at" in user
 
 
-def test_update_user():
+def test_update_user() -> None:
     """Test updating user information with optional fields.
 
     Verifies that individual fields (phone_number, timezone) can be updated
@@ -123,7 +125,7 @@ def test_update_user():
     assert updated_user["send_transcript_file"] == 0
 
 
-def test_delete_user():
+def test_delete_user() -> None:
     """Test deleting a user from the database.
 
     Verifies that a user can be successfully deleted by ID and that

@@ -3,7 +3,7 @@
 from app.db.operations import user_states, users
 
 
-def test_create_user_state():
+def test_create_user_state() -> None:
     """Test creating a new user state with upsert behavior.
 
     Verifies successful state creation with or without temp_data, and
@@ -49,7 +49,7 @@ def test_create_user_state():
     assert retrieved_state["state"] == "RATING_GOALS"
 
 
-def test_get_user_state():
+def test_get_user_state() -> None:
     """Test retrieving a user's current state.
 
     Verifies that existing user states can be successfully retrieved with
@@ -80,7 +80,7 @@ def test_get_user_state():
     assert non_existent_state is None
 
 
-def test_update_user_state():
+def test_update_user_state() -> None:
     """Test updating user state information with optional fields.
 
     Verifies that individual fields (state, temp_data) can be updated
@@ -123,7 +123,7 @@ def test_update_user_state():
     assert unchanged_state["user_id"] == user["id"]
 
 
-def test_delete_user_state():
+def test_delete_user_state() -> None:
     """Test deleting a user state from the database.
 
     Verifies that a user state can be successfully deleted and that
