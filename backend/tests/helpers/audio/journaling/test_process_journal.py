@@ -18,9 +18,9 @@ def test_process_journal_success() -> None:
     fake_now = datetime(2024, 1, 1, 10, 0, 0, tzinfo=UTC)
 
     with (
-        patch("app.helpers.audio.journaling.send_message") as mock_send,
-        patch("app.helpers.audio.journaling.summarize_transcript") as mock_summarize,
-        patch("app.helpers.audio.journaling.transcribe_audio") as mock_transcribe,
+        patch("app.helpers.audio.journaling.process_journal.send_message") as mock_send,
+        patch("app.helpers.audio.journaling.process_journal.summarize_transcript") as mock_summarize,
+        patch("app.helpers.audio.journaling.process_journal.transcribe_audio") as mock_transcribe,
     ):
         mock_transcribe.return_value = "Transcript"
         mock_summarize.return_value = "Summary"
@@ -49,8 +49,8 @@ def test_process_journal_already_exists() -> None:
     # The entry will have today's date.
 
     with (
-        patch("app.helpers.audio.journaling.send_message"),
-        patch("app.helpers.audio.journaling.transcribe_audio") as mock_transcribe,
+        patch("app.helpers.audio.journaling.process_journal.send_message"),
+        patch("app.helpers.audio.journaling.process_journal.transcribe_audio") as mock_transcribe,
     ):
         # Act
         response = process_journal(
@@ -73,8 +73,8 @@ def test_process_journal_exceptions() -> None:
 
     # Test Transcription Error
     with (
-        patch("app.helpers.audio.journaling.send_message"),
-        patch("app.helpers.audio.journaling.transcribe_audio") as mock_transcribe,
+        patch("app.helpers.audio.journaling.process_journal.send_message"),
+        patch("app.helpers.audio.journaling.process_journal.transcribe_audio") as mock_transcribe,
     ):
         mock_transcribe.side_effect = RuntimeError("API Error")
         response = process_journal("12345", user, "audio_data", now=fake_now)
@@ -82,9 +82,9 @@ def test_process_journal_exceptions() -> None:
 
     # Test Summarization Error
     with (
-        patch("app.helpers.audio.journaling.send_message"),
-        patch("app.helpers.audio.journaling.transcribe_audio") as mock_transcribe,
-        patch("app.helpers.audio.journaling.summarize_transcript") as mock_summarize,
+        patch("app.helpers.audio.journaling.process_journal.send_message"),
+        patch("app.helpers.audio.journaling.process_journal.transcribe_audio") as mock_transcribe,
+        patch("app.helpers.audio.journaling.process_journal.summarize_transcript") as mock_summarize,
     ):
         mock_transcribe.return_value = "Transcript"
         mock_summarize.side_effect = RuntimeError("API Error")
