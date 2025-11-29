@@ -19,7 +19,7 @@ The Python/Flask backend handles message processing, goal tracking, and business
 **Key Endpoints:**
 
 - `POST /webhook` — Process incoming messages
-- `GET /emulator` — Web-based testing interface
+- `GET /` — Web-based testing interface
 
 [View Backend API Reference →](backend/index.md)
 

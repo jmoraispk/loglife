@@ -91,13 +91,13 @@ Main endpoint for processing incoming messages from WhatsApp.
 
 ---
 
-### GET `/emulator`
+### GET `/`
 
 Web-based testing interface for the bot.
 
 **Description:** Provides a simple web UI to test bot commands without needing WhatsApp.
 
-**Usage:** Open `http://localhost:5000/emulator` in your browser.
+**Usage:** Open `http://localhost:5000/` in your browser.
 
 **Features:**
 
