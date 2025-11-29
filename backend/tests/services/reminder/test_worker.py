@@ -5,9 +5,12 @@ and reminder notification triggering.
 """
 
 from datetime import UTC, datetime, timedelta
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import app.services.reminder.worker as reminder_worker
+from app.db.tables.goals import Goal
+from app.db.tables.reminders import Reminder
+from app.db.tables.users import User
 
 
 def test_next_reminder_seconds() -> None:
@@ -22,13 +25,22 @@ def test_next_reminder_seconds() -> None:
     # Set a reminder 30 minutes in the future
     reminder_time = (now + timedelta(minutes=30)).strftime("%H:%M")
 
+    # Mock objects for new DB structure
+    mock_reminder = MagicMock(spec=Reminder)
+    mock_reminder.user_id = 1
+    mock_reminder.reminder_time = reminder_time
+
+    mock_user = MagicMock(spec=User)
+    mock_user.timezone = "UTC"
+
     # Use unittest.mock.patch as a context manager
+    # We need to patch db.reminders.get_all and db.users.get
     with (
-        patch.object(reminder_worker, "get_all_goal_reminders") as mock_get_reminders,
-        patch.object(reminder_worker, "get_user") as mock_get_user,
+        patch("app.services.reminder.worker.db.reminders.get_all") as mock_get_reminders,
+        patch("app.services.reminder.worker.db.users.get") as mock_get_user,
     ):
-        mock_get_reminders.return_value = [{"user_id": 1, "reminder_time": reminder_time}]
-        mock_get_user.return_value = {"timezone": "UTC"}
+        mock_get_reminders.return_value = [mock_reminder]
+        mock_get_user.return_value = mock_user
 
         # First call: non-empty list
         wait = reminder_worker._next_reminder_seconds()  # noqa: SLF001
@@ -54,18 +66,30 @@ def test_check_reminders() -> None:
     now = datetime.now(UTC)
     reminder_time = now.strftime("%H:%M")
 
-    # Mock data
+    # Mock objects
+    mock_reminder = MagicMock(spec=Reminder)
+    mock_reminder.id = 1
+    mock_reminder.user_id = 1
+    mock_reminder.user_goal_id = 10
+    mock_reminder.reminder_time = reminder_time
+
+    mock_user = MagicMock(spec=User)
+    mock_user.timezone = "UTC"
+    mock_user.phone_number = "1234567890"
+
+    mock_goal = MagicMock(spec=Goal)
+    mock_goal.goal_description = "Test Goal"
+    mock_goal.goal_emoji = "✅"
+
     with (
-        patch.object(reminder_worker, "get_all_goal_reminders") as mock_get_reminders,
-        patch.object(reminder_worker, "get_user") as mock_get_user,
-        patch.object(reminder_worker, "get_goal") as mock_get_goal,
-        patch.object(reminder_worker, "send_message") as mock_send,
+        patch("app.services.reminder.worker.db.reminders.get_all") as mock_get_reminders,
+        patch("app.services.reminder.worker.db.users.get") as mock_get_user,
+        patch("app.services.reminder.worker.db.goals.get") as mock_get_goal,
+        patch("app.services.reminder.worker.send_message") as mock_send,
     ):
-        mock_get_reminders.return_value = [
-            {"id": 1, "user_id": 1, "user_goal_id": 10, "reminder_time": reminder_time},
-        ]
-        mock_get_user.return_value = {"timezone": "UTC", "phone_number": "1234567890"}
-        mock_get_goal.return_value = {"goal_description": "Test Goal", "goal_emoji": "✅"}
+        mock_get_reminders.return_value = [mock_reminder]
+        mock_get_user.return_value = mock_user
+        mock_get_goal.return_value = mock_goal
 
         reminder_worker._check_reminders()  # noqa: SLF001
 

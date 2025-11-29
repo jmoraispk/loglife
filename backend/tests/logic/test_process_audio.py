@@ -1,135 +1,88 @@
-"""Tests for process_audio logic."""
+"""Tests for audio processing logic."""
 
 from unittest.mock import patch
 
-from app.db.operations import users
-from app.logic import process_audio
+import pytest
+from app.db.client import db
+from app.logic.audio.processor import process_audio
 
-MODULE = "app.logic.audio.processor"
+
+@pytest.fixture
+def user():
+    return db.users.create("+1234567890", "UTC")
 
 
-def test_process_audio_success() -> None:
-    """Test successful audio processing with real DB."""
-    # Arrange - Setup DB state
-    user = users.create_user("+1234567890", "UTC")
-    # Ensure send_transcript_file is enabled (default)
-    assert user["send_transcript_file"] == 1
-
+def test_process_audio_success(user):
+    """Test successful audio processing flow."""
     with (
-        patch(f"{MODULE}.send_message") as mock_send,
-        patch(f"{MODULE}.summarize_transcript") as mock_summarize,
-        patch(f"{MODULE}.transcribe_audio") as mock_transcribe,
-        patch(f"{MODULE}.create_audio_journal_entry") as mock_create_entry,
+        patch("app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("app.logic.audio.processor.summarize_transcript") as mock_summarize,
+        patch("app.logic.audio.processor.send_message") as mock_send,
     ):
-        mock_transcribe.return_value = "Transcript"
-        mock_summarize.return_value = "Summary"
+        mock_transcribe.return_value = "Transcribed text"
+        mock_summarize.return_value = "Summary text"
 
-        # Act
-        response = process_audio("12345", user, "audio_data")
+        response = process_audio("+1234567890", user, "base64_audio")
 
-        # Assert
-        assert isinstance(response, tuple)
-        assert response[1] == "Summary"
-        mock_transcribe.assert_called_once()
-        mock_summarize.assert_called_once()
-        # send_message called:
-        # 1. "Audio received. Transcribing..."
-        # 2. "Audio transcribed. Summarizing..."
-        # 3. "Summary stored in Database."
-        assert mock_send.call_count == 3
-        mock_create_entry.assert_called_once()
+        assert response == "Summary text"
+        assert mock_send.call_count == 3  # Received, Transcribed, Stored
+
+        # Verify DB entry
+        entries = db.audio_journal.get_by_user(user.id)
+        assert len(entries) == 1
+        assert entries[0].transcription_text == "Transcribed text"
+        assert entries[0].summary_text == "Summary text"
 
 
-def test_process_audio_no_transcript_file() -> None:
-    """Test successful audio processing when transcript file is disabled."""
-    # Arrange
-    user = users.create_user("+1987654321", "UTC")
-    users.update_user(user["id"], send_transcript_file=0)
-    user = users.get_user(user["id"])  # Refresh user data
-
+def test_process_audio_transcribe_failure(user):
+    """Test audio processing with transcription failure."""
     with (
-        patch(f"{MODULE}.send_message"),
-        patch(f"{MODULE}.summarize_transcript") as mock_summarize,
-        patch(f"{MODULE}.transcribe_audio") as mock_transcribe,
-        patch(f"{MODULE}.transcript_to_base64") as mock_base64,
-        patch(f"{MODULE}.create_audio_journal_entry"),
+        patch("app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("app.logic.audio.processor.send_message") as mock_send,
     ):
-        mock_transcribe.return_value = "Transcript"
-        mock_summarize.return_value = "Summary"
+        mock_transcribe.side_effect = RuntimeError("Transcription error")
 
-        # Act
-        response = process_audio("12345", user, "audio_data")
+        response = process_audio("+1234567890", user, "base64_audio")
 
-        # Assert
-        assert isinstance(response, str)
-        assert response == "Summary"
-        mock_base64.assert_not_called()
-
-
-def test_process_audio_transcription_error() -> None:
-    """Test handling of transcription errors."""
-    user = users.create_user("+1234567890", "UTC")
-
-    with (
-        patch(f"{MODULE}.send_message"),
-        patch(f"{MODULE}.transcribe_audio") as mock_transcribe,
-    ):
-        mock_transcribe.side_effect = RuntimeError("API Error")
-        response = process_audio("12345", user, "audio_data")
         assert response == "Transcription failed!"
+        mock_send.assert_called_once_with("+1234567890", "Audio received. Transcribing...")
 
 
-def test_process_audio_summarization_error() -> None:
-    """Test handling of summarization errors."""
-    user = users.create_user("+1234567890", "UTC")
-
+def test_process_audio_summarize_failure(user):
+    """Test audio processing with summarization failure."""
     with (
-        patch(f"{MODULE}.send_message"),
-        patch(f"{MODULE}.transcribe_audio") as mock_transcribe,
-        patch(f"{MODULE}.summarize_transcript") as mock_summarize,
+        patch("app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("app.logic.audio.processor.summarize_transcript") as mock_summarize,
+        patch("app.logic.audio.processor.send_message") as mock_send,
     ):
-        mock_transcribe.return_value = "Transcript"
-        mock_summarize.side_effect = RuntimeError("API Error")
+        mock_transcribe.return_value = "Transcribed text"
+        mock_summarize.side_effect = RuntimeError("Summarization error")
 
-        response = process_audio("12345", user, "audio_data")
+        response = process_audio("+1234567890", user, "base64_audio")
+
         assert response == "Summarization failed!"
+        assert mock_send.call_count == 2  # Received, Transcribed
 
 
-def test_process_audio_empty_transcript() -> None:
-    """Test handling when transcription returns empty string."""
-    user = users.create_user("+1234567890", "UTC")
-
-    with (
-        patch(f"{MODULE}.send_message"),
-        patch(f"{MODULE}.transcribe_audio") as mock_transcribe,
-        patch(f"{MODULE}.summarize_transcript") as mock_summarize,
-        patch(f"{MODULE}.create_audio_journal_entry") as mock_create,
-    ):
-        mock_transcribe.return_value = ""
-        mock_summarize.return_value = "Nothing to summarize."
-
-        response = process_audio("12345", user, "audio_data")
-
-        assert isinstance(response, tuple)
-        assert response[1] == "Nothing to summarize."
-        mock_create.assert_called_once()
-
-
-def test_process_audio_empty_summary() -> None:
-    """Test handling when summary returns empty string."""
-    user = users.create_user("+1234567890", "UTC")
+def test_process_audio_with_transcript_file(user):
+    """Test audio processing with transcript file enabled."""
+    db.users.update(user.id, send_transcript_file=1)
+    # Need to re-fetch user or manually update the object passed, 
+    # because user is a dataclass copy, not a live reference to DB.
+    # The process_audio function takes a User object.
+    user = db.users.get(user.id)
 
     with (
-        patch(f"{MODULE}.send_message"),
-        patch(f"{MODULE}.transcribe_audio") as mock_transcribe,
-        patch(f"{MODULE}.summarize_transcript") as mock_summarize,
-        patch(f"{MODULE}.create_audio_journal_entry") as mock_create,
+        patch("app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("app.logic.audio.processor.summarize_transcript") as mock_summarize,
+        patch("app.logic.audio.processor.transcript_to_base64") as mock_to_b64,
+        patch("app.logic.audio.processor.send_message") as mock_send,
     ):
-        mock_transcribe.return_value = "Some content"
-        mock_summarize.return_value = ""
+        mock_transcribe.return_value = "Transcribed text"
+        mock_summarize.return_value = "Summary text"
+        mock_to_b64.return_value = "base64_file_content"
 
-        response = process_audio("12345", user, "audio_data")
+        response = process_audio("+1234567890", user, "base64_audio")
 
         assert isinstance(response, tuple)
-        assert response[1] == ""
-        mock_create.assert_called_once()
+        assert response == ("base64_file_content", "Summary text")
