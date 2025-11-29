@@ -12,11 +12,11 @@ LogLife is an AI bot to help track goals, journal thoughts, and build better hab
 
 **For Users:**
 
-Explore the [Usage Guide](usage/overview/) to learn about audio journaling, referrals, and managing goals.
+Explore the [Usage Guide](usage/overview.md) to learn about audio journaling, referrals, and managing goals.
 
 **For Developers:**
 
-See the [Developer Guide](developer/overview/) - it covers complete local/remote setup and system architecture.
+See the [Developer Guide](developer/overview.md) - it covers complete local/remote setup and system architecture.
 
 ---
 
@@ -24,21 +24,21 @@ See the [Developer Guide](developer/overview/) - it covers complete local/remote
 
 **Usage:**
 
-- [Audio Journaling](usage/audio-journaling/) — Send voice notes for AI-powered transcription and summaries
-- [Referrals](usage/referrals/) — Invite others by sharing contacts
-- [Managing Goals](usage/managing-goals/) — Track, rate, and get reminders for your goals
+- [Audio Journaling](usage/audio-journaling.md) — Send voice notes for AI-powered transcription and summaries
+- [Referrals](usage/referrals.md) — Invite others by sharing contacts
+- [Managing Goals](usage/managing-goals.md) — Track, rate, and get reminders for your goals
 
 **Developer Guides:**
 
-- [Overview](developer/overview/) — System architecture and quick start
-- [Backend](developer/backend/) — Python/Flask backend details
-- [WhatsApp Client](developer/whatsapp-client/) — Node.js client setup
-- [Twilio Setup](developer/twilio-whatsapp-number-setup/) — Production WhatsApp configuration
+- [Overview](developer/overview.md) — System architecture and quick start
+- [Backend](developer/backend.md) — Python/Flask backend details
+- [WhatsApp Client](developer/whatsapp-client.md) — Node.js client setup
+- [Twilio Setup](developer/twilio-whatsapp-number-setup.md) — Production WhatsApp configuration
 
 **API Documentation:**
 
-- [API Overview](api/overview/) — HTTP endpoints and base URLs
-- [Backend API](api/backend/) — Message processing endpoints
-- [WhatsApp Client API](api/whatsapp-client/) — Automated messaging endpoints
+- [API Overview](api/overview.md) — HTTP endpoints and base URLs
+- [Backend API](api/backend/index.md) — Message processing endpoints
+- [WhatsApp Client API](api/whatsapp-client.md) — Automated messaging endpoints
 
 ---
