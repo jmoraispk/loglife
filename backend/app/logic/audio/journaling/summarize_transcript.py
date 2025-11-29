@@ -50,9 +50,7 @@ def summarize_transcript(transcript: str) -> str:
 
     try:
         # Set timeout to 30 seconds to prevent indefinite hangs
-        response = requests.post(
-            OPENAI_API_URL, json=payload, headers=headers, timeout=30
-        )
+        response = requests.post(OPENAI_API_URL, json=payload, headers=headers, timeout=30)
         response.raise_for_status()
         data = response.json()
         return data["choices"][0]["message"]["content"]

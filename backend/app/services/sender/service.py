@@ -63,5 +63,6 @@ def send_message(number: str, message: str) -> None:
     else:
         # Fallback or default behavior if client_type is missing/unknown
         # For now, we might want to log a warning or default to whatsapp if safe
-        logger.warning("Unknown or missing client_type in g context: %s", getattr(g, "client_type", "None"))
-
+        logger.warning(
+            "Unknown or missing client_type in g context: %s", getattr(g, "client_type", "None")
+        )

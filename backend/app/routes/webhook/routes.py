@@ -72,4 +72,3 @@ def webhook() -> ResponseReturnValue:
         error = f"Error processing webhook > {e}"
         logger.exception(error)
         return error_response(error)
-

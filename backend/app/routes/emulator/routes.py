@@ -43,4 +43,3 @@ def events() -> Response:
             yield f"data: {msg}\n\n"
 
     return Response(stream(), mimetype="text/event-stream")
-

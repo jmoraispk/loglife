@@ -100,4 +100,3 @@ def success_response(
         ),
         status_code,
     )
-

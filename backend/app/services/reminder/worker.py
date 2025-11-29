@@ -155,4 +155,3 @@ def start_reminder_service() -> threading.Thread:
     t.start()
     logger.info("Reminder service thread %s started (daemon=%s)", t.name, t.daemon)
     return t
-

@@ -23,9 +23,10 @@ def test_next_reminder_seconds() -> None:
     reminder_time = (now + timedelta(minutes=30)).strftime("%H:%M")
 
     # Use unittest.mock.patch as a context manager
-    with patch.object(reminder_worker, "get_all_goal_reminders") as mock_get_reminders, \
-         patch.object(reminder_worker, "get_user") as mock_get_user:
-
+    with (
+        patch.object(reminder_worker, "get_all_goal_reminders") as mock_get_reminders,
+        patch.object(reminder_worker, "get_user") as mock_get_user,
+    ):
         mock_get_reminders.return_value = [{"user_id": 1, "reminder_time": reminder_time}]
         mock_get_user.return_value = {"timezone": "UTC"}
 
@@ -54,11 +55,12 @@ def test_check_reminders() -> None:
     reminder_time = now.strftime("%H:%M")
 
     # Mock data
-    with patch.object(reminder_worker, "get_all_goal_reminders") as mock_get_reminders, \
-         patch.object(reminder_worker, "get_user") as mock_get_user, \
-         patch.object(reminder_worker, "get_goal") as mock_get_goal, \
-         patch.object(reminder_worker, "send_message") as mock_send:
-
+    with (
+        patch.object(reminder_worker, "get_all_goal_reminders") as mock_get_reminders,
+        patch.object(reminder_worker, "get_user") as mock_get_user,
+        patch.object(reminder_worker, "get_goal") as mock_get_goal,
+        patch.object(reminder_worker, "send_message") as mock_send,
+    ):
         mock_get_reminders.return_value = [
             {"id": 1, "user_id": 1, "user_goal_id": 10, "reminder_time": reminder_time},
         ]

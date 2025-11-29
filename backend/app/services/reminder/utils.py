@@ -52,4 +52,3 @@ def get_goals_not_tracked_today(user_id: int) -> list:
             untracked_goals.append(goal)
 
     return untracked_goals
-

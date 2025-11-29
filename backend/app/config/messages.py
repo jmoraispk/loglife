@@ -108,8 +108,12 @@ SUCCESS_INDIVIDUAL_RATING = "📅 <today_display>\n<goal_emoji> <goal_descriptio
 SUCCESS_GOAL_ADDED = "Goal Added successfully! When you would like to be reminded?"
 SUCCESS_JOURNALING_ENABLED = "✅ You already have a journaling goal! Check 'goals' to see it."
 SUCCESS_GOAL_DELETED = "✅ Goal deleted: {goal_emoji} {goal_description}"
-SUCCESS_REMINDER_UPDATED = "✅ Reminder updated! I'll remind you at {display_time} for {goal_emoji} {goal_desc}"
-SUCCESS_TRANSCRIPT_ENABLED = "✅ Transcript files enabled! You'll now receive transcript file with your audio journaling."
+SUCCESS_REMINDER_UPDATED = (
+    "✅ Reminder updated! I'll remind you at {display_time} for {goal_emoji} {goal_desc}"
+)
+SUCCESS_TRANSCRIPT_ENABLED = (
+    "✅ Transcript files enabled! You'll now receive transcript file with your audio journaling."
+)
 SUCCESS_TRANSCRIPT_DISABLED = "✅ Transcript files disabled! You'll only receive the summary message with your audio journaling."
 
 # -----------------------------

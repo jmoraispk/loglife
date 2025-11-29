@@ -131,17 +131,10 @@ class JournalPromptsHandler(TextCommandHandler):
             return messages.JOURNAL_REMINDER_MESSAGE.replace(
                 "<goals_not_tracked_today>",
                 "- *Did you complete the goals?*\n"
-                + "\n".join(
-                    [
-                        f"- {goal['goal_description']}"
-                        for goal in goals_not_tracked_today
-                    ]
-                ),
+                + "\n".join([f"- {goal['goal_description']}" for goal in goals_not_tracked_today]),
             )
 
-        return messages.JOURNAL_REMINDER_MESSAGE.replace(
-            "\n\n<goals_not_tracked_today>", ""
-        )
+        return messages.JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
 
 
 class DeleteGoalHandler(TextCommandHandler):
@@ -214,10 +207,7 @@ class ReminderTimeHandler(TextCommandHandler):
 
         goal_desc = goal["goal_description"]
         goal_emoji = goal["goal_emoji"]
-        return (
-            f"Got it! I'll remind you daily at {display_time} for "
-            f"{goal_emoji} {goal_desc}."
-        )
+        return f"Got it! I'll remind you daily at {display_time} for {goal_emoji} {goal_desc}."
 
 
 class GoalsListHandler(TextCommandHandler):
@@ -251,9 +241,7 @@ class GoalsListHandler(TextCommandHandler):
             goal_desc = goal["goal_description"]
             goal_emoji = goal["goal_emoji"]
             boost = goal["boost_level"]
-            goal_lines.append(
-                f"{i}. {goal_emoji} {goal_desc} (boost {boost}) {time_display}"
-            )
+            goal_lines.append(f"{i}. {goal_emoji} {goal_desc} (boost {boost}) {time_display}")
 
         response = "```" + "\n".join(goal_lines) + "```"
         response += (
