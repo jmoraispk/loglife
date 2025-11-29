@@ -57,6 +57,14 @@ class Database:
     def referrals(self) -> ReferralsTable:
         return ReferralsTable(self.conn)
 
+    def set_connection(self, conn: sqlite3.Connection) -> None:
+        """Set the database connection explicitly (useful for testing)."""
+        self._conn = conn
+
+    def clear_connection(self) -> None:
+        """Clear the database connection reference without closing it."""
+        self._conn = None
+
     def close(self):
         if self._conn:
             self._conn.close()

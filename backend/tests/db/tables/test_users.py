@@ -75,6 +75,23 @@ def test_get_user_by_phone_number() -> None:
     assert user.phone_number == "+1234567890"
 
 
+def test_get_all_users() -> None:
+    """Test retrieving all users.
+
+    Verifies that get_all returns a list of all user records.
+    """
+    # Arrange
+    db.users.create(phone_number="+1234567890", timezone="UTC")
+    db.users.create(phone_number="+9876543210", timezone="UTC")
+
+    # Act
+    users = db.users.get_all()
+
+    # Assert
+    assert len(users) == 2
+    assert isinstance(users[0], User)
+
+
 def test_update_user() -> None:
     """Test updating user information with optional fields.
 
@@ -107,12 +124,7 @@ def test_delete_user() -> None:
     user_id = user.id
 
     # Act
-    # Currently the Table classes don't have delete method exposed?
-    # Wait, I added delete() to most Repositories but I need to check UsersTable.
-    # Checking UsersTable implementation...
-    # Ah, UsersTable in backend/app/db/tables/users.py doesn't seem to have a delete method
-    # based on my recollection. I should check or add it.
-    # Actually, I should probably add it if it's missing.
-    # For now, let's assume I'll add it or it's there (I'll fix it if test fails).
-    # Update: I checked users.py earlier and it didn't have delete.
-    pass
+    db.users.delete(user_id)
+
+    # Assert
+    assert db.users.get(user_id) is None

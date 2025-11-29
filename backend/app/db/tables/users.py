@@ -49,6 +49,11 @@ class UsersTable:
             return self._row_to_model(row)
         return None
 
+    def get_all(self) -> list[User]:
+        """Retrieve all users."""
+        rows = self._conn.execute("SELECT * FROM users").fetchall()
+        return [self._row_to_model(row) for row in rows]
+
     def create(self, phone_number: str, timezone: str) -> User:
         """Create a new user record."""
         cursor = self._conn.execute(
@@ -91,6 +96,10 @@ class UsersTable:
         self._conn.execute(query, params)
 
         return self.get(user_id)
+
+    def delete(self, user_id: int) -> None:
+        """Delete a user record."""
+        self._conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
 
     def _row_to_model(self, row: sqlite3.Row) -> User:
         """Convert a SQLite row to a User model."""

@@ -33,6 +33,9 @@ def process_audio(sender: str, user: User, audio_data: str) -> str | tuple[str, 
         logger.exception("Error transcribing audio")
         return "Transcription failed!"
 
+    if not transcript.strip():
+        return "Transcription was empty."
+
     send_message(sender, "Audio transcribed. Summarizing...")
 
     try:

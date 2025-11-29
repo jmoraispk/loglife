@@ -15,8 +15,49 @@ def test_get_monday_before() -> None:
     or present (never in the future relative to "now").
     """
     monday = week_module.get_monday_before()
+    now = datetime.now(tz=UTC)
+
     assert monday.weekday() == 0
-    assert monday <= datetime.now(tz=UTC)
+    assert monday <= now
+    assert (now - monday).days <= 6
+
+
+def test_monday_before_edge_cases() -> None:
+    """Test get_monday_before for various days of the week.
+
+    Ensures that calling the function on different days (Monday vs Sunday vs Wednesday)
+    always correctly identifies the most recent past Monday (or today if today is Monday).
+    """
+    # We verify the logic by strictly mocking datetime.now
+    # If today is Monday (0), delta is 0
+    # If today is Tuesday (1), delta is 1
+    # ...
+    # If today is Sunday (6), delta is 6
+
+    # Use a known Monday as base for easy calculation.
+    # Jan 1, 2024 was a Monday.
+    base_monday = datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC)
+
+    for i in range(7):
+        # Simulating each day of the week: Monday (0) to Sunday (6)
+        simulated_today = base_monday + timedelta(days=i)
+
+        # We need to patch datetime in the module where it is used
+        with patch("app.logic.text.week.datetime") as mock_datetime:
+            mock_datetime.now.return_value = simulated_today
+
+            monday = week_module.get_monday_before()
+
+            # Expect the result to be the base_monday (same time as simulated_today)
+            # because get_monday_before subtracts the days since Monday from current time.
+            expected_monday = simulated_today - timedelta(days=i)
+
+            assert monday == expected_monday
+            assert monday.weekday() == 0
+
+            # Verify the delta explicitly as requested
+            # (simulated_today.date() - monday.date()).days should be i
+            assert (simulated_today.date() - monday.date()).days == i
 
 
 def test_look_back_summary() -> None:
