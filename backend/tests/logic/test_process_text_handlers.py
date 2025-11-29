@@ -12,7 +12,7 @@ from app.db.operations import (
     user_states,
     users,
 )
-from app.logic.text_handlers import (
+from app.logic.text.handlers import (
     AddGoalHandler,
     DeleteGoalHandler,
     EnableJournalingHandler,

@@ -5,8 +5,8 @@ from datetime import UTC, datetime
 
 from app.config import ERROR_NO_GOALS_SET
 from app.db.operations import goal_ratings, goal_reminders, user_goals, user_states, users
-from app.logic.process_text import process_text
-from app.logic.text_handlers import _extract_emoji
+from app.logic.text.processor import process_text
+from app.logic.text.handlers import _extract_emoji
 
 
 def test_internal_extract_emoji() -> None:

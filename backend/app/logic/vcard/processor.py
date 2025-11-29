@@ -14,7 +14,7 @@ def _extract_phone_number(vcard_str: str) -> str:
     return match.group(1)
 
 
-def process_vard(referrer_user: dict, raw_vcards: str) -> str:
+def process_vcard(referrer_user: dict, raw_vcards: str) -> str:
     """Create referral users from VCARD attachments.
 
     Parse the incoming VCARD JSON payload, ensure each contact exists as a

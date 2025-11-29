@@ -8,7 +8,7 @@ import logging
 
 from app.db import create_user, get_user_by_phone_number
 from app.helpers import error_response, get_timezone_from_number, success_response
-from app.logic import process_audio, process_text, process_vard
+from app.logic import process_audio, process_text, process_vcard
 from flask import Blueprint, g, request
 from flask.typing import ResponseReturnValue
 
@@ -53,7 +53,7 @@ def webhook() -> ResponseReturnValue:
             else:
                 response_message = audio_response
         elif msg_type == "vcard":
-            response_message = process_vard(user, raw_msg)
+            response_message = process_vcard(user, raw_msg)
         else:
             response_message = "Can't process this type of message."
 

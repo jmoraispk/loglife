@@ -3,9 +3,9 @@
 from unittest.mock import patch
 
 from app.db.operations import users
-from app.logic.process_audio import process_audio
+from app.logic.audio.processor import process_audio
 
-MODULE = "app.logic.process_audio"
+MODULE = "app.logic.audio.processor"
 
 
 def test_process_audio_success() -> None:
