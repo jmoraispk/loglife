@@ -8,26 +8,7 @@ from datetime import UTC, datetime, timedelta
 from app.config import (
     DEFAULT_GOAL_EMOJI,
     STYLE,
-)
-from app.config.messages import (
-    ERROR_ADD_GOAL_FIRST,
-    ERROR_INVALID_DELETE_FORMAT,
-    ERROR_INVALID_GOAL_NUMBER,
-    ERROR_INVALID_INPUT_LENGTH,
-    ERROR_INVALID_TIME_FORMAT,
-    ERROR_INVALID_UPDATE_FORMAT,
-    ERROR_NO_GOALS_SET,
-    HELP_MESSAGE,
-    JOURNAL_REMINDER_MESSAGE,
-    SUCCESS_GOAL_ADDED,
-    SUCCESS_GOAL_DELETED,
-    SUCCESS_INDIVIDUAL_RATING,
-    SUCCESS_JOURNALING_ENABLED,
-    SUCCESS_RATINGS_SUBMITTED,
-    SUCCESS_REMINDER_UPDATED,
-    SUCCESS_TRANSCRIPT_DISABLED,
-    SUCCESS_TRANSCRIPT_ENABLED,
-    USAGE_RATE,
+    messages,
 )
 from app.db import (
     create_goal,
@@ -109,7 +90,7 @@ class AddGoalHandler(TextCommandHandler):
                     state="awaiting_reminder_time",
                     temp_data=json.dumps({"goal_id": goal["id"]}),
                 )
-                return SUCCESS_GOAL_ADDED
+                return messages.SUCCESS_GOAL_ADDED
         return None
 
 
@@ -128,7 +109,7 @@ class EnableJournalingHandler(TextCommandHandler):
         user_goals: list[dict] = get_user_goals(user_id)
         for goal in user_goals:
             if goal["goal_emoji"] == "📓" and "journaling" in goal["goal_description"]:
-                return SUCCESS_JOURNALING_ENABLED
+                return messages.SUCCESS_JOURNALING_ENABLED
 
         # Delegate to AddGoalHandler
         add_handler = AddGoalHandler()
@@ -147,7 +128,7 @@ class JournalPromptsHandler(TextCommandHandler):
         user_id = user["id"]
         goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
         if goals_not_tracked_today:
-            return JOURNAL_REMINDER_MESSAGE.replace(
+            return messages.JOURNAL_REMINDER_MESSAGE.replace(
                 "<goals_not_tracked_today>",
                 "- *Did you complete the goals?*\n"
                 + "\n".join(
@@ -158,7 +139,9 @@ class JournalPromptsHandler(TextCommandHandler):
                 ),
             )
 
-        return JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
+        return messages.JOURNAL_REMINDER_MESSAGE.replace(
+            "\n\n<goals_not_tracked_today>", ""
+        )
 
 
 class DeleteGoalHandler(TextCommandHandler):
@@ -176,22 +159,21 @@ class DeleteGoalHandler(TextCommandHandler):
         try:
             goal_num: int = int(message.replace(self.PREFIX, "").strip())
         except ValueError:
-            return ERROR_INVALID_DELETE_FORMAT
+            return messages.ERROR_INVALID_DELETE_FORMAT
 
         if goal_num <= 0:
-            return ERROR_INVALID_GOAL_NUMBER
+            return messages.ERROR_INVALID_GOAL_NUMBER
 
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals or goal_num > len(user_goals):
-            return ERROR_INVALID_GOAL_NUMBER
+            return messages.ERROR_INVALID_GOAL_NUMBER
 
         goal: dict = user_goals[goal_num - 1]
 
         delete_goal(goal["id"])
 
-        return SUCCESS_GOAL_DELETED.format(
-            goal_emoji=goal['goal_emoji'],
-            goal_description=goal['goal_description']
+        return messages.SUCCESS_GOAL_DELETED.format(
+            goal_emoji=goal["goal_emoji"], goal_description=goal["goal_description"]
         )
 
 
@@ -211,7 +193,7 @@ class ReminderTimeHandler(TextCommandHandler):
 
         user_state: dict | None = get_user_state(user_id)
         if not user_state or user_state["state"] != "awaiting_reminder_time":
-            return ERROR_ADD_GOAL_FIRST
+            return messages.ERROR_ADD_GOAL_FIRST
 
         temp = json.loads(user_state.get("temp_data") or "{}")
         goal_id = temp.get("goal_id")
@@ -253,7 +235,7 @@ class GoalsListHandler(TextCommandHandler):
         user_goals: list[dict] = get_user_goals(user_id)
 
         if not user_goals:
-            return ERROR_NO_GOALS_SET
+            return messages.ERROR_NO_GOALS_SET
 
         # Format each goal with its description
         goal_lines: list[str] = []
@@ -296,18 +278,18 @@ class UpdateReminderHandler(TextCommandHandler):
         user_id = user["id"]
         parts = message.replace(self.PREFIX, "").strip().split(" ")
         if len(parts) != MIN_PARTS_EXPECTED:
-            return ERROR_INVALID_UPDATE_FORMAT
+            return messages.ERROR_INVALID_UPDATE_FORMAT
         goal_num: int = int(parts[0])
         time_input: str = parts[1]
 
         # Validate and get normalized time
         normalized_time = parse_time_string(time_input)
         if not normalized_time:
-            return ERROR_INVALID_TIME_FORMAT
+            return messages.ERROR_INVALID_TIME_FORMAT
 
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals or goal_num > len(user_goals) or goal_num < 1:
-            return ERROR_INVALID_GOAL_NUMBER
+            return messages.ERROR_INVALID_GOAL_NUMBER
 
         goal: dict = user_goals[goal_num - 1]
 
@@ -328,10 +310,8 @@ class UpdateReminderHandler(TextCommandHandler):
 
         goal_emoji = goal["goal_emoji"]
         goal_desc = goal["goal_description"]
-        return SUCCESS_REMINDER_UPDATED.format(
-            display_time=display_time,
-            goal_emoji=goal_emoji,
-            goal_desc=goal_desc
+        return messages.SUCCESS_REMINDER_UPDATED.format(
+            display_time=display_time, goal_emoji=goal_emoji, goal_desc=goal_desc
         )
 
 
@@ -349,10 +329,10 @@ class TranscriptToggleHandler(TextCommandHandler):
         user_id = user["id"]
         if "on" in message:
             update_user(user_id, send_transcript_file=1)
-            return SUCCESS_TRANSCRIPT_ENABLED
+            return messages.SUCCESS_TRANSCRIPT_ENABLED
         if "off" in message:
             update_user(user_id, send_transcript_file=0)
-            return SUCCESS_TRANSCRIPT_DISABLED
+            return messages.SUCCESS_TRANSCRIPT_DISABLED
         return "Invalid command. Usage: transcript [on|off]"
 
 
@@ -382,7 +362,7 @@ class WeekSummaryHandler(TextCommandHandler):
         # Add Goals Header
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals:
-            return ERROR_NO_GOALS_SET
+            return messages.ERROR_NO_GOALS_SET
 
         goal_emojis: list[str] = [goal["goal_emoji"] for goal in user_goals]
         summary += "    " + " ".join(goal_emojis) + "\n```"
@@ -407,7 +387,7 @@ class LookbackHandler(TextCommandHandler):
         # Check if user has any goals first
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals:
-            return ERROR_NO_GOALS_SET
+            return messages.ERROR_NO_GOALS_SET
 
         # Extract number of days
         parts: list[str] = message.split()
@@ -449,27 +429,27 @@ class RateSingleHandler(TextCommandHandler):
         user_id = user["id"]
         parse_rating: list[str] = message.replace(self.PREFIX, "").strip().split(" ")
         if len(parse_rating) != MIN_PARTS_EXPECTED:
-            return USAGE_RATE
+            return messages.USAGE_RATE
 
         try:
             goal_num: int = int(parse_rating[0])
             rating_value: int = int(parse_rating[1])
         except ValueError:
-            return USAGE_RATE
+            return messages.USAGE_RATE
 
         if goal_num <= 0:
-            return USAGE_RATE
+            return messages.USAGE_RATE
 
         if not (1 <= rating_value <= 3):
-            return USAGE_RATE
+            return messages.USAGE_RATE
 
         user_goals: list[dict] = get_user_goals(user_id)
 
         if not user_goals:
-            return ERROR_NO_GOALS_SET
+            return messages.ERROR_NO_GOALS_SET
 
         if not (goal_num <= len(user_goals)):
-            return USAGE_RATE
+            return messages.USAGE_RATE
 
         goal: dict = user_goals[goal_num - 1]
 
@@ -485,7 +465,7 @@ class RateSingleHandler(TextCommandHandler):
         status_symbol: str = STYLE[rating_value]
 
         return (
-            SUCCESS_INDIVIDUAL_RATING.replace("<today_display>", today_display)
+            messages.SUCCESS_INDIVIDUAL_RATING.replace("<today_display>", today_display)
             .replace("<goal_emoji>", goal["goal_emoji"])
             .replace("<goal_description>", goal["goal_description"])
             .replace("<status_symbol>", status_symbol)
@@ -504,11 +484,11 @@ class RateAllHandler(TextCommandHandler):
         user_id = user["id"]
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals:
-            return ERROR_NO_GOALS_SET
+            return messages.ERROR_NO_GOALS_SET
 
         # Validate input length
         if len(message) != len(user_goals):
-            return ERROR_INVALID_INPUT_LENGTH.replace(
+            return messages.ERROR_INVALID_INPUT_LENGTH.replace(
                 "<num_goals>",
                 str(len(user_goals)),
             )
@@ -528,7 +508,7 @@ class RateAllHandler(TextCommandHandler):
         status: list[str] = [STYLE[r] for r in ratings]
 
         return (
-            SUCCESS_RATINGS_SUBMITTED.replace("<today_display>", today_display)
+            messages.SUCCESS_RATINGS_SUBMITTED.replace("<today_display>", today_display)
             .replace("<goal_emojis>", " ".join(goal_emojis))
             .replace("<goal_description>", goal["goal_description"])
             .replace("<status>", " ".join(status))
@@ -546,4 +526,4 @@ class HelpHandler(TextCommandHandler):
 
     def handle(self, _user: dict, _message: str) -> str | None:
         """Process help command."""
-        return HELP_MESSAGE
+        return messages.HELP_MESSAGE
