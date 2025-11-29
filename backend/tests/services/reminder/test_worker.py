@@ -36,8 +36,8 @@ def test_next_reminder_seconds() -> None:
     # Use unittest.mock.patch as a context manager
     # We need to patch db.reminders.get_all and db.users.get
     with (
-        patch("app.services.reminder.worker.db.reminders.get_all") as mock_get_reminders,
-        patch("app.services.reminder.worker.db.users.get") as mock_get_user,
+        patch("app.db.tables.reminders.RemindersTable.get_all") as mock_get_reminders,
+        patch("app.db.tables.users.UsersTable.get") as mock_get_user,
     ):
         mock_get_reminders.return_value = [mock_reminder]
         mock_get_user.return_value = mock_user
@@ -82,9 +82,9 @@ def test_check_reminders() -> None:
     mock_goal.goal_emoji = "✅"
 
     with (
-        patch("app.services.reminder.worker.db.reminders.get_all") as mock_get_reminders,
-        patch("app.services.reminder.worker.db.users.get") as mock_get_user,
-        patch("app.services.reminder.worker.db.goals.get") as mock_get_goal,
+        patch("app.db.tables.reminders.RemindersTable.get_all") as mock_get_reminders,
+        patch("app.db.tables.users.UsersTable.get") as mock_get_user,
+        patch("app.db.tables.goals.GoalsTable.get") as mock_get_goal,
         patch("app.services.reminder.worker.send_message") as mock_send,
     ):
         mock_get_reminders.return_value = [mock_reminder]
@@ -94,4 +94,5 @@ def test_check_reminders() -> None:
         reminder_worker._check_reminders()  # noqa: SLF001
 
         # Assert message sent
+        # Ensure we are matching the exact call format including args
         mock_send.assert_called_once_with("1234567890", "⏰ Reminder: ✅ Test Goal")

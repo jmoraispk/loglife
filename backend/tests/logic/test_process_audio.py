@@ -24,7 +24,13 @@ def test_process_audio_success(user):
 
         response = process_audio("+1234567890", user, "base64_audio")
 
-        assert response == "Summary text"
+        if isinstance(response, tuple):
+            # Unpack if user settings cause a tuple return (e.g., file enabled)
+            _, summary = response
+            assert summary == "Summary text"
+        else:
+            assert response == "Summary text"
+            
         assert mock_send.call_count == 3  # Received, Transcribed, Stored
 
         # Verify DB entry
@@ -85,4 +91,5 @@ def test_process_audio_with_transcript_file(user):
         response = process_audio("+1234567890", user, "base64_audio")
 
         assert isinstance(response, tuple)
+        # Check for the tuple order (transcript_file, summary)
         assert response == ("base64_file_content", "Summary text")

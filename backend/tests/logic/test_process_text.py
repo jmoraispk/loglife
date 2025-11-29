@@ -48,7 +48,7 @@ def test_process_text_add_goal() -> None:
     goals = db.goals.get_by_user(user.id)
     assert len(goals) == 1
     assert goals[0].goal_emoji == "🏃"
-    assert goals[0].goal_description == "Run 5k" # Note: Original was "run 5k", but handler strips/cleans? 
+    assert goals[0].goal_description == "run 5k" # Note: Original was "run 5k", but handler strips/cleans? 
     # Wait, original assert was "run 5k" lowercase? Let's check handler logic. 
     # Handler logic: raw_goal.replace(goal_emoji, "").strip(). 
     # It doesn't lowercase description. 
@@ -308,7 +308,7 @@ def test_add_goal_special_chars(user) -> None:
     # Ah! process_text calls `message = message.strip().lower()` at the very top!
     # So everything is lowercased before handler sees it.
     # My handler implementation didn't change this behavior, process_text does it.
-    assert goals[0].goal_description.lower() == dangerous_string.lower()
+    assert goals[0].goal_description == dangerous_string.lower()
 
 
 def test_add_goal_very_long(user) -> None:
