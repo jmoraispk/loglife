@@ -285,7 +285,7 @@ def test_add_goal_special_chars(user) -> None:
     response = process_text(user, f"add goal 🏃 {dangerous_string}")
 
     assert "Goal Added successfully" in response
-    
+
     # Verify it was stored literally
     goals = user_goals.get_user_goals(user["id"])
     assert len(goals) == 1

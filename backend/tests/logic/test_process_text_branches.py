@@ -1,9 +1,7 @@
 """Tests for process_text logic (missing branches)."""
 
-import sqlite3
 from datetime import UTC, datetime
 
-import pytest
 from app.config import ERROR_NO_GOALS_SET, STYLE
 from app.db.operations import goal_ratings, goal_reminders, user_goals, users
 from app.logic import process_text
@@ -46,7 +44,7 @@ def test_process_text_rate_invalid_values() -> None:
 
     # The handlers now return usage message instead of raising IntegrityError
     # So we expect "Usage: rate" or similar error message
-    
+
     response = process_text(user, "rate 1 4")
     assert "Usage: rate" in response
 
