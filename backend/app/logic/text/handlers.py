@@ -7,13 +7,26 @@ from datetime import UTC, datetime, timedelta
 
 from app.config import (
     DEFAULT_GOAL_EMOJI,
+    STYLE,
+)
+from app.config.messages import (
+    ERROR_ADD_GOAL_FIRST,
+    ERROR_INVALID_DELETE_FORMAT,
+    ERROR_INVALID_GOAL_NUMBER,
     ERROR_INVALID_INPUT_LENGTH,
+    ERROR_INVALID_TIME_FORMAT,
+    ERROR_INVALID_UPDATE_FORMAT,
     ERROR_NO_GOALS_SET,
     HELP_MESSAGE,
     JOURNAL_REMINDER_MESSAGE,
-    STYLE,
+    SUCCESS_GOAL_ADDED,
+    SUCCESS_GOAL_DELETED,
     SUCCESS_INDIVIDUAL_RATING,
+    SUCCESS_JOURNALING_ENABLED,
     SUCCESS_RATINGS_SUBMITTED,
+    SUCCESS_REMINDER_UPDATED,
+    SUCCESS_TRANSCRIPT_DISABLED,
+    SUCCESS_TRANSCRIPT_ENABLED,
     USAGE_RATE,
 )
 from app.db import (
@@ -96,7 +109,7 @@ class AddGoalHandler(TextCommandHandler):
                     state="awaiting_reminder_time",
                     temp_data=json.dumps({"goal_id": goal["id"]}),
                 )
-                return "Goal Added successfully! When you would like to be reminded?"
+                return SUCCESS_GOAL_ADDED
         return None
 
 
@@ -115,7 +128,7 @@ class EnableJournalingHandler(TextCommandHandler):
         user_goals: list[dict] = get_user_goals(user_id)
         for goal in user_goals:
             if goal["goal_emoji"] == "📓" and "journaling" in goal["goal_description"]:
-                return "✅ You already have a journaling goal! Check 'goals' to see it."
+                return SUCCESS_JOURNALING_ENABLED
 
         # Delegate to AddGoalHandler
         add_handler = AddGoalHandler()
@@ -163,17 +176,23 @@ class DeleteGoalHandler(TextCommandHandler):
         try:
             goal_num: int = int(message.replace(self.PREFIX, "").strip())
         except ValueError:
-            return "Invalid format. Usage: delete [goal number]\nExample: delete 1"
+            return ERROR_INVALID_DELETE_FORMAT
+
+        if goal_num <= 0:
+            return ERROR_INVALID_GOAL_NUMBER
 
         user_goals: list[dict] = get_user_goals(user_id)
-        if not user_goals or goal_num > len(user_goals) or goal_num < 1:
-            return "Invalid goal number. Type 'goals' to see your goals."
+        if not user_goals or goal_num > len(user_goals):
+            return ERROR_INVALID_GOAL_NUMBER
 
         goal: dict = user_goals[goal_num - 1]
 
         delete_goal(goal["id"])
 
-        return f"✅ Goal deleted: {goal['goal_emoji']} {goal['goal_description']}"
+        return SUCCESS_GOAL_DELETED.format(
+            goal_emoji=goal['goal_emoji'],
+            goal_description=goal['goal_description']
+        )
 
 
 class ReminderTimeHandler(TextCommandHandler):
@@ -192,7 +211,7 @@ class ReminderTimeHandler(TextCommandHandler):
 
         user_state: dict | None = get_user_state(user_id)
         if not user_state or user_state["state"] != "awaiting_reminder_time":
-            return "Please add a goal first."
+            return ERROR_ADD_GOAL_FIRST
 
         temp = json.loads(user_state.get("temp_data") or "{}")
         goal_id = temp.get("goal_id")
@@ -277,18 +296,18 @@ class UpdateReminderHandler(TextCommandHandler):
         user_id = user["id"]
         parts = message.replace(self.PREFIX, "").strip().split(" ")
         if len(parts) != MIN_PARTS_EXPECTED:
-            return "Usage: update [goal number] [time]\nExample: update 1 8pm"
+            return ERROR_INVALID_UPDATE_FORMAT
         goal_num: int = int(parts[0])
         time_input: str = parts[1]
 
         # Validate and get normalized time
         normalized_time = parse_time_string(time_input)
         if not normalized_time:
-            return "Invalid time format. Try: 8pm, 9:30am, 20:00"
+            return ERROR_INVALID_TIME_FORMAT
 
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals or goal_num > len(user_goals) or goal_num < 1:
-            return "Invalid goal number. Type 'goals' to see your goals."
+            return ERROR_INVALID_GOAL_NUMBER
 
         goal: dict = user_goals[goal_num - 1]
 
@@ -309,9 +328,10 @@ class UpdateReminderHandler(TextCommandHandler):
 
         goal_emoji = goal["goal_emoji"]
         goal_desc = goal["goal_description"]
-        return (
-            f"✅ Reminder updated! I'll remind you at {display_time} for "
-            f"{goal_emoji} {goal_desc}"
+        return SUCCESS_REMINDER_UPDATED.format(
+            display_time=display_time,
+            goal_emoji=goal_emoji,
+            goal_desc=goal_desc
         )
 
 
@@ -329,16 +349,10 @@ class TranscriptToggleHandler(TextCommandHandler):
         user_id = user["id"]
         if "on" in message:
             update_user(user_id, send_transcript_file=1)
-            return (
-                "✅ Transcript files enabled! You'll now receive transcript "
-                "file with your audio journaling."
-            )
+            return SUCCESS_TRANSCRIPT_ENABLED
         if "off" in message:
             update_user(user_id, send_transcript_file=0)
-            return (
-                "✅ Transcript files disabled! You'll only receive the summary "
-                "message with your audio journaling."
-            )
+            return SUCCESS_TRANSCRIPT_DISABLED
         return "Invalid command. Usage: transcript [on|off]"
 
 
@@ -444,6 +458,9 @@ class RateSingleHandler(TextCommandHandler):
             return USAGE_RATE
 
         if goal_num <= 0:
+            return USAGE_RATE
+
+        if not (1 <= rating_value <= 3):
             return USAGE_RATE
 
         user_goals: list[dict] = get_user_goals(user_id)

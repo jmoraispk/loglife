@@ -2,7 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from app.helpers.audio.journaling.summarize_transcript import summarize_transcript
+from app.logic.audio.journaling.summarize_transcript import summarize_transcript
 
 
 def test_summarize_transcript() -> None:
@@ -12,7 +12,7 @@ def test_summarize_transcript() -> None:
     mock_response.json.return_value = {"choices": [{"message": {"content": "Summarized text"}}]}
     mock_response.raise_for_status.return_value = None
 
-    with patch("app.helpers.audio.journaling.summarize_transcript.requests.post") as mock_post:
+    with patch("app.logic.audio.journaling.summarize_transcript.requests.post") as mock_post:
         mock_post.return_value = mock_response
 
         # Act

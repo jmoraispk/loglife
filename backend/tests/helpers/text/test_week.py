@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from unittest.mock import patch
 
-import app.helpers.text.week as week_module
+import app.logic.text.week as week_module
 
 
 def test_get_monday_before() -> None:
@@ -21,7 +21,7 @@ def test_get_monday_before() -> None:
 def test_get_monday_before_edge_cases() -> None:
     """Test get_monday_before on specific days."""
     # Mock datetime.now() to be a Monday
-    with patch("app.helpers.text.week.datetime") as mock_datetime:
+    with patch("app.logic.text.week.datetime") as mock_datetime:
         # Monday Jan 1st 2024
         mock_datetime.now.return_value = datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC)
         result = week_module.get_monday_before()

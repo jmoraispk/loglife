@@ -69,3 +69,38 @@ def test_process_vcard_existing_user() -> None:
             referrals.create_referral(referrer["id"], existing_user["id"])
 
         mock_send.assert_called_once()
+
+
+def test_process_vcard_malformed_json():
+    """Test vcard processing with malformed JSON string."""
+    referrer = users.create_user("+1234567890", "UTC")
+    
+    # If json.loads fails, it will raise JSONDecodeError.
+    # The current implementation does NOT catch this in process_vcard.
+    # It relies on the caller (webhook) to catch Exception.
+    # Let's verify it raises so webhook can catch it.
+    with pytest.raises(json.JSONDecodeError):
+        process_vcard(referrer, "{invalid_json")
+
+
+def test_process_vcard_empty_list():
+    """Test processing an empty list of vcards."""
+    referrer = users.create_user("+1234567890", "UTC")
+    
+    # Empty list
+    response = process_vcard(referrer, "[]")
+    assert "Thank you for the referral" in response 
+    # Should succeed but do nothing
+
+
+def test_process_vcard_missing_waid():
+    """Test vcard string that doesn't contain a waid."""
+    referrer = users.create_user("+1234567890", "UTC")
+    vcards = json.dumps(["BEGIN:VCARD\nFN:John Doe\nEND:VCARD"])
+    
+    # _extract_phone_number will raise AttributeError if regex doesn't match
+    # This is an unhandled edge case in current logic if we expect strict vcards.
+    # Ideally it should probably skip or error gracefully.
+    # For now, let's document behavior: it raises AttributeError
+    with pytest.raises(AttributeError):
+        process_vcard(referrer, vcards)

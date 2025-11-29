@@ -91,6 +91,11 @@ Keep up the great work of spreading positive habits! 🌟"""
 # -----------------------------
 ERROR_NO_GOALS_SET = "❌ You don't have any goals yet. Add one with 'add goal 😴 Description'"
 ERROR_INVALID_INPUT_LENGTH = "❌ Invalid input. Send <num_goals> digits."
+ERROR_INVALID_GOAL_NUMBER = "Invalid goal number. Type 'goals' to see your goals."
+ERROR_INVALID_DELETE_FORMAT = "Invalid format. Usage: delete [goal number]\nExample: delete 1"
+ERROR_INVALID_UPDATE_FORMAT = "Usage: update [goal number] [time]\nExample: update 1 8pm"
+ERROR_INVALID_TIME_FORMAT = "Invalid time format. Try: 8pm, 9:30am, 20:00"
+ERROR_ADD_GOAL_FIRST = "Please add a goal first."
 
 # Usage messages
 USAGE_RATE = "❌ Usage: rate 2 3 (goal number and rating 1-3)"
@@ -100,6 +105,12 @@ USAGE_RATE = "❌ Usage: rate 2 3 (goal number and rating 1-3)"
 # -----------------------------
 SUCCESS_RATINGS_SUBMITTED = "📅 <today_display>\n<goal_emojis> <goal_description>: <status>"
 SUCCESS_INDIVIDUAL_RATING = "📅 <today_display>\n<goal_emoji> <goal_description>: <status_symbol>"
+SUCCESS_GOAL_ADDED = "Goal Added successfully! When you would like to be reminded?"
+SUCCESS_JOURNALING_ENABLED = "✅ You already have a journaling goal! Check 'goals' to see it."
+SUCCESS_GOAL_DELETED = "✅ Goal deleted: {goal_emoji} {goal_description}"
+SUCCESS_REMINDER_UPDATED = "✅ Reminder updated! I'll remind you at {display_time} for {goal_emoji} {goal_desc}"
+SUCCESS_TRANSCRIPT_ENABLED = "✅ Transcript files enabled! You'll now receive transcript file with your audio journaling."
+SUCCESS_TRANSCRIPT_DISABLED = "✅ Transcript files disabled! You'll only receive the summary message with your audio journaling."
 
 # -----------------------------
 # Lookback Summary Messages

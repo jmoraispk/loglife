@@ -93,3 +93,43 @@ def test_process_audio_summarization_error() -> None:
 
         response = process_audio("12345", user, "audio_data")
         assert response == "Summarization failed!"
+
+
+def test_process_audio_empty_transcript() -> None:
+    """Test handling when transcription returns empty string."""
+    user = users.create_user("+1234567890", "UTC")
+
+    with (
+        patch(f"{MODULE}.send_message"),
+        patch(f"{MODULE}.transcribe_audio") as mock_transcribe,
+        patch(f"{MODULE}.summarize_transcript") as mock_summarize,
+        patch(f"{MODULE}.create_audio_journal_entry") as mock_create,
+    ):
+        mock_transcribe.return_value = ""
+        mock_summarize.return_value = "Nothing to summarize."
+
+        response = process_audio("12345", user, "audio_data")
+
+        assert isinstance(response, tuple)
+        assert response[1] == "Nothing to summarize."
+        mock_create.assert_called_once()
+
+
+def test_process_audio_empty_summary() -> None:
+    """Test handling when summary returns empty string."""
+    user = users.create_user("+1234567890", "UTC")
+
+    with (
+        patch(f"{MODULE}.send_message"),
+        patch(f"{MODULE}.transcribe_audio") as mock_transcribe,
+        patch(f"{MODULE}.summarize_transcript") as mock_summarize,
+        patch(f"{MODULE}.create_audio_journal_entry") as mock_create,
+    ):
+        mock_transcribe.return_value = "Some content"
+        mock_summarize.return_value = ""
+
+        response = process_audio("12345", user, "audio_data")
+
+        assert isinstance(response, tuple)
+        assert response[1] == ""
+        mock_create.assert_called_once()

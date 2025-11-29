@@ -44,11 +44,14 @@ def test_process_text_rate_invalid_values() -> None:
     user = users.create_user("+1234567890", "UTC")
     user_goals.create_goal(user["id"], "🏃", "Run")
 
-    with pytest.raises(sqlite3.IntegrityError):
-        process_text(user, "rate 1 4")
+    # The handlers now return usage message instead of raising IntegrityError
+    # So we expect "Usage: rate" or similar error message
+    
+    response = process_text(user, "rate 1 4")
+    assert "Usage: rate" in response
 
-    with pytest.raises(sqlite3.IntegrityError):
-        process_text(user, "rate 1 0")
+    response = process_text(user, "rate 1 0")
+    assert "Usage: rate" in response
 
 
 def test_process_text_delete_invalid_format() -> None:
