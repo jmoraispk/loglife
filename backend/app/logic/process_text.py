@@ -18,6 +18,24 @@ from app.logic.text_handlers import (
     WeekSummaryHandler,
 )
 
+# Instantiate handlers once at module level to avoid overhead on every call
+# Order matters for priority
+HANDLERS: list[TextCommandHandler] = [
+    AddGoalHandler(),
+    EnableJournalingHandler(),
+    JournalPromptsHandler(),
+    DeleteGoalHandler(),
+    ReminderTimeHandler(),
+    GoalsListHandler(),
+    UpdateReminderHandler(),
+    TranscriptToggleHandler(),
+    WeekSummaryHandler(),
+    LookbackHandler(),
+    RateSingleHandler(),
+    RateAllHandler(),
+    HelpHandler(),
+]
+
 
 def process_text(user: dict, message: str) -> str:
     """Route incoming text commands to the appropriate goal or rating handler.
@@ -40,25 +58,8 @@ def process_text(user: dict, message: str) -> str:
     for alias, command in COMMAND_ALIASES.items():
         message = message.replace(alias, command)
 
-    # Instantiate handlers
-    handlers: list[TextCommandHandler] = [
-        AddGoalHandler(),
-        EnableJournalingHandler(),
-        JournalPromptsHandler(),
-        DeleteGoalHandler(),
-        ReminderTimeHandler(),
-        GoalsListHandler(),
-        UpdateReminderHandler(),
-        TranscriptToggleHandler(),
-        WeekSummaryHandler(),
-        LookbackHandler(),
-        RateSingleHandler(),
-        RateAllHandler(),
-        HelpHandler(),
-    ]
-
     # Execute the first matching command handler
-    for handler in handlers:
+    for handler in HANDLERS:
         if handler.matches(message):
             result = handler.handle(user, message)
             # Special case: add_goal can return None if no goal text provided
