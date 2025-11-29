@@ -3,7 +3,8 @@
 import sqlite3
 
 import pytest
-from app.db.operations import referrals, users
+from app.db.client import db
+from app.db.tables.users import User
 
 
 def test_create_referral() -> None:
@@ -16,13 +17,13 @@ def test_create_referral() -> None:
 
     """
     # Arrange - create two users
-    referrer = users.create_user("+1234567890", "America/New_York")
-    referred = users.create_user("+9876543210", "Europe/London")
+    referrer = db.users.create("+1234567890", "America/New_York")
+    referred = db.users.create("+9876543210", "Europe/London")
 
     # Test successful creation
-    referrals.create_referral(
-        referrer_user_id=referrer["id"],
-        referred_user_id=referred["id"],
+    db.referrals.create(
+        referrer_user_id=referrer.id,
+        referred_user_id=referred.id,
     )
 
     # We can't directly verify the referral was created since the function
@@ -31,22 +32,22 @@ def test_create_referral() -> None:
 
     # Test duplicate referral (should fail UNIQUE constraint)
     with pytest.raises(sqlite3.IntegrityError):
-        referrals.create_referral(
-            referrer_user_id=referrer["id"],
-            referred_user_id=referred["id"],
+        db.referrals.create(
+            referrer_user_id=referrer.id,
+            referred_user_id=referred.id,
         )
 
     # Test creating referral with different referred user (should succeed)
-    referred2 = users.create_user("+5555555555", "Asia/Tokyo")
-    referrals.create_referral(
-        referrer_user_id=referrer["id"],
-        referred_user_id=referred2["id"],
+    referred2 = db.users.create("+5555555555", "Asia/Tokyo")
+    db.referrals.create(
+        referrer_user_id=referrer.id,
+        referred_user_id=referred2.id,
     )
 
     # Test creating referral where roles are reversed (should succeed)
-    referrals.create_referral(
-        referrer_user_id=referred["id"],
-        referred_user_id=referrer["id"],
+    db.referrals.create(
+        referrer_user_id=referred.id,
+        referred_user_id=referrer.id,
     )
 
     # All successful creations pass

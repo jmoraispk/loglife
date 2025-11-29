@@ -1,6 +1,8 @@
 """Tests for goal_reminders database operations."""
 
-from app.db.operations import goal_reminders, user_goals, users
+from app.db.client import db
+from app.db.tables.reminders import Reminder
+from app.db.tables.users import User
 
 
 def test_create_goal_reminder() -> None:
@@ -12,34 +14,37 @@ def test_create_goal_reminder() -> None:
 
     """
     # Arrange - create user and goal
-    user = users.create_user("+1234567890", "America/New_York")
-    goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
+    user = db.users.create("+1234567890", "America/New_York")
+    goal = db.goals.create(user.id, "🎯", "Learn Python")
 
     # Test successful creation
-    reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"],
-        user_goal_id=goal["id"],
+    reminder = db.reminders.create(
+        user_id=user.id,
+        user_goal_id=goal.id,
         reminder_time="2024-12-25 09:00:00",
     )
 
     # Assert successful creation
     assert reminder is not None
-    assert isinstance(reminder, dict)
-    assert reminder["user_id"] == user["id"]
-    assert reminder["user_goal_id"] == goal["id"]
-    assert reminder["reminder_time"] == "2024-12-25 09:00:00"
-    assert reminder["id"] is not None
-    assert "created_at" in reminder
+    assert isinstance(reminder, Reminder)
+    assert reminder.user_id == user.id
+    assert reminder.user_goal_id == goal.id
+    # Note: SQLite stores datetime as strings or numbers based on implementation.
+    # The model field is 'datetime'. If we pass string, it might be stored as string.
+    # The assert below expects string match if that's what's stored.
+    assert str(reminder.reminder_time) == "2024-12-25 09:00:00"
+    assert reminder.id is not None
+    assert reminder.created_at is not None
 
     # Test creating another reminder
-    reminder2 = goal_reminders.create_goal_reminder(
-        user_id=user["id"],
-        user_goal_id=goal["id"],
+    reminder2 = db.reminders.create(
+        user_id=user.id,
+        user_goal_id=goal.id,
         reminder_time="2024-12-26 10:00:00",
     )
 
-    assert reminder2["reminder_time"] == "2024-12-26 10:00:00"
-    assert reminder2["id"] != reminder["id"]
+    assert str(reminder2.reminder_time) == "2024-12-26 10:00:00"
+    assert reminder2.id != reminder.id
 
 
 def test_get_goal_reminder() -> None:
@@ -51,27 +56,27 @@ def test_get_goal_reminder() -> None:
 
     """
     # Arrange - create user, goal, and reminder
-    user = users.create_user("+1234567890", "America/New_York")
-    goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
-    created_reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"],
-        user_goal_id=goal["id"],
+    user = db.users.create("+1234567890", "America/New_York")
+    goal = db.goals.create(user.id, "🎯", "Learn Python")
+    created_reminder = db.reminders.create(
+        user_id=user.id,
+        user_goal_id=goal.id,
         reminder_time="2024-12-25 09:00:00",
     )
 
     # Test retrieving existing reminder
-    retrieved_reminder = goal_reminders.get_goal_reminder(created_reminder["id"])
+    retrieved_reminder = db.reminders.get(created_reminder.id)
 
     # Assert existing reminder
     assert retrieved_reminder is not None
-    assert isinstance(retrieved_reminder, dict)
-    assert retrieved_reminder["id"] == created_reminder["id"]
-    assert retrieved_reminder["user_id"] == user["id"]
-    assert retrieved_reminder["user_goal_id"] == goal["id"]
-    assert retrieved_reminder["reminder_time"] == "2024-12-25 09:00:00"
+    assert isinstance(retrieved_reminder, Reminder)
+    assert retrieved_reminder.id == created_reminder.id
+    assert retrieved_reminder.user_id == user.id
+    assert retrieved_reminder.user_goal_id == goal.id
+    assert str(retrieved_reminder.reminder_time) == "2024-12-25 09:00:00"
 
     # Test retrieving non-existent reminder
-    non_existent_reminder = goal_reminders.get_goal_reminder(999)
+    non_existent_reminder = db.reminders.get(999)
     assert non_existent_reminder is None
 
 
@@ -81,26 +86,26 @@ def test_get_goal_reminder_by_goal_id() -> None:
     Verifies that reminders can be retrieved via the goal ID.
     """
     # Arrange - create user, goal, and reminder
-    user = users.create_user("+1234567890", "America/New_York")
-    goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
-    created_reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"],
-        user_goal_id=goal["id"],
+    user = db.users.create("+1234567890", "America/New_York")
+    goal = db.goals.create(user.id, "🎯", "Learn Python")
+    created_reminder = db.reminders.create(
+        user_id=user.id,
+        user_goal_id=goal.id,
         reminder_time="2024-12-25 09:00:00",
     )
 
     # Test retrieving existing reminder
-    retrieved_reminder = goal_reminders.get_goal_reminder_by_goal_id(goal["id"])
+    retrieved_reminder = db.reminders.get_by_goal_id(goal.id)
 
     # Assert existing reminder
     assert retrieved_reminder is not None
-    assert isinstance(retrieved_reminder, dict)
-    assert retrieved_reminder["id"] == created_reminder["id"]
-    assert retrieved_reminder["user_id"] == user["id"]
-    assert retrieved_reminder["user_goal_id"] == goal["id"]
+    assert isinstance(retrieved_reminder, Reminder)
+    assert retrieved_reminder.id == created_reminder.id
+    assert retrieved_reminder.user_id == user.id
+    assert retrieved_reminder.user_goal_id == goal.id
 
     # Test retrieving non-existent reminder
-    non_existent_reminder = goal_reminders.get_goal_reminder_by_goal_id(999)
+    non_existent_reminder = db.reminders.get_by_goal_id(999)
     assert non_existent_reminder is None
 
 
@@ -112,29 +117,29 @@ def test_get_all_goal_reminders() -> None:
 
     """
     # Arrange - create user, goals, and reminders
-    user = users.create_user("+1234567890", "America/New_York")
-    goal1 = user_goals.create_goal(user["id"], "🎯", "Learn Python")
-    goal2 = user_goals.create_goal(user["id"], "💪", "Exercise")
-    goal3 = user_goals.create_goal(user["id"], "📚", "Read books")
+    user = db.users.create("+1234567890", "America/New_York")
+    goal1 = db.goals.create(user.id, "🎯", "Learn Python")
+    goal2 = db.goals.create(user.id, "💪", "Exercise")
+    goal3 = db.goals.create(user.id, "📚", "Read books")
 
-    goal_reminders.create_goal_reminder(user["id"], goal1["id"], "2024-12-25 09:00:00")
-    goal_reminders.create_goal_reminder(user["id"], goal2["id"], "2024-12-25 10:00:00")
-    goal_reminders.create_goal_reminder(user["id"], goal3["id"], "2024-12-25 11:00:00")
+    db.reminders.create(user.id, goal1.id, "2024-12-25 09:00:00")
+    db.reminders.create(user.id, goal2.id, "2024-12-25 10:00:00")
+    db.reminders.create(user.id, goal3.id, "2024-12-25 11:00:00")
 
     # Act
-    all_reminders = goal_reminders.get_all_goal_reminders()
+    all_reminders = db.reminders.get_all()
 
     # Assert correct count
     assert len(all_reminders) == 3
 
     # Verify all reminders have required fields
     for reminder in all_reminders:
-        assert "id" in reminder
-        assert "user_id" in reminder
-        assert "user_goal_id" in reminder
-        assert "reminder_time" in reminder
-        assert "created_at" in reminder
-        assert reminder["user_id"] == user["id"]
+        assert reminder.id is not None
+        assert reminder.user_id is not None
+        assert reminder.user_goal_id is not None
+        assert reminder.reminder_time is not None
+        assert reminder.created_at is not None
+        assert reminder.user_id == user.id
 
 
 def test_update_goal_reminder() -> None:
@@ -147,46 +152,46 @@ def test_update_goal_reminder() -> None:
 
     """
     # Arrange - create user, goals, and reminder
-    user = users.create_user("+1234567890", "America/New_York")
-    goal1 = user_goals.create_goal(user["id"], "🎯", "Learn Python")
-    goal2 = user_goals.create_goal(user["id"], "💪", "Exercise")
-    reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"],
-        user_goal_id=goal1["id"],
+    user = db.users.create("+1234567890", "America/New_York")
+    goal1 = db.goals.create(user.id, "🎯", "Learn Python")
+    goal2 = db.goals.create(user.id, "💪", "Exercise")
+    reminder = db.reminders.create(
+        user_id=user.id,
+        user_goal_id=goal1.id,
         reminder_time="2024-12-25 09:00:00",
     )
 
     # Test updating reminder_time only
-    updated_reminder = goal_reminders.update_goal_reminder(
-        reminder["id"],
+    updated_reminder = db.reminders.update(
+        reminder.id,
         reminder_time="2024-12-26 10:00:00",
     )
 
-    assert updated_reminder["reminder_time"] == "2024-12-26 10:00:00"
-    assert updated_reminder["user_goal_id"] == goal1["id"]
+    assert str(updated_reminder.reminder_time) == "2024-12-26 10:00:00"
+    assert updated_reminder.user_goal_id == goal1.id
 
     # Test updating user_goal_id only
-    updated_reminder = goal_reminders.update_goal_reminder(
-        reminder["id"],
-        user_goal_id=goal2["id"],
+    updated_reminder = db.reminders.update(
+        reminder.id,
+        user_goal_id=goal2.id,
     )
 
-    assert updated_reminder["user_goal_id"] == goal2["id"]
-    assert updated_reminder["reminder_time"] == "2024-12-26 10:00:00"
+    assert updated_reminder.user_goal_id == goal2.id
+    assert str(updated_reminder.reminder_time) == "2024-12-26 10:00:00"
 
     # Test updating both fields
-    updated_reminder = goal_reminders.update_goal_reminder(
-        reminder["id"],
-        user_goal_id=goal1["id"],
+    updated_reminder = db.reminders.update(
+        reminder.id,
+        user_goal_id=goal1.id,
         reminder_time="2024-12-27 11:00:00",
     )
 
-    assert updated_reminder["user_goal_id"] == goal1["id"]
-    assert updated_reminder["reminder_time"] == "2024-12-27 11:00:00"
+    assert updated_reminder.user_goal_id == goal1.id
+    assert str(updated_reminder.reminder_time) == "2024-12-27 11:00:00"
 
     # Test updating with no fields returns existing reminder
-    unchanged_reminder = goal_reminders.update_goal_reminder(reminder["id"])
-    assert unchanged_reminder["id"] == reminder["id"]
+    unchanged_reminder = db.reminders.update(reminder.id)
+    assert unchanged_reminder.id == reminder.id
 
 
 def test_delete_goal_reminder() -> None:
@@ -197,21 +202,21 @@ def test_delete_goal_reminder() -> None:
 
     """
     # Arrange - create user, goal, and reminder
-    user = users.create_user("+1234567890", "America/New_York")
-    goal = user_goals.create_goal(user["id"], "🎯", "Learn Python")
-    reminder = goal_reminders.create_goal_reminder(
-        user_id=user["id"],
-        user_goal_id=goal["id"],
+    user = db.users.create("+1234567890", "America/New_York")
+    goal = db.goals.create(user.id, "🎯", "Learn Python")
+    reminder = db.reminders.create(
+        user_id=user.id,
+        user_goal_id=goal.id,
         reminder_time="2024-12-25 09:00:00",
     )
-    reminder_id = reminder["id"]
+    reminder_id = reminder.id
 
     # Verify reminder exists
-    assert goal_reminders.get_goal_reminder(reminder_id) is not None
+    assert db.reminders.get(reminder_id) is not None
 
     # Act - delete the reminder
-    goal_reminders.delete_goal_reminder(reminder_id)
+    db.reminders.delete(reminder_id)
 
     # Assert reminder is deleted
-    deleted_reminder = goal_reminders.get_goal_reminder(reminder_id)
+    deleted_reminder = db.reminders.get(reminder_id)
     assert deleted_reminder is None

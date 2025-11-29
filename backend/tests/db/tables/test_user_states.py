@@ -1,6 +1,8 @@
 """Tests for user_states database operations."""
 
-from app.db.operations import user_states, users
+from app.db.client import db
+from app.db.tables.user_states import UserState
+from app.db.tables.users import User
 
 
 def test_create_user_state() -> None:
@@ -12,41 +14,41 @@ def test_create_user_state() -> None:
 
     """
     # Arrange - create a user first
-    user = users.create_user("+1234567890", "America/New_York")
+    user = db.users.create("+1234567890", "America/New_York")
 
     # Test creating initial state without temp_data
-    state = user_states.create_user_state(user_id=user["id"], state="MAIN_MENU")
+    state = db.user_states.create(user_id=user.id, state="MAIN_MENU")
 
     # Assert successful creation
     assert state is not None
-    assert isinstance(state, dict)
-    assert state["user_id"] == user["id"]
-    assert state["state"] == "MAIN_MENU"
-    assert state["temp_data"] is None
+    assert isinstance(state, UserState)
+    assert state.user_id == user.id
+    assert state.state == "MAIN_MENU"
+    assert state.temp_data is None
 
     # Test creating state with temp_data
-    state2 = user_states.create_user_state(
-        user_id=user["id"],
+    state2 = db.user_states.create(
+        user_id=user.id,
         state="SETTING_GOAL",
         temp_data='{"goal_emoji": "🎯"}',
     )
 
-    assert state2["state"] == "SETTING_GOAL"
-    assert state2["temp_data"] == '{"goal_emoji": "🎯"}'
+    assert state2.state == "SETTING_GOAL"
+    assert state2.temp_data == '{"goal_emoji": "🎯"}'
 
     # Test upsert behavior - updating existing state
-    state3 = user_states.create_user_state(
-        user_id=user["id"],
+    state3 = db.user_states.create(
+        user_id=user.id,
         state="RATING_GOALS",
         temp_data='{"rating": 3}',
     )
 
-    assert state3["state"] == "RATING_GOALS"
-    assert state3["temp_data"] == '{"rating": 3}'
+    assert state3.state == "RATING_GOALS"
+    assert state3.temp_data == '{"rating": 3}'
 
     # Verify only one state exists for the user
-    retrieved_state = user_states.get_user_state(user["id"])
-    assert retrieved_state["state"] == "RATING_GOALS"
+    retrieved_state = db.user_states.get(user.id)
+    assert retrieved_state.state == "RATING_GOALS"
 
 
 def test_get_user_state() -> None:
@@ -58,25 +60,25 @@ def test_get_user_state() -> None:
 
     """
     # Arrange - create user and state
-    user = users.create_user("+1234567890", "America/New_York")
-    user_states.create_user_state(
-        user_id=user["id"],
+    user = db.users.create("+1234567890", "America/New_York")
+    db.user_states.create(
+        user_id=user.id,
         state="MAIN_MENU",
         temp_data='{"key": "value"}',
     )
 
     # Test retrieving existing state
-    retrieved_state = user_states.get_user_state(user["id"])
+    retrieved_state = db.user_states.get(user.id)
 
     # Assert existing state
     assert retrieved_state is not None
-    assert isinstance(retrieved_state, dict)
-    assert retrieved_state["user_id"] == user["id"]
-    assert retrieved_state["state"] == "MAIN_MENU"
-    assert retrieved_state["temp_data"] == '{"key": "value"}'
+    assert isinstance(retrieved_state, UserState)
+    assert retrieved_state.user_id == user.id
+    assert retrieved_state.state == "MAIN_MENU"
+    assert retrieved_state.temp_data == '{"key": "value"}'
 
     # Test retrieving non-existent state
-    non_existent_state = user_states.get_user_state(999)
+    non_existent_state = db.user_states.get(999)
     assert non_existent_state is None
 
 
@@ -90,37 +92,37 @@ def test_update_user_state() -> None:
 
     """
     # Arrange - create user and state
-    user = users.create_user("+1234567890", "America/New_York")
-    user_states.create_user_state(user_id=user["id"], state="MAIN_MENU")
+    user = db.users.create("+1234567890", "America/New_York")
+    db.user_states.create(user_id=user.id, state="MAIN_MENU")
 
     # Test updating state only
-    updated_state = user_states.update_user_state(user["id"], state="SETTING_GOAL")
+    updated_state = db.user_states.update(user.id, state="SETTING_GOAL")
 
-    assert updated_state["state"] == "SETTING_GOAL"
-    assert updated_state["temp_data"] is None
+    assert updated_state.state == "SETTING_GOAL"
+    assert updated_state.temp_data is None
 
     # Test updating temp_data only
-    updated_state = user_states.update_user_state(
-        user["id"],
+    updated_state = db.user_states.update(
+        user.id,
         temp_data='{"goal_emoji": "🎯"}',
     )
 
-    assert updated_state["state"] == "SETTING_GOAL"
-    assert updated_state["temp_data"] == '{"goal_emoji": "🎯"}'
+    assert updated_state.state == "SETTING_GOAL"
+    assert updated_state.temp_data == '{"goal_emoji": "🎯"}'
 
     # Test updating both fields
-    updated_state = user_states.update_user_state(
-        user["id"],
+    updated_state = db.user_states.update(
+        user.id,
         state="RATING_GOALS",
         temp_data='{"rating": 3}',
     )
 
-    assert updated_state["state"] == "RATING_GOALS"
-    assert updated_state["temp_data"] == '{"rating": 3}'
+    assert updated_state.state == "RATING_GOALS"
+    assert updated_state.temp_data == '{"rating": 3}'
 
     # Test updating with no fields returns existing state
-    unchanged_state = user_states.update_user_state(user["id"])
-    assert unchanged_state["user_id"] == user["id"]
+    unchanged_state = db.user_states.update(user.id)
+    assert unchanged_state.user_id == user.id
 
 
 def test_delete_user_state() -> None:
@@ -131,15 +133,15 @@ def test_delete_user_state() -> None:
 
     """
     # Arrange - create user and state
-    user = users.create_user("+1234567890", "America/New_York")
-    user_states.create_user_state(user_id=user["id"], state="MAIN_MENU")
+    user = db.users.create("+1234567890", "America/New_York")
+    db.user_states.create(user_id=user.id, state="MAIN_MENU")
 
     # Verify state exists
-    assert user_states.get_user_state(user["id"]) is not None
+    assert db.user_states.get(user.id) is not None
 
     # Act - delete the state
-    user_states.delete_user_state(user["id"])
+    db.user_states.delete(user.id)
 
     # Assert state is deleted
-    deleted_state = user_states.get_user_state(user["id"])
+    deleted_state = db.user_states.get(user.id)
     assert deleted_state is None

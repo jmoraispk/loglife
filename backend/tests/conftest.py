@@ -2,12 +2,12 @@
 
 import sqlite3
 from collections.abc import Generator
-from contextlib import contextmanager
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from app.config.paths import SCHEMA_FILE
+from app.db.client import Database, db
 from app.factory import create_app
 from flask import Flask
 from flask.testing import FlaskClient
@@ -59,38 +59,49 @@ def test_db() -> Generator[sqlite3.Connection, None, None]:
 
 
 @pytest.fixture(autouse=True)
-def mock_connect(
+def mock_db_connection(
     monkeypatch: pytest.MonkeyPatch, test_db: sqlite3.Connection
-) -> sqlite3.Connection:
-    """Mock the connect() function in ALL db operations modules.
+) -> None:
+    """Mock the database connection in the singleton 'db' instance.
 
-    Ensure your db operations use the test database instead of the real one.
-
-    The key: Patch where connect is USED, not where it's DEFINED.
+    This ensures that whenever `app.db.client.db.conn` is accessed in the application code
+    (or via `db.users`, `db.goals` etc.), it returns the in-memory `test_db` connection
+    instead of opening the real database file.
     """
-
-    # Create a context manager that returns the test database
-    @contextmanager
-    def mock_connect_func() -> Generator[sqlite3.Connection, None, None]:
-        try:
-            yield test_db
-            test_db.commit()  # Commit transaction on success
-        except Exception:
-            test_db.rollback()  # Rollback on error
-            raise
-
-    # Patch connect in ALL the operations modules where it's imported
-    operations_modules = [
-        "app.db.operations.users",
-        "app.db.operations.user_goals",
-        "app.db.operations.user_states",
-        "app.db.operations.goal_ratings",
-        "app.db.operations.goal_reminders",
-        "app.db.operations.referrals",
-        "app.db.operations.audio_journal_entries",
-    ]
-
-    for module in operations_modules:
-        monkeypatch.setattr(f"{module}.connect", mock_connect_func)
-
-    return test_db
+    # Mock the 'conn' property of the singleton 'db' instance
+    # We need to patch the class property or the instance property.
+    # Since 'db' is an instance of Database, we can just set its _conn attribute
+    # or mock the property.
+    
+    # Simpler approach: directly inject the test_db connection into the db instance
+    # and ensure it doesn't try to close or reopen it in a way that breaks tests.
+    
+    # However, the Database class lazily loads `conn`.
+    # Let's patch the `conn` property on the class or instance.
+    
+    # Method 1: Patching the property on the class (Database.conn)
+    # This affects all instances, which is fine since 'db' is a singleton.
+    # But 'test_db' is a fixture value, so we need to do this per test.
+    
+    # Method 2: Patching the instance 'db' in app.db.client
+    # We want 'db.conn' to return 'test_db'.
+    
+    # Let's use monkeypatch to replace the 'conn' property on the instance `db`
+    # effectively. But 'conn' is a property.
+    
+    # Easiest way: Just set db._conn = test_db
+    # The Database class checks 'if self._conn is None'.
+    # If we set it, it returns it.
+    # We also need to make sure it doesn't get closed prematurely if app code calls close().
+    # But close() sets _conn = None.
+    
+    # Let's wrap the test_db in a way that close() is ignored or safe?
+    # Or just let it close and rely on the fact that usually tests run one logic flow.
+    
+    # Reset the singleton before each test to ensure clean state
+    db._conn = test_db
+    
+    yield
+    
+    # Cleanup
+    db._conn = None
