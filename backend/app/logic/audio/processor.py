@@ -2,7 +2,8 @@
 
 import logging
 
-from app.db import create_audio_journal_entry
+from app.db.client import db
+from app.db.tables.users import User
 from app.logic.audio.journaling.summarize_transcript import summarize_transcript
 from app.logic.audio.journaling.transcript_to_base64 import transcript_to_base64
 from app.logic.audio.transcribe_audio import transcribe_audio
@@ -11,7 +12,7 @@ from app.services.sender import send_message
 logger = logging.getLogger(__name__)
 
 
-def process_audio(sender: str, user: dict, audio_data: str) -> str | tuple[str, str]:
+def process_audio(sender: str, user: User, audio_data: str) -> str | tuple[str, str]:
     """Process an incoming audio message from a user.
 
     Args:
@@ -40,14 +41,14 @@ def process_audio(sender: str, user: dict, audio_data: str) -> str | tuple[str, 
         logger.exception("Error summarizing transcript")
         return "Summarization failed!"
 
-    create_audio_journal_entry(
-        user_id=user["id"],
+    db.audio_journal.create(
+        user_id=user.id,
         transcription_text=transcript,
         summary_text=summary,
     )
     send_message(sender, "Summary stored in Database.")
 
-    if user.get("send_transcript_file"):
+    if user.send_transcript_file:
         transcript_file: str = transcript_to_base64(transcript)
         return transcript_file, summary
 

@@ -12,7 +12,10 @@ if TYPE_CHECKING:
     from zoneinfo import ZoneInfo
 
 from app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
-from app.db import get_all_goal_reminders, get_goal, get_user
+from app.db.client import db
+from app.db.tables.goals import Goal
+from app.db.tables.reminders import Reminder
+from app.db.tables.users import User
 from app.services.reminder.utils import get_goals_not_tracked_today, get_timezone_safe
 from app.services.sender import send_message
 
@@ -26,16 +29,23 @@ def _next_reminder_seconds() -> float:
     window. The minimum wait is 10 seconds and the maximum wait is 60 seconds.
     This ensures the service remains responsive to newly added reminders.
     """
-    reminders: list[dict] = get_all_goal_reminders()
+    reminders: list[Reminder] = db.reminders.get_all()
     if not reminders:
         logger.info("No reminders scheduled; using default wait interval")
     now_utc: datetime = datetime.now(UTC)
     wait_times = []
 
     for reminder in reminders:
-        user_id: int = reminder["user_id"]
-        user_timezone: str = get_user(user_id)["timezone"]
-        time_str: str = reminder["reminder_time"]
+        user_id: int = reminder.user_id
+        user: User | None = db.users.get(user_id)
+        # Skip if user not found (data integrity issue, but safe to handle)
+        if not user:
+             continue
+             
+        user_timezone: str = user.timezone
+        # Check if reminder_time is string (from old DB) or datetime (from new model)
+        # SQLite adapter usually returns string if not parsed. 
+        time_str: str = str(reminder.reminder_time)
 
         hours_minutes: list[str] = time_str.split(":")
         # Extract hours and minutes as integers
@@ -68,29 +78,32 @@ def _check_reminders() -> None:
     """Check all reminders and send notifications when scheduled time matches.
 
     Send notifications to users when their scheduled reminder times match the
-    current local time in their timezone.
+    current local time.
     """
-    reminders: list[dict] = get_all_goal_reminders()
+    reminders: list[Reminder] = db.reminders.get_all()
     now_utc: datetime = datetime.now(UTC)
 
     for reminder in reminders:
-        user_id: int = reminder["user_id"]
-        user_goal_id: int = reminder["user_goal_id"]
+        user_id: int = reminder.user_id
+        user_goal_id: int = reminder.user_goal_id
 
-        user: dict = get_user(user_id)
-        user_goal: dict = get_goal(user_goal_id)
+        user: User | None = db.users.get(user_id)
+        user_goal: Goal | None = db.goals.get(user_goal_id)
 
-        user_timezone: str = user["timezone"]
+        if not user or not user_goal:
+             continue
+
+        user_timezone: str = user.timezone
         logger.debug(
             "Evaluating reminder %s for user %s in timezone %s",
-            reminder.get("id"),
+            reminder.id,
             user_id,
             user_timezone,
         )
         tz = get_timezone_safe(user_timezone)
         local_now: datetime = now_utc.astimezone(tz)
 
-        time_str: str = reminder.get("reminder_time")
+        time_str: str = str(reminder.reminder_time)
         hours_minutes: list[str] = time_str.split(":")
         # Extract hours and minutes as integers
         hours: int = int(hours_minutes[0])
@@ -99,7 +112,7 @@ def _check_reminders() -> None:
         # Check if current time matches reminder time (HH:MM)
         if local_now.hour == hours and local_now.minute == minutes:
             # Check if this is a journaling reminder
-            if user_goal["goal_emoji"] == "📓" and user_goal["goal_description"] == "journaling":
+            if user_goal.goal_emoji == "📓" and user_goal.goal_description == "journaling":
                 goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
                 if goals_not_tracked_today != []:
                     message: str = JOURNAL_REMINDER_MESSAGE.replace(
@@ -115,13 +128,13 @@ def _check_reminders() -> None:
                     )
             else:
                 message: str = REMINDER_MESSAGE.replace(
-                    "<goal_emoji>", user_goal["goal_emoji"]
-                ).replace("<goal_description>", user_goal["goal_description"])
-            send_message(user["phone_number"], message)
+                    "<goal_emoji>", user_goal.goal_emoji
+                ).replace("<goal_description>", user_goal.goal_description)
+            send_message(user.phone_number, message)
             logger.info(
                 "Sent reminder '%s' to %s",
-                user_goal["goal_description"],
-                user["phone_number"],
+                user_goal.goal_description,
+                user.phone_number,
             )
 
 
