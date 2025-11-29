@@ -67,7 +67,7 @@ def _is_valid_rating(message: str) -> bool:
     return message.isdigit() and all(m in "123" for m in message)
 
 
-def _handle_add_goal(user_id: int, message: str) -> str:
+def _add_goal(user_id: int, message: str) -> str:
     """Handle 'add goal' command."""
     raw_goal: str = message.replace("add goal", "")
     if raw_goal:
@@ -84,7 +84,7 @@ def _handle_add_goal(user_id: int, message: str) -> str:
     return None
 
 
-def _handle_enable_journaling(user: dict) -> str:
+def _enable_journaling(user: dict) -> str:
     """Handle 'enable journaling' command."""
     user_id: int = user["id"]
     # Check if user already has a journaling goal
@@ -96,7 +96,7 @@ def _handle_enable_journaling(user: dict) -> str:
     return process_text(user, "add goal 📓 journaling")
 
 
-def _handle_journal_prompts(user_id: int) -> str:
+def _journal_prompts(user_id: int) -> str:
     """Handle 'journal prompts' or 'journal now' commands."""
     goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
     if goals_not_tracked_today:
@@ -114,7 +114,7 @@ def _handle_journal_prompts(user_id: int) -> str:
     return JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
 
 
-def _handle_delete_goal(user_id: int, message: str) -> str:
+def _delete_goal(user_id: int, message: str) -> str:
     """Handle 'delete' command."""
     try:
         goal_num: int = int(message.replace("delete", "").strip())
@@ -132,7 +132,7 @@ def _handle_delete_goal(user_id: int, message: str) -> str:
     return f"✅ Goal deleted: {goal['goal_emoji']} {goal['goal_description']}"
 
 
-def _handle_reminder_time(user_id: int, message: str) -> str:
+def _reminder_time(user_id: int, message: str) -> str:
     """Handle time input for goal reminders."""
     normalized_time: str = parse_time_string(message)
     user_state: dict | None = get_user_state(user_id)
@@ -164,7 +164,7 @@ def _handle_reminder_time(user_id: int, message: str) -> str:
     )
 
 
-def _handle_goals_list(user_id: int) -> str:
+def _goals_list(user_id: int) -> str:
     """Handle 'goals' command."""
     user_goals: list[dict] = get_user_goals(user_id)
 
@@ -198,7 +198,7 @@ def _handle_goals_list(user_id: int) -> str:
     return response
 
 
-def _handle_update_reminder(user_id: int, message: str) -> str:
+def _update_reminder(user_id: int, message: str) -> str:
     """Handle 'update' command."""
     parts = message.replace("update", "").strip().split(" ")
     if len(parts) != MIN_PARTS_EXPECTED:
@@ -240,7 +240,7 @@ def _handle_update_reminder(user_id: int, message: str) -> str:
     )
 
 
-def _handle_transcript_toggle(user_id: int, message: str) -> str:
+def _transcript_toggle(user_id: int, message: str) -> str:
     """Handle 'transcript' command."""
     if "on" in message:
         update_user(user_id, send_transcript_file=1)
@@ -257,7 +257,7 @@ def _handle_transcript_toggle(user_id: int, message: str) -> str:
     return "Invalid command. Usage: transcript [on|off]"
 
 
-def _handle_week_summary(user_id: int) -> str:
+def _week_summary(user_id: int) -> str:
     """Handle 'week' command."""
     start: datetime = get_monday_before()
 
@@ -283,7 +283,7 @@ def _handle_week_summary(user_id: int) -> str:
     return summary
 
 
-def _handle_lookback(user_id: int, message: str) -> str:
+def _lookback(user_id: int, message: str) -> str:
     """Handle 'lookback' command."""
     # Check if user has any goals first
     user_goals: list[dict] = get_user_goals(user_id)
@@ -316,7 +316,7 @@ def _handle_lookback(user_id: int, message: str) -> str:
     return summary
 
 
-def _handle_rate_single(user_id: int, message: str) -> str:
+def _rate_single(user_id: int, message: str) -> str:
     """Handle 'rate' command for single goal."""
     parse_rating: list[str] = message.replace("rate", "").strip().split(" ")
     if len(parse_rating) != MIN_PARTS_EXPECTED:
@@ -358,7 +358,7 @@ def _handle_rate_single(user_id: int, message: str) -> str:
     )
 
 
-def _handle_rate_all(user_id: int, message: str) -> str:
+def _rate_all(user_id: int, message: str) -> str:
     """Handle rating all goals at once with a string of digits."""
     user_goals: list[dict] = get_user_goals(user_id)
     if not user_goals:
@@ -420,21 +420,21 @@ def process_text(user: dict, message: str) -> str:
     # Command routing table - order matters for some checks
     # Each tuple: (condition_check, handler_function)
     command_routes = [
-        ("add goal" in message, lambda: _handle_add_goal(user_id, message)),
-        (message == "enable journaling", lambda: _handle_enable_journaling(user)),
+        ("add goal" in message, lambda: _add_goal(user_id, message)),
+        (message == "enable journaling", lambda: _enable_journaling(user)),
         (
             "journal prompts" in message or "journal now" in message,
-            lambda: _handle_journal_prompts(user_id),
+            lambda: _journal_prompts(user_id),
         ),
-        (message.startswith("delete"), lambda: _handle_delete_goal(user_id, message)),
-        (parse_time_string(message) is not None, lambda: _handle_reminder_time(user_id, message)),
-        (message == "goals", lambda: _handle_goals_list(user_id)),
-        (message.startswith("update"), lambda: _handle_update_reminder(user_id, message)),
-        ("transcript" in message, lambda: _handle_transcript_toggle(user_id, message)),
-        (message == "week", lambda: _handle_week_summary(user_id)),
-        (message.startswith("lookback"), lambda: _handle_lookback(user_id, message)),
-        (message.startswith("rate"), lambda: _handle_rate_single(user_id, message)),
-        (_is_valid_rating(message), lambda: _handle_rate_all(user_id, message)),
+        (message.startswith("delete"), lambda: _delete_goal(user_id, message)),
+        (parse_time_string(message) is not None, lambda: _reminder_time(user_id, message)),
+        (message == "goals", lambda: _goals_list(user_id)),
+        (message.startswith("update"), lambda: _update_reminder(user_id, message)),
+        ("transcript" in message, lambda: _transcript_toggle(user_id, message)),
+        (message == "week", lambda: _week_summary(user_id)),
+        (message.startswith("lookback"), lambda: _lookback(user_id, message)),
+        (message.startswith("rate"), lambda: _rate_single(user_id, message)),
+        (_is_valid_rating(message), lambda: _rate_all(user_id, message)),
         (message == "help", lambda: HELP_MESSAGE),
     ]
 
