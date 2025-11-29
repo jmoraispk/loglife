@@ -1,6 +1,16 @@
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional, List
 import sqlite3
-from app.db.rows import Goal
+
+@dataclass
+class Goal:
+    id: int
+    user_id: int
+    goal_emoji: str
+    goal_description: str
+    boost_level: int
+    created_at: datetime
 
 class GoalsTable:
     def __init__(self, conn: sqlite3.Connection):

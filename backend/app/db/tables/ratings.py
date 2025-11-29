@@ -1,6 +1,16 @@
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional, List
 import sqlite3
-from app.db.rows import Rating
+
+@dataclass
+class Rating:
+    id: int
+    user_goal_id: int
+    rating: int
+    rating_date: datetime
+    created_at: datetime
+    updated_at: datetime
 
 class RatingsTable:
     def __init__(self, conn: sqlite3.Connection):

@@ -1,6 +1,14 @@
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional
 import sqlite3
-from app.db.rows import Referral
+
+@dataclass
+class Referral:
+    id: int
+    referrer_user_id: int
+    referred_user_id: int
+    created_at: datetime
 
 class ReferralsTable:
     def __init__(self, conn: sqlite3.Connection):

@@ -1,6 +1,14 @@
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional
 import sqlite3
-from app.db.rows import UserState
+
+@dataclass
+class UserState:
+    user_id: int
+    state: str
+    temp_data: Optional[str]
+    created_at: datetime
 
 class UserStatesTable:
     def __init__(self, conn: sqlite3.Connection):

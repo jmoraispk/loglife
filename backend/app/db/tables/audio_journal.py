@@ -1,6 +1,15 @@
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional, List
 import sqlite3
-from app.db.rows import AudioJournalEntry
+
+@dataclass
+class AudioJournalEntry:
+    id: int
+    user_id: int
+    transcription_text: Optional[str]
+    summary_text: Optional[str]
+    created_at: datetime
 
 class AudioJournalTable:
     def __init__(self, conn: sqlite3.Connection):

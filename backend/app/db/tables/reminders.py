@@ -1,6 +1,15 @@
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Optional, List
 import sqlite3
-from app.db.rows import Reminder
+
+@dataclass
+class Reminder:
+    id: int
+    user_id: int
+    user_goal_id: int
+    reminder_time: datetime
+    created_at: datetime
 
 class RemindersTable:
     def __init__(self, conn: sqlite3.Connection):
