@@ -3,7 +3,7 @@
 from unittest.mock import patch
 
 from app.db.operations import users
-from app.logic.audio.processor import process_audio
+from app.logic import process_audio
 
 MODULE = "app.logic.audio.processor"
 

@@ -6,7 +6,8 @@ from unittest.mock import patch
 
 import pytest
 from app.db.operations import referrals, users
-from app.logic.vcard.processor import _extract_phone_number, process_vcard
+from app.logic import process_vcard
+from app.logic.vcard.processor import _extract_phone_number
 
 
 def test_internal_extract_phone_number() -> None:

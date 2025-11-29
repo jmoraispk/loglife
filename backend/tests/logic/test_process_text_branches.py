@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 import pytest
 from app.config import ERROR_NO_GOALS_SET, STYLE
 from app.db.operations import goal_ratings, goal_reminders, user_goals, users
-from app.logic.text.processor import process_text
+from app.logic import process_text
 
 
 def test_process_text_add_goal_no_emoji() -> None:
