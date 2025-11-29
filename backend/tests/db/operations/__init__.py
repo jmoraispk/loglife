@@ -1,2 +1,1 @@
 """Database operations tests package."""
-
