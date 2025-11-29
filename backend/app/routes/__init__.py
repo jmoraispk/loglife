@@ -1,6 +1,5 @@
 """Flask blueprints for application routes."""
 
-from app.routes.events import events_bp
 from app.routes.webhook import webhook_bp
 
 # Try to import emulator_bp, but ignore if it fails (optional component)
@@ -9,4 +8,4 @@ try:
 except ImportError:
     emulator_bp = None
 
-__all__ = ["emulator_bp", "events_bp", "webhook_bp"]
+__all__ = ["emulator_bp", "webhook_bp"]
