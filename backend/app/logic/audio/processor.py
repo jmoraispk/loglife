@@ -3,10 +3,10 @@
 import logging
 
 from app.db import create_audio_journal_entry
-from app.helpers import send_message
 from app.logic.audio.journaling.summarize_transcript import summarize_transcript
 from app.logic.audio.journaling.transcript_to_base64 import transcript_to_base64
 from app.logic.audio.transcribe_audio import transcribe_audio
+from app.services.sender import send_message
 
 logger = logging.getLogger(__name__)
 

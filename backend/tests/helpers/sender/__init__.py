@@ -1,2 +1,0 @@
-"""Sender helpers tests package."""
-

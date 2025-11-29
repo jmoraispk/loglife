@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 from app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
 from app.db import get_all_goal_reminders, get_goal, get_user
-from app.helpers import send_message
+from app.services.sender import send_message
 from app.services.reminder.utils import get_goals_not_tracked_today, get_timezone_safe
 
 logger = logging.getLogger(__name__)

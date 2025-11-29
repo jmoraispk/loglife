@@ -4,7 +4,7 @@ This module defines a Flask blueprint for streaming log events to clients
 using Server-Sent Events protocol.
 """
 
-from app.helpers.sender.emulator_sender import log_queue
+from app.services.sender import log_queue
 from flask import Blueprint, Response
 
 events_bp = Blueprint("events", __name__)

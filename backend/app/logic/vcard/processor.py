@@ -5,7 +5,7 @@ import re
 
 from app.config import REFERRAL_SUCCESS, WELCOME_MESSAGE
 from app.db import create_referral, create_user, get_user_by_phone_number
-from app.helpers import send_message
+from app.services import send_message
 
 
 def _extract_phone_number(vcard_str: str) -> str:
