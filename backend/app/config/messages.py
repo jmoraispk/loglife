@@ -114,7 +114,9 @@ SUCCESS_REMINDER_UPDATED = (
 SUCCESS_TRANSCRIPT_ENABLED = (
     "✅ Transcript files enabled! You'll now receive transcript file with your audio journaling."
 )
-SUCCESS_TRANSCRIPT_DISABLED = "✅ Transcript files disabled! You'll only receive the summary message with your audio journaling."
+SUCCESS_TRANSCRIPT_DISABLED = (
+    "✅ Transcript files disabled! You'll only receive the summary message when audio journaling."
+)
 
 # -----------------------------
 # Lookback Summary Messages
