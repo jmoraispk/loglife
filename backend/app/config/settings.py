@@ -22,5 +22,5 @@ STYLE = {
 }
 
 COMMAND_ALIASES = {
-    "add habit": "add goal",
+    "journal now": "journal prompts",
 }

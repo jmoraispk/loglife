@@ -411,7 +411,7 @@ def process_text(user: dict, message: str) -> str:
     """
     message: str = message.strip().lower()
 
-    # Add aliases
+    # Replace aliases
     for alias, command in COMMAND_ALIASES.items():
         message = message.replace(alias, command)
 
@@ -422,10 +422,7 @@ def process_text(user: dict, message: str) -> str:
     command_routes = [
         ("add goal" in message, lambda: _add_goal(user_id, message)),
         (message == "enable journaling", lambda: _enable_journaling(user)),
-        (
-            "journal prompts" in message or "journal now" in message,
-            lambda: _journal_prompts(user_id),
-        ),
+        (message == "journal prompts", lambda: _journal_prompts(user_id)),
         (message.startswith("delete"), lambda: _delete_goal(user_id, message)),
         (parse_time_string(message) is not None, lambda: _reminder_time(user_id, message)),
         (message == "goals", lambda: _goals_list(user_id)),
