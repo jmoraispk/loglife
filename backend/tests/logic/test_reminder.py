@@ -1,8 +1,8 @@
-"""Tests for reminder service helpers."""
+"""Tests for reminder service logic."""
 
 from zoneinfo import ZoneInfo
 
-from app.helpers.services.reminder import get_timezone_safe
+from app.logic.reminder import get_timezone_safe
 
 
 def test_get_timezone_safe() -> None:
