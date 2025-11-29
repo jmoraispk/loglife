@@ -4,9 +4,30 @@ import sqlite3
 from collections.abc import Generator
 from contextlib import contextmanager
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 from app.config.paths import SCHEMA_FILE
+from app.factory import create_app
+from flask import Flask
+from flask.testing import FlaskClient
+
+
+@pytest.fixture
+def app() -> Generator[Flask, None, None]:
+    """Create a Flask app instance for testing."""
+    app = create_app()
+    app.config["TESTING"] = True
+
+    # Stop the reminder service thread from starting
+    with patch("app.factory.start_reminder_service"):
+        yield app
+
+
+@pytest.fixture
+def client(app: Flask) -> FlaskClient:
+    """Create a test client for the Flask app."""
+    return app.test_client()
 
 
 @pytest.fixture
@@ -25,7 +46,7 @@ def test_db() -> Generator[sqlite3.Connection, None, None]:
             pass
     """
     # Create an in-memory SQLite database (fast, isolated)
-    conn = sqlite3.connect(":memory:")
+    conn = sqlite3.connect(":memory:", check_same_thread=False)
     conn.row_factory = sqlite3.Row
 
     # Apply your schema

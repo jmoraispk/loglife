@@ -6,7 +6,23 @@ from unittest.mock import patch
 
 import pytest
 from app.db.operations import referrals, users
-from app.logic.process_vcard import process_vard
+from app.logic.process_vcard import _extract_phone_number, process_vard
+
+
+def test_internal_extract_phone_number() -> None:
+    """Test internal _extract_phone_number function."""
+    test_cases = [
+        # Simple vcard with phone number
+        ("waid=1234567890", "1234567890"),
+        # Vcard with additional text before
+        ("BEGIN:VCARD\nwaid=9876543210", "9876543210"),
+        # Vcard with additional text after
+        ("waid=5555555555:END", "5555555555"),
+    ]
+
+    for vcard_string, expected_phone in test_cases:
+        result = _extract_phone_number(vcard_string)
+        assert result == expected_phone
 
 
 def test_process_vcard_creates_referral() -> None:

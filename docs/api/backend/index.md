@@ -119,5 +119,3 @@ The backend is designed to work with the WhatsApp Client:
 
 For automated messages (reminders, status updates), the backend calls the WhatsApp Client's `/send-message` endpoint.
 
----
-

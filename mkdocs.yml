@@ -22,21 +22,36 @@ nav:
     - Managing Goals: usage/managing-goals.md
   - Developer Guides:
     - Overview: developer/overview.md
+    - Essentials: developer/essentials.md
     - Backend: developer/backend.md
     - WhatsApp Client: developer/whatsapp-client.md
     - Twilio WhatsApp Number Setup: developer/twilio-whatsapp-number-setup.md
   - API Docs:
     - Overview: api/overview.md
-    - Backend API: api/backend.md
+    - Backend API:
+      - Overview: api/backend/index.md
+      - Routes: api/backend/routes.md
+      - Business Logic: api/backend/logic.md
+      - Services: api/backend/services.md
+      - Database Operations: api/backend/database.md
     - WhatsApp Client API: api/whatsapp-client.md
 
 markdown_extensions:
   - toc:
       title: On this page
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
 
 plugins:
   - search
   - glightbox
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [backend]
+          options:
+            docstring_style: google
 
 extra_css:
   - extra_css/theme.css

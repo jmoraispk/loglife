@@ -21,7 +21,7 @@ The Python/Flask backend handles message processing, goal tracking, and business
 - `POST /webhook` — Process incoming messages
 - `GET /emulator` — Web-based testing interface
 
-[View Backend API Reference →](backend.md)
+[View Backend API Reference →](backend/index.md)
 
 ### WhatsApp Client API
 

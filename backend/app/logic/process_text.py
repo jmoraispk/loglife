@@ -1,13 +1,16 @@
 """Message processing logic for inbound WhatsApp text commands."""
 
 import json
+import re
 from datetime import UTC, datetime, timedelta
 
 from app.config import (
     COMMAND_ALIASES,
+    DEFAULT_GOAL_EMOJI,
     ERROR_INVALID_INPUT_LENGTH,
     ERROR_NO_GOALS_SET,
     HELP_MESSAGE,
+    JOURNAL_REMINDER_MESSAGE,
     STYLE,
     SUCCESS_INDIVIDUAL_RATING,
     SUCCESS_RATINGS_SUBMITTED,
@@ -30,14 +33,38 @@ from app.db import (
     update_user,
 )
 from app.helpers import (
-    extract_emoji,
+    get_goals_not_tracked_today,
     get_monday_before,
-    is_valid_rating_digits,
     look_back_summary,
     parse_time_string,
 )
 
 MIN_PARTS_EXPECTED = 2
+
+# internal variable (not intended for import)
+_emoji_pattern: str = (
+    r"[\U0001F600-\U0001F64F"
+    r"\U0001F300-\U0001F5FF"
+    r"\U0001F680-\U0001F6FF"
+    r"\U0001F1E0-\U0001F1FF"
+    r"\U00002600-\U000026FF"
+    r"\U00002700-\U000027BF"
+    r"\U0001F900-\U0001F9FF"
+    r"\U0001FA70-\U0001FAFF"
+    r"\U0001F018-\U0001F0F5"
+    r"\U0001F200-\U0001F2FF]+"
+)
+
+
+def _extract_emoji(text: str) -> str:
+    """Extract the first emoji from the given text."""
+    match = re.search(_emoji_pattern, text)
+    return match.group(0) if match else DEFAULT_GOAL_EMOJI
+
+
+def _is_valid_rating(message: str) -> bool:
+    """Check whether the message contains only valid rating digits."""
+    return message.isdigit() and all(m in "123" for m in message)
 
 
 def process_text(user: dict, message: str) -> str:
@@ -66,7 +93,7 @@ def process_text(user: dict, message: str) -> str:
     if "add goal" in message:
         raw_goal: str = message.replace("add goal", "")
         if raw_goal:
-            goal_emoji: str = extract_emoji(raw_goal)
+            goal_emoji: str = _extract_emoji(raw_goal)
             goal_description: str = raw_goal.replace(goal_emoji, "").strip()
             goal: dict | None = create_goal(user_id, goal_emoji, goal_description)
             if goal:
@@ -85,6 +112,22 @@ def process_text(user: dict, message: str) -> str:
                 return "✅ You already have a journaling goal! Check 'goals' to see it."
 
         return process_text(user, "add goal 📓 journaling")
+
+    elif "journal prompts" in message or "journal now" in message:
+        goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
+        if goals_not_tracked_today:
+            return JOURNAL_REMINDER_MESSAGE.replace(
+                "<goals_not_tracked_today>",
+                "- *Did you complete the goals?*\n"
+                + "\n".join(
+                    [
+                        f"- {goal['goal_description']}"
+                        for goal in goals_not_tracked_today
+                    ]
+                ),
+            )
+
+        return JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
 
     elif message.startswith("delete"):
         try:
@@ -316,7 +359,7 @@ def process_text(user: dict, message: str) -> str:
         )
 
     # rate all goals at once
-    elif is_valid_rating_digits(message):
+    elif _is_valid_rating(message):
         user_goals: list[dict] = get_user_goals(user_id)
         if not user_goals:
             return ERROR_NO_GOALS_SET
