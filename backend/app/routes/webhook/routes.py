@@ -6,7 +6,8 @@ It processes incoming messages (text, audio, or VCARD) and routes them to the ap
 
 import logging
 
-from app.db import create_user, get_user_by_phone_number
+from app.db.client import db
+from app.db.tables.users import User
 from app.logic import process_audio, process_text, process_vcard
 from app.routes.webhook.utils import (
     error_response,
@@ -38,10 +39,10 @@ def webhook() -> ResponseReturnValue:
         # g is for request-scoped data (global variable)
         g.client_type = data["client_type"]
 
-        user: dict | None = get_user_by_phone_number(sender)
+        user: User | None = db.users.get_by_phone(sender)
         if not user:
             user_timezone: str = get_timezone_from_number(sender)
-            user: dict = create_user(sender, user_timezone)
+            user = db.users.create(sender, user_timezone)
             logger.info("Created new user %s with timezone %s", user, user_timezone)
         else:
             logger.info("Found existing user for sender: %s", user)

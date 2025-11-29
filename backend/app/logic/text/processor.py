@@ -1,6 +1,7 @@
 """Message processing logic for inbound WhatsApp text commands."""
 
 from app.config import COMMAND_ALIASES
+from app.db.tables.users import User
 from app.logic.text.handlers import (
     AddGoalHandler,
     DeleteGoalHandler,
@@ -37,7 +38,7 @@ HANDLERS: list[TextCommandHandler] = [
 ]
 
 
-def process_text(user: dict, message: str) -> str:
+def process_text(user: User, message: str) -> str:
     """Route incoming text commands to the appropriate goal or rating handler.
 
     Handle commands such as adding goals, submitting ratings, configuring
@@ -45,7 +46,7 @@ def process_text(user: dict, message: str) -> str:
     state for multi-step flows (e.g., goal reminder setup).
 
     Args:
-        user: The user record dict for the message sender
+        user: The user record for the message sender
         message: The incoming text message content
 
     Returns:

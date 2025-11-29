@@ -6,7 +6,9 @@ from app.config import (
     LOOKBACK_NO_GOALS,
     STYLE,
 )
-from app.db import get_rating_by_goal_and_date, get_user_goals
+from app.db.client import db
+from app.db.tables.goals import Goal
+from app.db.tables.ratings import Rating
 
 
 def get_monday_before() -> datetime:
@@ -39,7 +41,7 @@ def look_back_summary(user_id: int, days: int, start: datetime) -> str:
     summary: str = "```"
 
     # Get user goals to determine how many goals to show
-    user_goals: list[dict] = get_user_goals(user_id)
+    user_goals: list[Goal] = db.goals.get_by_user(user_id)
 
     if not user_goals:
         return LOOKBACK_NO_GOALS
@@ -52,20 +54,20 @@ def look_back_summary(user_id: int, days: int, start: datetime) -> str:
         # Get ratings for this date
         ratings_data = []
         for user_goal in user_goals:
-            user_goal_rating: dict | None = get_rating_by_goal_and_date(
-                user_goal["id"],
+            user_goal_rating: Rating | None = db.ratings.get_by_goal_and_date(
+                user_goal.id,
                 storage_date,
             )
             if user_goal_rating:
                 ratings_data.append(
                     {
-                        "goal_emoji": user_goal["goal_emoji"],
-                        "rating": user_goal_rating["rating"],
+                        "goal_emoji": user_goal.goal_emoji,
+                        "rating": user_goal_rating.rating,
                     },
                 )
             else:
                 ratings_data.append(
-                    {"goal_emoji": user_goal["goal_emoji"], "rating": None},
+                    {"goal_emoji": user_goal.goal_emoji, "rating": None},
                 )
 
         # Create status symbols for each goal
@@ -74,8 +76,8 @@ def look_back_summary(user_id: int, days: int, start: datetime) -> str:
             # Find rating for this goal
             rating: int | None = None
             for rating_row in ratings_data:
-                if rating_row["goal_emoji"] == goal["goal_emoji"]:
-                    rating = rating_row["rating"]
+                if rating_row["goal_emoji"] == goal.goal_emoji:
+                    rating = rating_row["rating"]  # type: ignore
                     break
 
             if rating:
