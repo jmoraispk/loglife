@@ -7,8 +7,7 @@ from app.config import (
     STYLE,
 )
 from app.db.client import db
-from app.db.tables.goals import Goal
-from app.db.tables.ratings import Rating
+from app.db.tables import Goal, Rating
 
 
 def get_monday_before() -> datetime:

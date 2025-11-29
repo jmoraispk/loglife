@@ -2,13 +2,15 @@ import sqlite3
 from pathlib import Path
 
 from app.config import DATABASE_FILE
-from app.db.tables.users import UsersTable
-from app.db.tables.goals import GoalsTable
-from app.db.tables.ratings import RatingsTable
-from app.db.tables.reminders import RemindersTable
-from app.db.tables.user_states import UserStatesTable
-from app.db.tables.audio_journal import AudioJournalTable
-from app.db.tables.referrals import ReferralsTable
+from app.db.tables import (
+    AudioJournalTable,
+    GoalsTable,
+    RatingsTable,
+    ReferralsTable,
+    RemindersTable,
+    UsersTable,
+    UserStatesTable,
+)
 
 class Database:
     """Main database client that provides access to tables."""

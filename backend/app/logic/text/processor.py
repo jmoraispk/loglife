@@ -1,7 +1,7 @@
 """Message processing logic for inbound WhatsApp text commands."""
 
 from app.config import COMMAND_ALIASES
-from app.db.tables.users import User
+from app.db.tables import User
 from app.logic.text.handlers import (
     AddGoalHandler,
     DeleteGoalHandler,

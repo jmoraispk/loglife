@@ -5,8 +5,7 @@ from unittest.mock import patch
 
 import app.logic.text.week as week_module
 from app.config import LOOKBACK_NO_GOALS
-from app.db.tables.goals import Goal
-from app.db.tables.ratings import Rating
+from app.db.tables import Goal, Rating
 
 
 def test_get_monday_before() -> None:

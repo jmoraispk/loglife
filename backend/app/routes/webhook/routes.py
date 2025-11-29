@@ -7,7 +7,7 @@ It processes incoming messages (text, audio, or VCARD) and routes them to the ap
 import logging
 
 from app.db.client import db
-from app.db.tables.users import User
+from app.db.tables import User
 from app.logic import process_audio, process_text, process_vcard
 from app.routes.webhook.utils import (
     error_response,

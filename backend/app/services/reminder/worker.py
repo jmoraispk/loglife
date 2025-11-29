@@ -13,9 +13,7 @@ if TYPE_CHECKING:
 
 from app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
 from app.db.client import db
-from app.db.tables.goals import Goal
-from app.db.tables.reminders import Reminder
-from app.db.tables.users import User
+from app.db.tables import Goal, Reminder, User
 from app.services.reminder.utils import get_goals_not_tracked_today, get_timezone_safe
 from app.services.sender import send_message
 

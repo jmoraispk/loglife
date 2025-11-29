@@ -3,7 +3,7 @@
 import logging
 
 from app.db.client import db
-from app.db.tables.users import User
+from app.db.tables import User
 from app.logic.audio.journaling.summarize_transcript import summarize_transcript
 from app.logic.audio.journaling.transcript_to_base64 import transcript_to_base64
 from app.logic.audio.transcribe_audio import transcribe_audio

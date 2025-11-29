@@ -8,9 +8,7 @@ from datetime import UTC, datetime, timedelta
 from unittest.mock import MagicMock, patch
 
 import app.services.reminder.worker as reminder_worker
-from app.db.tables.goals import Goal
-from app.db.tables.reminders import Reminder
-from app.db.tables.users import User
+from app.db.tables import Goal, Reminder, User
 
 
 def test_next_reminder_seconds() -> None:

@@ -3,7 +3,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from app.db.tables.users import User
+from app.db.tables import User
 from app.routes.webhook import webhook_bp
 from flask import Flask
 from flask.testing import FlaskClient

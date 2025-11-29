@@ -6,11 +6,7 @@ from datetime import UTC, datetime
 import pytest
 from app.config import ERROR_NO_GOALS_SET, USAGE_RATE
 from app.db.client import db
-from app.db.tables.goals import Goal
-from app.db.tables.ratings import Rating
-from app.db.tables.reminders import Reminder
-from app.db.tables.user_states import UserState
-from app.db.tables.users import User
+from app.db.tables import Goal, Rating, Reminder, User, UserState
 from app.logic import process_text
 from app.logic.text.handlers import _extract_emoji
 

@@ -1,8 +1,7 @@
 """Tests for goal_reminders database operations."""
 
 from app.db.client import db
-from app.db.tables.reminders import Reminder
-from app.db.tables.users import User
+from app.db.tables import Reminder, User
 
 
 def test_create_goal_reminder() -> None:

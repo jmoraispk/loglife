@@ -4,7 +4,7 @@ import sqlite3
 
 import pytest
 from app.db.client import db
-from app.db.tables.users import User
+from app.db.tables import User
 
 
 def test_create_referral() -> None:

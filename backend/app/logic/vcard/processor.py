@@ -5,7 +5,7 @@ import re
 
 from app.config import REFERRAL_SUCCESS, WELCOME_MESSAGE
 from app.db.client import db
-from app.db.tables.users import User
+from app.db.tables import User
 from app.services import send_message
 
 

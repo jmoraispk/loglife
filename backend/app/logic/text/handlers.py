@@ -11,11 +11,7 @@ from app.config import (
     messages,
 )
 from app.db.client import db
-from app.db.tables.goals import Goal
-from app.db.tables.ratings import Rating
-from app.db.tables.reminders import Reminder
-from app.db.tables.user_states import UserState
-from app.db.tables.users import User
+from app.db.tables import Goal, Rating, Reminder, User, UserState
 from app.logic.text.reminder_time import parse_time_string
 from app.logic.text.week import get_monday_before, look_back_summary
 from app.services.reminder.utils import get_goals_not_tracked_today

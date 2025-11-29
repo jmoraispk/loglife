@@ -4,8 +4,7 @@ from datetime import UTC, datetime
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from app.db.client import db
-from app.db.tables.goals import Goal
-from app.db.tables.ratings import Rating
+from app.db.tables import Goal, Rating
 
 
 def get_timezone_safe(timezone_str: str) -> ZoneInfo:
