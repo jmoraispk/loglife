@@ -10,9 +10,8 @@ emulator_bp = Blueprint("emulator", __name__)
 
 
 @emulator_bp.route(
-    "/emulator",
-    strict_slashes=False,
-)  # strict_slashes=False lets the emulator route match both /emulator and /emulator/
+    "/",
+)
 def emulator() -> str:
     """Render the emulator template.
 

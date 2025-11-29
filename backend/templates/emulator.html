@@ -360,6 +360,41 @@
             cursor: not-allowed;
         }
 
+        .history-arrows {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+
+        .btn-arrow {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius);
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: all .15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 20px;
+            font-size: 12px;
+            flex-shrink: 0;
+            line-height: 1;
+        }
+
+        .btn-arrow:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-arrow:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
         .btn-mic {
             border: 1px solid rgba(255, 255, 255, 0.15);
             border-radius: var(--radius);
@@ -544,6 +579,10 @@
                     <div class="chat-input-wrapper">
                         <textarea class="chat-textarea" id="messageInput" name="message" rows="1"
                             placeholder="Type your message here..." required></textarea>
+                        <div class="history-arrows">
+                            <button type="button" class="btn-arrow" id="arrowUpBtn" title="Previous message">▲</button>
+                            <button type="button" class="btn-arrow" id="arrowDownBtn" title="Next message">▼</button>
+                        </div>
                         <button type="button" class="btn-mic" id="micBtn" title="Record audio"></button>
                         <button type="submit" class="btn" id="sendBtn">Send</button>
                     </div>
@@ -559,6 +598,8 @@
         const messageInput = byId('messageInput');
         const sendBtn = byId('sendBtn');
         const micBtn = byId('micBtn');
+        const arrowUpBtn = byId('arrowUpBtn');
+        const arrowDownBtn = byId('arrowDownBtn');
         const chatForm = byId('chatForm');
         const chatMessages = byId('chatMessages');
         const statusPill = byId('statusPill');
@@ -567,6 +608,9 @@
         let mediaRecorder = null;
         let audioChunks = [];
         let messageHistory = [];
+        let sentMessages = []; // Store only sent text messages for arrow navigation
+        let historyIndex = -1; // Current position in history (-1 = not navigating)
+        let currentDraft = ''; // Store current input when starting navigation
         let isRecording = false;
 
         // Auto-resize textarea
@@ -574,6 +618,12 @@
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, 120) + 'px';
         });
+
+        // Update arrow button states
+        function updateArrowButtons() {
+            arrowUpBtn.disabled = sentMessages.length === 0 || historyIndex >= sentMessages.length - 1;
+            arrowDownBtn.disabled = historyIndex === -1;
+        }
 
         // Quick Presets Dropdown
         presetSelect.addEventListener('change', () => {
@@ -583,6 +633,49 @@
                 messageInput.focus();
                 presetSelect.value = ''; // Reset dropdown
             }
+        });
+
+        // Arrow button click handlers
+        arrowUpBtn.addEventListener('click', () => {
+            if (sentMessages.length === 0) return;
+            
+            // Save current draft when starting navigation
+            if (historyIndex === -1) {
+                currentDraft = messageInput.value;
+            }
+            
+            // Move up in history (toward older messages)
+            if (historyIndex < sentMessages.length - 1) {
+                historyIndex++;
+                const historyMessage = sentMessages[sentMessages.length - 1 - historyIndex];
+                messageInput.value = historyMessage;
+                messageInput.style.height = 'auto';
+                messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+                messageInput.focus();
+                messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length);
+                updateArrowButtons();
+            }
+        });
+
+        arrowDownBtn.addEventListener('click', () => {
+            if (historyIndex === -1) return;
+            
+            // Move down in history (toward newer messages)
+            historyIndex--;
+            
+            if (historyIndex === -1) {
+                // Restore draft
+                messageInput.value = currentDraft;
+            } else {
+                const historyMessage = sentMessages[sentMessages.length - 1 - historyIndex];
+                messageInput.value = historyMessage;
+            }
+            
+            messageInput.style.height = 'auto';
+            messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+            messageInput.focus();
+            messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length);
+            updateArrowButtons();
         });
 
         function setStatus(mode, text) {
@@ -778,6 +871,9 @@
 
         const eventSource = startEventStream();
 
+        // Initialize arrow button states
+        updateArrowButtons();
+
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -786,6 +882,12 @@
 
             // Add user message
             addMessage(message, 'user');
+            
+            // Store sent message for arrow key navigation
+            sentMessages.push(message);
+            historyIndex = -1; // Reset history navigation
+            currentDraft = ''; // Clear draft
+            updateArrowButtons();
             
             const payload = { 
                 sender: senderEl.value, 
@@ -985,11 +1087,61 @@
             }
         });
 
-        // Enter to send, Shift+Enter for new line
+        // Enter to send, Shift+Enter for new line, Arrow keys for history
         messageInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 chatForm.dispatchEvent(new Event('submit'));
+                return;
+            }
+            
+            // Arrow key navigation through message history
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                
+                if (sentMessages.length === 0) return;
+                
+                // Save current draft when starting navigation
+                if (historyIndex === -1) {
+                    currentDraft = messageInput.value;
+                }
+                
+                // Move up in history (toward older messages)
+                if (historyIndex < sentMessages.length - 1) {
+                    historyIndex++;
+                    const historyMessage = sentMessages[sentMessages.length - 1 - historyIndex];
+                    messageInput.value = historyMessage;
+                    messageInput.style.height = 'auto';
+                    messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+                    // Move cursor to end
+                    messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length);
+                    updateArrowButtons();
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                
+                if (historyIndex === -1) return; // Not navigating history
+                
+                // Move down in history (toward newer messages)
+                historyIndex--;
+                
+                if (historyIndex === -1) {
+                    // Restore draft
+                    messageInput.value = currentDraft;
+                } else {
+                    const historyMessage = sentMessages[sentMessages.length - 1 - historyIndex];
+                    messageInput.value = historyMessage;
+                }
+                
+                messageInput.style.height = 'auto';
+                messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+                // Move cursor to end
+                messageInput.setSelectionRange(messageInput.value.length, messageInput.value.length);
+                updateArrowButtons();
+            } else if (historyIndex !== -1 && messageInput.value !== sentMessages[sentMessages.length - 1 - historyIndex]) {
+                // User started typing while navigating history - exit history mode
+                historyIndex = -1;
+                updateArrowButtons();
             }
         });
     </script>

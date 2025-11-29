@@ -107,7 +107,7 @@ uv run pytest backend/tests
 
 - Backend runs on `http://localhost:5000`
 - WhatsApp Client runs on `http://localhost:3000`
-- Use `/emulator` endpoint for testing without WhatsApp
+- Use `/` endpoint for testing without WhatsApp
 
 ---
 

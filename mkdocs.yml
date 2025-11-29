@@ -54,7 +54,7 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
-          paths: [backend]
+          paths: ["."]
           options:
             docstring_style: google
 
