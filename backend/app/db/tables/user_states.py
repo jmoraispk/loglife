@@ -1,27 +1,43 @@
+"""User state table operations and data model.
+
+This module defines the UserState data class and the UserStatesTable class for handling
+database interactions related to user conversation states.
+"""
+
+import sqlite3
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional
-import sqlite3
+
 
 @dataclass
 class UserState:
+    """User state data model."""
+
     user_id: int
     state: str
-    temp_data: Optional[str]
+    temp_data: str | None
     created_at: datetime
 
+
 class UserStatesTable:
-    def __init__(self, conn: sqlite3.Connection):
+    """Handles database operations for the user_states table."""
+
+    def __init__(self, conn: sqlite3.Connection) -> None:
+        """Initialize the UserStatesTable with a database connection."""
         self._conn = conn
 
-    def get(self, user_id: int) -> Optional[UserState]:
+    def get(self, user_id: int) -> UserState | None:
+        """Retrieve a user state by user ID."""
         row = self._conn.execute(
-            "SELECT * FROM user_states WHERE user_id = ?", 
-            (user_id,)
+            "SELECT * FROM user_states WHERE user_id = ?",
+            (user_id,),
         ).fetchone()
         return self._row_to_model(row) if row else None
 
-    def create(self, user_id: int, state: str, temp_data: Optional[str] = None) -> UserState:
+    def create(
+        self, user_id: int, state: str, temp_data: str | None = None
+    ) -> UserState:
+        """Create or update a user state record."""
         self._conn.execute(
             """
             INSERT INTO user_states (user_id, state, temp_data)
@@ -31,19 +47,21 @@ class UserStatesTable:
                 temp_data = excluded.temp_data,
                 created_at = CURRENT_TIMESTAMP
             """,
-            (user_id, state, temp_data)
+            (user_id, state, temp_data),
         )
-        return self.get(user_id)
+        return self.get(user_id)  # type: ignore[arg-type]
 
-    def update(self, user_id: int, state: Optional[str] = None, 
-               temp_data: Optional[str] = None) -> Optional[UserState]:
+    def update(
+        self, user_id: int, state: str | None = None, temp_data: str | None = None
+    ) -> UserState | None:
+        """Update a user state record with provided fields."""
         updates = []
         params = []
 
         if state is not None:
             updates.append("state = ?")
             params.append(state)
-            
+
         if temp_data is not None:
             updates.append("temp_data = ?")
             params.append(temp_data)
@@ -52,13 +70,16 @@ class UserStatesTable:
             return self.get(user_id)
 
         params.append(user_id)
-        query = f"UPDATE user_states SET {', '.join(updates)} WHERE user_id = ?"
+        # noqa: S608 - Safe usage (whitelist construction)
+        query = f"UPDATE user_states SET {', '.join(updates)} WHERE user_id = ?"  # noqa: S608
         self._conn.execute(query, params)
-        
+
         return self.get(user_id)
 
     def delete(self, user_id: int) -> None:
+        """Delete a user state record."""
         self._conn.execute("DELETE FROM user_states WHERE user_id = ?", (user_id,))
 
     def _row_to_model(self, row: sqlite3.Row) -> UserState:
+        """Convert a SQLite row to a UserState model."""
         return UserState(**dict(row))

@@ -10,22 +10,12 @@ from app.config import (
     STYLE,
     messages,
 )
-from app.db import (
-    create_goal,
-    create_goal_reminder,
-    create_rating,
-    create_user_state,
-    delete_goal,
-    delete_user_state,
-    get_goal,
-    get_goal_reminder_by_goal_id,
-    get_rating_by_goal_and_date,
-    get_user_goals,
-    get_user_state,
-    update_goal_reminder,
-    update_rating,
-    update_user,
-)
+from app.db.client import db
+from app.db.tables.goals import Goal
+from app.db.tables.ratings import Rating
+from app.db.tables.reminders import Reminder
+from app.db.tables.user_states import UserState
+from app.db.tables.users import User
 from app.logic.text.reminder_time import parse_time_string
 from app.logic.text.week import get_monday_before, look_back_summary
 from app.services.reminder.utils import get_goals_not_tracked_today
@@ -62,7 +52,7 @@ class TextCommandHandler(ABC):
         ...
 
     @abstractmethod
-    def handle(self, user: dict, message: str) -> str | None:
+    def handle(self, user: User, message: str) -> str | None:
         """Process the message and return a response."""
         ...
 
@@ -76,19 +66,19 @@ class AddGoalHandler(TextCommandHandler):
         """Check if message contains 'add goal'."""
         return self.PREFIX in message
 
-    def handle(self, user: dict, message: str) -> str | None:
+    def handle(self, user: User, message: str) -> str | None:
         """Process 'add goal' command."""
-        user_id = user["id"]
+        user_id = user.id
         raw_goal: str = message.replace(self.PREFIX, "")
         if raw_goal:
             goal_emoji: str = _extract_emoji(raw_goal)
             goal_description: str = raw_goal.replace(goal_emoji, "").strip()
-            goal: dict | None = create_goal(user_id, goal_emoji, goal_description)
+            goal: Goal = db.goals.create(user_id, goal_emoji, goal_description)
             if goal:
-                create_user_state(
+                db.user_states.create(
                     user_id,
                     state="awaiting_reminder_time",
-                    temp_data=json.dumps({"goal_id": goal["id"]}),
+                    temp_data=json.dumps({"goal_id": goal.id}),
                 )
                 return messages.SUCCESS_GOAL_ADDED
         return None
@@ -103,12 +93,12 @@ class EnableJournalingHandler(TextCommandHandler):
         """Check if message is 'enable journaling'."""
         return message == self.COMMAND
 
-    def handle(self, user: dict, _message: str) -> str | None:
+    def handle(self, user: User, _message: str) -> str | None:
         """Process 'enable journaling' command."""
-        user_id: int = user["id"]
-        user_goals: list[dict] = get_user_goals(user_id)
+        user_id: int = user.id
+        user_goals: list[Goal] = db.goals.get_by_user(user_id)
         for goal in user_goals:
-            if goal["goal_emoji"] == "📓" and "journaling" in goal["goal_description"]:
+            if goal.goal_emoji == "📓" and "journaling" in goal.goal_description:
                 return messages.SUCCESS_JOURNALING_ENABLED
 
         # Delegate to AddGoalHandler
@@ -123,9 +113,9 @@ class JournalPromptsHandler(TextCommandHandler):
         """Check if message contains journal prompts/now."""
         return "journal prompts" in message or "journal now" in message
 
-    def handle(self, user: dict, _message: str) -> str | None:
+    def handle(self, user: User, _message: str) -> str | None:
         """Process journal prompts command."""
-        user_id = user["id"]
+        user_id = user.id
         goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
         if goals_not_tracked_today:
             return messages.JOURNAL_REMINDER_MESSAGE.replace(
@@ -146,9 +136,9 @@ class DeleteGoalHandler(TextCommandHandler):
         """Check if message starts with 'delete'."""
         return message.startswith(self.PREFIX)
 
-    def handle(self, user: dict, message: str) -> str | None:
+    def handle(self, user: User, message: str) -> str | None:
         """Process delete command."""
-        user_id = user["id"]
+        user_id = user.id
         try:
             goal_num: int = int(message.replace(self.PREFIX, "").strip())
         except ValueError:
@@ -157,16 +147,16 @@ class DeleteGoalHandler(TextCommandHandler):
         if goal_num <= 0:
             return messages.ERROR_INVALID_GOAL_NUMBER
 
-        user_goals: list[dict] = get_user_goals(user_id)
+        user_goals: list[Goal] = db.goals.get_by_user(user_id)
         if not user_goals or goal_num > len(user_goals):
             return messages.ERROR_INVALID_GOAL_NUMBER
 
-        goal: dict = user_goals[goal_num - 1]
+        goal: Goal = user_goals[goal_num - 1]
 
-        delete_goal(goal["id"])
+        db.goals.delete(goal.id)
 
         return messages.SUCCESS_GOAL_DELETED.format(
-            goal_emoji=goal["goal_emoji"], goal_description=goal["goal_description"]
+            goal_emoji=goal.goal_emoji, goal_description=goal.goal_description
         )
 
 
@@ -177,36 +167,41 @@ class ReminderTimeHandler(TextCommandHandler):
         """Check if message is a valid time string."""
         return parse_time_string(message) is not None
 
-    def handle(self, user: dict, message: str) -> str | None:
+    def handle(self, user: User, message: str) -> str | None:
         """Process time input."""
-        user_id = user["id"]
-        normalized_time: str = parse_time_string(message)
+        user_id = user.id
+        normalized_time: str | None = parse_time_string(message)
+        if normalized_time is None:
+             return None # Should be caught by matches, but for type safety
+        
         # Note: We call parse_time_string again here. Ideally we'd cache it,
         # but for stateless handlers this is cleaner than shared state.
 
-        user_state: dict | None = get_user_state(user_id)
-        if not user_state or user_state["state"] != "awaiting_reminder_time":
+        user_state: UserState | None = db.user_states.get(user_id)
+        if not user_state or user_state.state != "awaiting_reminder_time":
             return messages.ERROR_ADD_GOAL_FIRST
 
-        temp = json.loads(user_state.get("temp_data") or "{}")
+        temp = json.loads(user_state.temp_data or "{}")
         goal_id = temp.get("goal_id")
 
-        create_goal_reminder(
+        db.reminders.create(
             user_id=user_id,
             user_goal_id=goal_id,
             reminder_time=normalized_time,
         )
-        delete_user_state(user_id)
+        db.user_states.delete(user_id)
 
         # Convert 24-hour format to 12-hour AM/PM format
         time_obj = datetime.strptime(normalized_time, "%H:%M:%S").time()  # noqa: DTZ007
         display_time = time_obj.strftime("%I:%M %p")
 
         # Get the goal to display in confirmation
-        goal: dict = get_goal(goal_id)
+        goal: Goal | None = db.goals.get(goal_id)
+        if not goal:
+            return "Goal not found."
 
-        goal_desc = goal["goal_description"]
-        goal_emoji = goal["goal_emoji"]
+        goal_desc = goal.goal_description
+        goal_emoji = goal.goal_emoji
         return f"Got it! I'll remind you daily at {display_time} for {goal_emoji} {goal_desc}."
 
 
@@ -219,10 +214,10 @@ class GoalsListHandler(TextCommandHandler):
         """Check if message is 'goals'."""
         return message == self.COMMAND
 
-    def handle(self, user: dict, _message: str) -> str | None:
+    def handle(self, user: User, _message: str) -> str | None:
         """Process goals list command."""
-        user_id = user["id"]
-        user_goals: list[dict] = get_user_goals(user_id)
+        user_id = user.id
+        user_goals: list[Goal] = db.goals.get_by_user(user_id)
 
         if not user_goals:
             return messages.ERROR_NO_GOALS_SET
@@ -231,16 +226,20 @@ class GoalsListHandler(TextCommandHandler):
         goal_lines: list[str] = []
         for i, goal in enumerate(user_goals, 1):
             # Get reminder for this goal
-            reminder = get_goal_reminder_by_goal_id(goal["id"])
+            reminder: Reminder | None = db.reminders.get_by_goal_id(goal.id)
             time_display = ""
             if reminder:
                 time_obj = datetime.strptime(  # noqa: DTZ007
-                    reminder["reminder_time"], "%H:%M:%S"
+                    # Ensure reminder_time is string, though model has it as datetime (check logic)
+                    # In SQLite it comes as string usually unless parsed. 
+                    # Our new model says datetime, but existing DB stores string. 
+                    # Let's assume string for now as we haven't added parsing logic in Table class
+                    str(reminder.reminder_time), "%H:%M:%S"
                 ).time()
                 time_display = f" ⏰ {time_obj.strftime('%I:%M %p')}"
-            goal_desc = goal["goal_description"]
-            goal_emoji = goal["goal_emoji"]
-            boost = goal["boost_level"]
+            goal_desc = goal.goal_description
+            goal_emoji = goal.goal_emoji
+            boost = goal.boost_level
             goal_lines.append(f"{i}. {goal_emoji} {goal_desc} (boost {boost}) {time_display}")
 
         response = "```" + "\n".join(goal_lines) + "```"
@@ -261,9 +260,9 @@ class UpdateReminderHandler(TextCommandHandler):
         """Check if message starts with 'update'."""
         return message.startswith(self.PREFIX)
 
-    def handle(self, user: dict, message: str) -> str | None:
+    def handle(self, user: User, message: str) -> str | None:
         """Process update reminder command."""
-        user_id = user["id"]
+        user_id = user.id
         parts = message.replace(self.PREFIX, "").strip().split(" ")
         if len(parts) != MIN_PARTS_EXPECTED:
             return messages.ERROR_INVALID_UPDATE_FORMAT
@@ -275,29 +274,29 @@ class UpdateReminderHandler(TextCommandHandler):
         if not normalized_time:
             return messages.ERROR_INVALID_TIME_FORMAT
 
-        user_goals: list[dict] = get_user_goals(user_id)
+        user_goals: list[Goal] = db.goals.get_by_user(user_id)
         if not user_goals or goal_num > len(user_goals) or goal_num < 1:
             return messages.ERROR_INVALID_GOAL_NUMBER
 
-        goal: dict = user_goals[goal_num - 1]
+        goal: Goal = user_goals[goal_num - 1]
 
-        reminder: dict | None = get_goal_reminder_by_goal_id(goal["id"])
+        reminder: Reminder | None = db.reminders.get_by_goal_id(goal.id)
 
         # Create reminder if it doesn't exist, otherwise update it
         if reminder is None:
-            create_goal_reminder(
+            db.reminders.create(
                 user_id=user_id,
-                user_goal_id=goal["id"],
+                user_goal_id=goal.id,
                 reminder_time=normalized_time,
             )
         else:
-            update_goal_reminder(reminder["id"], reminder_time=normalized_time)
+            db.reminders.update(reminder.id, reminder_time=normalized_time)
 
         time_obj = datetime.strptime(normalized_time, "%H:%M:%S").time()  # noqa: DTZ007
         display_time = time_obj.strftime("%I:%M %p")
 
-        goal_emoji = goal["goal_emoji"]
-        goal_desc = goal["goal_description"]
+        goal_emoji = goal.goal_emoji
+        goal_desc = goal.goal_description
         return messages.SUCCESS_REMINDER_UPDATED.format(
             display_time=display_time, goal_emoji=goal_emoji, goal_desc=goal_desc
         )
@@ -312,14 +311,14 @@ class TranscriptToggleHandler(TextCommandHandler):
         """Check if message contains 'transcript'."""
         return self.KEYWORD in message
 
-    def handle(self, user: dict, message: str) -> str | None:
+    def handle(self, user: User, message: str) -> str | None:
         """Process transcript toggle command."""
-        user_id = user["id"]
+        user_id = user.id
         if "on" in message:
-            update_user(user_id, send_transcript_file=1)
+            db.users.update(user_id, send_transcript_file=1)
             return messages.SUCCESS_TRANSCRIPT_ENABLED
         if "off" in message:
-            update_user(user_id, send_transcript_file=0)
+            db.users.update(user_id, send_transcript_file=0)
             return messages.SUCCESS_TRANSCRIPT_DISABLED
         return "Invalid command. Usage: transcript [on|off]"
 
@@ -333,9 +332,9 @@ class WeekSummaryHandler(TextCommandHandler):
         """Check if message is 'week'."""
         return message == self.COMMAND
 
-    def handle(self, user: dict, _message: str) -> str | None:
+    def handle(self, user: User, _message: str) -> str | None:
         """Process week summary command."""
-        user_id = user["id"]
+        user_id = user.id
         start: datetime = get_monday_before()
 
         # Create Week Summary Header (E.g. Week 26: Jun 30 - Jul 06)
@@ -348,11 +347,11 @@ class WeekSummaryHandler(TextCommandHandler):
         summary: str = f"```Week {week_num}: {week_start} - {week_end}\n"
 
         # Add Goals Header
-        user_goals: list[dict] = get_user_goals(user_id)
+        user_goals: list[Goal] = db.goals.get_by_user(user_id)
         if not user_goals:
             return messages.ERROR_NO_GOALS_SET
 
-        goal_emojis: list[str] = [goal["goal_emoji"] for goal in user_goals]
+        goal_emojis: list[str] = [goal.goal_emoji for goal in user_goals]
         summary += "    " + " ".join(goal_emojis) + "\n```"
 
         # Add Day-by-Day Summary
@@ -369,11 +368,11 @@ class LookbackHandler(TextCommandHandler):
         """Check if message starts with 'lookback'."""
         return message.startswith(self.PREFIX)
 
-    def handle(self, user: dict, message: str) -> str | None:
+    def handle(self, user: User, message: str) -> str | None:
         """Process lookback command."""
-        user_id = user["id"]
+        user_id = user.id
         # Check if user has any goals first
-        user_goals: list[dict] = get_user_goals(user_id)
+        user_goals: list[Goal] = db.goals.get_by_user(user_id)
         if not user_goals:
             return messages.ERROR_NO_GOALS_SET
 
@@ -395,7 +394,7 @@ class LookbackHandler(TextCommandHandler):
         summary: str = f"```{days} Days: {start_date} - {end_date}\n"
 
         # Add Goals Header
-        goal_emojis: list[str] = [goal["goal_emoji"] for goal in user_goals]
+        goal_emojis: list[str] = [goal.goal_emoji for goal in user_goals]
         summary += "    " + " ".join(goal_emojis) + "\n```"
 
         # Add Day-by-Day Summary
@@ -412,9 +411,9 @@ class RateSingleHandler(TextCommandHandler):
         """Check if message starts with 'rate'."""
         return message.startswith(self.PREFIX)
 
-    def handle(self, user: dict, message: str) -> str | None:
+    def handle(self, user: User, message: str) -> str | None:
         """Process single rating command."""
-        user_id = user["id"]
+        user_id = user.id
         parse_rating: list[str] = message.replace(self.PREFIX, "").strip().split(" ")
         if len(parse_rating) != MIN_PARTS_EXPECTED:
             return messages.USAGE_RATE
@@ -431,7 +430,7 @@ class RateSingleHandler(TextCommandHandler):
         if not (1 <= rating_value <= 3):
             return messages.USAGE_RATE
 
-        user_goals: list[dict] = get_user_goals(user_id)
+        user_goals: list[Goal] = db.goals.get_by_user(user_id)
 
         if not user_goals:
             return messages.ERROR_NO_GOALS_SET
@@ -439,23 +438,23 @@ class RateSingleHandler(TextCommandHandler):
         if not (goal_num <= len(user_goals)):
             return messages.USAGE_RATE
 
-        goal: dict = user_goals[goal_num - 1]
+        goal: Goal = user_goals[goal_num - 1]
 
         today_str = datetime.now(tz=UTC).strftime("%Y-%m-%d")
-        rating: dict | None = get_rating_by_goal_and_date(goal["id"], today_str)
+        rating: Rating | None = db.ratings.get_by_goal_and_date(goal.id, today_str)
 
         if not rating:
-            create_rating(goal["id"], rating_value)
+            db.ratings.create(goal.id, rating_value)
         else:
-            update_rating(rating["id"], user_goal_id=goal["id"], rating=rating_value)
+            db.ratings.update(rating.id, user_goal_id=goal.id, rating=rating_value)
 
         today_display: str = datetime.now(tz=UTC).strftime("%a (%b %d)")
         status_symbol: str = STYLE[rating_value]
 
         return (
             messages.SUCCESS_INDIVIDUAL_RATING.replace("<today_display>", today_display)
-            .replace("<goal_emoji>", goal["goal_emoji"])
-            .replace("<goal_description>", goal["goal_description"])
+            .replace("<goal_emoji>", goal.goal_emoji)
+            .replace("<goal_description>", goal.goal_description)
             .replace("<status_symbol>", status_symbol)
         )
 
@@ -467,10 +466,10 @@ class RateAllHandler(TextCommandHandler):
         """Check if message consists of rating digits."""
         return message.isdigit() and all(m in "123" for m in message)
 
-    def handle(self, user: dict, message: str) -> str | None:
+    def handle(self, user: User, message: str) -> str | None:
         """Process rate all command."""
-        user_id = user["id"]
-        user_goals: list[dict] = get_user_goals(user_id)
+        user_id = user.id
+        user_goals: list[Goal] = db.goals.get_by_user(user_id)
         if not user_goals:
             return messages.ERROR_NO_GOALS_SET
 
@@ -485,20 +484,23 @@ class RateAllHandler(TextCommandHandler):
 
         today_str = datetime.now(tz=UTC).strftime("%Y-%m-%d")
         for i, goal in enumerate(user_goals):
-            rating: dict | None = get_rating_by_goal_and_date(goal["id"], today_str)
+            rating: Rating | None = db.ratings.get_by_goal_and_date(goal.id, today_str)
             if not rating:
-                create_rating(goal["id"], ratings[i])
+                db.ratings.create(goal.id, ratings[i])
             else:
-                update_rating(rating["id"], user_goal_id=goal["id"], rating=ratings[i])
+                db.ratings.update(rating.id, user_goal_id=goal.id, rating=ratings[i])
 
         today_display: str = datetime.now(tz=UTC).strftime("%a (%b %d)")
-        goal_emojis: list[str] = [goal["goal_emoji"] for goal in user_goals]
+        goal_emojis: list[str] = [goal.goal_emoji for goal in user_goals]
         status: list[str] = [STYLE[r] for r in ratings]
+        # Use the last goal description for the message (matches original logic, 
+        # though maybe unexpected if it refers to 'goal_description' singular)
+        last_goal_desc = user_goals[-1].goal_description 
 
         return (
             messages.SUCCESS_RATINGS_SUBMITTED.replace("<today_display>", today_display)
             .replace("<goal_emojis>", " ".join(goal_emojis))
-            .replace("<goal_description>", goal["goal_description"])
+            .replace("<goal_description>", last_goal_desc)
             .replace("<status>", " ".join(status))
         )
 
@@ -512,6 +514,6 @@ class HelpHandler(TextCommandHandler):
         """Check if message is 'help'."""
         return message == self.COMMAND
 
-    def handle(self, _user: dict, _message: str) -> str | None:
+    def handle(self, _user: User, _message: str) -> str | None:
         """Process help command."""
         return messages.HELP_MESSAGE
