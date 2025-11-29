@@ -1,10 +1,10 @@
-"""Tests for individual handlers in process_text logic."""
+"""Tests for individual handlers in text_handlers logic."""
 
 import json
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 import pytest
-from app.config import ERROR_NO_GOALS_SET, ERROR_INVALID_INPUT_LENGTH, USAGE_RATE
+from app.config import ERROR_NO_GOALS_SET, USAGE_RATE
 from app.db.operations import (
     goal_ratings,
     goal_reminders,
@@ -12,19 +12,19 @@ from app.db.operations import (
     user_states,
     users,
 )
-from app.logic.process_text import (
-    _add_goal,
-    _enable_journaling,
-    _journal_prompts,
-    _delete_goal,
-    _reminder_time,
-    _goals_list,
-    _update_reminder,
-    _transcript_toggle,
-    _week_summary,
-    _lookback,
-    _rate_single,
-    _rate_all,
+from app.logic.text_handlers import (
+    AddGoalHandler,
+    DeleteGoalHandler,
+    EnableJournalingHandler,
+    GoalsListHandler,
+    JournalPromptsHandler,
+    LookbackHandler,
+    RateAllHandler,
+    RateSingleHandler,
+    ReminderTimeHandler,
+    TranscriptToggleHandler,
+    UpdateReminderHandler,
+    WeekSummaryHandler,
 )
 
 # Helper to create a user
@@ -33,9 +33,11 @@ def user():
     return users.create_user("+1234567890", "UTC")
 
 def test_add_goal(user):
-    """Test _add_goal handler."""
+    """Test AddGoalHandler."""
+    handler = AddGoalHandler()
     message = "add goal 🏃 Run 5k"
-    response = _add_goal(user["id"], message)
+    assert handler.matches(message)
+    response = handler.handle(user, message)
     
     assert "Goal Added successfully" in response
     
@@ -52,14 +54,19 @@ def test_add_goal(user):
     assert temp["goal_id"] == goals[0]["id"]
 
 def test_add_goal_empty(user):
-    """Test _add_goal with empty message."""
+    """Test AddGoalHandler with empty message."""
+    handler = AddGoalHandler()
     message = "add goal"
-    response = _add_goal(user["id"], message)
+    assert handler.matches(message)
+    response = handler.handle(user, message)
     assert response is None
 
 def test_enable_journaling(user):
-    """Test _enable_journaling handler."""
-    response = _enable_journaling(user)
+    """Test EnableJournalingHandler."""
+    handler = EnableJournalingHandler()
+    message = "enable journaling"
+    assert handler.matches(message)
+    response = handler.handle(user, message)
     assert "Goal Added successfully" in response
     
     goals = user_goals.get_user_goals(user["id"])
@@ -68,23 +75,27 @@ def test_enable_journaling(user):
     assert "journaling" in goals[0]["goal_description"]
 
 def test_enable_journaling_existing(user):
-    """Test _enable_journaling when already enabled."""
-    _enable_journaling(user) # Create it first
+    """Test EnableJournalingHandler when already enabled."""
+    handler = EnableJournalingHandler()
+    handler.handle(user, "enable journaling") # Create it first
     
-    response = _enable_journaling(user)
+    response = handler.handle(user, "enable journaling")
     assert "already have a journaling goal" in response
     
     goals = user_goals.get_user_goals(user["id"])
     assert len(goals) == 1
 
 def test_journal_prompts(user):
-    """Test _journal_prompts handler."""
+    """Test JournalPromptsHandler."""
+    handler = JournalPromptsHandler()
+    assert handler.matches("journal prompts")
+    
     # Setup goals
     goal1 = user_goals.create_goal(user["id"], "🏃", "Run")
     goal2 = user_goals.create_goal(user["id"], "📚", "Read")
     
     # No ratings today
-    response = _journal_prompts(user["id"])
+    response = handler.handle(user, "journal prompts")
     assert "Did you complete the goals?" in response
     assert "Run" in response
     assert "Read" in response
@@ -93,20 +104,24 @@ def test_journal_prompts(user):
     today = datetime.now(UTC).strftime("%Y-%m-%d")
     goal_ratings.create_rating(goal1["id"], 3)
     
-    response = _journal_prompts(user["id"])
+    response = handler.handle(user, "journal prompts")
     assert "Run" not in response
     assert "Read" in response
     
     # Rate all
     goal_ratings.create_rating(goal2["id"], 3)
-    response = _journal_prompts(user["id"])
+    response = handler.handle(user, "journal prompts")
     assert "Did you complete the goals?" not in response
 
 def test_delete_goal(user):
-    """Test _delete_goal handler."""
-    goal = user_goals.create_goal(user["id"], "🏃", "Run")
+    """Test DeleteGoalHandler."""
+    handler = DeleteGoalHandler()
+    message = "delete 1"
+    assert handler.matches(message)
     
-    response = _delete_goal(user["id"], "delete 1")
+    user_goals.create_goal(user["id"], "🏃", "Run")
+    
+    response = handler.handle(user, message)
     assert "Goal deleted" in response
     assert "Run" in response
     
@@ -114,16 +129,21 @@ def test_delete_goal(user):
     assert len(goals) == 0
 
 def test_delete_goal_invalid(user):
-    """Test _delete_goal with invalid inputs."""
-    response = _delete_goal(user["id"], "delete invalid")
+    """Test DeleteGoalHandler with invalid inputs."""
+    handler = DeleteGoalHandler()
+    response = handler.handle(user, "delete invalid")
     assert "Invalid format" in response
     
     user_goals.create_goal(user["id"], "🏃", "Run")
-    response = _delete_goal(user["id"], "delete 99")
+    response = handler.handle(user, "delete 99")
     assert "Invalid goal number" in response
 
 def test_reminder_time(user):
-    """Test _reminder_time handler."""
+    """Test ReminderTimeHandler."""
+    handler = ReminderTimeHandler()
+    message = "10:00"
+    assert handler.matches(message)
+    
     # Setup state
     goal = user_goals.create_goal(user["id"], "🏃", "Run")
     user_states.create_user_state(
@@ -132,7 +152,7 @@ def test_reminder_time(user):
         temp_data=json.dumps({"goal_id": goal["id"]})
     )
     
-    response = _reminder_time(user["id"], "10:00")
+    response = handler.handle(user, message)
     assert "remind you daily at 10:00 AM" in response
     
     reminder = goal_reminders.get_goal_reminder_by_goal_id(goal["id"])
@@ -142,30 +162,37 @@ def test_reminder_time(user):
     assert user_states.get_user_state(user["id"]) is None
 
 def test_reminder_time_no_state(user):
-    """Test _reminder_time without proper state."""
-    response = _reminder_time(user["id"], "10:00")
+    """Test ReminderTimeHandler without proper state."""
+    handler = ReminderTimeHandler()
+    response = handler.handle(user, "10:00")
     assert "Please add a goal first" in response
 
 def test_goals_list(user):
-    """Test _goals_list handler."""
+    """Test GoalsListHandler."""
+    handler = GoalsListHandler()
+    assert handler.matches("goals")
+    
     # No goals
-    response = _goals_list(user["id"])
+    response = handler.handle(user, "goals")
     assert response == ERROR_NO_GOALS_SET
     
     # With goals
     g1 = user_goals.create_goal(user["id"], "🏃", "Run")
     goal_reminders.create_goal_reminder(user["id"], g1["id"], "09:00:00")
     
-    response = _goals_list(user["id"])
+    response = handler.handle(user, "goals")
     assert "1. 🏃 Run" in response
     assert "⏰ 09:00 AM" in response
 
 def test_update_reminder(user):
-    """Test _update_reminder handler."""
+    """Test UpdateReminderHandler."""
+    handler = UpdateReminderHandler()
+    assert handler.matches("update 1 8pm")
+    
     goal = user_goals.create_goal(user["id"], "🏃", "Run")
     
     # Create new reminder
-    response = _update_reminder(user["id"], "update 1 8pm")
+    response = handler.handle(user, "update 1 8pm")
     assert "Reminder updated" in response
     assert "08:00 PM" in response
     
@@ -173,69 +200,83 @@ def test_update_reminder(user):
     assert reminder["reminder_time"] == "20:00:00"
     
     # Update existing
-    response = _update_reminder(user["id"], "update 1 9pm")
+    response = handler.handle(user, "update 1 9pm")
     reminder = goal_reminders.get_goal_reminder_by_goal_id(goal["id"])
     assert reminder["reminder_time"] == "21:00:00"
 
 def test_update_reminder_invalid(user):
-    """Test _update_reminder with invalid inputs."""
-    response = _update_reminder(user["id"], "update")
+    """Test UpdateReminderHandler with invalid inputs."""
+    handler = UpdateReminderHandler()
+    
+    response = handler.handle(user, "update")
     assert "Usage: update" in response
     
-    response = _update_reminder(user["id"], "update 1 invalid")
+    response = handler.handle(user, "update 1 invalid")
     assert "Invalid time format" in response
     
-    response = _update_reminder(user["id"], "update 1 10pm") # No goals yet
+    response = handler.handle(user, "update 1 10pm") # No goals yet
     assert "Invalid goal number" in response
 
 def test_transcript_toggle(user):
-    """Test _transcript_toggle handler."""
-    response = _transcript_toggle(user["id"], "transcript on")
+    """Test TranscriptToggleHandler."""
+    handler = TranscriptToggleHandler()
+    assert handler.matches("transcript on")
+    
+    response = handler.handle(user, "transcript on")
     assert "Transcript files enabled" in response
     assert users.get_user(user["id"])["send_transcript_file"] == 1
     
-    response = _transcript_toggle(user["id"], "transcript off")
+    response = handler.handle(user, "transcript off")
     assert "Transcript files disabled" in response
     assert users.get_user(user["id"])["send_transcript_file"] == 0
     
-    response = _transcript_toggle(user["id"], "transcript invalid")
+    response = handler.handle(user, "transcript invalid")
     assert "Invalid command" in response
 
 def test_week_summary(user):
-    """Test _week_summary handler."""
+    """Test WeekSummaryHandler."""
+    handler = WeekSummaryHandler()
+    assert handler.matches("week")
+    
     # No goals
-    response = _week_summary(user["id"])
+    response = handler.handle(user, "week")
     assert response == ERROR_NO_GOALS_SET
     
     # With goals
     user_goals.create_goal(user["id"], "🏃", "Run")
-    response = _week_summary(user["id"])
+    response = handler.handle(user, "week")
     assert "Week" in response
     assert "🏃" in response
 
 def test_lookback(user):
-    """Test _lookback handler."""
+    """Test LookbackHandler."""
+    handler = LookbackHandler()
+    assert handler.matches("lookback")
+    
     # No goals
-    response = _lookback(user["id"], "lookback")
+    response = handler.handle(user, "lookback")
     assert response == ERROR_NO_GOALS_SET
     
     # With goals
     user_goals.create_goal(user["id"], "🏃", "Run")
     
     # Default 7 days
-    response = _lookback(user["id"], "lookback")
+    response = handler.handle(user, "lookback")
     assert "7 Days" in response
     assert "🏃" in response
     
     # Custom days
-    response = _lookback(user["id"], "lookback 3")
+    response = handler.handle(user, "lookback 3")
     assert "3 Days" in response
 
 def test_rate_single(user):
-    """Test _rate_single handler."""
+    """Test RateSingleHandler."""
+    handler = RateSingleHandler()
+    assert handler.matches("rate 1 3")
+    
     goal = user_goals.create_goal(user["id"], "🏃", "Run")
     
-    response = _rate_single(user["id"], "rate 1 3")
+    response = handler.handle(user, "rate 1 3")
     assert "✅" in response # Success symbol
     assert "Run" in response
     
@@ -244,30 +285,35 @@ def test_rate_single(user):
     assert rating["rating"] == 3
     
     # Update rating
-    _rate_single(user["id"], "rate 1 2")
+    handler.handle(user, "rate 1 2")
     rating = goal_ratings.get_rating_by_goal_and_date(goal["id"], today)
     assert rating["rating"] == 2
 
 def test_rate_single_invalid(user):
-    """Test _rate_single with invalid inputs."""
-    response = _rate_single(user["id"], "rate")
+    """Test RateSingleHandler with invalid inputs."""
+    handler = RateSingleHandler()
+    
+    response = handler.handle(user, "rate")
     assert response == USAGE_RATE
     
     # No goals
-    response = _rate_single(user["id"], "rate 1 3")
+    response = handler.handle(user, "rate 1 3")
     assert response == ERROR_NO_GOALS_SET
 
 def test_rate_all(user):
-    """Test _rate_all handler."""
+    """Test RateAllHandler."""
+    handler = RateAllHandler()
+    assert handler.matches("31")
+    
     # No goals
-    response = _rate_all(user["id"], "123")
+    response = handler.handle(user, "123")
     assert response == ERROR_NO_GOALS_SET
     
     goal1 = user_goals.create_goal(user["id"], "🏃", "Run")
     goal2 = user_goals.create_goal(user["id"], "📚", "Read")
     
     # Valid
-    response = _rate_all(user["id"], "31")
+    response = handler.handle(user, "31")
     assert "✅" in response # 3
     assert "❌" in response # 1
     
@@ -278,10 +324,10 @@ def test_rate_all(user):
     assert r2["rating"] == 1
 
 def test_rate_all_invalid_length(user):
-    """Test _rate_all with invalid length."""
+    """Test RateAllHandler with invalid length."""
+    handler = RateAllHandler()
     user_goals.create_goal(user["id"], "🏃", "Run")
     
-    response = _rate_all(user["id"], "33")
+    response = handler.handle(user, "33")
     assert "Invalid input" in response
     assert "Send 1 digits" in response
-
