@@ -1,4 +1,4 @@
-"""Reminder service logic."""
+"""Reminder service utility functions."""
 
 from datetime import UTC, datetime
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError

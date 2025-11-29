@@ -26,7 +26,7 @@ from app.db import (
     update_rating,
     update_user,
 )
-from app.logic.reminder import get_goals_not_tracked_today
+from app.services.reminder.utils import get_goals_not_tracked_today
 from app.logic.text.reminder_time import parse_time_string
 from app.logic.text.week import get_monday_before, look_back_summary
 

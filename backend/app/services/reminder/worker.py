@@ -1,11 +1,4 @@
-"""Asynchronous reminder service for user goals.
-
-This module continuously polls stored reminder definitions, calculates the next
-execution window per user timezone, and dispatches WhatsApp notifications when
-their goal schedules align with the current local time. It exposes a daemonized
-worker loop that sleeps between batches based on upcoming reminders, minimizing
-polling overhead while ensuring timely alerts.
-"""
+"""Reminder service worker logic."""
 
 from __future__ import annotations
 
@@ -21,7 +14,7 @@ if TYPE_CHECKING:
 from app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
 from app.db import get_all_goal_reminders, get_goal, get_user
 from app.helpers import send_message
-from app.logic.reminder import get_goals_not_tracked_today, get_timezone_safe
+from app.services.reminder.utils import get_goals_not_tracked_today, get_timezone_safe
 
 logger = logging.getLogger(__name__)
 
@@ -162,3 +155,4 @@ def start_reminder_service() -> threading.Thread:
     t.start()
     logger.info("Reminder service thread %s started (daemon=%s)", t.name, t.daemon)
     return t
+

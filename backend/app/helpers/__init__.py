@@ -4,7 +4,7 @@ from app.helpers.sender import send_message
 from app.helpers.webhook.get_timezone import get_timezone_from_number
 from app.helpers.webhook.response_builder import error_response, success_response
 from app.logic.audio.transcribe_audio import transcribe_audio
-from app.logic.reminder import get_goals_not_tracked_today, get_timezone_safe
+from app.services.reminder.utils import get_goals_not_tracked_today, get_timezone_safe
 from app.logic.text.reminder_time import parse_time_string
 from app.logic.text.week import get_monday_before, look_back_summary
 

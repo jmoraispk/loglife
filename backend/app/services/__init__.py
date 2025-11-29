@@ -1,5 +1,5 @@
-"""Services package for background tasks and workers."""
+"""Service layer for the application."""
 
-from .reminder import start_reminder_service
+from app.services.reminder import start_reminder_service
 
 __all__ = ["start_reminder_service"]
