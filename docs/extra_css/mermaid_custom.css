@@ -1,0 +1,66 @@
+:root {
+    --mermaid-font-family: "Roboto", sans-serif;
+}
+
+/* Background for the Mermaid container */
+[data-md-color-scheme="slate"] .mermaid {
+    background-color: #1e2029; /* Slightly lighter than the page background */
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+/* Ensure font matches the theme */
+.mermaid text, .mermaid tspan {
+    font-family: "Roboto", sans-serif !important;
+}
+
+/* Override text color for darker themes */
+[data-md-color-scheme="slate"] .mermaid text {
+    fill: #e0e0e0 !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid .node rect,
+[data-md-color-scheme="slate"] .mermaid .node circle,
+[data-md-color-scheme="slate"] .mermaid .node polygon,
+[data-md-color-scheme="slate"] .mermaid .node path {
+    fill: #2e303e !important;
+    stroke: #7f8497 !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid .edgePath .path {
+    stroke: #7f8497 !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid .flowchart-link {
+    stroke: #7f8497 !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid .marker {
+    fill: #7f8497 !important;
+    stroke: #7f8497 !important;
+}
+
+/* Custom class styles if needed */
+.mermaid .decision {
+    fill: #3d3720 !important; /* Darker yellow/brown for dark mode decision */
+    stroke: #f57f17 !important;
+    color: #fff !important;
+}
+
+.mermaid .action {
+    fill: #1b3320 !important; /* Darker green for dark mode action */
+    stroke: #2e7d32 !important;
+    color: #fff !important;
+}
+
+.mermaid .result {
+    fill: #2a1830 !important; /* Darker purple for dark mode result */
+    stroke: #7b1fa2 !important;
+    color: #fff !important;
+}
+
+.mermaid .voice {
+    fill: #15302d !important; /* Darker teal for dark mode voice */
+    stroke: #004d40 !important;
+    color: #fff !important;
+}

@@ -25,6 +25,7 @@ dev = [
     "mkdocs-material>=9.6.22",  # Theme
     "mkdocs-glightbox>=0.5.2",  # "Click image to zoom" feature
     "mkdocstrings[python]>=0.28.0", # Auto-doc from docstrings
+    "mkdocs-mermaid-zoom>=0.1.0",  # Mermaid zoom support
     
     # Cross-platform
     "tzdata>=2025.2",  # Timezone data (needed for timezones in Windows)
