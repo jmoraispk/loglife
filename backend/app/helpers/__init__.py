@@ -1,7 +1,6 @@
 """Helper utilities for the application."""
 
 from app.helpers.audio.transcribe_audio import transcribe_audio
-from app.helpers.queue import log_queue
 from app.helpers.sender import send_message
 from app.helpers.services.reminder import get_goals_not_tracked_today, get_timezone_safe
 from app.helpers.text.reminder_time import parse_time_string
@@ -15,7 +14,6 @@ __all__ = [
     "get_monday_before",
     "get_timezone_from_number",
     "get_timezone_safe",
-    "log_queue",
     "look_back_summary",
     "parse_time_string",
     "send_message",

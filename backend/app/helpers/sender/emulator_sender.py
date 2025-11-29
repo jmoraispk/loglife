@@ -1,6 +1,9 @@
 """Utilities for sending emulator-bound messages via the log queue."""
 
-from app.helpers.queue import log_queue
+import queue
+
+# Queue for streaming log messages to clients via SSE
+log_queue = queue.Queue()
 
 
 def send_emulator_message(message: str) -> None:
