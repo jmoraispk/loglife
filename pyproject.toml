@@ -62,10 +62,3 @@ ignore = [
     "S101",    # Use of assert detected (standard in pytest)
     "PLR2004", # Magic value used in comparison (acceptable in tests)
 ]
-"backend/app/logic/process_text.py" = [
-    "C901",    # Function too complex (command router with many branches)
-    "PLR0911", # Too many return statements (command router)
-    "PLR0912", # Too many branches (command router)
-    "PLR0915", # Too many statements (command router)
-]
-
