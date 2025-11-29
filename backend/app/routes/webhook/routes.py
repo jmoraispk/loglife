@@ -7,8 +7,12 @@ It processes incoming messages (text, audio, or VCARD) and routes them to the ap
 import logging
 
 from app.db import create_user, get_user_by_phone_number
-from app.helpers import error_response, get_timezone_from_number, success_response
 from app.logic import process_audio, process_text, process_vcard
+from app.routes.webhook.utils import (
+    error_response,
+    get_timezone_from_number,
+    success_response,
+)
 from flask import Blueprint, g, request
 from flask.typing import ResponseReturnValue
 
@@ -68,3 +72,4 @@ def webhook() -> ResponseReturnValue:
         error = f"Error processing webhook > {e}"
         logger.exception(error)
         return error_response(error)
+

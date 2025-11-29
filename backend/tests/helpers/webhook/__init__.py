@@ -1,2 +1,0 @@
-"""Webhook helpers tests package."""
-

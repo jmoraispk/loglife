@@ -20,10 +20,10 @@ def client() -> FlaskClient:
 def test_webhook_text_message(client: FlaskClient) -> None:
     """Test handling a text message via webhook."""
     # Mock user lookup/creation
-    with patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user:
+    with patch("app.routes.webhook.routes.get_user_by_phone_number") as mock_get_user:
         mock_get_user.return_value = {"id": 1, "phone_number": "1234567890", "timezone": "UTC"}
 
-        with patch("app.routes.webhook.process_text") as mock_process:
+        with patch("app.routes.webhook.routes.process_text") as mock_process:
             mock_process.return_value = "Response message"
 
             response = client.post(
@@ -44,9 +44,9 @@ def test_webhook_text_message(client: FlaskClient) -> None:
 def test_webhook_new_user(client: FlaskClient) -> None:
     """Test handling a message from a new user."""
     with (
-        patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user,
-        patch("app.routes.webhook.create_user") as mock_create_user,
-        patch("app.routes.webhook.process_text") as mock_process,
+        patch("app.routes.webhook.routes.get_user_by_phone_number") as mock_get_user,
+        patch("app.routes.webhook.routes.create_user") as mock_create_user,
+        patch("app.routes.webhook.routes.process_text") as mock_process,
     ):
         mock_get_user.return_value = None
         mock_create_user.return_value = {"id": 1, "phone_number": "1234567890", "timezone": "UTC"}
@@ -69,8 +69,8 @@ def test_webhook_new_user(client: FlaskClient) -> None:
 def test_webhook_audio_message(client: FlaskClient) -> None:
     """Test handling an audio message."""
     with (
-        patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user,
-        patch("app.routes.webhook.process_audio") as mock_process,
+        patch("app.routes.webhook.routes.get_user_by_phone_number") as mock_get_user,
+        patch("app.routes.webhook.routes.process_audio") as mock_process,
     ):
         mock_get_user.return_value = {"id": 1}
         mock_process.return_value = "Audio processed"
