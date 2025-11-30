@@ -100,7 +100,7 @@ node index.js
 
 Run backend tests:
 ```bash
-uv run pytest backend/tests
+uv run pytest tests
 ```
 
 ### Local Development

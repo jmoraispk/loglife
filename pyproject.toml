@@ -59,7 +59,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"backend/tests/**/*.py" = [
+"tests/**/*.py" = [
     "S101",    # Use of assert detected (standard in pytest)
     "PLR2004", # Magic value used in comparison (acceptable in tests)
 ]

@@ -117,7 +117,7 @@ Follow these steps to set up LogLife on your local machine.
 To ensure everything is working correctly, run the backend tests:
 
 ```bash
-uv run pytest backend/tests
+uv run pytest tests
 ```
 
 ---
