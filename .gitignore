@@ -1,5 +1,5 @@
 build/*
-goal_bot.egg-info/*
+**/loglife.egg-info/*
 **/__pycache__/**
 whatsapp-client/.wwebjs_auth/**
 whatsapp-client/node_modules/**
