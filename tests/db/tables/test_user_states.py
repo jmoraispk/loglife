@@ -1,7 +1,7 @@
 """Tests for user_states database operations."""
 
-from app.db.client import db
-from app.db.tables import UserState
+from loglife.app.db.client import db
+from loglife.app.db.tables import UserState
 
 
 def test_create_user_state() -> None:

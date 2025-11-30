@@ -4,8 +4,8 @@ import sqlite3
 from datetime import UTC, datetime
 
 import pytest
-from app.db.client import db
-from app.db.tables import Rating
+from loglife.app.db.client import db
+from loglife.app.db.tables import Rating
 
 
 def test_create_rating() -> None:

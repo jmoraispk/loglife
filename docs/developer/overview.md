@@ -80,7 +80,7 @@ Third-party APIs:
 
 1. **Start the Backend:**
 ```bash
-uv run backend/main.py
+uv run src/loglife/main.py
 ```
 
 2. **Start the WhatsApp Client:**

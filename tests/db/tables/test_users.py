@@ -3,8 +3,8 @@
 import sqlite3
 
 import pytest
-from app.db.client import db
-from app.db.tables import User
+from loglife.app.db.client import db
+from loglife.app.db.tables import User
 
 
 def test_create_user() -> None:

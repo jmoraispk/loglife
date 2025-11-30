@@ -7,9 +7,9 @@ and reminder notification triggering.
 from datetime import UTC, datetime
 from unittest.mock import MagicMock, patch
 
-import app.services.reminder.worker as reminder_worker
-from app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
-from app.db.tables import Goal, Reminder, User
+import loglife.app.services.reminder.worker as reminder_worker
+from loglife.app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
+from loglife.app.db.tables import Goal, Reminder, User
 
 
 def test_check_reminders() -> None:
@@ -41,10 +41,10 @@ def test_check_reminders() -> None:
     mock_goal.goal_emoji = "✅"
 
     with (
-        patch("app.db.tables.reminders.RemindersTable.get_all") as mock_get_reminders,
-        patch("app.db.tables.users.UsersTable.get_all") as mock_get_all_users,
-        patch("app.db.tables.goals.GoalsTable.get") as mock_get_goal,
-        patch("app.services.reminder.worker.send_message") as mock_send,
+        patch("loglife.app.db.tables.reminders.RemindersTable.get_all") as mock_get_reminders,
+        patch("loglife.app.db.tables.users.UsersTable.get_all") as mock_get_all_users,
+        patch("loglife.app.db.tables.goals.GoalsTable.get") as mock_get_goal,
+        patch("loglife.app.services.reminder.worker.send_message") as mock_send,
     ):
         mock_get_reminders.return_value = [mock_reminder]
         mock_get_all_users.return_value = [mock_user]
@@ -123,7 +123,7 @@ def test_build_journal_reminder_message_with_untracked() -> None:
     mock_goal1 = MagicMock(spec=Goal)
     mock_goal1.goal_description = "Run 5k"
 
-    with patch("app.services.reminder.worker.get_goals_not_tracked_today") as mock_get_goals:
+    with patch("loglife.app.services.reminder.worker.get_goals_not_tracked_today") as mock_get_goals:
         mock_get_goals.return_value = [mock_goal1]
 
         msg = reminder_worker._build_journal_reminder_message(1)  # noqa: SLF001
@@ -134,7 +134,7 @@ def test_build_journal_reminder_message_with_untracked() -> None:
 
 def test_build_journal_reminder_message_all_tracked() -> None:
     """Test journaling reminder message when all goals are tracked."""
-    with patch("app.services.reminder.worker.get_goals_not_tracked_today") as mock_get_goals:
+    with patch("loglife.app.services.reminder.worker.get_goals_not_tracked_today") as mock_get_goals:
         mock_get_goals.return_value = []
 
         msg = reminder_worker._build_journal_reminder_message(1)  # noqa: SLF001

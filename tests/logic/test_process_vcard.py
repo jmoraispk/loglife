@@ -4,10 +4,10 @@ import json
 from unittest.mock import patch
 
 import pytest
-from app.config import REFERRAL_SUCCESS
-from app.db.client import db
-from app.db.tables import User
-from app.logic.vcard.processor import process_vcard
+from loglife.app.config import REFERRAL_SUCCESS
+from loglife.app.db.client import db
+from loglife.app.db.tables import User
+from loglife.app.logic.vcard.processor import process_vcard
 
 
 @pytest.fixture
@@ -24,7 +24,7 @@ def test_process_vcard_success(referrer: User) -> None:
     ]
     raw_vcards = json.dumps(vcards)
 
-    with patch("app.logic.vcard.processor.send_message") as mock_send:
+    with patch("loglife.app.logic.vcard.processor.send_message") as mock_send:
         response = process_vcard(referrer, raw_vcards)
 
         assert response == REFERRAL_SUCCESS
@@ -50,7 +50,7 @@ def test_process_vcard_existing_user(referrer: User) -> None:
     vcards = ["BEGIN:VCARD\nVERSION:3.0\nTEL;waid=9876543210:+98 765 43210\nEND:VCARD"]
     raw_vcards = json.dumps(vcards)
 
-    with patch("app.logic.vcard.processor.send_message") as mock_send:
+    with patch("loglife.app.logic.vcard.processor.send_message") as mock_send:
         response = process_vcard(referrer, raw_vcards)
 
         assert response == REFERRAL_SUCCESS
@@ -69,7 +69,7 @@ def test_process_vcard_multiple(referrer: User) -> None:
     ]
     raw_vcards = json.dumps(vcards)
 
-    with patch("app.logic.vcard.processor.send_message") as mock_send:
+    with patch("loglife.app.logic.vcard.processor.send_message") as mock_send:
         response = process_vcard(referrer, raw_vcards)
 
         assert response == REFERRAL_SUCCESS

@@ -7,13 +7,13 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 import pytest
-from app.config import ERROR_NO_GOALS_SET, USAGE_RATE
-from app.db.client import db
-from app.logic import process_text
-from app.logic.text.handlers import _extract_emoji
+from loglife.app.config import ERROR_NO_GOALS_SET, USAGE_RATE
+from loglife.app.db.client import db
+from loglife.app.logic import process_text
+from loglife.app.logic.text.handlers import _extract_emoji
 
 if TYPE_CHECKING:
-    from app.db.tables import User
+    from loglife.app.db.tables import User
 
 
 @pytest.fixture

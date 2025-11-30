@@ -1,7 +1,7 @@
 """Tests for goal_reminders database operations."""
 
-from app.db.client import db
-from app.db.tables import Reminder
+from loglife.app.db.client import db
+from loglife.app.db.tables import Reminder
 
 
 def test_create_goal_reminder() -> None:

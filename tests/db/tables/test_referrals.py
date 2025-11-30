@@ -3,7 +3,7 @@
 import sqlite3
 
 import pytest
-from app.db.client import db
+from loglife.app.db.client import db
 
 
 def test_create_referral() -> None:

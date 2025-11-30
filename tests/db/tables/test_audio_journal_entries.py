@@ -1,7 +1,7 @@
 """Tests for audio_journal_entries database operations."""
 
-from app.db.client import db
-from app.db.tables import AudioJournalEntry
+from loglife.app.db.client import db
+from loglife.app.db.tables import AudioJournalEntry
 
 
 def test_create_audio_journal_entry() -> None:

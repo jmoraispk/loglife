@@ -3,8 +3,8 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from app.db.tables import User
-from app.routes.webhook import webhook_bp
+from loglife.app.db.tables import User
+from loglife.app.routes.webhook import webhook_bp
 from flask import Flask
 from flask.testing import FlaskClient
 
@@ -26,10 +26,10 @@ def test_webhook_text_message(client: FlaskClient) -> None:
     mock_user.timezone = "UTC"
 
     # Mock user lookup/creation
-    with patch("app.db.tables.users.UsersTable.get_by_phone") as mock_get_user:
+    with patch("loglife.app.db.tables.users.UsersTable.get_by_phone") as mock_get_user:
         mock_get_user.return_value = mock_user
 
-        with patch("app.routes.webhook.routes.process_text") as mock_process:
+        with patch("loglife.app.routes.webhook.routes.process_text") as mock_process:
             mock_process.return_value = "Response message"
 
             response = client.post(
@@ -55,9 +55,9 @@ def test_webhook_new_user(client: FlaskClient) -> None:
     mock_user.timezone = "UTC"
 
     with (
-        patch("app.db.tables.users.UsersTable.get_by_phone") as mock_get_user,
-        patch("app.db.tables.users.UsersTable.create") as mock_create_user,
-        patch("app.routes.webhook.routes.process_text") as mock_process,
+        patch("loglife.app.db.tables.users.UsersTable.get_by_phone") as mock_get_user,
+        patch("loglife.app.db.tables.users.UsersTable.create") as mock_create_user,
+        patch("loglife.app.routes.webhook.routes.process_text") as mock_process,
     ):
         mock_get_user.return_value = None
         mock_create_user.return_value = mock_user
@@ -83,8 +83,8 @@ def test_webhook_audio_message(client: FlaskClient) -> None:
     mock_user.id = 1
 
     with (
-        patch("app.db.tables.users.UsersTable.get_by_phone") as mock_get_user,
-        patch("app.routes.webhook.routes.process_audio") as mock_process,
+        patch("loglife.app.db.tables.users.UsersTable.get_by_phone") as mock_get_user,
+        patch("loglife.app.routes.webhook.routes.process_audio") as mock_process,
     ):
         mock_get_user.return_value = mock_user
         mock_process.return_value = "Audio processed"

@@ -5,8 +5,8 @@ on specific branches. Updating to new DB structure.
 """
 
 import pytest
-from app.db.client import db
-from app.db.tables import User
+from loglife.app.db.client import db
+from loglife.app.db.tables import User
 
 
 @pytest.fixture

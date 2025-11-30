@@ -1,6 +1,6 @@
 """Tests for webhook utilities."""
 
-from app.routes.webhook.utils import get_timezone_from_number
+from loglife.app.routes.webhook.utils import get_timezone_from_number
 
 
 def test_get_timezone_from_number() -> None:

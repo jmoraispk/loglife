@@ -3,9 +3,9 @@
 from unittest.mock import patch
 
 import pytest
-from app.db.client import db
-from app.db.tables import User
-from app.logic.audio.processor import process_audio
+from loglife.app.db.client import db
+from loglife.app.db.tables import User
+from loglife.app.logic.audio.processor import process_audio
 
 
 @pytest.fixture
@@ -17,9 +17,9 @@ def user() -> User:
 def test_process_audio_success(user: User) -> None:
     """Test successful audio processing flow."""
     with (
-        patch("app.logic.audio.processor.transcribe_audio") as mock_transcribe,
-        patch("app.logic.audio.processor.summarize_transcript") as mock_summarize,
-        patch("app.logic.audio.processor.send_message") as mock_send,
+        patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
+        patch("loglife.app.logic.audio.processor.send_message") as mock_send,
     ):
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.return_value = "Summary text"
@@ -48,9 +48,9 @@ def test_process_audio_empty_transcript(user: User) -> None:
     Should handle gracefully by returning an error message and NOT summarizing.
     """
     with (
-        patch("app.logic.audio.processor.transcribe_audio") as mock_transcribe,
-        patch("app.logic.audio.processor.summarize_transcript") as mock_summarize,
-        patch("app.logic.audio.processor.send_message"),
+        patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
+        patch("loglife.app.logic.audio.processor.send_message"),
     ):
         mock_transcribe.return_value = ""
 
@@ -71,9 +71,9 @@ def test_process_audio_no_transcript_file(user: User) -> None:
     assert user is not None
 
     with (
-        patch("app.logic.audio.processor.transcribe_audio") as mock_transcribe,
-        patch("app.logic.audio.processor.summarize_transcript") as mock_summarize,
-        patch("app.logic.audio.processor.send_message"),
+        patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
+        patch("loglife.app.logic.audio.processor.send_message"),
     ):
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.return_value = "Summary text"
@@ -91,9 +91,9 @@ def test_process_audio_empty_summary(user: User) -> None:
     Should store the empty summary without error.
     """
     with (
-        patch("app.logic.audio.processor.transcribe_audio") as mock_transcribe,
-        patch("app.logic.audio.processor.summarize_transcript") as mock_summarize,
-        patch("app.logic.audio.processor.send_message"),
+        patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
+        patch("loglife.app.logic.audio.processor.send_message"),
     ):
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.return_value = ""
@@ -116,8 +116,8 @@ def test_process_audio_empty_summary(user: User) -> None:
 def test_process_audio_transcribe_failure(user: User) -> None:
     """Test audio processing with transcription failure."""
     with (
-        patch("app.logic.audio.processor.transcribe_audio") as mock_transcribe,
-        patch("app.logic.audio.processor.send_message") as mock_send,
+        patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("loglife.app.logic.audio.processor.send_message") as mock_send,
     ):
         mock_transcribe.side_effect = RuntimeError("Transcription error")
 
@@ -130,9 +130,9 @@ def test_process_audio_transcribe_failure(user: User) -> None:
 def test_process_audio_summarize_failure(user: User) -> None:
     """Test audio processing with summarization failure."""
     with (
-        patch("app.logic.audio.processor.transcribe_audio") as mock_transcribe,
-        patch("app.logic.audio.processor.summarize_transcript") as mock_summarize,
-        patch("app.logic.audio.processor.send_message") as mock_send,
+        patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
+        patch("loglife.app.logic.audio.processor.send_message") as mock_send,
     ):
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.side_effect = RuntimeError("Summarization error")
@@ -153,10 +153,10 @@ def test_process_audio_with_transcript_file(user: User) -> None:
     assert user is not None
 
     with (
-        patch("app.logic.audio.processor.transcribe_audio") as mock_transcribe,
-        patch("app.logic.audio.processor.summarize_transcript") as mock_summarize,
-        patch("app.logic.audio.processor.transcript_to_base64") as mock_to_b64,
-        patch("app.logic.audio.processor.send_message"),
+        patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
+        patch("loglife.app.logic.audio.processor.transcript_to_base64") as mock_to_b64,
+        patch("loglife.app.logic.audio.processor.send_message"),
     ):
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.return_value = "Summary text"

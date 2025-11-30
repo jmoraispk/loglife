@@ -1,6 +1,6 @@
 """Tests for reminder time parsing helpers."""
 
-from app.logic.text import reminder_time
+from loglife.app.logic.text import reminder_time
 
 
 def test_parse_time_string() -> None:

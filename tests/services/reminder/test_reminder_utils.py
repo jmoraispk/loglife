@@ -2,7 +2,7 @@
 
 from zoneinfo import ZoneInfo
 
-from app.services.reminder.utils import get_timezone_safe
+from loglife.app.services.reminder.utils import get_timezone_safe
 
 
 def test_get_timezone_safe() -> None:

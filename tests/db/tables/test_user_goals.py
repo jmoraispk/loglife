@@ -1,7 +1,7 @@
 """Tests for user_goals database operations."""
 
-from app.db.client import db
-from app.db.tables import Goal, User
+from loglife.app.db.client import db
+from loglife.app.db.tables import Goal, User
 
 
 def test_create_goal() -> None:

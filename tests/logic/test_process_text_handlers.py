@@ -4,7 +4,7 @@ import json
 from datetime import UTC, datetime
 
 import pytest
-from app.config.messages import (
+from loglife.app.config.messages import (
     ERROR_ADD_GOAL_FIRST,
     ERROR_INVALID_DELETE_FORMAT,
     ERROR_INVALID_GOAL_NUMBER,
@@ -17,9 +17,9 @@ from app.config.messages import (
     SUCCESS_TRANSCRIPT_ENABLED,
     USAGE_RATE,
 )
-from app.db.client import db
-from app.db.tables import User
-from app.logic.text.handlers import (
+from loglife.app.db.client import db
+from loglife.app.db.tables import User
+from loglife.app.logic.text.handlers import (
     AddGoalHandler,
     DeleteGoalHandler,
     EnableJournalingHandler,

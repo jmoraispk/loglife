@@ -3,7 +3,7 @@
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-from app.logic.audio.transcribe_audio import transcribe_audio
+from loglife.app.logic.audio.transcribe_audio import transcribe_audio
 
 FIXTURE_DIR = Path(__file__).parent
 AUDIO_PATH = FIXTURE_DIR / "audio_bytes.txt"
@@ -31,8 +31,8 @@ def test_transcribe_audio() -> None:
     mock_poll_response.raise_for_status.return_value = None
 
     with (
-        patch("app.logic.audio.transcribe_audio.requests.post") as mock_post,
-        patch("app.logic.audio.transcribe_audio.requests.get") as mock_get,
+        patch("loglife.app.logic.audio.transcribe_audio.requests.post") as mock_post,
+        patch("loglife.app.logic.audio.transcribe_audio.requests.get") as mock_get,
     ):
         # Configure mock side effects
         mock_post.side_effect = [mock_upload_response, mock_transcript_response]

@@ -3,9 +3,9 @@
 from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
-import app.logic.text.week as week_module
-from app.config import LOOKBACK_NO_GOALS
-from app.db.tables import Goal, Rating
+import loglife.app.logic.text.week as week_module
+from loglife.app.config import LOOKBACK_NO_GOALS
+from loglife.app.db.tables import Goal, Rating
 
 
 def test_get_monday_before() -> None:
@@ -43,7 +43,7 @@ def test_monday_before_edge_cases() -> None:
         simulated_today = base_monday + timedelta(days=i)
 
         # We need to patch datetime in the module where it is used
-        with patch("app.logic.text.week.datetime") as mock_datetime:
+        with patch("loglife.app.logic.text.week.datetime") as mock_datetime:
             mock_datetime.now.return_value = simulated_today
 
             monday = week_module.get_monday_before()
@@ -68,7 +68,7 @@ def test_look_back_summary() -> None:
     for multiple days in the summary.
     """
     # Test with no goals
-    with patch("app.db.tables.goals.GoalsTable.get_by_user", return_value=[]) as mock_get_goals:
+    with patch("loglife.app.db.tables.goals.GoalsTable.get_by_user", return_value=[]) as mock_get_goals:
         summary = week_module.look_back_summary(1, 7, datetime.now(UTC))
         assert summary == LOOKBACK_NO_GOALS
 
@@ -119,8 +119,8 @@ def test_look_back_summary() -> None:
     )
 
     with (
-        patch("app.db.tables.goals.GoalsTable.get_by_user") as mock_get_goals,
-        patch("app.db.tables.ratings.RatingsTable.get_by_goal_and_date") as mock_get_rating,
+        patch("loglife.app.db.tables.goals.GoalsTable.get_by_user") as mock_get_goals,
+        patch("loglife.app.db.tables.ratings.RatingsTable.get_by_goal_and_date") as mock_get_rating,
     ):
         mock_get_goals.return_value = [goal1, goal2]
 

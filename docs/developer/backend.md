@@ -39,7 +39,7 @@ The LogLife backend is built with Python and Flask. It handles goal tracking, au
 Start the backend from the root directory:
 
 ```bash
-uv run backend/main.py
+uv run src/loglife/main.py
 ```
 
 **Note:** `uv sync` runs automatically when you use `uv run`, so dependencies are installed automatically.
@@ -71,12 +71,12 @@ Text commands are processed through a state machine pattern:
 
 **Key files:**
 
-- `app/logic/text/processor.py` — Main command routing logic
-- `app/logic/text/handlers.py` — Text command handlers (Goal, Rate, etc.)
-- `app/logic/text/week.py` — Week summary formatter
-- `app/db/tables/goals.py` — Goal database operations
-- `app/db/tables/ratings.py` — Rating database operations
-- `app/db/tables/user_states.py` — Conversation state management
+- `src/loglife/app/logic/text/processor.py` — Main command routing logic
+- `src/loglife/app/logic/text/handlers.py` — Text command handlers (Goal, Rate, etc.)
+- `src/loglife/app/logic/text/week.py` — Week summary formatter
+- `src/loglife/app/db/tables/goals.py` — Goal database operations
+- `src/loglife/app/db/tables/ratings.py` — Rating database operations
+- `src/loglife/app/db/tables/user_states.py` — Conversation state management
 
 ### Audio Journaling
 
@@ -137,8 +137,8 @@ Text commands are processed through a state machine pattern:
 
 **Key files:**
 
-- `app/logic/vcard/processor.py` — VCARD processing logic
-- `app/db/tables/referrals.py` — Referral database operations
+- `src/loglife/app/logic/vcard/processor.py` — VCARD processing logic
+- `src/loglife/app/db/tables/referrals.py` — Referral database operations
 
 ---
 
@@ -155,9 +155,9 @@ The backend uses SQLite with the following main tables:
 | `user_states` | Conversation state for multi-step flows |
 | `audio_journal_entries` | Audio transcripts and summaries |
 
-**Database file:** `backend/db/loglife.db`
+**Database file:** `src/loglife/app/db/loglife.db`
 
-**Schema file:** `backend/db/schema.sql`
+**Schema file:** `src/loglife/app/db/schema.sql`
 
 ---
 
@@ -165,10 +165,10 @@ The backend uses SQLite with the following main tables:
 
 **Main directories:**
 
-- `app/db/` - Database layer and data access
-- `app/logic/` - Message processing and command routing
-- `app/routes/` - Flask API endpoints
-- `app/services/` - Background services (Sender, Reminder)
-- `db/` - SQLite database file and schema
+- `src/loglife/app/db/` - Database layer and data access
+- `src/loglife/app/logic/` - Message processing and command routing
+- `src/loglife/app/routes/` - Flask API endpoints
+- `src/loglife/app/services/` - Background services (Sender, Reminder)
+- `src/loglife/app/db/` - SQLite database file and schema
 
 ---

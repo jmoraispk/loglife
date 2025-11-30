@@ -1,0 +1,14 @@
+phonenumbers>=9.0.17
+flask>=3.1.2
+requests>=2.32.5
+
+[dev]
+ruff>=0.14.3
+mkdocs-material>=9.6.22
+mkdocs-glightbox>=0.5.2
+mkdocstrings[python]>=0.28.0
+mkdocs-mermaid-zoom>=0.1.0
+tzdata>=2025.2
+pytest>=8.4.2
+pytest-cov>=7.0.0
+sqlite-web>=0.6.5

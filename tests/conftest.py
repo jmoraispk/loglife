@@ -6,9 +6,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from app.config.paths import SCHEMA_FILE
-from app.db.client import db
-from app.factory import create_app
+from loglife.app.config.paths import SCHEMA_FILE
+from loglife.app.db.client import db
+from loglife.app.factory import create_app
 from flask import Flask
 from flask.testing import FlaskClient
 
@@ -20,7 +20,7 @@ def app() -> Generator[Flask, None, None]:
     app.config["TESTING"] = True
 
     # Stop the reminder service thread from starting
-    with patch("app.factory.start_reminder_service"):
+    with patch("loglife.app.factory.start_reminder_service"):
         yield app
 
 
