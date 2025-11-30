@@ -5,8 +5,9 @@ This module defines a Flask blueprint for:
 2. Streaming log events to the emulator via SSE.
 """
 
-from loglife.app.services.sender import log_queue
 from flask import Blueprint, Response, render_template
+
+from loglife.app.services.sender import log_queue
 
 emulator_bp = Blueprint(
     "emulator",

@@ -9,17 +9,12 @@ from __future__ import annotations
 import logging
 from typing import TYPE_CHECKING
 
-from loglife.app.db.client import db
-from loglife.app.logic import process_audio, process_text, process_vcard
-from loglife.app.routes.webhook.utils import (
-    error_response,
-    get_timezone_from_number,
-    success_response,
-)
-from flask import Blueprint, g, request
+from flask import Blueprint, current_app, g, request
+
+from loglife.app.routes.webhook.schema import Message
+from loglife.app.routes.webhook.utils import error_response, success_response
 
 if TYPE_CHECKING:
-    from loglife.app.db.tables import User
     from flask.typing import ResponseReturnValue
 
 webhook_bp = Blueprint("webhook", __name__)
@@ -35,45 +30,27 @@ def webhook() -> ResponseReturnValue:
         JSON response containing `success`, `message`, and `data`.
 
     """
+    router = current_app.extensions["router"]
+    router_errors = current_app.extensions.get("router_errors", (Exception,))
+
     try:
         data: dict = request.get_json()
 
-        sender = data["sender"]
-        msg_type = data["msg_type"]
-        raw_msg = data["raw_msg"]
-        # g is for request-scoped data (global variable)
-        g.client_type = data["client_type"]
+        message = Message.from_payload(data)
+        g.client_type = message.client_type  # expose client type to sender service
 
-        user: User | None = db.users.get_by_phone(sender)
-        if not user:
-            user_timezone: str = get_timezone_from_number(sender)
-            user = db.users.create(sender, user_timezone)
-            logger.info("Created new user %s with timezone %s", user, user_timezone)
-        else:
-            logger.info("Found existing user for sender: %s", user)
-
-        extra_data = {}
-
-        if msg_type == "chat":
-            response_message = process_text(user, raw_msg)
-        elif msg_type in ("audio", "ptt"):
-            audio_response = process_audio(sender, user, raw_msg)
-            if isinstance(audio_response, tuple):
-                extra_data["transcript_file"], response_message = audio_response
-            else:
-                response_message = audio_response
-        elif msg_type == "vcard":
-            response_message = process_vcard(user, raw_msg)
-        else:
-            response_message = "Can't process this type of message."
+        result = router(message)
 
         logger.info(
             "Webhook processed type %s for %s, response generated: %s",
-            msg_type,
-            sender,
-            response_message,
+            message.msg_type,
+            message.sender,
+            result.message,
         )
-        return success_response(message=response_message, **extra_data)
+        return success_response(message=result.message, **result.extras)
+    except router_errors as exc:
+        logger.warning("Router rejected message: %s", exc)
+        return error_response(str(exc))
     except Exception as e:
         error = f"Error processing webhook > {e}"
         logger.exception(error)

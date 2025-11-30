@@ -1,114 +1,71 @@
 """Tests for webhook route."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
-from loglife.app.db.tables import User
-from loglife.app.routes.webhook import webhook_bp
 from flask import Flask
 from flask.testing import FlaskClient
+from loglife.app.logic.router import RouterError, RouterResult
+from loglife.app.routes.webhook import webhook_bp
 
 
 @pytest.fixture
-def client() -> FlaskClient:
-    """Flask test client fixture."""
+def client_with_router() -> tuple[FlaskClient, MagicMock]:
+    """Flask client fixture with a mocked router extension."""
     app = Flask(__name__)
+    router_mock: MagicMock = MagicMock()
+    app.extensions["router"] = router_mock
+    app.extensions["router_errors"] = (RouterError,)
     app.register_blueprint(webhook_bp)
     with app.test_client() as client:
-        yield client
+        yield client, router_mock
 
 
-def test_webhook_text_message(client: FlaskClient) -> None:
-    """Test handling a text message via webhook."""
-    mock_user = MagicMock(spec=User)
-    mock_user.id = 1
-    mock_user.phone_number = "1234567890"
-    mock_user.timezone = "UTC"
+def test_webhook_delegates_to_router(client_with_router: tuple[FlaskClient, MagicMock]) -> None:
+    """Ensure the route forwards payloads to the router."""
+    client, router = client_with_router
+    router.return_value = RouterResult(message="ok", extras={"foo": "bar"})
 
-    # Mock user lookup/creation
-    with patch("loglife.app.db.tables.users.UsersTable.get_by_phone") as mock_get_user:
-        mock_get_user.return_value = mock_user
+    response = client.post(
+        "/webhook",
+        json={
+            "sender": "1234567890",
+            "msg_type": "chat",
+            "raw_msg": "Hello",
+            "client_type": "whatsapp",
+        },
+    )
 
-        with patch("loglife.app.routes.webhook.routes.process_text") as mock_process:
-            mock_process.return_value = "Response message"
-
-            response = client.post(
-                "/webhook",
-                json={
-                    "sender": "1234567890",
-                    "msg_type": "chat",
-                    "raw_msg": "Hello",
-                    "client_type": "whatsapp",
-                },
-            )
-
-            assert response.status_code == 200
-            assert response.json["success"] is True
-            assert response.json["message"] == "Response message"
+    assert response.status_code == 200
+    assert response.json["success"] is True
+    assert response.json["message"] == "ok"
+    assert response.json["data"]["foo"] == "bar"
+    router.assert_called_once()
 
 
-def test_webhook_new_user(client: FlaskClient) -> None:
-    """Test handling a message from a new user."""
-    mock_user = MagicMock(spec=User)
-    mock_user.id = 1
-    mock_user.phone_number = "1234567890"
-    mock_user.timezone = "UTC"
+def test_webhook_router_error(client_with_router: tuple[FlaskClient, MagicMock]) -> None:
+    """Router errors should map to HTTP 400 responses."""
+    client, router = client_with_router
+    router.side_effect = RouterError("boom")
 
-    with (
-        patch("loglife.app.db.tables.users.UsersTable.get_by_phone") as mock_get_user,
-        patch("loglife.app.db.tables.users.UsersTable.create") as mock_create_user,
-        patch("loglife.app.routes.webhook.routes.process_text") as mock_process,
-    ):
-        mock_get_user.return_value = None
-        mock_create_user.return_value = mock_user
-        mock_process.return_value = "Welcome"
+    response = client.post(
+        "/webhook",
+        json={
+            "sender": "1234567890",
+            "msg_type": "unknown",
+            "raw_msg": "Hello",
+            "client_type": "whatsapp",
+        },
+    )
 
-        response = client.post(
-            "/webhook",
-            json={
-                "sender": "1234567890",
-                "msg_type": "chat",
-                "raw_msg": "Hello",
-                "client_type": "whatsapp",
-            },
-        )
-
-        assert response.status_code == 200
-        mock_create_user.assert_called_once()
+    assert response.status_code == 400
+    assert response.json["success"] is False
+    assert "boom" in response.json["message"]
 
 
-def test_webhook_audio_message(client: FlaskClient) -> None:
-    """Test handling an audio message."""
-    mock_user = MagicMock(spec=User)
-    mock_user.id = 1
-
-    with (
-        patch("loglife.app.db.tables.users.UsersTable.get_by_phone") as mock_get_user,
-        patch("loglife.app.routes.webhook.routes.process_audio") as mock_process,
-    ):
-        mock_get_user.return_value = mock_user
-        mock_process.return_value = "Audio processed"
-
-        response = client.post(
-            "/webhook",
-            json={
-                "sender": "1234567890",
-                "msg_type": "audio",
-                "raw_msg": "base64audio",
-                "client_type": "whatsapp",
-            },
-        )
-
-        assert response.status_code == 200
-        assert response.json["message"] == "Audio processed"
-
-
-def test_webhook_error_handling(client: FlaskClient) -> None:
-    """Test error handling in webhook."""
-    # Sending invalid JSON (missing fields) should raise KeyError
+def test_webhook_error_handling(client_with_router: tuple[FlaskClient, MagicMock]) -> None:
+    """Invalid payloads should return an error."""
+    client, _ = client_with_router
     response = client.post("/webhook", json={})
-
-    # The exception is caught and error_response is called
-    # error_response defaults to status_code=400
     assert response.status_code == 400
     assert response.json["success"] is False
