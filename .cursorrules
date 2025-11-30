@@ -4,5 +4,5 @@
 
 - **Always** use `uv run` to execute Python commands, scripts, modules or tests.
 - Do NOT use `python` or `python3` directly as there is no active global or local shell environment activated.
-- Assume we use Python 3.12
+- Assume we use Python 3.12. DO NOT USE `from __future__ import annotation`. And USE | not Union!
 - Don't do "cd ROOT && <cmd>" in each command. Assume we ARE in the project ROOT and simply do the target command
