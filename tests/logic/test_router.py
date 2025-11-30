@@ -102,3 +102,21 @@ def test_route_message_unsupported_type(mock_queue: MagicMock) -> None:
     assert "Can't process" in args[1]
 
 
+@patch("loglife.app.logic.router.queue_async_message")
+@patch("loglife.app.logic.router.process_audio")
+@patch("loglife.app.logic.router.db")
+def test_route_message_handles_processing_exception(
+    mock_db: MagicMock,
+    mock_audio: MagicMock,
+    mock_queue: MagicMock,
+) -> None:
+    """Ensure exceptions in processing trigger a fallback response."""
+    mock_user = MagicMock()
+    mock_db.users.get_by_phone.return_value = mock_user
+    mock_audio.side_effect = ValueError("Processing Failed")
+
+    route_message(_make_message(msg_type="audio"))
+
+    mock_queue.assert_called_once()
+    args, _ = mock_queue.call_args
+    assert "Sorry, something went wrong" in args[1]

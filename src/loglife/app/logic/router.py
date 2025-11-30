@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from typing import Any
 
 from loglife.app.db.client import db
@@ -11,6 +12,8 @@ from loglife.app.logic.timezone import get_timezone_from_number
 from loglife.app.logic.vcard import process_vcard
 from loglife.core.messaging import Message
 from loglife.core.services.sender import queue_async_message
+
+logger = logging.getLogger(__name__)
 
 
 def route_message(message: Message) -> None:
@@ -22,19 +25,24 @@ def route_message(message: Message) -> None:
 
     attachments: dict[str, Any] = {}
 
-    if message.msg_type == "chat":
-        response = process_text(user, message.raw_payload)
-    elif message.msg_type in {"audio", "ptt"}:
-        audio_response = process_audio(message.sender, user, message.raw_payload)
-        if isinstance(audio_response, tuple):
-            transcript_file, response = audio_response
-            attachments = {"transcript_file": transcript_file}
+    try:
+        if message.msg_type == "chat":
+            response = process_text(user, message.raw_payload)
+        elif message.msg_type in {"audio", "ptt"}:
+            audio_response = process_audio(message.sender, user, message.raw_payload)
+            if isinstance(audio_response, tuple):
+                transcript_file, response = audio_response
+                attachments = {"transcript_file": transcript_file}
+            else:
+                response = audio_response
+        elif message.msg_type == "vcard":
+            response = process_vcard(user, message.raw_payload)
         else:
-            response = audio_response
-    elif message.msg_type == "vcard":
-        response = process_vcard(user, message.raw_payload)
-    else:
-        response = "Can't process this type of message."
+            response = "Can't process this type of message."
+            attachments = {}
+    except Exception:
+        logger.exception("Error processing message from %s", message.sender)
+        response = "Sorry, something went wrong while processing your message."
         attachments = {}
 
     queue_async_message(

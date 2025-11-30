@@ -51,7 +51,9 @@ def process_audio(sender: str, user: User, audio_data: str) -> str | tuple[str, 
     )
     queue_async_message(sender, "Summary stored in Database.", client_type="whatsapp")
 
-    if user.send_transcript_file:
+    # Refetch user to ensure settings are up to date
+    current_user = db.users.get(user.id)
+    if current_user and current_user.send_transcript_file:
         transcript_file: str = transcript_to_base64(transcript)
         return transcript_file, summary
 

@@ -60,6 +60,9 @@ def start_message_worker(handler: "Callable[[Message], None]") -> None:
             except Empty:
                 continue
 
+            if message.msg_type == "_stop":
+                break
+
             try:
                 handler(message)
             except Exception:  # pragma: no cover - logged for observability

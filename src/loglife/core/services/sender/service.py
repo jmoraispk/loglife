@@ -37,6 +37,10 @@ def start_sender_worker() -> None:
                 message = get_outbound_message()
             except Empty:
                 continue
+
+            if message.msg_type == "_stop":
+                break
+
             try:
                 _dispatch_outbound(message)
             except Exception:  # pragma: no cover

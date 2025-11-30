@@ -145,3 +145,33 @@ def test_build_journal_reminder_message_all_tracked() -> None:
 
         assert "Did you complete the goals?" not in msg
         assert msg == JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
+
+
+def test_check_reminders_not_due() -> None:
+    """Test that reminders are not sent if not due."""
+    now = datetime.now(UTC)
+
+    # Mock objects
+    mock_reminder = MagicMock(spec=Reminder)
+    mock_reminder.id = 1
+    mock_reminder.user_id = 1
+    mock_reminder.reminder_time = "00:00"  # Unlikely to match unless now is 00:00
+    # Force mismatch
+    if now.strftime("%H:%M") == "00:00":
+        mock_reminder.reminder_time = "00:01"
+
+    mock_user = MagicMock(spec=User)
+    mock_user.id = 1
+    mock_user.timezone = "UTC"
+
+    with (
+        patch("loglife.app.db.tables.reminders.RemindersTable.get_all") as mock_get_reminders,
+        patch("loglife.app.db.tables.users.UsersTable.get_all") as mock_get_all_users,
+        patch("loglife.app.services.reminder.worker.queue_async_message") as mock_send,
+    ):
+        mock_get_reminders.return_value = [mock_reminder]
+        mock_get_all_users.return_value = [mock_user]
+
+        reminder_worker._check_reminders()  # noqa: SLF001
+
+        mock_send.assert_not_called()

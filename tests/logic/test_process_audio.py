@@ -169,3 +169,34 @@ def test_process_audio_with_transcript_file(user: User) -> None:
         assert isinstance(response, tuple)
         # Check for the tuple order (transcript_file, summary)
         assert response == ("base64_file_content", "Summary text")
+
+
+def test_process_audio_respects_user_settings_change_mid_flow(user: User) -> None:
+    """Test that process_audio re-checks user settings after long processing."""
+    # Initial state: send_transcript_file is False
+    db.users.update(user.id, send_transcript_file=0)
+    initial_user = db.users.get(user.id)
+    assert initial_user.send_transcript_file == 0
+
+    with (
+        patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
+        patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
+        patch("loglife.app.logic.audio.processor.transcript_to_base64") as mock_to_b64,
+        patch("loglife.app.logic.audio.processor.queue_async_message"),
+    ):
+        mock_transcribe.return_value = "Transcribed text"
+
+        # Simulate user changing setting while processing is happening
+        def side_effect_update(*args):
+            db.users.update(user.id, send_transcript_file=1)
+            return "Summary text"
+
+        mock_summarize.side_effect = side_effect_update
+        mock_to_b64.return_value = "base64_file_content"
+
+        # Pass the OLD user object (from before update)
+        response = process_audio("+1234567890", initial_user, "base64_audio")
+
+        # Should return tuple because it refetched the user and found send_transcript_file=1
+        assert isinstance(response, tuple)
+        assert response == ("base64_file_content", "Summary text")
