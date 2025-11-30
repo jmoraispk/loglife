@@ -10,17 +10,11 @@ from loglife.app.logic.text import process_text
 from loglife.app.logic.timezone import get_timezone_from_number
 from loglife.app.logic.vcard import process_vcard
 from loglife.core.messaging import Message
+from loglife.core.services.sender import queue_async_message
 
 
-def route_message(message: Message) -> Message:
-    """Route an inbound message to the correct processor.
-
-    Arguments:
-        message: Normalized message content from a transport adapter.
-
-    Raises:
-        None explicitly; unexpected failures are logged by the queue worker.
-    """
+def route_message(message: Message) -> None:
+    """Route an inbound message to the correct processor and queue a reply."""
     user = db.users.get_by_phone(message.sender)
     if not user:
         timezone = get_timezone_from_number(message.sender)
@@ -40,8 +34,15 @@ def route_message(message: Message) -> Message:
     elif message.msg_type == "vcard":
         response = process_vcard(user, message.raw_payload)
     else:
-        return message.reply("Can't process this type of message.")
+        response = "Can't process this type of message."
+        attachments = {}
 
-    return message.reply(raw_payload=response, attachments=attachments)
+    queue_async_message(
+        message.sender,
+        response,
+        client_type=message.client_type or "whatsapp",
+        metadata=message.metadata,
+        attachments=attachments,
+    )
 
 

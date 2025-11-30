@@ -19,7 +19,7 @@ def test_process_audio_success(user: User) -> None:
     with (
         patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
         patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
-        patch("loglife.app.logic.audio.processor.send_message") as mock_send,
+        patch("loglife.app.logic.audio.processor.queue_async_message") as mock_queue,
     ):
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.return_value = "Summary text"
@@ -33,7 +33,7 @@ def test_process_audio_success(user: User) -> None:
         else:
             assert response == "Summary text"
 
-        assert mock_send.call_count == 3  # Received, Transcribed, Stored
+        assert mock_queue.call_count == 3  # Received, Transcribed, Stored
 
         # Verify DB entry
         entries = db.audio_journal.get_by_user(user.id)
@@ -50,7 +50,7 @@ def test_process_audio_empty_transcript(user: User) -> None:
     with (
         patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
         patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
-        patch("loglife.app.logic.audio.processor.send_message"),
+        patch("loglife.app.logic.audio.processor.queue_async_message"),
     ):
         mock_transcribe.return_value = ""
 
@@ -73,7 +73,7 @@ def test_process_audio_no_transcript_file(user: User) -> None:
     with (
         patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
         patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
-        patch("loglife.app.logic.audio.processor.send_message"),
+        patch("loglife.app.logic.audio.processor.queue_async_message"),
     ):
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.return_value = "Summary text"
@@ -93,7 +93,7 @@ def test_process_audio_empty_summary(user: User) -> None:
     with (
         patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
         patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
-        patch("loglife.app.logic.audio.processor.send_message"),
+        patch("loglife.app.logic.audio.processor.queue_async_message"),
     ):
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.return_value = ""
@@ -117,14 +117,16 @@ def test_process_audio_transcribe_failure(user: User) -> None:
     """Test audio processing with transcription failure."""
     with (
         patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
-        patch("loglife.app.logic.audio.processor.send_message") as mock_send,
+        patch("loglife.app.logic.audio.processor.queue_async_message") as mock_queue,
     ):
         mock_transcribe.side_effect = RuntimeError("Transcription error")
 
         response = process_audio("+1234567890", user, "base64_audio")
 
         assert response == "Transcription failed!"
-        mock_send.assert_called_once_with("+1234567890", "Audio received. Transcribing...")
+        mock_queue.assert_called_once_with(
+            "+1234567890", "Audio received. Transcribing...", client_type="whatsapp"
+        )
 
 
 def test_process_audio_summarize_failure(user: User) -> None:
@@ -132,7 +134,7 @@ def test_process_audio_summarize_failure(user: User) -> None:
     with (
         patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
         patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
-        patch("loglife.app.logic.audio.processor.send_message") as mock_send,
+        patch("loglife.app.logic.audio.processor.queue_async_message") as mock_queue,
     ):
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.side_effect = RuntimeError("Summarization error")
@@ -140,7 +142,7 @@ def test_process_audio_summarize_failure(user: User) -> None:
         response = process_audio("+1234567890", user, "base64_audio")
 
         assert response == "Summarization failed!"
-        assert mock_send.call_count == 2  # Received, Transcribed
+        assert mock_queue.call_count == 2  # Received, Transcribed
 
 
 def test_process_audio_with_transcript_file(user: User) -> None:
@@ -156,7 +158,7 @@ def test_process_audio_with_transcript_file(user: User) -> None:
         patch("loglife.app.logic.audio.processor.transcribe_audio") as mock_transcribe,
         patch("loglife.app.logic.audio.processor.summarize_transcript") as mock_summarize,
         patch("loglife.app.logic.audio.processor.transcript_to_base64") as mock_to_b64,
-        patch("loglife.app.logic.audio.processor.send_message"),
+        patch("loglife.app.logic.audio.processor.queue_async_message"),
     ):
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.return_value = "Summary text"

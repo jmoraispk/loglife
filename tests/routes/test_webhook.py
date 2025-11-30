@@ -6,7 +6,6 @@ import pytest
 from flask import Flask
 from flask.testing import FlaskClient
 from loglife.core.routes.webhook import webhook_bp
-from loglife.core.messaging import Message
 
 
 @pytest.fixture
@@ -18,17 +17,9 @@ def client() -> FlaskClient:
         yield client
 
 
-@patch("loglife.core.routes.webhook.routes.submit_message")
-def test_webhook_delegates_to_router(mock_publish, client: FlaskClient) -> None:
-    """Ensure the route forwards payloads to the message bus."""
-    mock_publish.return_value = Message(
-        sender="1234567890",
-        msg_type="chat",
-        raw_payload="ok",
-        client_type="whatsapp",
-        attachments={"foo": "bar"},
-    )
-
+@patch("loglife.core.routes.webhook.routes.enqueue_inbound_message")
+def test_webhook_delegates_to_router(mock_enqueue, client: FlaskClient) -> None:
+    """Ensure the route forwards payloads to the inbound queue."""
     response = client.post(
         "/webhook",
         json={
@@ -41,14 +32,16 @@ def test_webhook_delegates_to_router(mock_publish, client: FlaskClient) -> None:
 
     assert response.status_code == 200
     assert response.json["success"] is True
-    assert response.json["message"] == "ok"
-    assert response.json["data"]["foo"] == "bar"
-    mock_publish.assert_called_once()
+    assert response.json["message"] == "Message queued"
+    mock_enqueue.assert_called_once()
 
 
-@patch("loglife.core.routes.webhook.routes.submit_message", side_effect=RuntimeError("boom"))
-def test_webhook_router_error(mock_publish, client: FlaskClient) -> None:
-    """Router errors should map to HTTP 400 responses."""
+@patch(
+    "loglife.core.routes.webhook.routes.enqueue_inbound_message",
+    side_effect=RuntimeError("boom"),
+)
+def test_webhook_enqueue_error(mock_enqueue, client: FlaskClient) -> None:
+    """Errors while enqueueing should return error responses."""
     response = client.post(
         "/webhook",
         json={
@@ -62,7 +55,7 @@ def test_webhook_router_error(mock_publish, client: FlaskClient) -> None:
     assert response.status_code == 400
     assert response.json["success"] is False
     assert "boom" in response.json["message"]
-    mock_publish.assert_called_once()
+    mock_enqueue.assert_called_once()
 
 
 def test_webhook_error_handling(client: FlaskClient) -> None:

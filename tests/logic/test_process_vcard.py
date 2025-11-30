@@ -24,11 +24,11 @@ def test_process_vcard_success(referrer: User) -> None:
     ]
     raw_vcards = json.dumps(vcards)
 
-    with patch("loglife.app.logic.vcard.processor.send_message") as mock_send:
+    with patch("loglife.app.logic.vcard.processor.queue_async_message") as mock_queue:
         response = process_vcard(referrer, raw_vcards)
 
         assert response == REFERRAL_SUCCESS
-        mock_send.assert_called_once()
+        mock_queue.assert_called_once()
 
         # Verify referred user created
         referred = db.users.get_by_phone("9876543210")
@@ -50,11 +50,11 @@ def test_process_vcard_existing_user(referrer: User) -> None:
     vcards = ["BEGIN:VCARD\nVERSION:3.0\nTEL;waid=9876543210:+98 765 43210\nEND:VCARD"]
     raw_vcards = json.dumps(vcards)
 
-    with patch("loglife.app.logic.vcard.processor.send_message") as mock_send:
+    with patch("loglife.app.logic.vcard.processor.queue_async_message") as mock_queue:
         response = process_vcard(referrer, raw_vcards)
 
         assert response == REFERRAL_SUCCESS
-        mock_send.assert_called_once()
+        mock_queue.assert_called_once()
 
         # Verify user still exists and wasn't overwritten
         referred = db.users.get_by_phone("9876543210")
@@ -69,11 +69,11 @@ def test_process_vcard_multiple(referrer: User) -> None:
     ]
     raw_vcards = json.dumps(vcards)
 
-    with patch("loglife.app.logic.vcard.processor.send_message") as mock_send:
+    with patch("loglife.app.logic.vcard.processor.queue_async_message") as mock_queue:
         response = process_vcard(referrer, raw_vcards)
 
         assert response == REFERRAL_SUCCESS
-        assert mock_send.call_count == 2
+        assert mock_queue.call_count == 2
 
         assert db.users.get_by_phone("1111111111") is not None
         assert db.users.get_by_phone("2222222222") is not None

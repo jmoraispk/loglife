@@ -16,11 +16,12 @@ from loglife.app.db.client import db
 @pytest.fixture
 def app() -> Generator[Flask, None, None]:
     """Create a Flask app instance for testing."""
-    app = create_app()
-    app.config["TESTING"] = True
-
-    # Stop the reminder service thread from starting
-    with patch("loglife.core.factory.start_reminder_service"):
+    with (
+        patch("loglife.core.factory.start_reminder_service"),
+        patch("loglife.core.factory.start_sender_worker"),
+    ):
+        app = create_app()
+        app.config["TESTING"] = True
         yield app
 
 

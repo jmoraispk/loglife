@@ -12,7 +12,7 @@ from typing import TYPE_CHECKING
 from flask import Blueprint, g, request
 
 from .utils import error_response, success_response
-from loglife.core.messaging import Message, submit_message
+from loglife.core.messaging import Message, enqueue_inbound_message
 
 if TYPE_CHECKING:
     from flask.typing import ResponseReturnValue
@@ -36,15 +36,10 @@ def webhook() -> ResponseReturnValue:
         message = Message.from_payload(data)
         g.client_type = message.client_type  # expose client type to sender service
 
-        result = submit_message(message, timeout=30)
+        enqueue_inbound_message(message)
 
-        logger.info(
-            "Webhook processed type %s for %s, response generated: %s",
-            message.msg_type,
-            message.sender,
-            result.raw_payload,
-        )
-        return success_response(message=result.raw_payload, **result.attachments)
+        logger.info("Queued message type %s for %s", message.msg_type, message.sender)
+        return success_response(message="Message queued")
     except Exception as e:
         error = f"Error processing webhook > {e}"
         logger.exception(error)

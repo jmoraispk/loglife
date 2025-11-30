@@ -1,12 +1,24 @@
 """Integration tests for full conversation flows."""
 
+from queue import Empty
 from typing import Any
 
 from flask.testing import FlaskClient
+from loglife.core.messaging import get_outbound_message
+
+
+def _drain_outbound_queue() -> None:
+    while True:
+        try:
+            get_outbound_message(timeout=0.01)
+        except Empty:
+            break
 
 
 def send_message(client: FlaskClient, text: str, sender: str = "+1234567890") -> dict[str, Any]:
     """Help simulate sending a WhatsApp message to the webhook."""
+    _drain_outbound_queue()
+
     response = client.post(
         "/webhook",
         json={
@@ -17,7 +29,9 @@ def send_message(client: FlaskClient, text: str, sender: str = "+1234567890") ->
         },
     )
     assert response.status_code == 200
-    return response.get_json()
+
+    outbound = get_outbound_message(timeout=1)
+    return {"message": outbound.raw_payload}
 
 
 def test_onboarding_and_goal_creation_flow(client: FlaskClient) -> None:

@@ -6,7 +6,7 @@ import re
 from loglife.app.config import REFERRAL_SUCCESS, WELCOME_MESSAGE
 from loglife.app.db.client import db
 from loglife.app.db.tables import User
-from loglife.app.services import send_message
+from loglife.core.services.sender import queue_async_message
 
 
 def _extract_phone_number(vcard_str: str) -> str:
@@ -42,6 +42,6 @@ def process_vcard(referrer_user: User, raw_vcards: str) -> str:
             referred_user = db.users.create(referred_phone_number, "Asia/Karachi")
 
         db.referrals.create(referrer_user_id, referred_user.id)
-        send_message(referred_phone_number, WELCOME_MESSAGE)
+        queue_async_message(referred_phone_number, WELCOME_MESSAGE, client_type="whatsapp")
 
     return REFERRAL_SUCCESS

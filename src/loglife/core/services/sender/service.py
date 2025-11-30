@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import logging
 import queue
+from queue import Empty
 from threading import Thread
+from typing import Any
 
 import requests
 from flask import g
@@ -31,7 +33,10 @@ def start_sender_worker() -> None:
 
     def _worker() -> None:
         while True:
-            message = get_outbound_message()
+            try:
+                message = get_outbound_message()
+            except Empty:
+                continue
             try:
                 _dispatch_outbound(message)
             except Exception:  # pragma: no cover
@@ -72,7 +77,8 @@ def queue_async_message(
     message: str,
     *,
     client_type: str = "whatsapp",
-    metadata: dict[str, str] | None = None,
+    metadata: dict[str, Any] | None = None,
+    attachments: dict[str, Any] | None = None,
 ) -> None:
     """Enqueue an outbound message for asynchronous delivery."""
     outbound = build_outbound_message(
@@ -80,6 +86,7 @@ def queue_async_message(
         message,
         client_type=client_type,
         metadata=metadata,
+        attachments=attachments,
     )
     enqueue_outbound_message(outbound)
 
@@ -89,6 +96,8 @@ def send_message(
     message: str,
     *,
     client_type: str | None = None,
+    metadata: dict[str, Any] | None = None,
+    attachments: dict[str, Any] | None = None,
 ) -> None:
     """Send a message immediately whenever client context is available."""
     target_client = client_type or getattr(g, "client_type", None)
@@ -100,4 +109,10 @@ def send_message(
         logger.info(
             "Queueing async message for %s (client_type=%s)", number, target_client or "unknown"
         )
-        queue_async_message(number, message, client_type="whatsapp")
+        queue_async_message(
+            number,
+            message,
+            client_type="whatsapp",
+            metadata=metadata,
+            attachments=attachments,
+        )
