@@ -26,7 +26,7 @@ def get_timezone_safe(timezone_str: str) -> ZoneInfo:
         return ZoneInfo("UTC")
 
 
-def get_goals_not_tracked_today(user_id: int) -> list[dict]:
+def get_goals_not_tracked_today(user_id: int) -> list[Goal]:
     """Get goals not yet tracked today.
 
     Args:
@@ -38,7 +38,7 @@ def get_goals_not_tracked_today(user_id: int) -> list[dict]:
     """
     user_goals: list[Goal] = db.goals.get_by_user(user_id)
     today_str: str = datetime.now(tz=UTC).date().strftime("%Y-%m-%d")
-    untracked_goals: list[dict] = []
+    untracked_goals: list[Goal] = []
 
     # exclude journaling goal
     filtered_goals = [
@@ -50,20 +50,6 @@ def get_goals_not_tracked_today(user_id: int) -> list[dict]:
     for goal in filtered_goals:
         rating: Rating | None = db.ratings.get_by_goal_and_date(goal.id, today_str)
         if rating is None:
-            # Returning as dict because the caller expects dict access for now, 
-            # or we should update caller to use object access. 
-            # The handler accessing this is JournalPromptsHandler which does:
-            # f"- {goal['goal_description']}"
-            # So we should update this to return dict or update handler to use object.
-            # Let's update this to return dict to minimize changes or we update handler
-            # handler already updated to use object attributes? 
-            # Let's check JournalPromptsHandler in handlers.py
-            # It does: [f"- {goal['goal_description']}" for goal in goals_not_tracked_today]
-            # wait, I might have missed updating that line in handler. Let's check.
-            untracked_goals.append({
-                "goal_description": goal.goal_description,
-                "goal_emoji": goal.goal_emoji,
-                "id": goal.id
-            })
+            untracked_goals.append(goal)
 
     return untracked_goals

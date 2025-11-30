@@ -19,13 +19,14 @@ from app.services.sender import send_message
 
 logger = logging.getLogger(__name__)
 
+MIN_WAIT_SECONDS = 10
+MAX_WAIT_SECONDS = 60
+
 
 def _next_reminder_seconds() -> float:
     """Calculate the next reminder execution window in seconds.
 
-    Return the number of seconds to wait until the next reminder execution
-    window. The minimum wait is 10 seconds and the maximum wait is 60 seconds.
-    This ensures the service remains responsive to newly added reminders.
+    Return the number of seconds to wait until the next reminder execution.
     """
     reminders: list[Reminder] = db.reminders.get_all()
     if not reminders:
@@ -36,17 +37,13 @@ def _next_reminder_seconds() -> float:
     for reminder in reminders:
         user_id: int = reminder.user_id
         user: User | None = db.users.get(user_id)
-        # Skip if user not found (data integrity issue, but safe to handle)
         if not user:
              continue
-             
+
         user_timezone: str = user.timezone
-        # Check if reminder_time is string (from old DB) or datetime (from new model)
-        # SQLite adapter usually returns string if not parsed. 
         time_str: str = str(reminder.reminder_time)
 
         hours_minutes: list[str] = time_str.split(":")
-        # Extract hours and minutes as integers
         hours: int = int(hours_minutes[0])
         minutes: int = int(hours_minutes[1])
 
@@ -54,30 +51,25 @@ def _next_reminder_seconds() -> float:
         local_now: datetime = now_utc.astimezone(tz).replace(
             second=0,
             microsecond=0,
-        )  # current time in user's timezone
+        )
         target: datetime = local_now.replace(hour=hours, minute=minutes)
 
-        if target <= local_now:  # target already passed
-            target += timedelta(days=1)  # move to next day
+        if target <= local_now:
+            target += timedelta(days=1)
 
         wait_times.append((target - local_now).total_seconds())
 
     # default=60 is used in case wait_times is empty
-    next_wait: float = float(min(wait_times, default=60))
+    next_wait: float = float(min(wait_times, default=MAX_WAIT_SECONDS))
 
     # Limits the maximum wait to 60 seconds and ensures a minimum wait of 10 seconds.
-    # This ensures the service is responsive to newly added reminders.
-    bounded_wait: float = float(max(10, min(60, next_wait)))
+    bounded_wait: float = float(max(MIN_WAIT_SECONDS, min(MAX_WAIT_SECONDS, next_wait)))
     logger.debug("Next reminder check scheduled in %d seconds", bounded_wait)
     return bounded_wait
 
 
 def _check_reminders() -> None:
-    """Check all reminders and send notifications when scheduled time matches.
-
-    Send notifications to users when their scheduled reminder times match the
-    current local time.
-    """
+    """Check all reminders and send notifications when scheduled time matches."""
     reminders: list[Reminder] = db.reminders.get_all()
     now_utc: datetime = datetime.now(UTC)
 
@@ -103,7 +95,6 @@ def _check_reminders() -> None:
 
         time_str: str = str(reminder.reminder_time)
         hours_minutes: list[str] = time_str.split(":")
-        # Extract hours and minutes as integers
         hours: int = int(hours_minutes[0])
         minutes: int = int(hours_minutes[1])
 
@@ -111,13 +102,13 @@ def _check_reminders() -> None:
         if local_now.hour == hours and local_now.minute == minutes:
             # Check if this is a journaling reminder
             if user_goal.goal_emoji == "📓" and user_goal.goal_description == "journaling":
-                goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
+                goals_not_tracked_today: list[Goal] = get_goals_not_tracked_today(user_id)
                 if goals_not_tracked_today != []:
                     message: str = JOURNAL_REMINDER_MESSAGE.replace(
                         "<goals_not_tracked_today>",
                         "- *Did you complete the goals?*\n"
                         + "\n".join(
-                            [f"- {goal['goal_description']}" for goal in goals_not_tracked_today]
+                            [f"- {goal.goal_description}" for goal in goals_not_tracked_today]
                         ),
                     )
                 else:
@@ -137,11 +128,7 @@ def _check_reminders() -> None:
 
 
 def _reminder_worker() -> None:
-    """Run daemonized worker loop for checking and sending reminders.
-
-    Continuously check for reminders and send notifications when their
-    scheduled time matches the current local time.
-    """
+    """Run daemonized worker loop for checking and sending reminders."""
     while True:
         sleep_seconds: float = _next_reminder_seconds()
         logger.debug("Reminder worker sleeping for %d seconds", sleep_seconds)
@@ -154,11 +141,7 @@ def _reminder_worker() -> None:
 
 
 def start_reminder_service() -> threading.Thread:
-    """Start the reminder service in a daemon thread.
-
-    Create and start a daemon thread that will automatically exit when the
-    main program exits.
-    """
+    """Start the reminder service in a daemon thread."""
     t: threading.Thread = threading.Thread(
         target=_reminder_worker,
         daemon=True,

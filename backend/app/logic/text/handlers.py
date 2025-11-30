@@ -112,12 +112,12 @@ class JournalPromptsHandler(TextCommandHandler):
     def handle(self, user: User, _message: str) -> str | None:
         """Process journal prompts command."""
         user_id = user.id
-        goals_not_tracked_today: list = get_goals_not_tracked_today(user_id)
+        goals_not_tracked_today: list[Goal] = get_goals_not_tracked_today(user_id)
         if goals_not_tracked_today:
             return messages.JOURNAL_REMINDER_MESSAGE.replace(
                 "<goals_not_tracked_today>",
                 "- *Did you complete the goals?*\n"
-                + "\n".join([f"- {goal['goal_description']}" for goal in goals_not_tracked_today]),
+                + "\n".join([f"- {goal.goal_description}" for goal in goals_not_tracked_today]),
             )
 
         return messages.JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
