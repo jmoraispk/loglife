@@ -25,6 +25,8 @@ def route_message(message: Message) -> None:
 
     attachments: dict[str, Any] = {}
 
+    logger.info("Processing message type: %s", message.msg_type)
+
     try:
         if message.msg_type == "chat":
             response = process_text(user, message.raw_payload)
@@ -38,7 +40,9 @@ def route_message(message: Message) -> None:
         elif message.msg_type == "vcard":
             response = process_vcard(user, message.raw_payload)
         else:
-            response = "Can't process this type of message."
+            response = (
+                "Can't process this type of message. Recognized types: chat, audio, ptt, vcard"
+            )
             attachments = {}
     except Exception:
         logger.exception("Error processing message from %s", message.sender)

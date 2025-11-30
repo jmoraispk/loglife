@@ -61,6 +61,7 @@ def start_message_worker(handler: "Callable[[Message], None]") -> None:
                 continue
 
             if message.msg_type == "_stop":
+                # Sentinel value to stop the worker thread cleanly (used in tests)
                 break
 
             try:

@@ -39,6 +39,7 @@ def start_sender_worker() -> None:
                 continue
 
             if message.msg_type == "_stop":
+                # Sentinel value to stop the worker thread cleanly (used in tests)
                 break
 
             try:

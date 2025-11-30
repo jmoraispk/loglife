@@ -1,5 +1,7 @@
 """Message processing logic for inbound WhatsApp text commands."""
 
+import logging
+
 from loglife.app.config import COMMAND_ALIASES
 from loglife.app.db.tables import User
 from loglife.app.logic.text.handlers import (
@@ -18,6 +20,8 @@ from loglife.app.logic.text.handlers import (
     UpdateReminderHandler,
     WeekSummaryHandler,
 )
+
+logger = logging.getLogger(__name__)
 
 # Instantiate handlers once at module level to avoid overhead on every call
 # Order matters for priority
@@ -53,18 +57,22 @@ def process_text(user: User, message: str) -> str:
         The WhatsApp response text to send back to the user.
 
     """
-    message: str = message.strip().lower()
+    try:
+        message: str = message.strip().lower()
 
-    # Add aliases
-    for alias, command in COMMAND_ALIASES.items():
-        message = message.replace(alias, command)
+        # Add aliases
+        for alias, command in COMMAND_ALIASES.items():
+            message = message.replace(alias, command)
 
-    # Execute the first matching command handler
-    for handler in HANDLERS:
-        if handler.matches(message):
-            result = handler.handle(user, message)
-            # Special case: add_goal can return None if no goal text provided
-            if result is not None:
-                return result
+        # Execute the first matching command handler
+        for handler in HANDLERS:
+            if handler.matches(message):
+                result = handler.handle(user, message)
+                # Special case: add_goal can return None if no goal text provided
+                if result is not None:
+                    return result
 
-    return "Wrong command!"
+        return "Wrong command!"
+    except Exception as exc:
+        logger.exception("Error in text processor")
+        return f"Error in text processor: {exc}"

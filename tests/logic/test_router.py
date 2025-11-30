@@ -99,7 +99,8 @@ def test_route_message_unsupported_type(mock_queue: MagicMock) -> None:
     """Unsupported message types return a fallback response."""
     route_message(_make_message(msg_type="gif"))
     args, kwargs = mock_queue.call_args
-    assert "Can't process" in args[1]
+    assert "Can't process this type of message" in args[1]
+    assert "Recognized types: chat, audio, ptt, vcard" in args[1]
 
 
 @patch("loglife.app.logic.router.queue_async_message")

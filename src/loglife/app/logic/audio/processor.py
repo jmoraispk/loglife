@@ -28,33 +28,35 @@ def process_audio(sender: str, user: User, audio_data: str) -> str | tuple[str, 
     queue_async_message(sender, "Audio received. Transcribing...", client_type="whatsapp")
 
     try:
-        transcript: str = transcribe_audio(audio_data)
-    except RuntimeError:
-        logger.exception("Error transcribing audio")
-        return "Transcription failed!"
+        try:
+            transcript: str = transcribe_audio(audio_data)
+        except RuntimeError:
+            logger.exception("Error transcribing audio")
+            return "Transcription failed!"
 
-    if not transcript.strip():
-        return "Transcription was empty."
+        if not transcript.strip():
+            return "Transcription was empty."
 
-    queue_async_message(sender, "Audio transcribed. Summarizing...", client_type="whatsapp")
+        queue_async_message(sender, "Audio transcribed. Summarizing...", client_type="whatsapp")
 
-    try:
-        summary: str = summarize_transcript(transcript)
-    except RuntimeError:
-        logger.exception("Error summarizing transcript")
-        return "Summarization failed!"
+        try:
+            summary: str = summarize_transcript(transcript)
+        except RuntimeError:
+            logger.exception("Error summarizing transcript")
+            return "Summarization failed!"
 
-    db.audio_journal.create(
-        user_id=user.id,
-        transcription_text=transcript,
-        summary_text=summary,
-    )
-    queue_async_message(sender, "Summary stored in Database.", client_type="whatsapp")
+        db.audio_journal.create(
+            user_id=user.id,
+            transcription_text=transcript,
+            summary_text=summary,
+        )
+        queue_async_message(sender, "Summary stored in Database.", client_type="whatsapp")
 
-    # Refetch user to ensure settings are up to date
-    current_user = db.users.get(user.id)
-    if current_user and current_user.send_transcript_file:
-        transcript_file: str = transcript_to_base64(transcript)
-        return transcript_file, summary
+        if user.send_transcript_file:
+            transcript_file: str = transcript_to_base64(transcript)
+            return transcript_file, summary
 
-    return summary
+        return summary
+    except Exception as exc:
+        logger.exception("Error in audio processor")
+        return f"Error in audio processor: {exc}"
