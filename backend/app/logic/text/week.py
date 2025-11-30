@@ -1,13 +1,18 @@
 """Weekly look-back text helpers for summaries."""
 
+from __future__ import annotations
+
 from datetime import UTC, datetime, timedelta
+from typing import TYPE_CHECKING
 
 from app.config import (
     LOOKBACK_NO_GOALS,
     STYLE,
 )
 from app.db.client import db
-from app.db.tables import Goal, Rating
+
+if TYPE_CHECKING:
+    from app.db.tables import Goal, Rating
 
 
 def get_monday_before() -> datetime:
@@ -28,7 +33,7 @@ def look_back_summary(user_id: int, days: int, start: datetime) -> str:
     Collect the user's goals and ratings, then compose a Markdown-style block
     where each line represents a day and shows the status symbols for all goals.
 
-    Args:
+    Arguments:
         user_id: The unique identifier of the user
         days: Number of days to include in the summary
         start: The starting datetime for the look-back window
@@ -76,7 +81,7 @@ def look_back_summary(user_id: int, days: int, start: datetime) -> str:
             rating: int | None = None
             for rating_row in ratings_data:
                 if rating_row["goal_emoji"] == goal.goal_emoji:
-                    rating = rating_row["rating"]  # type: ignore
+                    rating = rating_row["rating"]  # type: ignore[assignment]
                     break
 
             if rating:

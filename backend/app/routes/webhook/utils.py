@@ -15,7 +15,7 @@ def get_timezone_from_number(number: str) -> str:
     '+' if missing. Return 'UTC' as a fallback if the number cannot be parsed
     or no timezone is found.
 
-    Args:
+    Arguments:
         number: Phone number string, with or without '+' prefix
             (e.g., "923186491240" or "+923186491240")
 
@@ -53,7 +53,7 @@ def error_response(
 ) -> tuple[Response, int]:
     """Build an error response body.
 
-    Args:
+    Arguments:
         message: The error message
         data: Optional error data
         status_code: HTTP status code (default: 400)
@@ -81,7 +81,7 @@ def success_response(
 ) -> tuple[Response, int]:
     """Build a success response body.
 
-    Args:
+    Arguments:
         message: The success message
         status_code: HTTP status code (default: 200)
         **kwargs: Additional data to include in the response

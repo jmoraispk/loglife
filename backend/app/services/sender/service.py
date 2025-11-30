@@ -16,7 +16,7 @@ log_queue = queue.Queue()
 def _send_emulator_message(message: str) -> None:
     """Push emulator responses to the SSE log queue.
 
-    Args:
+    Arguments:
         message: The message content to send to the emulator.
 
     """
@@ -26,7 +26,7 @@ def _send_emulator_message(message: str) -> None:
 def _send_whatsapp_message(number: str, message: str) -> None:
     """Send a WhatsApp message to the specified phone number.
 
-    Args:
+    Arguments:
         number: The phone number to send the message to.
         message: The message content to send.
 
@@ -51,7 +51,7 @@ def send_message(number: str, message: str) -> None:
     Determines the client type (WhatsApp or Emulator) from the global request
     context `g` and routes the message accordingly.
 
-    Args:
+    Arguments:
         number: The phone number to send the message to.
         message: The message content to send.
 

@@ -60,27 +60,27 @@ def test_check_reminders() -> None:
 def test_is_reminder_due_true() -> None:
     """Test _is_reminder_due returns True when times match."""
     now_utc = datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC)
-    
+
     mock_user = MagicMock(spec=User)
     mock_user.timezone = "UTC"
-    
+
     mock_reminder = MagicMock(spec=Reminder)
     mock_reminder.reminder_time = "12:00:00"
-    
-    assert reminder_worker._is_reminder_due(mock_reminder, mock_user, now_utc) # noqa: SLF001
+
+    assert reminder_worker._is_reminder_due(mock_reminder, mock_user, now_utc)  # noqa: SLF001
 
 
 def test_is_reminder_due_false() -> None:
     """Test _is_reminder_due returns False when times do not match."""
     now_utc = datetime(2024, 1, 1, 12, 0, 0, tzinfo=UTC)
-    
+
     mock_user = MagicMock(spec=User)
     mock_user.timezone = "UTC"
-    
+
     mock_reminder = MagicMock(spec=Reminder)
     mock_reminder.reminder_time = "12:01:00"
-    
-    assert not reminder_worker._is_reminder_due(mock_reminder, mock_user, now_utc) # noqa: SLF001
+
+    assert not reminder_worker._is_reminder_due(mock_reminder, mock_user, now_utc)  # noqa: SLF001
 
 
 def test_is_reminder_due_timezone_conversion() -> None:
@@ -97,11 +97,11 @@ def test_is_reminder_due_timezone_conversion() -> None:
     # In Jan (Standard Time), Paris is UTC+1. So 12:00 UTC -> 13:00 Paris.
     mock_reminder.reminder_time = "13:00:00"
 
-    assert reminder_worker._is_reminder_due(
+    assert reminder_worker._is_reminder_due(  # noqa: SLF001
         mock_reminder,
         mock_user,
         now_utc,
-    )  # noqa: SLF001
+    )
 
 
 def test_build_standard_reminder_message() -> None:
@@ -112,9 +112,9 @@ def test_build_standard_reminder_message() -> None:
 
     msg = reminder_worker._build_standard_reminder_message(mock_goal)  # noqa: SLF001
 
-    expected = REMINDER_MESSAGE.replace(
-        "<goal_emoji>", "🏃"
-    ).replace("<goal_description>", "Run 5k")
+    expected = REMINDER_MESSAGE.replace("<goal_emoji>", "🏃").replace(
+        "<goal_description>", "Run 5k"
+    )
     assert msg == expected
 
 
@@ -122,12 +122,12 @@ def test_build_journal_reminder_message_with_untracked() -> None:
     """Test journaling reminder message when there are untracked goals."""
     mock_goal1 = MagicMock(spec=Goal)
     mock_goal1.goal_description = "Run 5k"
-    
+
     with patch("app.services.reminder.worker.get_goals_not_tracked_today") as mock_get_goals:
         mock_get_goals.return_value = [mock_goal1]
-        
-        msg = reminder_worker._build_journal_reminder_message(1) # noqa: SLF001
-        
+
+        msg = reminder_worker._build_journal_reminder_message(1)  # noqa: SLF001
+
         assert "Did you complete the goals?" in msg
         assert "Run 5k" in msg
 
@@ -136,8 +136,8 @@ def test_build_journal_reminder_message_all_tracked() -> None:
     """Test journaling reminder message when all goals are tracked."""
     with patch("app.services.reminder.worker.get_goals_not_tracked_today") as mock_get_goals:
         mock_get_goals.return_value = []
-        
-        msg = reminder_worker._build_journal_reminder_message(1) # noqa: SLF001
-        
+
+        msg = reminder_worker._build_journal_reminder_message(1)  # noqa: SLF001
+
         assert "Did you complete the goals?" not in msg
         assert msg == JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")

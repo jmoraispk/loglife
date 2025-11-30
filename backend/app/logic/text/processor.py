@@ -45,7 +45,7 @@ def process_text(user: User, message: str) -> str:
     reminder times, and generating look-back summaries. Maintain temporary
     state for multi-step flows (e.g., goal reminder setup).
 
-    Args:
+    Arguments:
         user: The user record for the message sender
         message: The incoming text message content
 

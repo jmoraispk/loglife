@@ -94,7 +94,8 @@ function createClient() {
 			const payload = {
 				sender: phoneNumber,
 				raw_msg: '',
-				msg_type: msg.type
+				msg_type: msg.type,
+				client_type: 'whatsapp'
 			};
 
 			// Populate raw_msg based on message type

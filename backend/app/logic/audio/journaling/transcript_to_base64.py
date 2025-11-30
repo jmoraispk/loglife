@@ -6,7 +6,7 @@ import base64
 def transcript_to_base64(text: str) -> str:
     """Convert a string into Base64-encoded data for a .txt file.
 
-    Args:
+    Arguments:
         text: The text string to encode
 
     Returns:

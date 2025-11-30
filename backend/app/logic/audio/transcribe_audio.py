@@ -17,7 +17,7 @@ def transcribe_audio(audio_data: str) -> str:
     Decode base64 audio data, upload it to AssemblyAI, initiate transcription,
     and poll the API until the transcription is completed or an error occurs.
 
-    Args:
+    Arguments:
         audio_data: Base64-encoded audio data string
 
     Returns:

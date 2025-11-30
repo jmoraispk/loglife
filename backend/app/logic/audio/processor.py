@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 def process_audio(sender: str, user: User, audio_data: str) -> str | tuple[str, str]:
     """Process an incoming audio message from a user.
 
-    Args:
+    Arguments:
         sender: The WhatsApp phone number of the sender
         user: The user record dictionary
         audio_data: Base64 encoded audio payload

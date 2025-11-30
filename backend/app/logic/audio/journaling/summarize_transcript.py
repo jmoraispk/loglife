@@ -23,7 +23,7 @@ def summarize_transcript(transcript: str) -> str:
     Send the transcript to OpenAI with a configured system prompt and returns
     the summarized content from the API response.
 
-    Args:
+    Arguments:
         transcript: The transcript text to summarize
 
     Returns:

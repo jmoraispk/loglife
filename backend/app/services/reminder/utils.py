@@ -10,7 +10,7 @@ from app.db.tables import Goal, Rating
 def get_timezone_safe(timezone_str: str) -> ZoneInfo:
     """Get ZoneInfo, falling back to UTC if timezone is invalid or unknown.
 
-    Args:
+    Arguments:
         timezone_str: Timezone string in IANA format (e.g., "Asia/Karachi",
             "America/New_York")
 
@@ -29,7 +29,7 @@ def get_timezone_safe(timezone_str: str) -> ZoneInfo:
 def get_goals_not_tracked_today(user_id: int) -> list[Goal]:
     """Get goals not yet tracked today.
 
-    Args:
+    Arguments:
         user_id: The unique identifier of the user
 
     Returns:
