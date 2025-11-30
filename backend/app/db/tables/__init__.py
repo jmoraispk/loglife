@@ -20,8 +20,7 @@ __all__ = [
     "Reminder",
     "RemindersTable",
     "User",
-    "UsersTable",
     "UserState",
     "UserStatesTable",
+    "UsersTable",
 ]
-

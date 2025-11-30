@@ -4,10 +4,12 @@ This module defines a Flask blueprint for handling inbound WhatsApp messages.
 It processes incoming messages (text, audio, or VCARD) and routes them to the appropriate handlers.
 """
 
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING
 
 from app.db.client import db
-from app.db.tables import User
 from app.logic import process_audio, process_text, process_vcard
 from app.routes.webhook.utils import (
     error_response,
@@ -15,7 +17,10 @@ from app.routes.webhook.utils import (
     success_response,
 )
 from flask import Blueprint, g, request
-from flask.typing import ResponseReturnValue
+
+if TYPE_CHECKING:
+    from app.db.tables import User
+    from flask.typing import ResponseReturnValue
 
 webhook_bp = Blueprint("webhook", __name__)
 

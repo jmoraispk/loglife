@@ -18,7 +18,7 @@ def parse_time_string(raw: str) -> str | None:
     Accept inputs like '18:00', '10:15 PM', '6 PM', '6pm', or '6'.
     Returns None if the value cannot be parsed or is out of range.
 
-    Args:
+    Arguments:
         raw: The incoming time value as typed by the user
 
     Returns:

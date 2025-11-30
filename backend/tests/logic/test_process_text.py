@@ -1,18 +1,24 @@
 """Tests for process_text logic."""
 
+from __future__ import annotations
+
 import json
 from datetime import UTC, datetime
+from typing import TYPE_CHECKING
 
 import pytest
 from app.config import ERROR_NO_GOALS_SET, USAGE_RATE
 from app.db.client import db
-from app.db.tables import Goal, Rating, Reminder, User, UserState
 from app.logic import process_text
 from app.logic.text.handlers import _extract_emoji
 
+if TYPE_CHECKING:
+    from app.db.tables import User
+
 
 @pytest.fixture
-def user():
+def user() -> User:
+    """Create a test user."""
     return db.users.create("+1234567890", "UTC")
 
 
@@ -44,11 +50,14 @@ def test_process_text_add_goal() -> None:
     goals = db.goals.get_by_user(user.id)
     assert len(goals) == 1
     assert goals[0].goal_emoji == "🏃"
-    assert goals[0].goal_description == "run 5k" # Note: Original was "run 5k", but handler strips/cleans? 
-    # Wait, original assert was "run 5k" lowercase? Let's check handler logic. 
-    # Handler logic: raw_goal.replace(goal_emoji, "").strip(). 
-    # It doesn't lowercase description. 
-    # Ah, the handler was updated. Let's assume case sensitivity matters now or check previous implementation.
+    assert (
+        goals[0].goal_description == "run 5k"
+    )  # Note: Original was "run 5k", but handler strips/cleans?
+    # Wait, original assert was "run 5k" lowercase? Let's check handler logic.
+    # Handler logic: raw_goal.replace(goal_emoji, "").strip().
+    # It doesn't lowercase description.
+    # Ah, the handler was updated. Let's assume case sensitivity matters now or check
+    # previous implementation.
     # Previous impl: goal_description: str = raw_goal.replace(goal_emoji, "").strip()
     # My new handler: goal_description: str = raw_goal.replace(goal_emoji, "").strip()
     # So it preserves case. "Run 5k" -> "Run 5k"
@@ -273,20 +282,20 @@ def test_process_text_invalid() -> None:
     assert "Wrong command" in response
 
 
-def test_process_text_empty_string(user) -> None:
+def test_process_text_empty_string(user: User) -> None:
     """Test processing an empty string."""
     # Should return "Wrong command!" or handle gracefully
     response = process_text(user, "")
     assert "Wrong command" in response
 
 
-def test_process_text_only_whitespace(user) -> None:
+def test_process_text_only_whitespace(user: User) -> None:
     """Test processing a string with only whitespace."""
     response = process_text(user, "   ")
     assert "Wrong command" in response
 
 
-def test_add_goal_special_chars(user) -> None:
+def test_add_goal_special_chars(user: User) -> None:
     """Test adding a goal with special characters and SQL injection attempts."""
     # SQL injection attempt
     dangerous_string = "run 5k'); DROP TABLE users; --"
@@ -307,7 +316,7 @@ def test_add_goal_special_chars(user) -> None:
     assert goals[0].goal_description == dangerous_string.lower()
 
 
-def test_add_goal_very_long(user) -> None:
+def test_add_goal_very_long(user: User) -> None:
     """Test adding a goal with a very long description."""
     long_desc = "a" * 1000
     response = process_text(user, f"add goal 🏃 {long_desc}")
@@ -317,7 +326,7 @@ def test_add_goal_very_long(user) -> None:
     assert goals[0].goal_description == long_desc
 
 
-def test_rate_single_out_of_bounds(user) -> None:
+def test_rate_single_out_of_bounds(user: User) -> None:
     """Test rating with values outside valid range."""
     db.goals.create(user.id, "🏃", "Run")
 
@@ -329,7 +338,7 @@ def test_rate_single_out_of_bounds(user) -> None:
     assert process_text(user, "rate 1 -1") == USAGE_RATE
 
 
-def test_rate_single_goal_number_overflow(user) -> None:
+def test_rate_single_goal_number_overflow(user: User) -> None:
     """Test rating a goal number that doesn't exist (too high)."""
     db.goals.create(user.id, "🏃", "Run")
 
@@ -337,14 +346,14 @@ def test_rate_single_goal_number_overflow(user) -> None:
     assert process_text(user, "rate 2 3") == USAGE_RATE
 
 
-def test_delete_goal_overflow(user) -> None:
+def test_delete_goal_overflow(user: User) -> None:
     """Test deleting a goal number that is too high."""
     db.goals.create(user.id, "🏃", "Run")
 
     assert "Invalid goal number" in process_text(user, "delete 2")
 
 
-def test_delete_goal_zero_or_negative(user) -> None:
+def test_delete_goal_zero_or_negative(user: User) -> None:
     """Test deleting goal 0 or negative."""
     db.goals.create(user.id, "🏃", "Run")
 
@@ -355,7 +364,7 @@ def test_delete_goal_zero_or_negative(user) -> None:
     assert "Invalid goal number" in process_text(user, "delete -1")
 
 
-def test_lookback_negative_days(user) -> None:
+def test_lookback_negative_days(user: User) -> None:
     """Test lookback with negative days."""
     db.goals.create(user.id, "🏃", "Run")
 
@@ -367,7 +376,7 @@ def test_lookback_negative_days(user) -> None:
     assert "7 Days" in response
 
 
-def test_lookback_huge_days(user) -> None:
+def test_lookback_huge_days(user: User) -> None:
     """Test lookback with a huge number of days."""
     db.goals.create(user.id, "🏃", "Run")
 

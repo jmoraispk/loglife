@@ -1,3 +1,5 @@
+"""Database client module."""
+
 import sqlite3
 from pathlib import Path
 
@@ -12,10 +14,17 @@ from app.db.tables import (
     UserStatesTable,
 )
 
+
 class Database:
     """Main database client that provides access to tables."""
-    
-    def __init__(self, db_path: Path = DATABASE_FILE):
+
+    def __init__(self, db_path: Path = DATABASE_FILE) -> None:
+        """Initialize the database client.
+
+        Arguments:
+            db_path: Path to the SQLite database file.
+
+        """
         self.db_path = db_path
         self._conn: sqlite3.Connection | None = None
 
@@ -31,30 +40,37 @@ class Database:
 
     @property
     def users(self) -> UsersTable:
+        """Get the users table accessor."""
         return UsersTable(self.conn)
 
     @property
     def goals(self) -> GoalsTable:
+        """Get the goals table accessor."""
         return GoalsTable(self.conn)
 
     @property
     def ratings(self) -> RatingsTable:
+        """Get the ratings table accessor."""
         return RatingsTable(self.conn)
 
     @property
     def reminders(self) -> RemindersTable:
+        """Get the reminders table accessor."""
         return RemindersTable(self.conn)
 
     @property
     def user_states(self) -> UserStatesTable:
+        """Get the user_states table accessor."""
         return UserStatesTable(self.conn)
 
     @property
     def audio_journal(self) -> AudioJournalTable:
+        """Get the audio_journal table accessor."""
         return AudioJournalTable(self.conn)
 
     @property
     def referrals(self) -> ReferralsTable:
+        """Get the referrals table accessor."""
         return ReferralsTable(self.conn)
 
     def set_connection(self, conn: sqlite3.Connection) -> None:
@@ -65,16 +81,25 @@ class Database:
         """Clear the database connection reference without closing it."""
         self._conn = None
 
-    def close(self):
+    def close(self) -> None:
+        """Close the database connection if it exists."""
         if self._conn:
             self._conn.close()
             self._conn = None
 
-    def __enter__(self):
+    def __enter__(self) -> "Database":
+        """Enter the context manager."""
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(
+        self,
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: object,
+    ) -> None:
+        """Exit the context manager and close the connection."""
         self.close()
+
 
 # Singleton instance for easy import
 db = Database()

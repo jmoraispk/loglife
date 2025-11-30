@@ -57,9 +57,9 @@ def _build_journal_reminder_message(user_id: int) -> str:
 
 def _build_standard_reminder_message(goal: Goal) -> str:
     """Construct a standard reminder message for a specific goal."""
-    return REMINDER_MESSAGE.replace(
-        "<goal_emoji>", goal.goal_emoji
-    ).replace("<goal_description>", goal.goal_description)
+    return REMINDER_MESSAGE.replace("<goal_emoji>", goal.goal_emoji).replace(
+        "<goal_description>", goal.goal_description
+    )
 
 
 def _process_due_reminder(user: User, reminder: Reminder) -> None:
@@ -68,9 +68,7 @@ def _process_due_reminder(user: User, reminder: Reminder) -> None:
     if not user_goal:
         return
 
-    is_journaling = (
-        user_goal.goal_emoji == "📓" and user_goal.goal_description == "journaling"
-    )
+    is_journaling = user_goal.goal_emoji == "📓" and user_goal.goal_description == "journaling"
 
     if is_journaling:
         message = _build_journal_reminder_message(user.id)

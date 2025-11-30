@@ -21,7 +21,7 @@ def process_vcard(referrer_user: User, raw_vcards: str) -> str:
     Parse the incoming VCARD JSON payload, ensure each contact exists as a
     user, link referrals, and send a welcome message to each referred number.
 
-    Args:
+    Arguments:
         referrer_user: The user dict of the person sharing the VCARDs
         raw_vcards: JSON string containing the VCARD data list
 
@@ -35,12 +35,12 @@ def process_vcard(referrer_user: User, raw_vcards: str) -> str:
     for vcard in vcards:
         referred_phone_number = _extract_phone_number(vcard)
         if not referred_phone_number:
-             continue
-             
+            continue
+
         referred_user: User | None = db.users.get_by_phone(referred_phone_number)
         if not referred_user:
             referred_user = db.users.create(referred_phone_number, "Asia/Karachi")
-        
+
         db.referrals.create(referrer_user_id, referred_user.id)
         send_message(referred_phone_number, WELCOME_MESSAGE)
 

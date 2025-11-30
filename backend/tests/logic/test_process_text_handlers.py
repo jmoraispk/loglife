@@ -18,6 +18,7 @@ from app.config.messages import (
     USAGE_RATE,
 )
 from app.db.client import db
+from app.db.tables import User
 from app.logic.text.handlers import (
     AddGoalHandler,
     DeleteGoalHandler,
@@ -36,11 +37,12 @@ from app.logic.text.handlers import (
 
 # Helper to create a user
 @pytest.fixture
-def user():
+def user() -> User:
+    """Create a test user."""
     return db.users.create("+1234567890", "UTC")
 
 
-def test_add_goal(user):
+def test_add_goal(user: User) -> None:
     """Test AddGoalHandler."""
     handler = AddGoalHandler()
     message = "add goal 🏃 Run 5k"
@@ -62,7 +64,7 @@ def test_add_goal(user):
     assert temp["goal_id"] == goals[0].id
 
 
-def test_add_goal_empty(user):
+def test_add_goal_empty(user: User) -> None:
     """Test AddGoalHandler with empty message."""
     handler = AddGoalHandler()
     message = "add goal"
@@ -71,7 +73,7 @@ def test_add_goal_empty(user):
     assert response is None
 
 
-def test_enable_journaling(user):
+def test_enable_journaling(user: User) -> None:
     """Test EnableJournalingHandler."""
     handler = EnableJournalingHandler()
     message = "enable journaling"
@@ -85,7 +87,7 @@ def test_enable_journaling(user):
     assert "journaling" in goals[0].goal_description
 
 
-def test_enable_journaling_existing(user):
+def test_enable_journaling_existing(user: User) -> None:
     """Test EnableJournalingHandler when already enabled."""
     handler = EnableJournalingHandler()
     handler.handle(user, "enable journaling")  # Create it first
@@ -97,7 +99,7 @@ def test_enable_journaling_existing(user):
     assert len(goals) == 1
 
 
-def test_journal_prompts(user):
+def test_journal_prompts(user: User) -> None:
     """Test JournalPromptsHandler."""
     handler = JournalPromptsHandler()
     assert handler.matches("journal prompts")
@@ -113,7 +115,6 @@ def test_journal_prompts(user):
     assert "Read" in response
 
     # Rate one
-    today = datetime.now(UTC).strftime("%Y-%m-%d")
     db.ratings.create(goal1.id, 3)
 
     response = handler.handle(user, "journal prompts")
@@ -126,7 +127,7 @@ def test_journal_prompts(user):
     assert "Did you complete the goals?" not in response
 
 
-def test_delete_goal(user):
+def test_delete_goal(user: User) -> None:
     """Test DeleteGoalHandler."""
     handler = DeleteGoalHandler()
     message = "delete 1"
@@ -142,7 +143,7 @@ def test_delete_goal(user):
     assert len(goals) == 0
 
 
-def test_delete_goal_invalid(user):
+def test_delete_goal_invalid(user: User) -> None:
     """Test DeleteGoalHandler with invalid inputs."""
     handler = DeleteGoalHandler()
     response = handler.handle(user, "delete invalid")
@@ -153,7 +154,7 @@ def test_delete_goal_invalid(user):
     assert ERROR_INVALID_GOAL_NUMBER in response
 
 
-def test_reminder_time(user):
+def test_reminder_time(user: User) -> None:
     """Test ReminderTimeHandler."""
     handler = ReminderTimeHandler()
     message = "10:00"
@@ -175,14 +176,14 @@ def test_reminder_time(user):
     assert db.user_states.get(user.id) is None
 
 
-def test_reminder_time_no_state(user):
+def test_reminder_time_no_state(user: User) -> None:
     """Test ReminderTimeHandler without proper state."""
     handler = ReminderTimeHandler()
     response = handler.handle(user, "10:00")
     assert ERROR_ADD_GOAL_FIRST in response
 
 
-def test_goals_list(user):
+def test_goals_list(user: User) -> None:
     """Test GoalsListHandler."""
     handler = GoalsListHandler()
     assert handler.matches("goals")
@@ -200,7 +201,7 @@ def test_goals_list(user):
     assert "⏰ 09:00 AM" in response
 
 
-def test_update_reminder(user):
+def test_update_reminder(user: User) -> None:
     """Test UpdateReminderHandler."""
     handler = UpdateReminderHandler()
     assert handler.matches("update 1 8pm")
@@ -221,7 +222,7 @@ def test_update_reminder(user):
     assert str(reminder.reminder_time) == "21:00:00"
 
 
-def test_update_reminder_invalid(user):
+def test_update_reminder_invalid(user: User) -> None:
     """Test UpdateReminderHandler with invalid inputs."""
     handler = UpdateReminderHandler()
 
@@ -235,7 +236,7 @@ def test_update_reminder_invalid(user):
     assert ERROR_INVALID_GOAL_NUMBER in response
 
 
-def test_transcript_toggle(user):
+def test_transcript_toggle(user: User) -> None:
     """Test TranscriptToggleHandler."""
     handler = TranscriptToggleHandler()
     assert handler.matches("transcript on")
@@ -252,7 +253,7 @@ def test_transcript_toggle(user):
     assert "Invalid command" in response
 
 
-def test_week_summary(user):
+def test_week_summary(user: User) -> None:
     """Test WeekSummaryHandler."""
     handler = WeekSummaryHandler()
     assert handler.matches("week")
@@ -268,7 +269,7 @@ def test_week_summary(user):
     assert "🏃" in response
 
 
-def test_lookback(user):
+def test_lookback(user: User) -> None:
     """Test LookbackHandler."""
     handler = LookbackHandler()
     assert handler.matches("lookback")
@@ -290,7 +291,7 @@ def test_lookback(user):
     assert "3 Days" in response
 
 
-def test_rate_single(user):
+def test_rate_single(user: User) -> None:
     """Test RateSingleHandler."""
     handler = RateSingleHandler()
     assert handler.matches("rate 1 3")
@@ -311,7 +312,7 @@ def test_rate_single(user):
     assert rating.rating == 2
 
 
-def test_rate_single_invalid(user):
+def test_rate_single_invalid(user: User) -> None:
     """Test RateSingleHandler with invalid inputs."""
     handler = RateSingleHandler()
 
@@ -323,7 +324,7 @@ def test_rate_single_invalid(user):
     assert response == ERROR_NO_GOALS_SET
 
 
-def test_rate_all(user):
+def test_rate_all(user: User) -> None:
     """Test RateAllHandler."""
     handler = RateAllHandler()
     assert handler.matches("31")
@@ -347,7 +348,7 @@ def test_rate_all(user):
     assert r2.rating == 1
 
 
-def test_rate_all_invalid_length(user):
+def test_rate_all_invalid_length(user: User) -> None:
     """Test RateAllHandler with invalid length."""
     handler = RateAllHandler()
     db.goals.create(user.id, "🏃", "Run")
@@ -357,7 +358,7 @@ def test_rate_all_invalid_length(user):
     assert "Send 1 digits" in response
 
 
-def test_add_goal_special_chars(user):
+def test_add_goal_special_chars(user: User) -> None:
     """Test adding a goal with special characters and SQL injection attempts."""
     handler = AddGoalHandler()
     # SQL injection attempt
@@ -373,7 +374,7 @@ def test_add_goal_special_chars(user):
     assert goals[0].goal_description.lower() == dangerous_string.lower()
 
 
-def test_add_goal_very_long(user):
+def test_add_goal_very_long(user: User) -> None:
     """Test adding a goal with a very long description."""
     handler = AddGoalHandler()
     long_desc = "a" * 1000
@@ -386,7 +387,7 @@ def test_add_goal_very_long(user):
     assert goals[0].goal_description == long_desc
 
 
-def test_rate_single_out_of_bounds(user):
+def test_rate_single_out_of_bounds(user: User) -> None:
     """Test rating with values outside valid range."""
     handler = RateSingleHandler()
     db.goals.create(user.id, "🏃", "Run")
@@ -399,7 +400,7 @@ def test_rate_single_out_of_bounds(user):
     assert handler.handle(user, "rate 1 -1") == USAGE_RATE
 
 
-def test_rate_single_goal_number_overflow(user):
+def test_rate_single_goal_number_overflow(user: User) -> None:
     """Test rating a goal number that doesn't exist (too high)."""
     handler = RateSingleHandler()
     db.goals.create(user.id, "🏃", "Run")
@@ -408,7 +409,7 @@ def test_rate_single_goal_number_overflow(user):
     assert handler.handle(user, "rate 2 3") == USAGE_RATE
 
 
-def test_delete_goal_overflow(user):
+def test_delete_goal_overflow(user: User) -> None:
     """Test deleting a goal number that is too high."""
     handler = DeleteGoalHandler()
     db.goals.create(user.id, "🏃", "Run")
@@ -417,7 +418,7 @@ def test_delete_goal_overflow(user):
     assert ERROR_INVALID_GOAL_NUMBER in response
 
 
-def test_delete_goal_zero_or_negative(user):
+def test_delete_goal_zero_or_negative(user: User) -> None:
     """Test deleting goal 0 or negative."""
     handler = DeleteGoalHandler()
     db.goals.create(user.id, "🏃", "Run")
@@ -429,7 +430,7 @@ def test_delete_goal_zero_or_negative(user):
     assert ERROR_INVALID_GOAL_NUMBER in response
 
 
-def test_lookback_negative_days(user):
+def test_lookback_negative_days(user: User) -> None:
     """Test lookback with negative days."""
     handler = LookbackHandler()
     db.goals.create(user.id, "🏃", "Run")
@@ -439,7 +440,7 @@ def test_lookback_negative_days(user):
     assert "7 Days" in response
 
 
-def test_lookback_huge_days(user):
+def test_lookback_huge_days(user: User) -> None:
     """Test lookback with a huge number of days."""
     handler = LookbackHandler()
     db.goals.create(user.id, "🏃", "Run")

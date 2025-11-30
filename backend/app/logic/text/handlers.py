@@ -168,8 +168,8 @@ class ReminderTimeHandler(TextCommandHandler):
         user_id = user.id
         normalized_time: str | None = parse_time_string(message)
         if normalized_time is None:
-             return None # Should be caught by matches, but for type safety
-        
+            return None  # Should be caught by matches, but for type safety
+
         # Note: We call parse_time_string again here. Ideally we'd cache it,
         # but for stateless handlers this is cleaner than shared state.
 
@@ -227,10 +227,11 @@ class GoalsListHandler(TextCommandHandler):
             if reminder:
                 time_obj = datetime.strptime(  # noqa: DTZ007
                     # Ensure reminder_time is string, though model has it as datetime (check logic)
-                    # In SQLite it comes as string usually unless parsed. 
-                    # Our new model says datetime, but existing DB stores string. 
+                    # In SQLite it comes as string usually unless parsed.
+                    # Our new model says datetime, but existing DB stores string.
                     # Let's assume string for now as we haven't added parsing logic in Table class
-                    str(reminder.reminder_time), "%H:%M:%S"
+                    str(reminder.reminder_time),
+                    "%H:%M:%S",
                 ).time()
                 time_display = f" ⏰ {time_obj.strftime('%I:%M %p')}"
             goal_desc = goal.goal_description
@@ -411,6 +412,7 @@ class RateSingleHandler(TextCommandHandler):
         """Process single rating command."""
         user_id = user.id
         parse_rating: list[str] = message.replace(self.PREFIX, "").strip().split(" ")
+
         if len(parse_rating) != MIN_PARTS_EXPECTED:
             return messages.USAGE_RATE
 
@@ -420,10 +422,8 @@ class RateSingleHandler(TextCommandHandler):
         except ValueError:
             return messages.USAGE_RATE
 
-        if goal_num <= 0:
-            return messages.USAGE_RATE
-
-        if not (1 <= rating_value <= 3):
+        max_rating = 3
+        if goal_num <= 0 or not (1 <= rating_value <= max_rating):
             return messages.USAGE_RATE
 
         user_goals: list[Goal] = db.goals.get_by_user(user_id)
@@ -431,7 +431,7 @@ class RateSingleHandler(TextCommandHandler):
         if not user_goals:
             return messages.ERROR_NO_GOALS_SET
 
-        if not (goal_num <= len(user_goals)):
+        if goal_num > len(user_goals):
             return messages.USAGE_RATE
 
         goal: Goal = user_goals[goal_num - 1]
@@ -489,9 +489,9 @@ class RateAllHandler(TextCommandHandler):
         today_display: str = datetime.now(tz=UTC).strftime("%a (%b %d)")
         goal_emojis: list[str] = [goal.goal_emoji for goal in user_goals]
         status: list[str] = [STYLE[r] for r in ratings]
-        # Use the last goal description for the message (matches original logic, 
+        # Use the last goal description for the message (matches original logic,
         # though maybe unexpected if it refers to 'goal_description' singular)
-        last_goal_desc = user_goals[-1].goal_description 
+        last_goal_desc = user_goals[-1].goal_description
 
         return (
             messages.SUCCESS_RATINGS_SUBMITTED.replace("<today_display>", today_display)

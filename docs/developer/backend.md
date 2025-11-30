@@ -71,13 +71,12 @@ Text commands are processed through a state machine pattern:
 
 **Key files:**
 
-- `app/logic/process_text.py` — Main command routing logic
-- `app/helpers/text/goal.py` — Goal text parsing utilities
-- `app/helpers/text/rate.py` — Rating command parser
-- `app/helpers/text/week.py` — Week summary formatter
-- `app/db/operations/user_goals.py` — Goal database operations
-- `app/db/operations/goal_ratings.py` — Rating database operations
-- `app/db/operations/user_states.py` — Conversation state management
+- `app/logic/text/processor.py` — Main command routing logic
+- `app/logic/text/handlers.py` — Text command handlers (Goal, Rate, etc.)
+- `app/logic/text/week.py` — Week summary formatter
+- `app/db/tables/goals.py` — Goal database operations
+- `app/db/tables/ratings.py` — Rating database operations
+- `app/db/tables/user_states.py` — Conversation state management
 
 ### Audio Journaling
 
@@ -94,9 +93,9 @@ Text commands are processed through a state machine pattern:
 
 **Key files:**
 
-- `app/logic/process_audio.py` — Audio processing logic
-- `app/helpers/audio/transcribe_audio.py` — AssemblyAI integration
-- `app/helpers/audio/summarize_transcript.py` — OpenAI integration
+- `app/logic/audio/processor.py` — Audio processing logic
+- `app/logic/audio/transcribe_audio.py` — AssemblyAI integration
+- `app/logic/audio/journaling/summarize_transcript.py` — OpenAI integration
 
 ### Goal Reminders
 
@@ -115,9 +114,9 @@ Text commands are processed through a state machine pattern:
 
 **Key files:**
 
-- `app/services/reminder.py` — Reminder scheduling service
-- `app/helpers/webhook/get_timezone.py` — Timezone detection
-- `app/helpers/text/reminder_time.py` — Time format parsing
+- `app/services/reminder/worker.py` — Reminder scheduling service
+- `app/routes/webhook/utils.py` — Timezone detection
+- `app/logic/text/reminder_time.py` — Time format parsing
 
 ### Referrals
 
@@ -138,9 +137,8 @@ Text commands are processed through a state machine pattern:
 
 **Key files:**
 
-- `app/logic/process_vcard.py` — VCARD processing logic
-- `app/helpers/vcard/vcard.py` — VCARD parsing utilities
-- `app/db/operations/referrals.py` — Referral database operations
+- `app/logic/vcard/processor.py` — VCARD processing logic
+- `app/db/tables/referrals.py` — Referral database operations
 
 ---
 
@@ -168,9 +166,9 @@ The backend uses SQLite with the following main tables:
 **Main directories:**
 
 - `app/db/` - Database layer and data access
-- `app/helpers/` - Utility functions (referrals, reminders, timezone)
 - `app/logic/` - Message processing and command routing
 - `app/routes/` - Flask API endpoints
+- `app/services/` - Background services (Sender, Reminder)
 - `db/` - SQLite database file and schema
 
 ---

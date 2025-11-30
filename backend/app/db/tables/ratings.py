@@ -34,9 +34,7 @@ class RatingsTable:
         row = self._conn.execute(query, (rating_id,)).fetchone()
         return self._row_to_model(row) if row else None
 
-    def get_by_goal_and_date(
-        self, user_goal_id: int, rating_date: str
-    ) -> Rating | None:
+    def get_by_goal_and_date(self, user_goal_id: int, rating_date: str) -> Rating | None:
         """Retrieve the most recent rating for a goal on a given date."""
         query = """
             SELECT * FROM goal_ratings

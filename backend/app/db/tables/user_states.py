@@ -32,9 +32,7 @@ class UserStatesTable:
         row = self._conn.execute(query, (user_id,)).fetchone()
         return self._row_to_model(row) if row else None
 
-    def create(
-        self, user_id: int, state: str, temp_data: str | None = None
-    ) -> UserState:
+    def create(self, user_id: int, state: str, temp_data: str | None = None) -> UserState:
         """Create or update a user state record."""
         query = """
             INSERT INTO user_states (user_id, state, temp_data)
