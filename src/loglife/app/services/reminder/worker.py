@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from loglife.app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
 from loglife.app.db.client import db
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today, get_timezone_safe
-from loglife.app.services.sender import send_message
+from loglife.core.services.sender import send_message
 
 logger = logging.getLogger(__name__)
 

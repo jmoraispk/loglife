@@ -11,10 +11,8 @@ from typing import TYPE_CHECKING
 
 from flask import Blueprint, g, request
 
-from loglife.app.logic.errors import RouterError
-from loglife.app.routes.webhook.schema import Message
-from loglife.app.routes.webhook.utils import error_response, success_response
-from loglife.core.messaging import message_bus
+from .utils import error_response, success_response
+from loglife.core.messaging import Message, submit_message
 
 if TYPE_CHECKING:
     from flask.typing import ResponseReturnValue
@@ -38,7 +36,7 @@ def webhook() -> ResponseReturnValue:
         message = Message.from_payload(data)
         g.client_type = message.client_type  # expose client type to sender service
 
-        result = message_bus.publish(message)
+        result = submit_message(message, timeout=30)
 
         logger.info(
             "Webhook processed type %s for %s, response generated: %s",
@@ -47,9 +45,6 @@ def webhook() -> ResponseReturnValue:
             result.raw_payload,
         )
         return success_response(message=result.raw_payload, **result.attachments)
-    except RouterError as exc:
-        logger.warning("Router rejected message: %s", exc)
-        return error_response(str(exc))
     except Exception as e:
         error = f"Error processing webhook > {e}"
         logger.exception(error)

@@ -6,8 +6,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from loglife.app.logic.router import RouterError, route_message
-from loglife.app.routes.webhook.schema import Message
+from loglife.app.logic.router import route_message
+from loglife.core.messaging import Message
 
 
 def _make_message(**overrides: str) -> Message:
@@ -69,8 +69,8 @@ def test_route_message_audio_with_tuple(mock_db: MagicMock, _: MagicMock) -> Non
 
 
 def test_route_message_unsupported_type() -> None:
-    """Unsupported message types raise RouterError."""
-    with pytest.raises(RouterError):
-        route_message(_make_message(msg_type="gif"))
+    """Unsupported message types return a fallback response."""
+    result = route_message(_make_message(msg_type="gif"))
+    assert "Can't process" in result.raw_payload
 
 

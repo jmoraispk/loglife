@@ -20,7 +20,7 @@ def app() -> Generator[Flask, None, None]:
     app.config["TESTING"] = True
 
     # Stop the reminder service thread from starting
-    with patch("loglife.app.factory.start_reminder_service"):
+    with patch("loglife.core.factory.start_reminder_service"):
         yield app
 
 

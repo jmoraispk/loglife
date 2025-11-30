@@ -115,7 +115,7 @@ Text commands are processed through a state machine pattern:
 **Key files:**
 
 - `app/services/reminder/worker.py` — Reminder scheduling service
-- `app/routes/webhook/utils.py` — Timezone detection
+- `src/loglife/core/routes/webhook/utils.py` — Timezone detection
 - `app/logic/text/reminder_time.py` — Time format parsing
 
 ### Referrals
@@ -167,7 +167,7 @@ The backend uses SQLite with the following main tables:
 
 - `src/loglife/app/db/` - Database layer and data access
 - `src/loglife/app/logic/` - Message processing and command routing
-- `src/loglife/app/routes/` - Flask API endpoints
+- `src/loglife/core/routes/` - Flask API endpoints
 - `src/loglife/app/services/` - Background services (Sender, Reminder)
 - `src/loglife/app/db/` - SQLite database file and schema
 

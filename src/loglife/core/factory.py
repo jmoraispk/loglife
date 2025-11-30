@@ -4,8 +4,8 @@ from flask import Flask
 
 from loglife.app.config import setup_logging
 from loglife.app.db import init_db
-from loglife.app.routes import emulator_bp, webhook_bp
 from loglife.app.services import start_reminder_service
+from loglife.core.routes import emulator_bp, webhook_bp
 
 
 def create_app() -> Flask:

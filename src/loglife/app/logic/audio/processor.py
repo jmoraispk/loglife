@@ -7,7 +7,7 @@ from loglife.app.db.tables import User
 from loglife.app.logic.audio.journaling.summarize_transcript import summarize_transcript
 from loglife.app.logic.audio.journaling.transcript_to_base64 import transcript_to_base64
 from loglife.app.logic.audio.transcribe_audio import transcribe_audio
-from loglife.app.services.sender import send_message
+from loglife.core.services.sender import send_message
 
 logger = logging.getLogger(__name__)
 

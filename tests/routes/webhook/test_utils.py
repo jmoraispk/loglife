@@ -2,7 +2,7 @@
 
 from flask import Flask
 
-from loglife.app.routes.webhook.utils import error_response, success_response
+from loglife.core.routes.webhook.utils import error_response, success_response
 
 
 def test_success_response() -> None:

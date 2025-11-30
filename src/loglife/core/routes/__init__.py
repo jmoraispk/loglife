@@ -1,11 +1,11 @@
 """Flask blueprints for application routes."""
 
-from loglife.app.routes.webhook import webhook_bp
+from loglife.core.routes.webhook.routes import webhook_bp
 
 # Try to import emulator_bp, but ignore if it fails (optional component)
 try:
-    from loglife.app.routes.emulator import emulator_bp
-except ImportError:
+    from loglife.core.routes.emulator.routes import emulator_bp
+except ImportError:  # pragma: no cover - optional component
     emulator_bp = None
 
 __all__ = ["emulator_bp", "webhook_bp"]

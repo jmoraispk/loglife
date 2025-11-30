@@ -3,12 +3,12 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
-from loglife.app.services.sender.service import _send_emulator_message, _send_whatsapp_message
+from loglife.core.services.sender.service import _send_emulator_message, _send_whatsapp_message
 
 
 def test_send_emulator_message() -> None:
     """Test sending message to emulator queue."""
-    with patch("loglife.app.services.sender.service.log_queue") as mock_queue:
+    with patch("loglife.core.services.sender.service.log_queue") as mock_queue:
         message = "Test message"
         _send_emulator_message(message)
         mock_queue.put.assert_called_once_with(message)
@@ -19,7 +19,7 @@ def test_send_whatsapp_message_success() -> None:
     mock_response = MagicMock()
     mock_response.status_code = 200
 
-    with patch("loglife.app.services.sender.service.requests.post") as mock_post:
+    with patch("loglife.core.services.sender.service.requests.post") as mock_post:
         mock_post.return_value = mock_response
 
         _send_whatsapp_message("1234567890", "Hello")
@@ -32,7 +32,7 @@ def test_send_whatsapp_message_success() -> None:
 
 def test_send_whatsapp_message_failure() -> None:
     """Test WhatsApp message sending failure."""
-    with patch("loglife.app.services.sender.service.requests.post") as mock_post:
+    with patch("loglife.core.services.sender.service.requests.post") as mock_post:
         mock_post.side_effect = Exception("Connection error")
 
         with pytest.raises(RuntimeError) as exc:

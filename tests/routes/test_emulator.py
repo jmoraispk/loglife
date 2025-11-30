@@ -16,7 +16,7 @@ def test_events_stream(client: FlaskClient) -> None:
     """Test that the events stream connects."""
     # Mock log_queue.get to raise an exception to break the infinite loop
     # This verifies the route is reachable and tries to access the queue
-    with patch("loglife.app.routes.emulator.routes.log_queue.get", side_effect=StopIteration):
+    with patch("loglife.core.routes.emulator.routes.log_queue.get", side_effect=StopIteration):
         try:
             client.get("/events")
         except StopIteration:

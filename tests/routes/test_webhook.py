@@ -5,9 +5,8 @@ from unittest.mock import patch
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
-from loglife.app.routes.webhook import webhook_bp
-from loglife.app.logic.router import RouterError
-from loglife.app.routes.webhook.schema import Message
+from loglife.core.routes.webhook import webhook_bp
+from loglife.core.messaging import Message
 
 
 @pytest.fixture
@@ -19,7 +18,7 @@ def client() -> FlaskClient:
         yield client
 
 
-@patch("loglife.app.routes.webhook.routes.message_bus.publish")
+@patch("loglife.core.routes.webhook.routes.submit_message")
 def test_webhook_delegates_to_router(mock_publish, client: FlaskClient) -> None:
     """Ensure the route forwards payloads to the message bus."""
     mock_publish.return_value = Message(
@@ -47,7 +46,7 @@ def test_webhook_delegates_to_router(mock_publish, client: FlaskClient) -> None:
     mock_publish.assert_called_once()
 
 
-@patch("loglife.app.routes.webhook.routes.message_bus.publish", side_effect=RouterError("boom"))
+@patch("loglife.core.routes.webhook.routes.submit_message", side_effect=RuntimeError("boom"))
 def test_webhook_router_error(mock_publish, client: FlaskClient) -> None:
     """Router errors should map to HTTP 400 responses."""
     response = client.post(
