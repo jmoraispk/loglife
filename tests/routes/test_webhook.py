@@ -1,30 +1,34 @@
 """Tests for webhook route."""
 
-from unittest.mock import MagicMock
+from unittest.mock import patch
 
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
-from loglife.app.logic.router import RouterError, RouterResult
 from loglife.app.routes.webhook import webhook_bp
+from loglife.app.logic.router import RouterError
+from loglife.app.routes.webhook.schema import Message
 
 
 @pytest.fixture
-def client_with_router() -> tuple[FlaskClient, MagicMock]:
-    """Flask client fixture with a mocked router extension."""
+def client() -> FlaskClient:
+    """Flask client fixture."""
     app = Flask(__name__)
-    router_mock: MagicMock = MagicMock()
-    app.extensions["router"] = router_mock
-    app.extensions["router_errors"] = (RouterError,)
     app.register_blueprint(webhook_bp)
     with app.test_client() as client:
-        yield client, router_mock
+        yield client
 
 
-def test_webhook_delegates_to_router(client_with_router: tuple[FlaskClient, MagicMock]) -> None:
-    """Ensure the route forwards payloads to the router."""
-    client, router = client_with_router
-    router.return_value = RouterResult(message="ok", extras={"foo": "bar"})
+@patch("loglife.app.routes.webhook.routes.message_bus.publish")
+def test_webhook_delegates_to_router(mock_publish, client: FlaskClient) -> None:
+    """Ensure the route forwards payloads to the message bus."""
+    mock_publish.return_value = Message(
+        sender="1234567890",
+        msg_type="chat",
+        raw_payload="ok",
+        client_type="whatsapp",
+        attachments={"foo": "bar"},
+    )
 
     response = client.post(
         "/webhook",
@@ -40,14 +44,12 @@ def test_webhook_delegates_to_router(client_with_router: tuple[FlaskClient, Magi
     assert response.json["success"] is True
     assert response.json["message"] == "ok"
     assert response.json["data"]["foo"] == "bar"
-    router.assert_called_once()
+    mock_publish.assert_called_once()
 
 
-def test_webhook_router_error(client_with_router: tuple[FlaskClient, MagicMock]) -> None:
+@patch("loglife.app.routes.webhook.routes.message_bus.publish", side_effect=RouterError("boom"))
+def test_webhook_router_error(mock_publish, client: FlaskClient) -> None:
     """Router errors should map to HTTP 400 responses."""
-    client, router = client_with_router
-    router.side_effect = RouterError("boom")
-
     response = client.post(
         "/webhook",
         json={
@@ -61,11 +63,11 @@ def test_webhook_router_error(client_with_router: tuple[FlaskClient, MagicMock])
     assert response.status_code == 400
     assert response.json["success"] is False
     assert "boom" in response.json["message"]
+    mock_publish.assert_called_once()
 
 
-def test_webhook_error_handling(client_with_router: tuple[FlaskClient, MagicMock]) -> None:
+def test_webhook_error_handling(client: FlaskClient) -> None:
     """Invalid payloads should return an error."""
-    client, _ = client_with_router
     response = client.post("/webhook", json={})
     assert response.status_code == 400
     assert response.json["success"] is False

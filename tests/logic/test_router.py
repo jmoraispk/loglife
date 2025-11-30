@@ -31,8 +31,8 @@ def test_route_message_existing_user(mock_db: MagicMock, _: MagicMock) -> None:
     result = route_message(_make_message())
 
     mock_db.users.get_by_phone.assert_called_once()
-    assert result.message == "hello back"
-    assert result.extras == {}
+    assert result.raw_payload == "hello back"
+    assert result.attachments == {}
 
 
 @patch("loglife.app.logic.router.get_timezone_from_number", return_value="UTC")
@@ -52,7 +52,7 @@ def test_route_message_creates_user(
 
     mock_db.users.create.assert_called_once()
     mock_timezone.assert_called_once()
-    assert result.message == "welcome"
+    assert result.raw_payload == "welcome"
 
 
 @patch("loglife.app.logic.router.process_audio", return_value=("file", "done"))
@@ -64,8 +64,8 @@ def test_route_message_audio_with_tuple(mock_db: MagicMock, _: MagicMock) -> Non
 
     result = route_message(_make_message(msg_type="audio"))
 
-    assert result.message == "done"
-    assert result.extras["transcript_file"] == "file"
+    assert result.raw_payload == "done"
+    assert result.attachments["transcript_file"] == "file"
 
 
 def test_route_message_unsupported_type() -> None:

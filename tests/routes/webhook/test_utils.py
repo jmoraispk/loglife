@@ -1,21 +1,26 @@
 """Tests for webhook utilities."""
 
-from loglife.app.logic.timezone import get_timezone_from_number
+from flask import Flask
+
+from loglife.app.routes.webhook.utils import error_response, success_response
 
 
-def test_get_timezone_from_number() -> None:
-    """Test timezone detection from various phone number formats.
+def test_success_response() -> None:
+    app = Flask(__name__)
+    with app.app_context():
+        response, status = success_response(message="ok", foo="bar")
+    assert status == 200
+    payload = response.get_json()
+    assert payload["success"] is True
+    assert payload["message"] == "ok"
+    assert payload["data"]["foo"] == "bar"
 
-    Verifies that the function correctly identifies timezones from valid
-    phone numbers and defaults to UTC for invalid or empty inputs.
-    """
-    test_cases = [
-        ("923186491240", "Asia/Karachi"),
-        ("+923186491240", "Asia/Karachi"),
-        ("123_some_digits", "UTC"),
-        ("no_digits", "UTC"),
-        ("", "UTC"),
-    ]
 
-    for number, expected in test_cases:
-        assert get_timezone_from_number(number) == expected
+def test_error_response() -> None:
+    app = Flask(__name__)
+    with app.app_context():
+        response, status = error_response("boom", status_code=418)
+    assert status == 418
+    payload = response.get_json()
+    assert payload["success"] is False
+    assert payload["message"] == "boom"

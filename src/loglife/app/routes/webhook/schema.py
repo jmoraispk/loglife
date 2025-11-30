@@ -1,5 +1,3 @@
-"""Data structures used by inbound webhook routes."""
-
 from __future__ import annotations
 
 from dataclasses import dataclass, field
@@ -11,21 +9,18 @@ if TYPE_CHECKING:
 
 @dataclass(slots=True)
 class Message:
-    """Normalized representation of an inbound transport message."""
+    """Normalized representation of transport messages."""
 
     sender: str
     msg_type: str
     raw_payload: str
     client_type: str
     metadata: dict[str, Any] = field(default_factory=dict)
+    attachments: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
     def from_payload(cls, payload: Mapping[str, Any]) -> "Message":
-        """Construct a Message from a HTTP/transport payload."""
-        if payload["client_type"] != "whatsapp":
-            msg = f"Invalid client type: {payload['client_type']}"
-            raise ValueError(msg)
-
+        """Construct a Message from an HTTP/transport payload."""
         return cls(
             sender=payload["sender"],
             msg_type=payload["msg_type"],
@@ -34,4 +29,19 @@ class Message:
             metadata=dict(payload.get("metadata") or {}),
         )
 
-
+    def reply(
+        self,
+        raw_payload: str,
+        *,
+        attachments: dict[str, Any] | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> "Message":
+        """Return a cloned message carrying response data."""
+        return Message(
+            sender=self.sender,
+            msg_type=self.msg_type,
+            raw_payload=raw_payload,
+            client_type=self.client_type,
+            metadata=metadata if metadata is not None else dict(self.metadata),
+            attachments=attachments if attachments is not None else dict(self.attachments),
+        )

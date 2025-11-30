@@ -6,11 +6,11 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from loglife.app.config.paths import SCHEMA_FILE
-from loglife.app.db.client import db
-from loglife.app.factory import create_app
 from flask import Flask
 from flask.testing import FlaskClient
+from loglife.app import create_app
+from loglife.app.config.paths import SCHEMA_FILE
+from loglife.app.db.client import db
 
 
 @pytest.fixture
