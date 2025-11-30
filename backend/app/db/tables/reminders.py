@@ -76,8 +76,7 @@ class RemindersTable:
             return self.get(reminder_id)
 
         params.append(reminder_id)
-        # noqa: S608 - Safe usage (whitelist construction)
-        query = f"UPDATE goal_reminders SET {', '.join(updates)} WHERE id = ?"  # noqa: S608
+        query = f"UPDATE goal_reminders SET {', '.join(updates)} WHERE id = ?"
         self._conn.execute(query, params)
 
         return self.get(reminder_id)

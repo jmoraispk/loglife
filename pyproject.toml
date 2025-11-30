@@ -63,3 +63,6 @@ ignore = [
     "S101",    # Use of assert detected (standard in pytest)
     "PLR2004", # Magic value used in comparison (acceptable in tests)
 ]
+"backend/app/db/tables/*.py" = [
+    "S608",    # Possible SQL injection vector through string-based query construction (whitelisted)
+]

@@ -66,8 +66,7 @@ class UserStatesTable:
             return self.get(user_id)
 
         params.append(user_id)
-        # noqa: S608 - Safe usage (whitelist construction)
-        query = f"UPDATE user_states SET {', '.join(updates)} WHERE user_id = ?"  # noqa: S608
+        query = f"UPDATE user_states SET {', '.join(updates)} WHERE user_id = ?"
         self._conn.execute(query, params)
 
         return self.get(user_id)

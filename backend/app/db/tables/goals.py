@@ -82,8 +82,7 @@ class GoalsTable:
             return self.get(goal_id)
 
         params.append(goal_id)
-        # noqa: S608 - Safe usage (whitelist construction)
-        query = f"UPDATE user_goals SET {', '.join(updates)} WHERE id = ?"  # noqa: S608
+        query = f"UPDATE user_goals SET {', '.join(updates)} WHERE id = ?"
         self._conn.execute(query, params)
 
         return self.get(goal_id)
