@@ -101,7 +101,31 @@ def start_message_worker(handler: "Callable[[Message], Message]") -> None:
     _worker_started = True
 
 
+def enqueue_outbound_message(message: Message) -> None:
+    """Place a message onto the outbound queue."""
+    _outbound_queue.put(message)
+
+
 def get_outbound_message(timeout: float | None = None) -> Message:
     """Retrieve the next message destined for outbound transports."""
     return _outbound_queue.get(timeout=timeout)
+
+
+def build_outbound_message(
+    number: str,
+    text: str,
+    *,
+    client_type: str = "whatsapp",
+    metadata: dict[str, Any] | None = None,
+    attachments: dict[str, Any] | None = None,
+) -> Message:
+    """Helper to construct outbound messages."""
+    return Message(
+        sender=number,
+        msg_type="system",
+        raw_payload=text,
+        client_type=client_type,
+        metadata=metadata or {},
+        attachments=attachments or {},
+    )
 

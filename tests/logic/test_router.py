@@ -4,8 +4,6 @@ from __future__ import annotations
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from loglife.app.logic.router import route_message
 from loglife.core.messaging import Message
 

@@ -5,12 +5,14 @@ from flask import Flask
 from loglife.app.logic.router import route_message
 from loglife.core.factory import create_app as _create_app
 from loglife.core.messaging import start_message_worker
+from loglife.core.services.sender import start_sender_worker
 
 
 def create_app() -> Flask:
     """Create the Flask application and register message handlers."""
     app = _create_app()
     start_message_worker(route_message)
+    start_sender_worker()
     return app
 
 

@@ -44,7 +44,7 @@ def test_check_reminders() -> None:
         patch("loglife.app.db.tables.reminders.RemindersTable.get_all") as mock_get_reminders,
         patch("loglife.app.db.tables.users.UsersTable.get_all") as mock_get_all_users,
         patch("loglife.app.db.tables.goals.GoalsTable.get") as mock_get_goal,
-        patch("loglife.app.services.reminder.worker.send_message") as mock_send,
+        patch("loglife.app.services.reminder.worker.queue_async_message") as mock_send,
     ):
         mock_get_reminders.return_value = [mock_reminder]
         mock_get_all_users.return_value = [mock_user]
@@ -54,7 +54,11 @@ def test_check_reminders() -> None:
 
         # Assert message sent
         # Ensure we are matching the exact call format including args
-        mock_send.assert_called_once_with("1234567890", "⏰ Reminder: ✅ Test Goal")
+        mock_send.assert_called_once_with(
+            "1234567890",
+            "⏰ Reminder: ✅ Test Goal",
+            client_type="whatsapp",
+        )
 
 
 def test_is_reminder_due_true() -> None:

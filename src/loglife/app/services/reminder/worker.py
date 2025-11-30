@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 from loglife.app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
 from loglife.app.db.client import db
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today, get_timezone_safe
-from loglife.core.services.sender import send_message
+from loglife.core.services.sender import queue_async_message
 
 logger = logging.getLogger(__name__)
 
@@ -75,7 +75,7 @@ def _process_due_reminder(user: User, reminder: Reminder) -> None:
     else:
         message = _build_standard_reminder_message(user_goal)
 
-    send_message(user.phone_number, message)
+    queue_async_message(user.phone_number, message, client_type="whatsapp")
     logger.info(
         "Sent reminder '%s' to %s",
         user_goal.goal_description,
