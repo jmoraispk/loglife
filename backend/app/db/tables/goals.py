@@ -30,18 +30,14 @@ class GoalsTable:
 
     def get(self, goal_id: int) -> Goal | None:
         """Retrieve a goal by its ID."""
-        row = self._conn.execute(
-            "SELECT * FROM user_goals WHERE id = ?",
-            (goal_id,),
-        ).fetchone()
+        query = "SELECT * FROM user_goals WHERE id = ?"
+        row = self._conn.execute(query, (goal_id,)).fetchone()
         return self._row_to_model(row) if row else None
 
     def get_by_user(self, user_id: int) -> list[Goal]:
         """Retrieve all goals for a user."""
-        rows = self._conn.execute(
-            "SELECT * FROM user_goals WHERE user_id = ? ORDER BY created_at DESC",
-            (user_id,),
-        ).fetchall()
+        query = "SELECT * FROM user_goals WHERE user_id = ? ORDER BY created_at DESC"
+        rows = self._conn.execute(query, (user_id,)).fetchall()
         return [self._row_to_model(row) for row in rows]
 
     def create(
@@ -52,13 +48,11 @@ class GoalsTable:
         boost_level: int = 1,
     ) -> Goal:
         """Create a new goal record."""
-        cursor = self._conn.execute(
-            """
+        query = """
             INSERT INTO user_goals(user_id, goal_emoji, goal_description, boost_level)
             VALUES (?, ?, ?, ?)
-            """,
-            (user_id, goal_emoji, goal_description, boost_level),
-        )
+        """
+        cursor = self._conn.execute(query, (user_id, goal_emoji, goal_description, boost_level))
         return self.get(cursor.lastrowid)  # type: ignore[arg-type]
 
     def update(
@@ -96,7 +90,8 @@ class GoalsTable:
 
     def delete(self, goal_id: int) -> None:
         """Delete a goal record."""
-        self._conn.execute("DELETE FROM user_goals WHERE id = ?", (goal_id,))
+        query = "DELETE FROM user_goals WHERE id = ?"
+        self._conn.execute(query, (goal_id,))
 
     def _row_to_model(self, row: sqlite3.Row) -> Goal:
         """Convert a SQLite row to a Goal model."""

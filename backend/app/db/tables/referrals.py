@@ -28,19 +28,16 @@ class ReferralsTable:
 
     def create(self, referrer_user_id: int, referred_user_id: int) -> None:
         """Create a new referral record."""
-        self._conn.execute(
-            """
+        query = """
             INSERT INTO referrals(referrer_user_id, referred_user_id)
             VALUES (?, ?)
-            """,
-            (referrer_user_id, referred_user_id),
-        )
+        """
+        self._conn.execute(query, (referrer_user_id, referred_user_id))
 
     def get(self, referral_id: int) -> Referral | None:
         """Retrieve a referral by its ID."""
-        row = self._conn.execute(
-            "SELECT * FROM referrals WHERE id = ?", (referral_id,)
-        ).fetchone()
+        query = "SELECT * FROM referrals WHERE id = ?"
+        row = self._conn.execute(query, (referral_id,)).fetchone()
         return self._row_to_model(row) if row else None
 
     def _row_to_model(self, row: sqlite3.Row) -> Referral:

@@ -29,36 +29,29 @@ class RemindersTable:
 
     def get(self, reminder_id: int) -> Reminder | None:
         """Retrieve a reminder by its ID."""
-        row = self._conn.execute(
-            "SELECT * FROM goal_reminders WHERE id = ?",
-            (reminder_id,),
-        ).fetchone()
+        query = "SELECT * FROM goal_reminders WHERE id = ?"
+        row = self._conn.execute(query, (reminder_id,)).fetchone()
         return self._row_to_model(row) if row else None
 
     def get_by_goal_id(self, user_goal_id: int) -> Reminder | None:
         """Retrieve a reminder for a specific goal."""
-        row = self._conn.execute(
-            "SELECT * FROM goal_reminders WHERE user_goal_id = ?",
-            (user_goal_id,),
-        ).fetchone()
+        query = "SELECT * FROM goal_reminders WHERE user_goal_id = ?"
+        row = self._conn.execute(query, (user_goal_id,)).fetchone()
         return self._row_to_model(row) if row else None
 
     def get_all(self) -> list[Reminder]:
         """Retrieve all reminders."""
-        rows = self._conn.execute(
-            "SELECT * FROM goal_reminders ORDER BY created_at DESC"
-        ).fetchall()
+        query = "SELECT * FROM goal_reminders ORDER BY created_at DESC"
+        rows = self._conn.execute(query).fetchall()
         return [self._row_to_model(row) for row in rows]
 
     def create(self, user_id: int, user_goal_id: int, reminder_time: str) -> Reminder:
         """Create a new reminder record."""
-        cursor = self._conn.execute(
-            """
+        query = """
             INSERT INTO goal_reminders (user_id, user_goal_id, reminder_time)
             VALUES (?, ?, ?)
-            """,
-            (user_id, user_goal_id, reminder_time),
-        )
+        """
+        cursor = self._conn.execute(query, (user_id, user_goal_id, reminder_time))
         return self.get(cursor.lastrowid)  # type: ignore[arg-type]
 
     def update(
@@ -91,7 +84,8 @@ class RemindersTable:
 
     def delete(self, reminder_id: int) -> None:
         """Delete a reminder record."""
-        self._conn.execute("DELETE FROM goal_reminders WHERE id = ?", (reminder_id,))
+        query = "DELETE FROM goal_reminders WHERE id = ?"
+        self._conn.execute(query, (reminder_id,))
 
     def _row_to_model(self, row: sqlite3.Row) -> Reminder:
         """Convert a SQLite row to a Reminder model."""

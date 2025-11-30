@@ -28,27 +28,23 @@ class UserStatesTable:
 
     def get(self, user_id: int) -> UserState | None:
         """Retrieve a user state by user ID."""
-        row = self._conn.execute(
-            "SELECT * FROM user_states WHERE user_id = ?",
-            (user_id,),
-        ).fetchone()
+        query = "SELECT * FROM user_states WHERE user_id = ?"
+        row = self._conn.execute(query, (user_id,)).fetchone()
         return self._row_to_model(row) if row else None
 
     def create(
         self, user_id: int, state: str, temp_data: str | None = None
     ) -> UserState:
         """Create or update a user state record."""
-        self._conn.execute(
-            """
+        query = """
             INSERT INTO user_states (user_id, state, temp_data)
             VALUES (?, ?, ?)
             ON CONFLICT(user_id) DO UPDATE SET
                 state = excluded.state,
                 temp_data = excluded.temp_data,
                 created_at = CURRENT_TIMESTAMP
-            """,
-            (user_id, state, temp_data),
-        )
+        """
+        self._conn.execute(query, (user_id, state, temp_data))
         return self.get(user_id)  # type: ignore[arg-type]
 
     def update(
@@ -78,7 +74,8 @@ class UserStatesTable:
 
     def delete(self, user_id: int) -> None:
         """Delete a user state record."""
-        self._conn.execute("DELETE FROM user_states WHERE user_id = ?", (user_id,))
+        query = "DELETE FROM user_states WHERE user_id = ?"
+        self._conn.execute(query, (user_id,))
 
     def _row_to_model(self, row: sqlite3.Row) -> UserState:
         """Convert a SQLite row to a UserState model."""

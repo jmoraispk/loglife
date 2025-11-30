@@ -29,10 +29,8 @@ class UsersTable:
 
     def get(self, user_id: int) -> User | None:
         """Retrieve a user by their ID."""
-        row = self._conn.execute(
-            "SELECT * FROM users WHERE id = ?",
-            (user_id,),
-        ).fetchone()
+        query = "SELECT * FROM users WHERE id = ?"
+        row = self._conn.execute(query, (user_id,)).fetchone()
 
         if row:
             return self._row_to_model(row)
@@ -40,10 +38,8 @@ class UsersTable:
 
     def get_by_phone(self, phone_number: str) -> User | None:
         """Retrieve a user by their phone number."""
-        row = self._conn.execute(
-            "SELECT * FROM users WHERE phone_number = ?",
-            (phone_number,),
-        ).fetchone()
+        query = "SELECT * FROM users WHERE phone_number = ?"
+        row = self._conn.execute(query, (phone_number,)).fetchone()
 
         if row:
             return self._row_to_model(row)
@@ -51,15 +47,14 @@ class UsersTable:
 
     def get_all(self) -> list[User]:
         """Retrieve all users."""
-        rows = self._conn.execute("SELECT * FROM users").fetchall()
+        query = "SELECT * FROM users"
+        rows = self._conn.execute(query).fetchall()
         return [self._row_to_model(row) for row in rows]
 
     def create(self, phone_number: str, timezone: str) -> User:
         """Create a new user record."""
-        cursor = self._conn.execute(
-            "INSERT INTO users (phone_number, timezone) VALUES (?, ?)",
-            (phone_number, timezone),
-        )
+        query = "INSERT INTO users (phone_number, timezone) VALUES (?, ?)"
+        cursor = self._conn.execute(query, (phone_number, timezone))
         # We need to fetch the created user to return the full model with ID and timestamps
         # The result of get() will not be None here because we just inserted it.
         return self.get(cursor.lastrowid)  # type: ignore[arg-type]
@@ -99,7 +94,8 @@ class UsersTable:
 
     def delete(self, user_id: int) -> None:
         """Delete a user record."""
-        self._conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        query = "DELETE FROM users WHERE id = ?"
+        self._conn.execute(query, (user_id,))
 
     def _row_to_model(self, row: sqlite3.Row) -> User:
         """Convert a SQLite row to a User model."""

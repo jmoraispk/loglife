@@ -30,39 +30,32 @@ class RatingsTable:
 
     def get(self, rating_id: int) -> Rating | None:
         """Retrieve a rating by its ID."""
-        row = self._conn.execute(
-            "SELECT * FROM goal_ratings WHERE id = ?",
-            (rating_id,),
-        ).fetchone()
+        query = "SELECT * FROM goal_ratings WHERE id = ?"
+        row = self._conn.execute(query, (rating_id,)).fetchone()
         return self._row_to_model(row) if row else None
 
     def get_by_goal_and_date(
         self, user_goal_id: int, rating_date: str
     ) -> Rating | None:
         """Retrieve the most recent rating for a goal on a given date."""
-        row = self._conn.execute(
-            """
+        query = """
             SELECT * FROM goal_ratings
             WHERE user_goal_id = ? AND DATE(rating_date) = DATE(?)
             ORDER BY created_at DESC LIMIT 1
-            """,
-            (user_goal_id, rating_date),
-        ).fetchone()
+        """
+        row = self._conn.execute(query, (user_goal_id, rating_date)).fetchone()
         return self._row_to_model(row) if row else None
 
     def get_all(self) -> list[Rating]:
         """Retrieve all ratings."""
-        rows = self._conn.execute(
-            "SELECT * FROM goal_ratings ORDER BY created_at DESC"
-        ).fetchall()
+        query = "SELECT * FROM goal_ratings ORDER BY created_at DESC"
+        rows = self._conn.execute(query).fetchall()
         return [self._row_to_model(row) for row in rows]
 
     def create(self, user_goal_id: int, rating: int) -> Rating:
         """Create a new rating record."""
-        cursor = self._conn.execute(
-            "INSERT INTO goal_ratings(user_goal_id, rating) VALUES (?, ?)",
-            (user_goal_id, rating),
-        )
+        query = "INSERT INTO goal_ratings(user_goal_id, rating) VALUES (?, ?)"
+        cursor = self._conn.execute(query, (user_goal_id, rating))
         return self.get(cursor.lastrowid)  # type: ignore[arg-type]
 
     def update(
@@ -100,7 +93,8 @@ class RatingsTable:
 
     def delete(self, rating_id: int) -> None:
         """Delete a rating record."""
-        self._conn.execute("DELETE FROM goal_ratings WHERE id = ?", (rating_id,))
+        query = "DELETE FROM goal_ratings WHERE id = ?"
+        self._conn.execute(query, (rating_id,))
 
     def _row_to_model(self, row: sqlite3.Row) -> Rating:
         """Convert a SQLite row to a Rating model."""
