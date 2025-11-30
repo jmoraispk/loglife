@@ -25,6 +25,7 @@ dev = [
     "mkdocs-material>=9.6.22",  # Theme
     "mkdocs-glightbox>=0.5.2",  # "Click image to zoom" feature
     "mkdocstrings[python]>=0.28.0", # Auto-doc from docstrings
+    "mkdocs-mermaid-zoom>=0.1.0",  # Mermaid zoom support
     
     # Cross-platform
     "tzdata>=2025.2",  # Timezone data (needed for timezones in Windows)
@@ -47,7 +48,7 @@ exclude = ["backend.app.db*"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["ALL"]
@@ -61,4 +62,7 @@ ignore = [
 "backend/tests/**/*.py" = [
     "S101",    # Use of assert detected (standard in pytest)
     "PLR2004", # Magic value used in comparison (acceptable in tests)
+]
+"backend/app/db/tables/*.py" = [
+    "S608",    # Possible SQL injection vector through string-based query construction (whitelisted)
 ]

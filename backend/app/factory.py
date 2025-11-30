@@ -2,7 +2,7 @@
 
 from app.config import STATIC, TEMPLATES, setup_logging
 from app.db import init_db
-from app.routes import emulator_bp, events_bp, webhook_bp
+from app.routes import emulator_bp, webhook_bp
 from app.services import start_reminder_service
 from flask import Flask
 
@@ -17,11 +17,9 @@ def create_app() -> Flask:
 
     start_reminder_service()
 
-    app.register_blueprint(emulator_bp)
+    if emulator_bp:
+        app.register_blueprint(emulator_bp)
 
     app.register_blueprint(webhook_bp)
 
-    app.register_blueprint(events_bp)
-
     return app
-

@@ -1,1 +1,0 @@
-"""VCARD processing utilities."""

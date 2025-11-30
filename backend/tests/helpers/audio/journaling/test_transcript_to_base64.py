@@ -2,7 +2,7 @@
 
 import base64
 
-from app.helpers.audio.journaling.transcript_to_base64 import transcript_to_base64
+from app.logic.audio.journaling.transcript_to_base64 import transcript_to_base64
 
 
 def test_transcript_to_base64() -> None:

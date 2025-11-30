@@ -1,11 +1,11 @@
-"""Business logic module for processing different types of messages."""
+"""Business logic for message processing."""
 
-from .process_audio import process_audio
-from .process_text import process_text
-from .process_vcard import process_vard
+from app.logic.audio import process_audio
+from app.logic.text import process_text
+from app.logic.vcard import process_vcard
 
 __all__ = [
     "process_audio",
     "process_text",
-    "process_vard",
+    "process_vcard",
 ]

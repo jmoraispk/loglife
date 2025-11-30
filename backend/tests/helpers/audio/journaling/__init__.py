@@ -1,2 +1,1 @@
 """Journaling tests package."""
-

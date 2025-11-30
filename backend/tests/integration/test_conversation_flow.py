@@ -125,4 +125,3 @@ def test_error_handling_flow(client: FlaskClient) -> None:
     # 2. Update non-existent goal
     data = send_message(client, "update 99 10pm")
     assert "Invalid goal number" in data["message"] or "goals" in data["message"]
-

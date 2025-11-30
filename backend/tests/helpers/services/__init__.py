@@ -1,2 +1,0 @@
-"""Services helpers tests package."""
-

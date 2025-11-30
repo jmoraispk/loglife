@@ -2,12 +2,12 @@
 
 import sqlite3
 from collections.abc import Generator
-from contextlib import contextmanager
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
 from app.config.paths import SCHEMA_FILE
+from app.db.client import db
 from app.factory import create_app
 from flask import Flask
 from flask.testing import FlaskClient
@@ -59,38 +59,19 @@ def test_db() -> Generator[sqlite3.Connection, None, None]:
 
 
 @pytest.fixture(autouse=True)
-def mock_connect(
-    monkeypatch: pytest.MonkeyPatch, test_db: sqlite3.Connection
-) -> sqlite3.Connection:
-    """Mock the connect() function in ALL db operations modules.
+def mock_db_connection(test_db: sqlite3.Connection) -> Generator[None, None, None]:
+    """Mock the database connection in the singleton 'db' instance.
 
-    Ensure your db operations use the test database instead of the real one.
+    This fixture automatically runs for every test (autouse=True). It injects
+    the in-memory `test_db` connection into the global `db` singleton.
 
-    The key: Patch where connect is USED, not where it's DEFINED.
+    This ensures that any application code importing `app.db.client.db` will
+    use our isolated test database instead of trying to open a real file on disk.
     """
+    # Inject the test database connection into the singleton
+    db.set_connection(test_db)
 
-    # Create a context manager that returns the test database
-    @contextmanager
-    def mock_connect_func() -> Generator[sqlite3.Connection, None, None]:
-        try:
-            yield test_db
-            test_db.commit()  # Commit transaction on success
-        except Exception:
-            test_db.rollback()  # Rollback on error
-            raise
+    yield
 
-    # Patch connect in ALL the operations modules where it's imported
-    operations_modules = [
-        "app.db.operations.users",
-        "app.db.operations.user_goals",
-        "app.db.operations.user_states",
-        "app.db.operations.goal_ratings",
-        "app.db.operations.goal_reminders",
-        "app.db.operations.referrals",
-        "app.db.operations.audio_journal_entries",
-    ]
-
-    for module in operations_modules:
-        monkeypatch.setattr(f"{module}.connect", mock_connect_func)
-
-    return test_db
+    # Reset the connection after the test to ensure clean state
+    db.clear_connection()

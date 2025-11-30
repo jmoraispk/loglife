@@ -13,5 +13,5 @@ DATABASE = BACKEND_ROOT / "db"
 # files
 ACCESS_LOG = LOGS / "access.txt"
 ERROR_LOG = LOGS / "error.txt"
-DATABASE_FILE = DATABASE / "loglife.db"
-SCHEMA_FILE = DATABASE / "schema.sql"
+DATABASE_FILE = BACKEND_ROOT / "app" / "db" / "loglife.db"
+SCHEMA_FILE = BACKEND_ROOT / "app" / "db" / "schema.sql"

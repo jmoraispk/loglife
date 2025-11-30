@@ -1,8 +1,9 @@
 """Tests for webhook route."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
+from app.db.tables import User
 from app.routes.webhook import webhook_bp
 from flask import Flask
 from flask.testing import FlaskClient
@@ -19,11 +20,16 @@ def client() -> FlaskClient:
 
 def test_webhook_text_message(client: FlaskClient) -> None:
     """Test handling a text message via webhook."""
-    # Mock user lookup/creation
-    with patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user:
-        mock_get_user.return_value = {"id": 1, "phone_number": "1234567890", "timezone": "UTC"}
+    mock_user = MagicMock(spec=User)
+    mock_user.id = 1
+    mock_user.phone_number = "1234567890"
+    mock_user.timezone = "UTC"
 
-        with patch("app.routes.webhook.process_text") as mock_process:
+    # Mock user lookup/creation
+    with patch("app.db.tables.users.UsersTable.get_by_phone") as mock_get_user:
+        mock_get_user.return_value = mock_user
+
+        with patch("app.routes.webhook.routes.process_text") as mock_process:
             mock_process.return_value = "Response message"
 
             response = client.post(
@@ -43,13 +49,18 @@ def test_webhook_text_message(client: FlaskClient) -> None:
 
 def test_webhook_new_user(client: FlaskClient) -> None:
     """Test handling a message from a new user."""
+    mock_user = MagicMock(spec=User)
+    mock_user.id = 1
+    mock_user.phone_number = "1234567890"
+    mock_user.timezone = "UTC"
+
     with (
-        patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user,
-        patch("app.routes.webhook.create_user") as mock_create_user,
-        patch("app.routes.webhook.process_text") as mock_process,
+        patch("app.db.tables.users.UsersTable.get_by_phone") as mock_get_user,
+        patch("app.db.tables.users.UsersTable.create") as mock_create_user,
+        patch("app.routes.webhook.routes.process_text") as mock_process,
     ):
         mock_get_user.return_value = None
-        mock_create_user.return_value = {"id": 1, "phone_number": "1234567890", "timezone": "UTC"}
+        mock_create_user.return_value = mock_user
         mock_process.return_value = "Welcome"
 
         response = client.post(
@@ -68,11 +79,14 @@ def test_webhook_new_user(client: FlaskClient) -> None:
 
 def test_webhook_audio_message(client: FlaskClient) -> None:
     """Test handling an audio message."""
+    mock_user = MagicMock(spec=User)
+    mock_user.id = 1
+
     with (
-        patch("app.routes.webhook.get_user_by_phone_number") as mock_get_user,
-        patch("app.routes.webhook.process_audio") as mock_process,
+        patch("app.db.tables.users.UsersTable.get_by_phone") as mock_get_user,
+        patch("app.routes.webhook.routes.process_audio") as mock_process,
     ):
-        mock_get_user.return_value = {"id": 1}
+        mock_get_user.return_value = mock_user
         mock_process.return_value = "Audio processed"
 
         response = client.post(
