@@ -15,15 +15,7 @@ from .messages import (
     USAGE_RATE,
     WELCOME_MESSAGE,
 )
-from .paths import (
-    ACCESS_LOG,
-    DATABASE_FILE,
-    ERROR_LOG,
-    LOGS,
-    SCHEMA_FILE,
-    STATIC,
-    TEMPLATES,
-)
+from .paths import ACCESS_LOG, DATABASE_FILE, ERROR_LOG, LOGS, SCHEMA_FILE
 from .secrets import ASSEMBLYAI_API_KEY, OPENAI_API_KEY
 from .settings import (
     COMMAND_ALIASES,
@@ -56,11 +48,9 @@ __all__ = [
     "REFERRAL_SUCCESS",
     "REMINDER_MESSAGE",
     "SCHEMA_FILE",
-    "STATIC",
     "STYLE",
     "SUCCESS_INDIVIDUAL_RATING",
     "SUCCESS_RATINGS_SUBMITTED",
-    "TEMPLATES",
     "USAGE_RATE",
     "WELCOME_MESSAGE",
     "WHATSAPP_API_URL",

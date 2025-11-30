@@ -8,7 +8,12 @@ This module defines a Flask blueprint for:
 from loglife.app.services.sender import log_queue
 from flask import Blueprint, Response, render_template
 
-emulator_bp = Blueprint("emulator", __name__)
+emulator_bp = Blueprint(
+    "emulator",
+    __name__,
+    template_folder="templates",
+    static_folder="static",
+)
 
 
 @emulator_bp.route("/")
