@@ -1,33 +1,72 @@
-"""Service for sending messages to clients (WhatsApp, Emulator, etc.)."""
+"""Outbound message sender and worker."""
 
 from __future__ import annotations
 
 import logging
 import queue
-from queue import Empty
+from queue import Empty, Queue
 from threading import Thread
 from typing import Any
 
 import requests
 from flask import g
 from loglife.app.config import WHATSAPP_API_URL
-from loglife.core.messaging import (
-    Message,
-    build_outbound_message,
-    enqueue_outbound_message,
-    get_outbound_message,
-)
+from loglife.core.messaging.message import Message
 
 logger = logging.getLogger(__name__)
 
+_outbound_queue: Queue[Message] = Queue()
+_sender_worker_started = False
+
 # Queue for streaming log messages to clients via SSE
 log_queue = queue.Queue()
-_sender_worker_started = False
+
+# Expose for tests
+__all__ = [
+    "build_outbound_message",
+    "enqueue_outbound_message",
+    "get_outbound_message",
+    "log_queue",
+    "queue_async_message",
+    "send_message",
+    "start_sender_worker",
+    "_outbound_queue",
+    "_sender_worker_started",
+]
+
+
+def enqueue_outbound_message(message: Message) -> None:
+    """Place a message onto the outbound queue."""
+    _outbound_queue.put(message)
+
+
+def get_outbound_message(timeout: float | None = 0.1) -> Message:
+    """Retrieve the next message destined for outbound transports."""
+    return _outbound_queue.get(timeout=timeout)
+
+
+def build_outbound_message(
+    number: str,
+    text: str,
+    *,
+    client_type: str = "whatsapp",
+    metadata: dict[str, Any] | None = None,
+    attachments: dict[str, Any] | None = None,
+) -> Message:
+    """Helper to construct outbound messages."""
+    return Message(
+        sender=number,
+        msg_type="system",
+        raw_payload=text,
+        client_type=client_type,
+        metadata=metadata or {},
+        attachments=attachments or {},
+    )
 
 
 def start_sender_worker() -> None:
     """Start a daemon worker that drains the outbound queue."""
-    global _sender_worker_started
+    global _sender_worker_started  # noqa: PLW0603
     if _sender_worker_started:
         return
 
@@ -121,3 +160,4 @@ def send_message(
             metadata=metadata,
             attachments=attachments,
         )
+

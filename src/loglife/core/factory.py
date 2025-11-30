@@ -6,9 +6,8 @@ from loglife.app.config import setup_logging
 from loglife.app.db import init_db
 from loglife.app.logic.router import route_message
 from loglife.app.services import start_reminder_service
-from loglife.core.messaging import start_message_worker
+from loglife.core.messaging import start_message_worker, start_sender_worker
 from loglife.core.routes import emulator_bp, webhook_bp
-from loglife.core.services.sender import start_sender_worker
 
 
 def create_app() -> Flask:

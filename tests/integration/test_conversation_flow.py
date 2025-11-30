@@ -2,6 +2,7 @@
 
 from queue import Empty
 from typing import Any
+from unittest.mock import patch
 
 from flask.testing import FlaskClient
 from loglife.core.messaging import get_outbound_message
@@ -17,6 +18,7 @@ def _drain_outbound_queue() -> None:
 
 def send_message(client: FlaskClient, text: str, sender: str = "+1234567890") -> dict[str, Any]:
     """Help simulate sending a WhatsApp message to the webhook."""
+    # Drain queue manually to ensure clean state
     _drain_outbound_queue()
 
     response = client.post(
@@ -30,6 +32,8 @@ def send_message(client: FlaskClient, text: str, sender: str = "+1234567890") ->
     )
     assert response.status_code == 200
 
+    # Retrieve message directly from queue
+    # Since sender worker is disabled in tests (via conftest), messages stay in queue
     outbound = get_outbound_message(timeout=1)
     return {"message": outbound.raw_payload}
 

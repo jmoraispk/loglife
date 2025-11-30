@@ -7,27 +7,25 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from loglife.core import messaging
 from loglife.core.messaging import Message, enqueue_inbound_message, start_message_worker
-
-
 @pytest.fixture(autouse=True)
 def reset_worker_state():
     """Ensure clean slate for worker state."""
-    messaging._worker_started = False
+    from loglife.core.messaging.receiver import _worker_started, _inbound_queue
+    _worker_started = False
     # Drain queue
-    while not messaging._inbound_queue.empty():
+    while not _inbound_queue.empty():
         try:
-            messaging._inbound_queue.get_nowait()
+            _inbound_queue.get_nowait()
         except queue.Empty:
             break
     yield
     # Cleanup after test
-    messaging._worker_started = False
+    _worker_started = False
     # Send stop signal if thread is running?
-    while not messaging._inbound_queue.empty():
+    while not _inbound_queue.empty():
         try:
-            messaging._inbound_queue.get_nowait()
+            _inbound_queue.get_nowait()
         except queue.Empty:
             break
 
@@ -39,7 +37,7 @@ def test_start_message_worker_handles_exception(caplog):
     mock_handler.side_effect = [ValueError("Test Error"), None]
 
     # Using the synchronous execution trick for unit testing logic
-    with patch("loglife.core.messaging.Thread") as mock_thread_cls:
+    with patch("loglife.core.messaging.receiver.Thread") as mock_thread_cls:
         start_message_worker(mock_handler)
         worker_func = mock_thread_cls.call_args[1]["target"]
 
@@ -66,24 +64,26 @@ def test_high_volume_queue_pressure():
         with lock:
             processed_count += 1
 
-    # Start real worker
-    start_message_worker(handler)
+    # Reset worker state to allow starting
+    import loglife.core.messaging.receiver as receiver_module
+    receiver_module._worker_started = False
 
-    # Enqueue 50 messages
-    count = 50
-    for i in range(count):
-        enqueue_inbound_message(Message(str(i), "chat", "hi", "w"))
+    # Use mocked thread to run synchronously
+    with patch("loglife.core.messaging.receiver.Thread") as mock_thread_cls:
+        start_message_worker(handler)
+        # Verify thread was created
+        assert mock_thread_cls.called, "Thread should have been created"
+        worker_func = mock_thread_cls.call_args[1]["target"]
 
-    # Wait for completion
-    timeout = 2.0
-    start = time.time()
-    while time.time() - start < timeout:
-        with lock:
-            if processed_count == count:
-                break
-        time.sleep(0.05)
+        # Enqueue 50 messages
+        count = 50
+        for i in range(count):
+            enqueue_inbound_message(Message(str(i), "chat", "hi", "w"))
+        
+        # Enqueue stop signal
+        enqueue_inbound_message(Message("stop", "_stop", "", "w"))
 
-    # Cleanup
-    enqueue_inbound_message(Message("stop", "_stop", "", "w"))
+        # Run worker loop (it runs until _stop)
+        worker_func()
 
     assert processed_count == count

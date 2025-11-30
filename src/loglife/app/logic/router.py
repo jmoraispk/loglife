@@ -10,8 +10,7 @@ from loglife.app.logic.audio import process_audio
 from loglife.app.logic.text import process_text
 from loglife.app.logic.timezone import get_timezone_from_number
 from loglife.app.logic.vcard import process_vcard
-from loglife.core.messaging import Message
-from loglife.core.services.sender import queue_async_message
+from loglife.core.messaging import Message, queue_async_message
 
 logger = logging.getLogger(__name__)
 

@@ -1,5 +1,6 @@
 """Pytest configuration and fixtures for database testing."""
 
+import signal
 import sqlite3
 from collections.abc import Generator
 from pathlib import Path
@@ -13,12 +14,40 @@ from loglife.app.config.paths import SCHEMA_FILE
 from loglife.app.db.client import db
 
 
+class TimeoutError(Exception):
+    """Raised when a test exceeds the timeout."""
+
+
+@pytest.fixture
+def timeout():
+    """Fixture to add timeout to tests (1 second max).
+    
+    Usage:
+        def test_something(timeout):
+            # Test code here - will timeout after 1 second
+            pass
+    """
+    def timeout_handler(signum, frame):
+        raise TimeoutError("Test exceeded 1 second timeout")
+    
+    # Set up signal handler
+    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(1)  # 1 second timeout
+    
+    try:
+        yield
+    finally:
+        # Always clear the alarm and restore old handler
+        signal.alarm(0)
+        signal.signal(signal.SIGALRM, old_handler)
+
+
 @pytest.fixture
 def app() -> Generator[Flask, None, None]:
     """Create a Flask app instance for testing."""
     with (
         patch("loglife.core.factory.start_reminder_service"),
-        patch("loglife.core.factory.start_sender_worker"),
+        patch("loglife.core.factory.start_sender_worker"),  # Don't start sender worker in tests
     ):
         app = create_app()
         app.config["TESTING"] = True
