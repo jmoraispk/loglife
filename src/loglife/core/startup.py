@@ -1,4 +1,8 @@
-"""Flask app factory."""
+"""Application startup and initialization.
+
+Bootstraps the Flask application, database connection, background services,
+and message workers. This is the central entry point for wiring the app components.
+"""
 
 from flask import Flask
 
@@ -11,7 +15,14 @@ from loglife.core.routes import emulator_bp, webhook_bp
 
 
 def create_app() -> Flask:
-    """Build the Flask app with logging, DB, services, and blueprints."""
+    """Initialize and configure the Flask application.
+
+    Sets up logging, database, background workers (reminder, sender, router),
+    and registers web blueprints (webhook, emulator).
+
+    Returns:
+        Configured Flask application instance.
+    """
     app = Flask(__name__)
 
     setup_logging()

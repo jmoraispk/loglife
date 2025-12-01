@@ -49,8 +49,8 @@ def global_timeout():
 def app() -> Generator[Flask, None, None]:
     """Create a Flask app instance for testing."""
     with (
-        patch("loglife.core.factory.start_reminder_service"),
-        patch("loglife.core.factory.start_sender_worker"),  # Don't start sender worker in tests
+        patch("loglife.core.startup.start_reminder_service"),
+        patch("loglife.core.startup.start_sender_worker"),  # Don't start sender worker in tests
     ):
         app = create_app()
         app.config["TESTING"] = True

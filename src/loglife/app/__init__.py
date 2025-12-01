@@ -1,5 +1,5 @@
-"""Application entrypoint exposing the core factory."""
+"""Application entrypoint exposing the startup function."""
 
-from loglife.core.factory import create_app
+from loglife.core.startup import create_app
 
 __all__ = ["create_app"]
