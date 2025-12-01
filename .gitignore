@@ -7,7 +7,8 @@ whatsapp-client/.wwebjs_cache/**
 whatsapp-client/package-lock.json
 git_token_server
 whatsapp-client/node_modules
-src/loglife/app/db/loglife.db
+**/loglife.db
+**/loglife.db-journal
 .venv
 uv.lock
 src/loglife/logs/
