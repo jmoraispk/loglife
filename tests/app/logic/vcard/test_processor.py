@@ -35,12 +35,7 @@ def test_process_vcard_success(referrer: User) -> None:
         referred = db.users.get_by_phone("9876543210")
         assert referred is not None
         assert referred.timezone == "Asia/Karachi"  # Default
-
-        # Verify referral created (we can't directly get referral by ID easily without ID,
-        # but we can check it exists via get_referral if we had get_by_referrer,
-        # or just trust no error raised and users created)
-        # Since we don't have get_by_referrer exposed in Table (yet), we assume success if no error.
-        # Or we can use the fact that create_referral creates a record.
+        assert referred.referred_by_id == referrer.id
 
 
 def test_process_vcard_existing_user(referrer: User) -> None:
@@ -55,11 +50,14 @@ def test_process_vcard_existing_user(referrer: User) -> None:
         response = process_vcard(referrer, raw_vcards)
 
         assert response == REFERRAL_SUCCESS
-        mock_queue.assert_called_once()
+        # Should NOT send welcome message for existing user
+        mock_queue.assert_not_called()
 
         # Verify user still exists and wasn't overwritten
         referred = db.users.get_by_phone("9876543210")
         assert referred.timezone == "Europe/London"
+        # Verify referrer WAS updated (since it was None)
+        assert referred.referred_by_id == referrer.id
 
 
 def test_process_vcard_multiple(referrer: User) -> None:
@@ -76,5 +74,10 @@ def test_process_vcard_multiple(referrer: User) -> None:
         assert response == REFERRAL_SUCCESS
         assert mock_queue.call_count == 2
 
-        assert db.users.get_by_phone("1111111111") is not None
-        assert db.users.get_by_phone("2222222222") is not None
+        u1 = db.users.get_by_phone("1111111111")
+        assert u1 is not None
+        assert u1.referred_by_id == referrer.id
+
+        u2 = db.users.get_by_phone("2222222222")
+        assert u2 is not None
+        assert u2.referred_by_id == referrer.id

@@ -1,6 +1,6 @@
 """Audio journal table operations and data model.
 
-This module defines the AudioJournalEntry data class and the AudioJournalTable class
+This module defines the AudioJournalEntry data class and the AudioJournalsTable class
 for handling database interactions related to audio journal entries.
 """
 
@@ -20,11 +20,11 @@ class AudioJournalEntry:
     created_at: datetime
 
 
-class AudioJournalTable:
+class AudioJournalsTable:
     """Handles database operations for the audio_journals table."""
 
     def __init__(self, conn: sqlite3.Connection) -> None:
-        """Initialize the AudioJournalTable with a database connection."""
+        """Initialize the AudioJournalsTable with a database connection."""
         self._conn = conn
 
     def get(self, entry_id: int) -> AudioJournalEntry | None:

@@ -4,9 +4,9 @@ CREATE TABLE IF NOT EXISTS users (
     timezone TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     send_transcript_file INTEGER DEFAULT 1,
-    -- Merged user_states table
     state TEXT,
-    state_data TEXT
+    state_data TEXT,
+    referred_by_id INTEGER REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_goals (
@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS user_goals (
     goal_description TEXT NOT NULL,
     boost_level INTEGER NOT NULL DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    -- Merged reminders table
     reminder_time DATETIME,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
@@ -31,19 +30,6 @@ CREATE TABLE IF NOT EXISTS goal_ratings (
     FOREIGN KEY (user_goal_id) REFERENCES user_goals (id) ON DELETE CASCADE
 );
 
--- Dropped goal_reminders table
-
-CREATE TABLE IF NOT EXISTS referrals (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    referrer_user_id INTEGER NOT NULL, -- Referrer is the user who sent the invite.
-    referred_user_id INTEGER NOT NULL, -- Referred is the user who received it.
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (referrer_user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (referred_user_id) REFERENCES users(id) ON DELETE CASCADE,
-    UNIQUE (referrer_user_id, referred_user_id)
-);
-
--- Dropped user_states table
 
 CREATE TABLE IF NOT EXISTS audio_journals (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

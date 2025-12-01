@@ -43,10 +43,16 @@ def process_vcard(referrer_user: User, raw_vcards: str) -> str:
 
             referred_user: User | None = db.users.get_by_phone(referred_phone_number)
             if not referred_user:
-                referred_user = db.users.create(referred_phone_number, "Asia/Karachi")
-
-            db.referrals.create(referrer_user_id, referred_user.id)
-            queue_async_message(referred_phone_number, WELCOME_MESSAGE, client_type="whatsapp")
+                # Create new user with referrer
+                db.users.create(
+                    referred_phone_number,
+                    "Asia/Karachi",
+                    referred_by_id=referrer_user_id,
+                )
+                queue_async_message(referred_phone_number, WELCOME_MESSAGE, client_type="whatsapp")
+            elif referred_user.referred_by_id is None:
+                # Update existing user if they don't have a referrer
+                db.users.update(referred_user.id, referred_by_id=referrer_user_id)
 
     except Exception as exc:
         logger.exception("Error in vcard processor")

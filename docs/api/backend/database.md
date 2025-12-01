@@ -19,8 +19,3 @@
     options:
       show_root_heading: true
       heading_level: 2
-
-::: loglife.app.db.tables.referrals
-    options:
-      show_root_heading: true
-      heading_level: 2

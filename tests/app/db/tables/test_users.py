@@ -27,10 +27,23 @@ def test_create_user() -> None:
     assert user.id is not None
     assert user.state is None
     assert user.state_data is None
+    assert user.referred_by_id is None
 
     # Act & Assert
     with pytest.raises(sqlite3.IntegrityError):
         db.users.create("+1234567890", "Europe/London")
+
+
+def test_create_user_with_referral() -> None:
+    """Test creating a user with a referrer."""
+    # Arrange
+    referrer = db.users.create("+1234567890", "UTC")
+
+    # Act
+    referred = db.users.create("+0987654321", "UTC", referred_by_id=referrer.id)
+
+    # Assert
+    assert referred.referred_by_id == referrer.id
 
 
 def test_get_user() -> None:
@@ -52,6 +65,7 @@ def test_get_user() -> None:
     user = db.users.get(999)
 
     # Assert
+    retrieved_user = db.users.get(created_user.id)
     assert retrieved_user is not None
     assert isinstance(retrieved_user, User)
     assert retrieved_user.id == created_user.id
@@ -105,14 +119,21 @@ def test_update_user() -> None:
     """
     # Arrange
     user = db.users.create("+1234567890", "America/New_York")
+    referrer = db.users.create("+1111111111", "UTC")
 
     # Act
-    updated_user = db.users.update(user.id, timezone="Europe/Paris", send_transcript_file=0)
+    updated_user = db.users.update(
+        user.id,
+        timezone="Europe/Paris",
+        send_transcript_file=0,
+        referred_by_id=referrer.id,
+    )
 
     # Assert
     assert updated_user.timezone == "Europe/Paris"
     assert updated_user.phone_number == "+1234567890"  # unchanged
     assert updated_user.send_transcript_file == 0
+    assert updated_user.referred_by_id == referrer.id
 
 
 def test_set_user_state() -> None:

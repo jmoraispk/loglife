@@ -37,7 +37,7 @@ def test_process_audio_success(user: User) -> None:
         assert mock_queue.call_count == 3  # Received, Transcribed, Stored
 
         # Verify DB entry
-        entries = db.audio_journal.get_by_user(user.id)
+        entries = db.audio_journals.get_by_user(user.id)
         assert len(entries) == 1
         assert entries[0].transcription_text == "Transcribed text"
         assert entries[0].summary_text == "Summary text"
@@ -108,7 +108,7 @@ def test_process_audio_empty_summary(user: User) -> None:
             assert response == ""
 
         # Verify DB entry stores empty summary
-        entries = db.audio_journal.get_by_user(user.id)
+        entries = db.audio_journals.get_by_user(user.id)
         assert len(entries) == 1
         assert entries[0].transcription_text == "Transcribed text"
         assert entries[0].summary_text == ""

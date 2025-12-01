@@ -49,7 +49,7 @@ def process_audio(sender: str, user: User, audio_data: str) -> str | tuple[str, 
             logger.exception("Error summarizing transcript")
             return "Summarization failed!"
 
-        db.audio_journal.create(
+        db.audio_journals.create(
             user_id=user.id,
             transcription_text=transcript,
             summary_text=summary,

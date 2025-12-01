@@ -5,10 +5,9 @@ from pathlib import Path
 
 from loglife.app.config import DATABASE_FILE
 from loglife.app.db.tables import (
-    AudioJournalTable,
+    AudioJournalsTable,
     GoalsTable,
     RatingsTable,
-    ReferralsTable,
     UsersTable,
 )
 
@@ -52,14 +51,9 @@ class Database:
         return RatingsTable(self.conn)
 
     @property
-    def audio_journal(self) -> AudioJournalTable:
-        """Get the audio_journal table accessor."""
-        return AudioJournalTable(self.conn)
-
-    @property
-    def referrals(self) -> ReferralsTable:
-        """Get the referrals table accessor."""
-        return ReferralsTable(self.conn)
+    def audio_journals(self) -> AudioJournalsTable:
+        """Get the audio_journals table accessor."""
+        return AudioJournalsTable(self.conn)
 
     def set_connection(self, conn: sqlite3.Connection) -> None:
         """Set the database connection explicitly (useful for testing)."""

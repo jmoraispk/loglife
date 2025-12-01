@@ -13,6 +13,7 @@ Stores user profiles, settings, and conversational state.
 | `send_transcript_file` | `INTEGER` | `1` to send .txt file, `0` for summary only. |
 | `state` | `TEXT` | Current conversational state (e.g., `awaiting_reminder_time`). |
 | `state_data` | `TEXT` | JSON blob for temporary state data. |
+| `referred_by_id` | `INTEGER` | User who referred this user (Self-reference). |
 
 ### 🎯 `user_goals`
 Tracks the goals users have set for themselves, including reminder settings.
@@ -24,7 +25,7 @@ Tracks the goals users have set for themselves, including reminder settings.
 | `goal_emoji` | `TEXT` | Visual icon for the goal. |
 | `goal_description` | `TEXT` | Text of the goal. |
 | `boost_level` | `INTEGER` | Importance/frequency multiplier. |
-| `reminder_time` | `DATETIME` | Scheduled time for daily notifications. |
+| `reminder_time` | `TEXT` | Scheduled time (HH:MM:SS). |
 
 ### ⭐ `goal_ratings`
 Daily performance scores for goals.
@@ -45,13 +46,5 @@ Stores transcripts and AI summaries of voice notes.
 | `user_id` | `INTEGER` | Foreign Key to `users`. |
 | `transcription_text` | `TEXT` | Raw speech-to-text output. |
 | `summary_text` | `TEXT` | AI-generated summary. |
-
-### 🤝 `referrals`
-Tracks who invited whom.
-
-| Column | Type | Description |
-| :--- | :--- | :--- |
-| `referrer_user_id` | `INTEGER` | User who sent the invite. |
-| `referred_user_id` | `INTEGER` | User who received the invite. |
 
 For raw SQL definitions, see `src/loglife/app/db/schema.sql`.

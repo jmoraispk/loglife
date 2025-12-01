@@ -20,6 +20,7 @@ class User:
     send_transcript_file: int  # 0 or 1
     state: str | None
     state_data: str | None
+    referred_by_id: int | None
 
 
 class UsersTable:
@@ -53,10 +54,15 @@ class UsersTable:
         rows = self._conn.execute(query).fetchall()
         return [self._row_to_model(row) for row in rows]
 
-    def create(self, phone_number: str, timezone: str) -> User:
+    def create(
+        self,
+        phone_number: str,
+        timezone: str,
+        referred_by_id: int | None = None,
+    ) -> User:
         """Create a new user record."""
-        query = "INSERT INTO users (phone_number, timezone) VALUES (?, ?)"
-        cursor = self._conn.execute(query, (phone_number, timezone))
+        query = "INSERT INTO users (phone_number, timezone, referred_by_id) VALUES (?, ?, ?)"
+        cursor = self._conn.execute(query, (phone_number, timezone, referred_by_id))
         # We need to fetch the created user to return the full model with ID and timestamps
         # The result of get() will not be None here because we just inserted it.
         return self.get(cursor.lastrowid)  # type: ignore[arg-type]
@@ -67,6 +73,7 @@ class UsersTable:
         phone_number: str | None = None,
         timezone: str | None = None,
         send_transcript_file: int | None = None,
+        referred_by_id: int | None = None,
     ) -> User | None:
         """Update a user record with provided fields."""
         updates = []
@@ -83,6 +90,10 @@ class UsersTable:
         if send_transcript_file is not None:
             updates.append("send_transcript_file = ?")
             params.append(send_transcript_file)
+
+        if referred_by_id is not None:
+            updates.append("referred_by_id = ?")
+            params.append(referred_by_id)
 
         if not updates:
             return self.get(user_id)

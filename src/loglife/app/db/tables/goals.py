@@ -19,7 +19,7 @@ class Goal:
     goal_description: str
     boost_level: int
     created_at: datetime
-    reminder_time: datetime | None  # in sqlite is text (YYYY-MM-DD HH:MM:SS or just HH:MM:SS)
+    reminder_time: str | None  # Stored as TEXT in SQLite (HH:MM:SS)
 
 
 class GoalsTable:

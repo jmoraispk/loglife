@@ -16,14 +16,14 @@ def test_create_audio_journal_entry() -> None:
     user: User = db.users.create("+1234567890", "America/New_York")
 
     # Act
-    db.audio_journal.create(
+    db.audio_journals.create(
         user_id=user.id,
         transcription_text="Today was a good day.",
         summary_text="Positive day summary.",
     )
 
     # Assert
-    entries = db.audio_journal.get_by_user(user.id)
+    entries = db.audio_journals.get_by_user(user.id)
     assert len(entries) == 1
     assert isinstance(entries[0], AudioJournalEntry)
     assert entries[0].user_id == user.id
@@ -40,17 +40,17 @@ def test_get_audio_journal_entry() -> None:
     """
     # Arrange
     user = db.users.create("+1234567890", "America/New_York")
-    db.audio_journal.create(
+    db.audio_journals.create(
         user_id=user.id,
         transcription_text="Test entry",
         summary_text="Summary",
     )
-    entries = db.audio_journal.get_by_user(user.id)
+    entries = db.audio_journals.get_by_user(user.id)
     entry_id = entries[0].id
 
     # Act
-    retrieved_entry = db.audio_journal.get(entry_id)
-    non_existent_entry = db.audio_journal.get(999)
+    retrieved_entry = db.audio_journals.get(entry_id)
+    non_existent_entry = db.audio_journals.get(999)
 
     # Assert
     assert retrieved_entry is not None
@@ -71,17 +71,17 @@ def test_get_user_audio_journal_entries() -> None:
     user3 = db.users.create("+1111111111", "UTC")
 
     # Create entries for user1
-    db.audio_journal.create(user1.id, "Entry 1", "Summary 1")
-    db.audio_journal.create(user1.id, "Entry 2", "Summary 2")
-    db.audio_journal.create(user1.id, "Entry 3", "Summary 3")
+    db.audio_journals.create(user1.id, "Entry 1", "Summary 1")
+    db.audio_journals.create(user1.id, "Entry 2", "Summary 2")
+    db.audio_journals.create(user1.id, "Entry 3", "Summary 3")
 
     # Create entry for user2
-    db.audio_journal.create(user2.id, "User 2 Entry", "User 2 Summary")
+    db.audio_journals.create(user2.id, "User 2 Entry", "User 2 Summary")
 
     # Act
-    user1_entries = db.audio_journal.get_by_user(user1.id)
-    user2_entries = db.audio_journal.get_by_user(user2.id)
-    empty_entries = db.audio_journal.get_by_user(user3.id)
+    user1_entries = db.audio_journals.get_by_user(user1.id)
+    user2_entries = db.audio_journals.get_by_user(user2.id)
+    empty_entries = db.audio_journals.get_by_user(user3.id)
 
     # Assert
     assert len(user1_entries) == 3
@@ -102,12 +102,12 @@ def test_get_all_audio_journal_entries() -> None:
     """
     # Arrange
     user = db.users.create("+1234567890", "UTC")
-    db.audio_journal.create(user.id, "Entry A", "Summary A")
-    db.audio_journal.create(user.id, "Entry B", "Summary B")
-    db.audio_journal.create(user.id, "Entry C", "Summary C")
+    db.audio_journals.create(user.id, "Entry A", "Summary A")
+    db.audio_journals.create(user.id, "Entry B", "Summary B")
+    db.audio_journals.create(user.id, "Entry C", "Summary C")
 
     # Act
-    all_entries = db.audio_journal.get_all()
+    all_entries = db.audio_journals.get_all()
 
     # Assert
     assert len(all_entries) == 3
@@ -120,23 +120,23 @@ def test_update_audio_journal_entry() -> None:
     """
     # Arrange
     user = db.users.create("+1234567890", "America/New_York")
-    db.audio_journal.create(
+    db.audio_journals.create(
         user_id=user.id,
         transcription_text="Original text",
         summary_text="Original summary",
     )
-    entries = db.audio_journal.get_by_user(user.id)
+    entries = db.audio_journals.get_by_user(user.id)
     entry_id = entries[0].id
 
     # Act
-    db.audio_journal.update(
+    db.audio_journals.update(
         entry_id=entry_id,
         transcription_text="Updated text",
         summary_text="Updated summary",
     )
 
     # Assert
-    updated_entry = db.audio_journal.get(entry_id)
+    updated_entry = db.audio_journals.get(entry_id)
     assert updated_entry is not None
     assert updated_entry.transcription_text == "Updated text"
     assert updated_entry.summary_text == "Updated summary"
@@ -149,23 +149,23 @@ def test_delete_audio_journal_entry() -> None:
     """
     # Arrange
     user = db.users.create("+1234567890", "America/New_York")
-    db.audio_journal.create(
+    db.audio_journals.create(
         user_id=user.id,
         transcription_text="To delete",
         summary_text="Delete summary",
     )
-    entries = db.audio_journal.get_by_user(user.id)
+    entries = db.audio_journals.get_by_user(user.id)
     entry_id = entries[0].id
 
     # Verify entry exists
-    assert db.audio_journal.get(entry_id) is not None
+    assert db.audio_journals.get(entry_id) is not None
 
     # Act
-    db.audio_journal.delete(entry_id)
+    db.audio_journals.delete(entry_id)
 
     # Assert
-    deleted_entry = db.audio_journal.get(entry_id)
+    deleted_entry = db.audio_journals.get(entry_id)
     assert deleted_entry is None
-    user_entries = db.audio_journal.get_by_user(user.id)
+    user_entries = db.audio_journals.get_by_user(user.id)
     assert len(user_entries) == 0
 
