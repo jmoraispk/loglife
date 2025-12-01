@@ -1,5 +1,5 @@
-"""Logic for processing audio messages."""
+"""Audio processing logic."""
 
-from loglife.app.logic.audio.processor import process_audio
+from .processor import process_audio
 
 __all__ = ["process_audio"]

@@ -1,4 +1,4 @@
-"""Webhook blueprint package."""
+"""Webhook route package."""
 
 from .routes import webhook_bp
 

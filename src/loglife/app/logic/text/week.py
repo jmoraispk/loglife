@@ -8,7 +8,7 @@ from loglife.app.config import (
     LOOKBACK_NO_GOALS,
     STYLE,
 )
-from loglife.app.db.client import db
+from loglife.app.db import db
 
 if TYPE_CHECKING:
     from loglife.app.db.tables import Goal, Rating

@@ -1,4 +1,4 @@
-"""Emulator blueprint package."""
+"""Emulator route package."""
 
 from .routes import emulator_bp
 

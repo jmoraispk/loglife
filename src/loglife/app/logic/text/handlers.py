@@ -10,7 +10,7 @@ from loglife.app.config import (
     STYLE,
     messages,
 )
-from loglife.app.db.client import db
+from loglife.app.db import db
 from loglife.app.db.tables import Goal, Rating, User
 from loglife.app.logic.text.reminder_time import parse_time_string
 from loglife.app.logic.text.week import get_monday_before, look_back_summary

@@ -4,9 +4,9 @@ from unittest.mock import patch
 
 import pytest
 
-from loglife.app.db.client import db
+from loglife.app.db import db
 from loglife.app.db.tables import User
-from loglife.app.logic.audio.processor import process_audio
+from loglife.app.logic.audio import process_audio
 
 
 @pytest.fixture

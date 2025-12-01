@@ -26,7 +26,7 @@ import requests
 from flask import Flask
 
 from loglife.app import create_app
-from loglife.app.db.client import db
+from loglife.app.db import db
 from loglife.core.messaging import Message, enqueue_inbound_message
 
 if TYPE_CHECKING:
@@ -52,7 +52,7 @@ def app_and_mock(real_db_path: str) -> Generator[tuple[Flask, MagicMock], None, 
     # We need to initialize the DB schema manually since we aren't using the memory fixture
     import sqlite3  # noqa: PLC0415
 
-    from loglife.app.config.paths import SCHEMA_FILE  # noqa: PLC0415
+    from loglife.app.config import SCHEMA_FILE  # noqa: PLC0415
 
     conn = sqlite3.connect(real_db_path, check_same_thread=False)
     with Path(SCHEMA_FILE).open(encoding="utf-8") as f:

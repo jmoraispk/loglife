@@ -1,6 +1,6 @@
 """Chat interface core package (transports, clients, shared protocols)."""
 
-from loglife.core.interface import Message, init, recv_msg, send_msg
+from .interface import Message, init, recv_msg, send_msg
 
 __all__ = [
     "Message",

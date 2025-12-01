@@ -6,7 +6,7 @@ of voice notes.
 
 import logging
 
-from loglife.app.db.client import db
+from loglife.app.db import db
 from loglife.app.db.tables import User
 from loglife.app.logic.audio.journaling.summarize_transcript import summarize_transcript
 from loglife.app.logic.audio.journaling.transcript_to_base64 import transcript_to_base64

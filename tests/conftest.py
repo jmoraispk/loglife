@@ -12,8 +12,8 @@ from flask import Flask
 from flask.testing import FlaskClient
 
 from loglife.app import create_app
-from loglife.app.config.paths import SCHEMA_FILE
-from loglife.app.db.client import db
+from loglife.app.config import SCHEMA_FILE
+from loglife.app.db import db
 
 TIMEOUT = 1.0  # seconds
 

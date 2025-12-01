@@ -8,9 +8,9 @@ from unittest.mock import patch
 import pytest
 
 from loglife.app.config import ERROR_NO_GOALS_SET, USAGE_RATE
-from loglife.app.db.client import db
+from loglife.app.db import db
 from loglife.app.db.tables import User
-from loglife.app.logic import process_text
+from loglife.app.logic.text import process_text
 from loglife.app.logic.text.handlers import _extract_emoji
 
 

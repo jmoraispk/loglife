@@ -5,7 +5,7 @@ import logging
 import re
 
 from loglife.app.config import REFERRAL_SUCCESS, WELCOME_MESSAGE
-from loglife.app.db.client import db
+from loglife.app.db import db
 from loglife.app.db.tables import User
 from loglife.core.messaging import queue_async_message
 

@@ -2,7 +2,7 @@
 
 from datetime import datetime
 
-from loglife.app.db.client import db
+from loglife.app.db import db
 from loglife.app.db.tables import AudioJournalEntry, User
 
 

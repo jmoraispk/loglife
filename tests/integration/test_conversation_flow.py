@@ -5,7 +5,7 @@ from typing import Any
 
 from flask.testing import FlaskClient
 
-from loglife.app.logic.router import route_message
+from loglife.app.logic import route_message
 from loglife.core.messaging import _inbound_queue, get_outbound_message
 
 

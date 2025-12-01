@@ -8,7 +8,7 @@ based on the message type.
 import logging
 from typing import Any
 
-from loglife.app.db.client import db
+from loglife.app.db import db
 from loglife.app.logic.audio import process_audio
 from loglife.app.logic.text import process_text
 from loglife.app.logic.timezone import get_timezone_from_number

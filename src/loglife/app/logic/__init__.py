@@ -1,13 +1,6 @@
-"""Business logic for message processing."""
+"""Logic routing module."""
 
-from loglife.app.logic.audio import process_audio
-from loglife.app.logic.router import route_message
-from loglife.app.logic.text import process_text
-from loglife.app.logic.vcard import process_vcard
+from .router import route_message
+from .timezone import get_timezone_from_number, get_timezone_safe
 
-__all__ = [
-    "process_audio",
-    "process_text",
-    "process_vcard",
-    "route_message",
-]
+__all__ = ["get_timezone_from_number", "get_timezone_safe", "route_message"]

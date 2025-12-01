@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 import pytest
 
-from loglife.app.config.messages import (
+from loglife.app.config import (
     ERROR_ADD_GOAL_FIRST,
     ERROR_INVALID_DELETE_FORMAT,
     ERROR_INVALID_GOAL_NUMBER,
@@ -18,7 +18,7 @@ from loglife.app.config.messages import (
     SUCCESS_TRANSCRIPT_ENABLED,
     USAGE_RATE,
 )
-from loglife.app.db.client import db
+from loglife.app.db import db
 from loglife.app.db.tables import User
 from loglife.app.logic.text.handlers import (
     AddGoalHandler,

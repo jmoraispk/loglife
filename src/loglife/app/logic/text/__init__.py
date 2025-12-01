@@ -1,5 +1,5 @@
-"""Logic for processing text messages."""
+"""Text processing logic."""
 
-from loglife.app.logic.text.processor import process_text
+from .processor import process_text
 
 __all__ = ["process_text"]

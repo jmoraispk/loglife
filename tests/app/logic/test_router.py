@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from loglife.app.logic.router import route_message
+from loglife.app.logic import route_message
 from loglife.core.messaging import Message
 
 
