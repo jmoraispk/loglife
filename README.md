@@ -97,7 +97,7 @@ Follow these steps to set up LogLife on your local machine.
 2.  **Set up the Backend:**
     ```bash
     # Install dependencies and run the backend
-    uv run backend/main.py
+    uv run src/loglife/main.py
     ```
 
 3.  **Set up the WhatsApp Client:**
@@ -117,7 +117,7 @@ Follow these steps to set up LogLife on your local machine.
 To ensure everything is working correctly, run the backend tests:
 
 ```bash
-uv run pytest backend/tests
+uv run pytest tests
 ```
 
 ---

@@ -1,5 +1,5 @@
 build/*
-goal_bot.egg-info/*
+**/loglife.egg-info/*
 **/__pycache__/**
 whatsapp-client/.wwebjs_auth/**
 whatsapp-client/node_modules/**
@@ -7,10 +7,11 @@ whatsapp-client/.wwebjs_cache/**
 whatsapp-client/package-lock.json
 git_token_server
 whatsapp-client/node_modules
-backend/app/db/loglife.db
+**/loglife.db
+**/loglife.db-journal
 .venv
 uv.lock
-backend/logs/
+src/loglife/logs/
 .ruff_cache/
 .coverage
 site/*

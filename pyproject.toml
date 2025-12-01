@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "goal_bot"
+name = "loglife"
 version = "0.1.0"
 requires-python = ">=3.11"
 description = "General Bot Package for Goal Tracking"
@@ -36,15 +36,9 @@ dev = [
     "sqlite-web>=0.6.5",  # Web database
 ]
 
-[tool.pytest.ini_options]
-pythonpath = ["backend"]
-
-# Package discovery configuration
-# Exclude 'db' directory to avoid setuptools error about multiple top-level packages
-# Only include 'app' directory as the main application package
 [tool.setuptools.packages.find]
-include = ["backend.app*"]
-exclude = ["backend.app.db*"]
+where = ["src"]
+include = ["loglife*"]
 
 [tool.ruff]
 line-length = 100
@@ -59,10 +53,13 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"backend/tests/**/*.py" = [
+"tests/**/*.py" = [
     "S101",    # Use of assert detected (standard in pytest)
     "PLR2004", # Magic value used in comparison (acceptable in tests)
 ]
-"backend/app/db/tables/*.py" = [
+"src/loglife/app/db/tables/*.py" = [
     "S608",    # Possible SQL injection vector through string-based query construction (whitelisted)
 ]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

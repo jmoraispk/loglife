@@ -1,41 +1,28 @@
-# Referrals
+# 🤝 Referrals
+
+Invite friends to join the journey.
 
 ---
 
-## Overview
+## ✨ How to Refer
 
-Share contacts from WhatsApp to invite others to LogLife.
+It's as simple as sharing a contact card.
 
----
-
-## How to Refer
-
-1. Open the contact you want to refer in WhatsApp
-2. Share the contact with LogLife
-3. LogLife will process the referral automatically
+1.  Open a chat with **LogLife**.
+2.  Tap **Attach** (paperclip icon) > **Contact**.
+3.  Select a friend and hit send.
 
 ---
 
-## What Happens
+## 🔄 What Happens Next?
 
-When you refer someone:
+LogLife takes care of the introduction so you don't have to.
 
-- LogLife automatically welcomes the new user with an onboarding message
-- You receive a confirmation message
-- The referred person can start using the bot immediately
-- No duplicate referrals — if the contact is already registered, you'll be notified
+1.  **System Check**: We verify if they are already a user.
+2.  **Welcome Message**: If they are new, LogLife sends them a friendly greeting explaining how to start tracking goals.
+3.  **Confirmation**: You get a thumbs-up message confirming the invite was sent.
 
----
-
-## Benefits
-
-Sharing LogLife with friends helps them:
-
-- Build better habits
-- Track their goals
-- Stay accountable
-
-It's a simple way to help others while growing the LogLife community!
+!!! tip "No Spam"
+    We only send **one** welcome message. We won't pester your friends if they don't reply.
 
 ---
-

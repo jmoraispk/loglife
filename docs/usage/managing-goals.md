@@ -1,86 +1,70 @@
-# Managing Goals
+# 🎯 Managing Goals
+
+Stay accountable by tracking your daily habits and goals.
 
 ---
 
-## Overview
+## 📋 Viewing Goals
 
-Track and manage your personal goals through simple text commands.
+Want to see what you're tracking? Just ask.
 
----
-
-## View Your Goals
-
-Send `goals` to see all your goals with boost levels and reminder times.
-
----
-
-## Add a New Goal
-
-1. Send `add goal [your goal]`
-2. Choose a boost level (1-5)
-3. Set a reminder time (e.g., "6 PM" or "18:00")
-
-**Example:**
-
-```
-add goal 🏃 Run daily
-```
+*   Send **`goals`** to list all active goals.
+    *   Shows your current streak.
+    *   Shows importance level ("Boost").
+    *   Shows scheduled reminder time.
 
 ---
 
-## Rate Your Goals
+## ➕ Adding a Goal
 
-**Rate a specific goal:**
+Creating a new habit is a conversation, not a form.
 
-Send `rate [goal #] [rating 1-5]`
-
-**Example:**
-
-```
-rate 1 4
-```
-
-**Rate all goals at once:**
-
-Send numbers like `12345` to rate multiple goals (1 for first goal, 2 for second, etc.)
-
-**Example:**
-
-```
-12345
-```
+1.  **Start**: Send `add goal` (or `add goal run daily`).
+2.  **Name**: If you didn't specify it, the bot will ask "What is the goal?".
+3.  **Importance**: Choose a "Boost Level" (Multiplier for your score).
+    *   🔥 **High (x3)**: Critical life goals.
+    *   ⚡ **Medium (x2)**: Important habits.
+    *   ✨ **Low (x1)**: Nice-to-haves.
+4.  **Schedule**: Set a time for your daily check-in (e.g., "9pm").
 
 ---
 
-## View Summaries
+## ⭐ Rating Your Day
 
-**Weekly progress:**
+Every day at your scheduled time, LogLife will ask: *"How did you do today?"*
 
-Send `week` to see your weekly progress summary.
+### Single Rating
+Rate a specific goal by its ID number (1-3 stars).
+> `rate 1 3` -> Rates Goal #1 as 3 stars (Great!)
 
-**Historical progress:**
+### Batch Rating
+Rate all your goals in one go by sending a sequence of numbers.
+> `321` -> Goal #1 gets 3 stars, Goal #2 gets 2 stars, Goal #3 gets 1 star.
 
-Send `lookback [N]` to see your progress from the last N days.
-
-**Examples:**
-
-```
-week
-lookback 7
-lookback 30
-```
-
----
-
-## Setting Reminder Times
-
-When adding a goal, you'll be asked for a reminder time. You can use any of these formats:
-
-- `18:00` or `18:30` — 24-hour format
-- `6 PM`, `6:30 PM`, or `10:15 AM` — 12-hour format with AM/PM
-- `6pm` or `6` — Casual format without minutes
-
-LogLife automatically adjusts reminders to your timezone!
+| Rating | Meaning | Emoji |
+| :--- | :--- | :--- |
+| **3** | Great / Done | 🟢 |
+| **2** | Okay / Partial | 🟡 |
+| **1** | Missed / Bad | 🔴 |
 
 ---
 
+## 📊 Checking Progress
+
+See how you're performing over time.
+
+*   📅 **`week`**: Get a summary of your performance for the current week.
+*   ⏮️ **`lookback 30`**: See your stats for the last 30 days (or any number).
+
+---
+
+## ⏰ Smart Reminders
+
+LogLife knows your timezone. When you say "Remind me at 8pm", it means **your** 8pm.
+
+**Supported Formats:**
+*   `18:00` (24-hour)
+*   `6 PM` or `6:30 PM`
+*   `6pm` (Casual)
+
+---

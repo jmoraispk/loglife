@@ -1,1 +1,0 @@
-"""VCard helpers tests package."""
