@@ -1,8 +1,6 @@
-"""Blueprint exposing the web-based emulator and event streaming.
+"""Web-based emulator for testing chat flows.
 
-This module defines a Flask blueprint for:
-1. Serving the emulator interface.
-2. Streaming log events to the emulator via SSE.
+Serves the emulator UI and provides an SSE stream for realtime logs.
 """
 
 from flask import Blueprint, Response, render_template
@@ -19,31 +17,15 @@ emulator_bp = Blueprint(
 
 @emulator_bp.route("/")
 def emulator() -> str:
-    """Render the emulator template.
-
-    Returns:
-        The rendered emulator HTML template.
-
-    """
+    """Render the emulator HTML interface."""
     return render_template("emulator.html")
 
 
 @emulator_bp.route("/events")
 def events() -> Response:
-    """Stream log events using Server-Sent Events (SSE).
+    """Stream realtime log events to the browser via SSE."""
 
-    Returns:
-        SSE stream with log messages
-
-    """
-
-    def stream() -> str:
-        """Generate SSE stream of log messages.
-
-        Yields:
-            Log messages in SSE format.
-
-        """
+    def stream():
         while True:
             msg = log_queue.get()
             yield f"data: {msg}\n\n"

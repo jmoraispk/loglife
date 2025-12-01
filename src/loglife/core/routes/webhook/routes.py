@@ -1,7 +1,6 @@
-"""Webhook blueprint handling inbound WhatsApp messages.
+"""Webhook endpoint for inbound WhatsApp messages.
 
-This module defines a Flask blueprint for handling inbound WhatsApp messages.
-It processes incoming messages (text, audio, or VCARD) and routes them to the appropriate handlers.
+Receives POST requests, validates payloads, and enqueues messages for processing.
 """
 
 from __future__ import annotations
@@ -25,12 +24,7 @@ logger = logging.getLogger(__name__)
 
 @webhook_bp.route("/webhook", methods=["POST"])
 def webhook() -> ResponseReturnValue:
-    """Handle inbound WhatsApp messages.
-
-    Returns:
-        JSON response containing `success`, `message`, and `data`.
-
-    """
+    """Handle inbound WhatsApp messages."""
     try:
         data: dict = request.get_json()
 
