@@ -1,4 +1,8 @@
-"""Audio processing workflow for inbound WhatsApp messages."""
+"""Audio processing workflow for inbound WhatsApp messages.
+
+Orchestrates transcription (Whisper), summarization (GPT), and database storage
+of voice notes.
+"""
 
 import logging
 

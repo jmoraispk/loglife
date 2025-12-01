@@ -1,4 +1,8 @@
-"""Central message router that orchestrates inbound processing."""
+"""Central message router that orchestrates inbound processing.
+
+Dispatches messages to the appropriate logic handler (Text, Audio, VCard)
+based on the message type.
+"""
 
 from __future__ import annotations
 

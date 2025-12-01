@@ -1,4 +1,7 @@
-"""Reminder service worker logic."""
+"""Background worker for checking and sending scheduled reminders.
+
+Runs a minutely job to check if any user reminders are due for their timezone.
+"""
 
 from __future__ import annotations
 
