@@ -49,6 +49,7 @@ def send_msg(message: Message | str, to: str | None = None) -> None:
     Args:
         message: A Message object OR a string text.
         to: The phone number to send to (required if message is a string).
+
     """
     if isinstance(message, str):
         if not to:

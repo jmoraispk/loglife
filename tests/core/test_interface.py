@@ -4,7 +4,7 @@ from unittest.mock import patch
 
 import pytest
 
-import loglife.core as core
+from loglife import core
 from loglife.core.messaging import Message
 
 

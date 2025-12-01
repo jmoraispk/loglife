@@ -3,7 +3,6 @@
 import queue
 import threading
 import time
-from queue import Empty
 from threading import Event
 from unittest.mock import MagicMock, patch
 

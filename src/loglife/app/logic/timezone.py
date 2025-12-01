@@ -24,11 +24,11 @@ def get_timezone_from_number(number: str) -> str:
     timezones = timezone.time_zones_for_number(parsed)
     if not timezones:
         return "UTC"
-    
+
     tz = timezones[0]
     if tz == "Etc/Unknown":
         return "UTC"
-        
+
     return tz
 
 

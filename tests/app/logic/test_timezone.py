@@ -2,8 +2,6 @@
 
 from zoneinfo import ZoneInfo
 
-import pytest
-
 from loglife.app.logic.timezone import get_timezone_from_number, get_timezone_safe
 
 
