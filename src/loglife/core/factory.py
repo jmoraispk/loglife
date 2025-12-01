@@ -22,8 +22,7 @@ def create_app() -> Flask:
     start_message_worker(route_message)
     start_sender_worker()
 
-    if emulator_bp:
-        app.register_blueprint(emulator_bp)
+    app.register_blueprint(emulator_bp)
 
     app.register_blueprint(webhook_bp)
 
