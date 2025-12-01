@@ -18,6 +18,12 @@ The LogLife backend is built with Python and Flask. It handles goal tracking, au
 
 ---
 
+## Architecture
+
+See [Architecture Guide](architecture.md) for details on the threading model, message pipeline, and core API.
+
+---
+
 ## Requirements
 
 **Basic operation:**

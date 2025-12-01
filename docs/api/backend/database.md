@@ -1,36 +1,36 @@
 # Database Operations
 
-::: backend.app.db.operations.users
+::: loglife.app.db.tables.users
     options:
       show_root_heading: true
       heading_level: 2
 
-::: backend.app.db.operations.user_goals
+::: loglife.app.db.tables.goals
     options:
       show_root_heading: true
       heading_level: 2
 
-::: backend.app.db.operations.goal_ratings
+::: loglife.app.db.tables.ratings
     options:
       show_root_heading: true
       heading_level: 2
 
-::: backend.app.db.operations.goal_reminders
+::: loglife.app.db.tables.reminders
     options:
       show_root_heading: true
       heading_level: 2
 
-::: backend.app.db.operations.audio_journal_entries
+::: loglife.app.db.tables.audio_journal
     options:
       show_root_heading: true
       heading_level: 2
 
-::: backend.app.db.operations.referrals
+::: loglife.app.db.tables.referrals
     options:
       show_root_heading: true
       heading_level: 2
 
-::: backend.app.db.operations.user_states
+::: loglife.app.db.tables.user_states
     options:
       show_root_heading: true
       heading_level: 2

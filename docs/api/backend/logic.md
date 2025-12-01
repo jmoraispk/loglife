@@ -1,16 +1,16 @@
 # Business Logic
 
-::: backend.app.logic.process_text
+::: loglife.app.logic.text.processor
     options:
       show_root_heading: true
       heading_level: 2
 
-::: backend.app.logic.process_audio
+::: loglife.app.logic.audio.processor
     options:
       show_root_heading: true
       heading_level: 2
 
-::: backend.app.logic.process_vcard
+::: loglife.app.logic.vcard.processor
     options:
       show_root_heading: true
       heading_level: 2

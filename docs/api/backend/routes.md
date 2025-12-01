@@ -1,11 +1,11 @@
 # Application Routes
 
-::: backend.core.routes.webhook
+::: loglife.core.routes.webhook.routes
     options:
       show_root_heading: true
       heading_level: 2
 
-::: backend.core.routes.emulator
+::: loglife.core.routes.emulator.routes
     options:
       show_root_heading: true
       heading_level: 2
