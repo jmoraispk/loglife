@@ -1,4 +1,6 @@
-# Essentials
+# ⚡ Quick Access
+
+Cheat sheet for common development tasks.
 
 | Task | Command |
 | :--- | :--- |

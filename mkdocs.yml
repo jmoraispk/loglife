@@ -29,12 +29,13 @@ nav:
         - Core API: api/backend/core.md
   - App Implementation:
     - Overview: app/overview.md
-    - Development Essentials: developer/essentials.md
+    - Database: app/database.md
+    - Quick Access: developer/quick-access.md
     - API Reference:
         - Routes: api/backend/routes.md
         - Business Logic: api/backend/logic.md
         - Services: api/backend/services.md
-        - Database: api/backend/database.md
+        - Database Ops: api/backend/database.md
         - WhatsApp Client: api/whatsapp-client.md
 
 markdown_extensions:

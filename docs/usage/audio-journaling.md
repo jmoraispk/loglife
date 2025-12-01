@@ -1,42 +1,40 @@
-# Audio Journaling
+# 🎙️ Audio Journaling
+
+Turn your voice notes into organized thoughts.
 
 ---
 
-## Overview
+## ✨ Overview
 
-Send voice notes to LogLife and let AI help you capture and reflect on your thoughts.
+Don't have time to type? Just talk. Send a voice note to LogLife, and our AI will transcribe it and distill it into a clear summary. It's perfect for:
 
----
-
-## How It Works
-
-When you send a voice note, LogLife will:
-
-1. Transcribe your audio
-2. Generate a summary using AI
-3. Store it in your journal
-4. Send you the summary
+*   🧠 **Brain Dumping:** Clear your head of clutter.
+*   📝 **Meeting Notes:** Summarize key points from a discussion.
+*   📖 **Daily Diary:** Record your day effortlessly while walking or driving.
 
 ---
 
-## Status Updates
+## 🔄 How It Works
 
-You'll receive real-time status updates:
+1.  **Record**: Hold the microphone button in WhatsApp and speak.
+2.  **Send**: Release to send the voice note.
+3.  **Wait**: You'll see status updates as the magic happens:
+    *   *Audio received. Transcribing...* 📝
+    *   *Audio transcribed. Summarizing...* 🤖
+    *   *Done!* ✅
+4.  **Read**: Receive a concise text summary of what you said, plus the full transcript file.
 
-- "Audio received. Transcribing..."
-- "Audio transcribed. Summarizing..."
-- "Summary stored in Database."
-
----
-
-## Supported Formats
-
-LogLife accepts:
-
-- Voice notes (push-to-talk)
-- Audio file attachments (OGG, MP3, WAV, M4A)
-
-Simply record your thoughts and send them—LogLife handles the rest!
+!!! note "Privacy"
+    Your audio is processed securely and summaries are stored in your private journal database.
 
 ---
 
+## 📂 Supported Formats
+
+LogLife is smart enough to handle various audio types:
+
+*   🎤 **Voice Notes** (Push-to-talk)
+*   🎵 **Audio Files** (MP3, WAV, M4A, OGG)
+*   📎 **Forwarded Audio** from other chats
+
+---
