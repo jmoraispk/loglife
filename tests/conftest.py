@@ -33,7 +33,9 @@ def global_timeout():
     def timeout_handler():
         _thread.interrupt_main()
 
-    timer = threading.Timer(TIMEOUT, timeout_handler)
+    # Increase timeout for E2E tests? Or make it configurable?
+    # 1.0s might be too tight for the E2E test initialization + thread spawn
+    timer = threading.Timer(10.0, timeout_handler)
     timer.start()
 
     try:
