@@ -55,5 +55,3 @@ def route_message(message: Message) -> None:
         metadata=message.metadata,
         attachments=attachments,
     )
-
-

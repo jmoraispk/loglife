@@ -4,6 +4,7 @@ import json
 from datetime import UTC, datetime
 
 import pytest
+
 from loglife.app.config.messages import (
     ERROR_ADD_GOAL_FIRST,
     ERROR_INVALID_DELETE_FORMAT,

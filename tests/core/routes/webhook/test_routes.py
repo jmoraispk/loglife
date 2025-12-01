@@ -5,6 +5,7 @@ from unittest.mock import patch
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
+
 from loglife.core.routes.webhook import webhook_bp
 
 

@@ -18,7 +18,7 @@ _inbound_queue: Queue[Message] = Queue()
 _worker_started = False
 
 # Expose for tests
-__all__ = ["enqueue_inbound_message", "start_message_worker", "_inbound_queue", "_worker_started"]
+__all__ = ["_inbound_queue", "_worker_started", "enqueue_inbound_message", "start_message_worker"]
 
 
 def enqueue_inbound_message(message: Message) -> None:
@@ -50,4 +50,3 @@ def start_message_worker(handler: Callable[[Message], None]) -> None:
 
     Thread(target=_worker, daemon=True, name="router-worker").start()
     _worker_started = True
-

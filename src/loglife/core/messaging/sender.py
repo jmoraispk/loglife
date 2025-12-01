@@ -10,6 +10,7 @@ from typing import Any
 
 import requests
 from flask import g
+
 from loglife.app.config import WHATSAPP_API_URL
 from loglife.core.messaging.message import Message
 
@@ -23,6 +24,8 @@ log_queue = queue.Queue()
 
 # Expose for tests
 __all__ = [
+    "_outbound_queue",
+    "_sender_worker_started",
     "build_outbound_message",
     "enqueue_outbound_message",
     "get_outbound_message",
@@ -30,8 +33,6 @@ __all__ = [
     "queue_async_message",
     "send_message",
     "start_sender_worker",
-    "_outbound_queue",
-    "_sender_worker_started",
 ]
 
 
@@ -160,4 +161,3 @@ def send_message(
             metadata=metadata,
             attachments=attachments,
         )
-

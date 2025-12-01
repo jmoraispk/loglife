@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import queue
 import threading
-import time
 from unittest.mock import MagicMock, patch
 
 import pytest
 
 from loglife.core.messaging import Message, enqueue_inbound_message, start_message_worker
+
+
 @pytest.fixture(autouse=True)
 def reset_worker_state():
     """Ensure clean slate for worker state."""
@@ -68,6 +69,7 @@ def test_high_volume_queue_pressure():
 
     # Reset worker state to allow starting
     import loglife.core.messaging.receiver as receiver_module
+
     receiver_module._worker_started = False
 
     # Use mocked thread to run synchronously
@@ -81,7 +83,7 @@ def test_high_volume_queue_pressure():
         count = 50
         for i in range(count):
             enqueue_inbound_message(Message(str(i), "chat", "hi", "w"))
-        
+
         # Enqueue stop signal
         enqueue_inbound_message(Message("stop", "_stop", "", "w"))
 

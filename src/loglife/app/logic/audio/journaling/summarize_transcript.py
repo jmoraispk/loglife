@@ -7,6 +7,7 @@ chat completion API with a configured system prompt.
 import logging
 
 import requests
+
 from loglife.app.config import (
     OPENAI_API_KEY,
     OPENAI_API_URL,

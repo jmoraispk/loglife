@@ -14,5 +14,3 @@ def test_get_timezone_from_number() -> None:
 
     for number, expected in cases:
         assert get_timezone_from_number(number) == expected
-
-

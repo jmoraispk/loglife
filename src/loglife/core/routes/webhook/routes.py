@@ -11,8 +11,9 @@ from typing import TYPE_CHECKING
 
 from flask import Blueprint, g, request
 
-from .utils import error_response, success_response
 from loglife.core.messaging import Message, enqueue_inbound_message
+
+from .utils import error_response, success_response
 
 if TYPE_CHECKING:
     from flask.typing import ResponseReturnValue

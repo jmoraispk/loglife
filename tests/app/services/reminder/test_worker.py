@@ -127,7 +127,9 @@ def test_build_journal_reminder_message_with_untracked() -> None:
     mock_goal1 = MagicMock(spec=Goal)
     mock_goal1.goal_description = "Run 5k"
 
-    with patch("loglife.app.services.reminder.worker.get_goals_not_tracked_today") as mock_get_goals:
+    with patch(
+        "loglife.app.services.reminder.worker.get_goals_not_tracked_today"
+    ) as mock_get_goals:
         mock_get_goals.return_value = [mock_goal1]
 
         msg = reminder_worker._build_journal_reminder_message(1)  # noqa: SLF001
@@ -138,7 +140,9 @@ def test_build_journal_reminder_message_with_untracked() -> None:
 
 def test_build_journal_reminder_message_all_tracked() -> None:
     """Test journaling reminder message when all goals are tracked."""
-    with patch("loglife.app.services.reminder.worker.get_goals_not_tracked_today") as mock_get_goals:
+    with patch(
+        "loglife.app.services.reminder.worker.get_goals_not_tracked_today"
+    ) as mock_get_goals:
         mock_get_goals.return_value = []
 
         msg = reminder_worker._build_journal_reminder_message(1)  # noqa: SLF001

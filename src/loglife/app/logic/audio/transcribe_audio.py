@@ -8,6 +8,7 @@ import base64
 import time
 
 import requests
+
 from loglife.app.config import ASSEMBLYAI_API_KEY, ASSEMBLYAI_BASE_URL
 
 

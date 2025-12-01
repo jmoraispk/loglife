@@ -3,6 +3,7 @@
 from unittest.mock import patch
 
 import pytest
+
 from loglife.app.db.client import db
 from loglife.app.db.tables import User
 from loglife.app.logic.audio.processor import process_audio
@@ -169,4 +170,3 @@ def test_process_audio_with_transcript_file(user: User) -> None:
         assert isinstance(response, tuple)
         # Check for the tuple order (transcript_file, summary)
         assert response == ("base64_file_content", "Summary text")
-

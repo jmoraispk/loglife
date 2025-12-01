@@ -2,9 +2,9 @@
 
 from queue import Empty
 from typing import Any
-from unittest.mock import patch
 
 from flask.testing import FlaskClient
+
 from loglife.core.messaging import get_outbound_message
 
 

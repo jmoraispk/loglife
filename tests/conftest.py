@@ -1,8 +1,8 @@
 """Pytest configuration and fixtures for database testing."""
 
 import _thread
-import threading
 import sqlite3
+import threading
 from collections.abc import Generator
 from pathlib import Path
 from unittest.mock import patch
@@ -10,12 +10,13 @@ from unittest.mock import patch
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
+
 from loglife.app import create_app
 from loglife.app.config.paths import SCHEMA_FILE
 from loglife.app.db.client import db
 
+TIMEOUT = 1.0  # seconds
 
-TIMEOUT = 1.0 # seconds
 
 class TimeoutError(Exception):
     """Raised when a test exceeds the timeout."""
@@ -24,16 +25,17 @@ class TimeoutError(Exception):
 @pytest.fixture(autouse=True)
 def global_timeout():
     """Global timeout fixture to prevent hanging tests ({TIMEOUT} seconds max).
-    
-    Works on both Linux and Windows by using a separate thread to interrupt 
+
+    Works on both Linux and Windows by using a separate thread to interrupt
     the main thread if the timeout is reached.
     """
+
     def timeout_handler():
         _thread.interrupt_main()
 
     timer = threading.Timer(TIMEOUT, timeout_handler)
     timer.start()
-    
+
     try:
         yield
     except KeyboardInterrupt:

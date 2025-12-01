@@ -24,4 +24,3 @@ __all__ = [
     "start_message_worker",
     "start_sender_worker",
 ]
-

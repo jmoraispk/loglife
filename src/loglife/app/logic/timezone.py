@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from phonenumbers import NumberParseException, timezone
 import phonenumbers
+from phonenumbers import NumberParseException, timezone
 
 
 def get_timezone_from_number(number: str) -> str:
@@ -23,5 +23,3 @@ def get_timezone_from_number(number: str) -> str:
     if not timezones:
         return "UTC"
     return timezones[0]
-
-

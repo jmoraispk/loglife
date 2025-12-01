@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from typing import TYPE_CHECKING
 
 import pytest
+
 from loglife.app.config import ERROR_NO_GOALS_SET, USAGE_RATE
 from loglife.app.db.client import db
 from loglife.app.logic import process_text

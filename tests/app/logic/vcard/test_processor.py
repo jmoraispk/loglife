@@ -4,6 +4,7 @@ import json
 from unittest.mock import patch
 
 import pytest
+
 from loglife.app.config import REFERRAL_SUCCESS
 from loglife.app.db.client import db
 from loglife.app.db.tables import User

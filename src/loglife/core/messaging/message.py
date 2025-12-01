@@ -30,4 +30,3 @@ class Message:
             client_type=payload.get("client_type", "unknown"),
             metadata=dict(payload.get("metadata") or {}),
         )
-
