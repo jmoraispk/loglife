@@ -21,7 +21,7 @@ The App is just a consumer of the Core's `router-worker`.
 ```mermaid
 graph TD
     subgraph "Core Framework"
-        In[Inbound Message] -->|Route| Router
+        In[Receive Queue] -->|Route| Router
     end
 
     subgraph "App Implementation"
@@ -66,6 +66,6 @@ The **Reminder Service** is a standalone daemon thread.
 
 ---
 
-## 🗄️ Database Schema
+## 💾 Database
 
-See the [Database Schema](database.md) page for full table definitions.
+The app stores data in SQLite. See the [Database Schema](database.md) for details.

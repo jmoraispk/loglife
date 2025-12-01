@@ -11,9 +11,9 @@ The Framework is built on a **Producer-Consumer** architecture using Python's `q
 ```mermaid
 graph LR
     A[User] -->|WhatsApp Webhook| B(Main Thread)
-    B -->|Push| C{Inbound Queue}
+    B -->|Push| C{Receive Queue}
     C -->|Pop| D[Your Logic Loop]
-    D -->|Push| E{Outbound Queue}
+    D -->|Push| E{Send Queue}
     E -->|Pop| F[Sender Thread]
     F -->|API Call| G[WhatsApp API]
 ```
@@ -26,9 +26,9 @@ The framework automatically manages the critical background threads for you.
 
 | Thread | Role | Efficiency |
 | :--- | :--- | :--- |
-| **MainThread** | **Web Server**. Receives Webhook & pushes to `Inbound Queue`. Returns `200 OK` instantly. | ⚡ **High**. Non-blocking. |
+| **MainThread** | **Web Server**. Receives Webhook & pushes to `Receive Queue`. Returns `200 OK` instantly. | ⚡ **High**. Non-blocking. |
 | **Your Loop** | **Logic**. You call `core.recv_msg()`. This is where your business logic lives. | 🐢 **Variable**. Depends on your code speed. |
-| **SenderThread** | **I/O Worker**. Pops from `Outbound Queue` and calls WhatsApp API. | 🐢 **Medium**. Handles network latency. |
+| **SenderThread** | **I/O Worker**. Pops from `Send Queue` and calls WhatsApp API. | 🐢 **Medium**. Handles network latency. |
 
 !!! tip "Why this matters"
     Because the **SenderThread** is separate, your logic loop can queue 10 messages instantly and go back to listening for new inputs, while the Sender Thread handles the slow task of actually delivering them one by one.
@@ -41,9 +41,9 @@ The core unifies all inputs (WhatsApp, Emulator, Tests) into a single `Message` 
 
 ### Workflow
 
-1.  **Ingestion**: Webhook receives JSON $\rightarrow$ Wraps in `Message` $\rightarrow$ Pushes to `Inbound Queue`.
+1.  **Ingestion**: Webhook receives JSON $\rightarrow$ Wraps in `Message` $\rightarrow$ Pushes to `Receive Queue`.
 2.  **Consumption**: You call `recv_msg()`, which blocks until a message is available.
-3.  **Production**: You call `send_msg()`, which wraps your text in a `Message` $\rightarrow$ Pushes to `Outbound Queue`.
+3.  **Production**: You call `send_msg()`, which wraps your text in a `Message` $\rightarrow$ Pushes to `Send Queue`.
 4.  **Delivery**: `SenderThread` wakes up $\rightarrow$ Pops message $\rightarrow$ Calls external API.
 
 ---

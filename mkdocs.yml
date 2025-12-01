@@ -20,7 +20,7 @@ nav:
     - Audio Journaling: usage/audio-journaling.md
     - Referrals: usage/referrals.md
     - Managing Goals: usage/managing-goals.md
-  - Framework (Core):
+  - Core Framework:
     - Quickstart: core/quickstart.md
     - Architecture: core/architecture.md
     - WhatsApp Setup: core/whatsapp-setup.md

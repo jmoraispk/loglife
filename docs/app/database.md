@@ -1,4 +1,4 @@
-# 🗄️ Database Schema
+# 💾 Database Schema
 
 The App uses SQLite (`loglife.db`). Below are the main tables.
 
@@ -33,6 +33,16 @@ Daily performance scores for goals.
 | `rating` | `INTEGER` | 1-3 stars (`1`: Bad, `2`: OK, `3`: Great). |
 | `rating_date` | `DATETIME` | Timestamp of the rating. |
 
+### ⏰ `goal_reminders`
+Scheduled times for daily notifications.
+
+| Column | Type | Description |
+| :--- | :--- | :--- |
+| `id` | `INTEGER` | Primary Key. |
+| `user_id` | `INTEGER` | Foreign Key to `users`. |
+| `user_goal_id` | `INTEGER` | Foreign Key to `user_goals`. |
+| `reminder_time` | `DATETIME` | The UTC timestamp for the next reminder. |
+
 ### 🎙️ `audio_journal_entries`
 Stores transcripts and AI summaries of voice notes.
 
@@ -61,4 +71,3 @@ Tracks who invited whom.
 | `referred_user_id` | `INTEGER` | User who received the invite. |
 
 For raw SQL definitions, see `src/loglife/app/db/schema.sql`.
-
