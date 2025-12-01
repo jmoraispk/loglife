@@ -30,7 +30,9 @@ def webhook() -> ResponseReturnValue:
         enqueue_inbound_message(message)
 
         logger.info("Queued message type %s for %s", message.msg_type, message.sender)
-        return success_response(message="Message queued")
+        # For emulator, we don't need an explicit "queued" response message in the UI
+        # We return an empty message so the emulator doesn't show "Message queued"
+        return success_response(message="")
     except Exception as e:
         error = f"Error processing webhook > {e}"
         logger.exception(error)

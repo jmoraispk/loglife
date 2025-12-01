@@ -854,8 +854,11 @@
             const source = new EventSource('/events');
 
             source.onmessage = (event) => {
+                // console.log('Event received:', event.data); // Debug
                 const payload = event.data;
-                if (!payload) return;
+                if (payload.includes("Queueing async message") || payload.includes("Sending emulator message") || payload.includes("Audio received. Transcribing...") || payload.includes("Audio transcribed. Summarizing...") || payload.includes("Summary stored in Database.")) {
+                    return;
+                }
 
                 clearEmptyState();
                 addMessage(payload, 'event', 'Server Event');
@@ -946,7 +949,21 @@
                     if (transcriptFile) {
                         addTranscriptMessage(transcriptFile);
                     }
-                    addMessage(formattedText, 'bot', `${ms}ms`);
+                    // Only add message if it's not empty or if it's an error
+                    if (formattedText.trim() !== '{"success":true,"message":"","data":{}}' && formattedText.trim() !== '') {
+                       // Try to parse it to see if message is empty inside JSON
+                       let showMessage = true;
+                       try {
+                           const jsonResp = JSON.parse(formattedText);
+                           if (jsonResp.success && !jsonResp.message && (!jsonResp.data || Object.keys(jsonResp.data).length === 0)) {
+                               showMessage = false;
+                           }
+                       } catch (e) {}
+
+                       if (showMessage) {
+                           addMessage(formattedText, 'bot', `${ms}ms`);
+                       }
+                    }
                     setStatus('success', 'Success');
                 } else {
                     addMessage(formattedText || 'No response', 'bot', `Error • ${ms}ms`);

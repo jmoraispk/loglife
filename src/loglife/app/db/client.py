@@ -29,7 +29,7 @@ class Database:
     def conn(self) -> sqlite3.Connection:
         """Lazy loading of the database connection."""
         if self._conn is None:
-            self._conn = sqlite3.connect(self.db_path)
+            self._conn = sqlite3.connect(self.db_path, check_same_thread=False)
             self._conn.row_factory = sqlite3.Row
             # Enforce foreign keys
             self._conn.execute("PRAGMA foreign_keys = ON")

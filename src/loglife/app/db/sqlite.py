@@ -12,7 +12,7 @@ def connect() -> sqlite3.Connection:
     objects (so you can access columns by name), and hands back that
     ready-to-use connection.
     """
-    conn: sqlite3.Connection = sqlite3.connect(DATABASE_FILE)
+    conn: sqlite3.Connection = sqlite3.connect(DATABASE_FILE, check_same_thread=False)
     conn.row_factory = sqlite3.Row
     return conn
 

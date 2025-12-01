@@ -122,6 +122,7 @@ def start_sender_worker() -> None:
                 break
 
             try:
+                logger.debug("Dispatching outbound message to %s via %s", message.sender, message.client_type)
                 _dispatch_outbound(message)
             except Exception:
                 logger.exception("Failed to deliver outbound message to %s", message.sender)
@@ -131,12 +132,14 @@ def start_sender_worker() -> None:
 
 def _dispatch_outbound(message: Message) -> None:
     client = message.client_type or "whatsapp"
+    logger.debug("Dispatching to client type: %s", client)
     if client == "emulator":
         _send_emulator_message(message.raw_payload)
     else:
         _send_whatsapp_message(message.sender, message.raw_payload)
 
 def _send_emulator_message(message: str) -> None:
+    logger.info("Sending emulator message: %s", message)
     log_queue.put(message)
 
 def _send_whatsapp_message(number: str, message: str) -> None:
