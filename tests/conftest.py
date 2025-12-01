@@ -1,6 +1,7 @@
 """Pytest configuration and fixtures for database testing."""
 
-import signal
+import _thread
+import threading
 import sqlite3
 from collections.abc import Generator
 from pathlib import Path
@@ -14,30 +15,32 @@ from loglife.app.config.paths import SCHEMA_FILE
 from loglife.app.db.client import db
 
 
+TIMEOUT = 1.0 # seconds
+
 class TimeoutError(Exception):
     """Raised when a test exceeds the timeout."""
 
 
 @pytest.fixture(autouse=True)
 def global_timeout():
-    """Global timeout fixture to prevent hanging tests (5 seconds max)."""
-    def timeout_handler(signum, frame):
-        raise TimeoutError("Test exceeded 5 second timeout")
+    """Global timeout fixture to prevent hanging tests ({TIMEOUT} seconds max).
     
-    # Set up signal handler
-    # Only available on Unix-like systems (which this is)
-    if hasattr(signal, "SIGALRM"):
-        old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(5)  # 5 second timeout
-        
-        try:
-            yield
-        finally:
-            # Always clear the alarm and restore old handler
-            signal.alarm(0)
-            signal.signal(signal.SIGALRM, old_handler)
-    else:
+    Works on both Linux and Windows by using a separate thread to interrupt 
+    the main thread if the timeout is reached.
+    """
+    def timeout_handler():
+        _thread.interrupt_main()
+
+    timer = threading.Timer(TIMEOUT, timeout_handler)
+    timer.start()
+    
+    try:
         yield
+    except KeyboardInterrupt:
+        # Caught the interrupt from our timer
+        raise TimeoutError(f"Test exceeded {TIMEOUT} second timeout")
+    finally:
+        timer.cancel()
 
 
 @pytest.fixture
