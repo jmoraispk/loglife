@@ -47,9 +47,9 @@ def test_process_text_add_goal() -> None:
     assert goals[0].goal_description == "run 5k"
 
     # Verify state transition
-    state = db.user_states.get(user.id)
-    assert state.state == "awaiting_reminder_time"
-    temp = json.loads(state.temp_data)
+    user = db.users.get(user.id)
+    assert user.state == "awaiting_reminder_time"
+    temp = json.loads(user.state_data)
     assert temp["goal_id"] == goals[0].id
 
 
@@ -58,10 +58,10 @@ def test_process_text_set_reminder_time() -> None:
     user = db.users.create("+1234567890", "UTC")
     # Setup state as if goal was just added
     goal = db.goals.create(user.id, "🏃", "Run 5k")
-    db.user_states.create(
+    db.users.set_state(
         user.id,
         state="awaiting_reminder_time",
-        temp_data=json.dumps({"goal_id": goal.id}),
+        state_data=json.dumps({"goal_id": goal.id}),
     )
 
     response = process_text(user, "10:00")
@@ -69,12 +69,13 @@ def test_process_text_set_reminder_time() -> None:
     assert "remind you daily at 10:00 AM" in response
 
     # Verify reminder created
-    reminder = db.reminders.get_by_goal_id(goal.id)
-    assert reminder is not None
-    assert str(reminder.reminder_time) == "10:00:00"
+    updated_goal = db.goals.get(goal.id)
+    assert updated_goal is not None
+    assert str(updated_goal.reminder_time) == "10:00:00"
 
     # Verify state cleared
-    assert db.user_states.get(user.id) is None
+    user = db.users.get(user.id)
+    assert user.state is None
 
 
 def test_process_text_list_goals() -> None:
@@ -144,15 +145,16 @@ def test_process_text_update_reminder() -> None:
     """Test updating a reminder."""
     user = db.users.create("+1234567890", "UTC")
     goal = db.goals.create(user.id, "🏃", "Run")
-    db.reminders.create(user.id, goal.id, "09:00:00")
+    # Set initial reminder
+    db.goals.update(goal.id, reminder_time="09:00:00")
 
     response = process_text(user, "update 1 10pm")
 
     assert "Reminder updated" in response
     assert "10:00 PM" in response
 
-    reminder = db.reminders.get_by_goal_id(goal.id)
-    assert str(reminder.reminder_time) == "22:00:00"
+    updated_goal = db.goals.get(goal.id)
+    assert str(updated_goal.reminder_time) == "22:00:00"
 
 
 def test_process_text_transcript_toggle() -> None:

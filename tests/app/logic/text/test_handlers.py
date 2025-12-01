@@ -59,9 +59,9 @@ def test_add_goal(user: User) -> None:
     assert goals[0].goal_description == "Run 5k"
 
     # Verify state transition
-    state = db.user_states.get(user.id)
-    assert state.state == "awaiting_reminder_time"
-    temp = json.loads(state.temp_data)
+    updated_user = db.users.get(user.id)
+    assert updated_user.state == "awaiting_reminder_time"
+    temp = json.loads(updated_user.state_data)
     assert temp["goal_id"] == goals[0].id
 
 
@@ -163,18 +163,19 @@ def test_reminder_time(user: User) -> None:
 
     # Setup state
     goal = db.goals.create(user.id, "🏃", "Run")
-    db.user_states.create(
-        user.id, state="awaiting_reminder_time", temp_data=json.dumps({"goal_id": goal.id}),
+    db.users.set_state(
+        user.id, state="awaiting_reminder_time", state_data=json.dumps({"goal_id": goal.id}),
     )
 
     response = handler.handle(user, message)
     assert "remind you daily at 10:00 AM" in response
 
-    reminder = db.reminders.get_by_goal_id(goal.id)
-    assert str(reminder.reminder_time) == "10:00:00"
+    updated_goal = db.goals.get(goal.id)
+    assert str(updated_goal.reminder_time) == "10:00:00"
 
     # Check state cleared
-    assert db.user_states.get(user.id) is None
+    updated_user = db.users.get(user.id)
+    assert updated_user.state is None
 
 
 def test_reminder_time_no_state(user: User) -> None:
@@ -195,7 +196,7 @@ def test_goals_list(user: User) -> None:
 
     # With goals
     g1 = db.goals.create(user.id, "🏃", "Run")
-    db.reminders.create(user.id, g1.id, "09:00:00")
+    db.goals.update(g1.id, reminder_time="09:00:00")
 
     response = handler.handle(user, "goals")
     assert "1. 🏃 Run" in response
@@ -214,13 +215,13 @@ def test_update_reminder(user: User) -> None:
     assert "Reminder updated" in response
     assert "08:00 PM" in response
 
-    reminder = db.reminders.get_by_goal_id(goal.id)
-    assert str(reminder.reminder_time) == "20:00:00"
+    updated_goal = db.goals.get(goal.id)
+    assert str(updated_goal.reminder_time) == "20:00:00"
 
     # Update existing
     response = handler.handle(user, "update 1 9pm")
-    reminder = db.reminders.get_by_goal_id(goal.id)
-    assert str(reminder.reminder_time) == "21:00:00"
+    updated_goal = db.goals.get(goal.id)
+    assert str(updated_goal.reminder_time) == "21:00:00"
 
 
 def test_update_reminder_invalid(user: User) -> None:

@@ -9,7 +9,7 @@ from unittest.mock import MagicMock, patch
 
 import loglife.app.services.reminder.worker as reminder_worker
 from loglife.app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
-from loglife.app.db.tables import Goal, Reminder, User
+from loglife.app.db.tables import Goal, User
 
 
 def test_check_reminders() -> None:
@@ -25,30 +25,25 @@ def test_check_reminders() -> None:
     reminder_time = now.strftime("%H:%M")
 
     # Mock objects
-    mock_reminder = MagicMock(spec=Reminder)
-    mock_reminder.id = 1
-    mock_reminder.user_id = 1
-    mock_reminder.user_goal_id = 10
-    mock_reminder.reminder_time = reminder_time
-
     mock_user = MagicMock(spec=User)
     mock_user.id = 1
     mock_user.timezone = "UTC"
     mock_user.phone_number = "1234567890"
 
     mock_goal = MagicMock(spec=Goal)
+    mock_goal.id = 10
+    mock_goal.user_id = 1
     mock_goal.goal_description = "Test Goal"
     mock_goal.goal_emoji = "✅"
+    mock_goal.reminder_time = reminder_time
 
     with (
-        patch("loglife.app.db.tables.reminders.RemindersTable.get_all") as mock_get_reminders,
+        patch("loglife.app.db.tables.goals.GoalsTable.get_all_with_reminders") as mock_get_goals,
         patch("loglife.app.db.tables.users.UsersTable.get_all") as mock_get_all_users,
-        patch("loglife.app.db.tables.goals.GoalsTable.get") as mock_get_goal,
         patch("loglife.app.services.reminder.worker.queue_async_message") as mock_send,
     ):
-        mock_get_reminders.return_value = [mock_reminder]
+        mock_get_goals.return_value = [mock_goal]
         mock_get_all_users.return_value = [mock_user]
-        mock_get_goal.return_value = mock_goal
 
         reminder_worker._check_reminders()  # noqa: SLF001
 
@@ -68,10 +63,10 @@ def test_is_reminder_due_true() -> None:
     mock_user = MagicMock(spec=User)
     mock_user.timezone = "UTC"
 
-    mock_reminder = MagicMock(spec=Reminder)
-    mock_reminder.reminder_time = "12:00:00"
+    mock_goal = MagicMock(spec=Goal)
+    mock_goal.reminder_time = "12:00:00"
 
-    assert reminder_worker._is_reminder_due(mock_reminder, mock_user, now_utc)  # noqa: SLF001
+    assert reminder_worker._is_reminder_due(mock_goal, mock_user, now_utc)  # noqa: SLF001
 
 
 def test_is_reminder_due_false() -> None:
@@ -81,10 +76,10 @@ def test_is_reminder_due_false() -> None:
     mock_user = MagicMock(spec=User)
     mock_user.timezone = "UTC"
 
-    mock_reminder = MagicMock(spec=Reminder)
-    mock_reminder.reminder_time = "12:01:00"
+    mock_goal = MagicMock(spec=Goal)
+    mock_goal.reminder_time = "12:01:00"
 
-    assert not reminder_worker._is_reminder_due(mock_reminder, mock_user, now_utc)  # noqa: SLF001
+    assert not reminder_worker._is_reminder_due(mock_goal, mock_user, now_utc)  # noqa: SLF001
 
 
 def test_is_reminder_due_timezone_conversion() -> None:
@@ -97,12 +92,12 @@ def test_is_reminder_due_timezone_conversion() -> None:
     mock_user = MagicMock(spec=User)
     mock_user.timezone = "Europe/Paris"
 
-    mock_reminder = MagicMock(spec=Reminder)
+    mock_goal = MagicMock(spec=Goal)
     # In Jan (Standard Time), Paris is UTC+1. So 12:00 UTC -> 13:00 Paris.
-    mock_reminder.reminder_time = "13:00:00"
+    mock_goal.reminder_time = "13:00:00"
 
     assert reminder_worker._is_reminder_due(  # noqa: SLF001
-        mock_reminder,
+        mock_goal,
         mock_user,
         now_utc,
     )
@@ -155,25 +150,24 @@ def test_check_reminders_not_due() -> None:
     """Test that reminders are not sent if not due."""
     now = datetime.now(UTC)
 
-    # Mock objects
-    mock_reminder = MagicMock(spec=Reminder)
-    mock_reminder.id = 1
-    mock_reminder.user_id = 1
-    mock_reminder.reminder_time = "00:00"  # Unlikely to match unless now is 00:00
-    # Force mismatch
-    if now.strftime("%H:%M") == "00:00":
-        mock_reminder.reminder_time = "00:01"
-
     mock_user = MagicMock(spec=User)
     mock_user.id = 1
     mock_user.timezone = "UTC"
 
+    mock_goal = MagicMock(spec=Goal)
+    mock_goal.id = 10
+    mock_goal.user_id = 1
+    mock_goal.reminder_time = "00:00"  # Unlikely to match unless now is 00:00
+    # Force mismatch
+    if now.strftime("%H:%M") == "00:00":
+        mock_goal.reminder_time = "00:01"
+
     with (
-        patch("loglife.app.db.tables.reminders.RemindersTable.get_all") as mock_get_reminders,
+        patch("loglife.app.db.tables.goals.GoalsTable.get_all_with_reminders") as mock_get_goals,
         patch("loglife.app.db.tables.users.UsersTable.get_all") as mock_get_all_users,
         patch("loglife.app.services.reminder.worker.queue_async_message") as mock_send,
     ):
-        mock_get_reminders.return_value = [mock_reminder]
+        mock_get_goals.return_value = [mock_goal]
         mock_get_all_users.return_value = [mock_user]
 
         reminder_worker._check_reminders()  # noqa: SLF001

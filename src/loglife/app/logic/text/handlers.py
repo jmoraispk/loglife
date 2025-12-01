@@ -11,7 +11,7 @@ from loglife.app.config import (
     messages,
 )
 from loglife.app.db.client import db
-from loglife.app.db.tables import Goal, Rating, Reminder, User, UserState
+from loglife.app.db.tables import Goal, Rating, User
 from loglife.app.logic.text.reminder_time import parse_time_string
 from loglife.app.logic.text.week import get_monday_before, look_back_summary
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
@@ -71,10 +71,10 @@ class AddGoalHandler(TextCommandHandler):
             goal_description: str = raw_goal.replace(goal_emoji, "").strip()
             goal: Goal = db.goals.create(user_id, goal_emoji, goal_description)
             if goal:
-                db.user_states.create(
+                db.users.set_state(
                     user_id,
                     state="awaiting_reminder_time",
-                    temp_data=json.dumps({"goal_id": goal.id}),
+                    state_data=json.dumps({"goal_id": goal.id}),
                 )
                 return messages.SUCCESS_GOAL_ADDED
         return None
@@ -170,22 +170,16 @@ class ReminderTimeHandler(TextCommandHandler):
         if normalized_time is None:
             return None  # Should be caught by matches, but for type safety
 
-        # Note: We call parse_time_string again here. Ideally we'd cache it,
-        # but for stateless handlers this is cleaner than shared state.
-
-        user_state: UserState | None = db.user_states.get(user_id)
-        if not user_state or user_state.state != "awaiting_reminder_time":
+        # Refresh user object to get latest state
+        current_user: User | None = db.users.get(user_id)
+        if not current_user or current_user.state != "awaiting_reminder_time":
             return messages.ERROR_ADD_GOAL_FIRST
 
-        temp = json.loads(user_state.temp_data or "{}")
+        temp = json.loads(current_user.state_data or "{}")
         goal_id = temp.get("goal_id")
 
-        db.reminders.create(
-            user_id=user_id,
-            user_goal_id=goal_id,
-            reminder_time=normalized_time,
-        )
-        db.user_states.delete(user_id)
+        db.goals.update(goal_id, reminder_time=normalized_time)
+        db.users.set_state(user_id, None)
 
         # Convert 24-hour format to 12-hour AM/PM format
         time_obj = datetime.strptime(normalized_time, "%H:%M:%S").time()  # noqa: DTZ007
@@ -221,16 +215,11 @@ class GoalsListHandler(TextCommandHandler):
         # Format each goal with its description
         goal_lines: list[str] = []
         for i, goal in enumerate(user_goals, 1):
-            # Get reminder for this goal
-            reminder: Reminder | None = db.reminders.get_by_goal_id(goal.id)
             time_display = ""
-            if reminder:
+            if goal.reminder_time:
                 time_obj = datetime.strptime(  # noqa: DTZ007
-                    # Ensure reminder_time is string, though model has it as datetime (check logic)
-                    # In SQLite it comes as string usually unless parsed.
-                    # Our new model says datetime, but existing DB stores string.
-                    # Let's assume string for now as we haven't added parsing logic in Table class
-                    str(reminder.reminder_time),
+                    # Ensure reminder_time is string
+                    str(goal.reminder_time),
                     "%H:%M:%S",
                 ).time()
                 time_display = f" ⏰ {time_obj.strftime('%I:%M %p')}"
@@ -277,17 +266,7 @@ class UpdateReminderHandler(TextCommandHandler):
 
         goal: Goal = user_goals[goal_num - 1]
 
-        reminder: Reminder | None = db.reminders.get_by_goal_id(goal.id)
-
-        # Create reminder if it doesn't exist, otherwise update it
-        if reminder is None:
-            db.reminders.create(
-                user_id=user_id,
-                user_goal_id=goal.id,
-                reminder_time=normalized_time,
-            )
-        else:
-            db.reminders.update(reminder.id, reminder_time=normalized_time)
+        db.goals.update(goal.id, reminder_time=normalized_time)
 
         time_obj = datetime.strptime(normalized_time, "%H:%M:%S").time()  # noqa: DTZ007
         display_time = time_obj.strftime("%I:%M %p")

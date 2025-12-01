@@ -30,6 +30,7 @@ def test_create_goal() -> None:
     assert goal.goal_description == "Learn Python"
     assert goal.boost_level == 1
     assert goal.id is not None
+    assert goal.reminder_time is None
 
     # Test creation with custom boost_level
     goal2 = db.goals.create(
@@ -141,6 +142,10 @@ def test_update_goal() -> None:
 
     assert updated_goal.boost_level == 2
 
+    # Test updating reminder_time
+    updated_goal = db.goals.update(goal.id, reminder_time="09:00:00")
+    assert updated_goal.reminder_time == "09:00:00"
+
     # Test updating all fields
     updated_goal = db.goals.update(
         goal.id,
@@ -152,6 +157,7 @@ def test_update_goal() -> None:
     assert updated_goal.goal_emoji == "💎"
     assert updated_goal.goal_description == "Become Python expert"
     assert updated_goal.boost_level == 3
+    assert updated_goal.reminder_time == "09:00:00"
 
     # Test updating with no fields returns existing goal
     unchanged_goal = db.goals.update(goal.id)
@@ -183,3 +189,21 @@ def test_delete_goal() -> None:
     # Assert goal is deleted
     deleted_goal = db.goals.get(goal_id)
     assert deleted_goal is None
+
+
+def test_get_all_with_reminders() -> None:
+    """Test retrieving goals that have reminders set."""
+    user = db.users.create("+1234567890", "UTC")
+    g1 = db.goals.create(user.id, "A", "A")
+    g2 = db.goals.create(user.id, "B", "B")
+    g3 = db.goals.create(user.id, "C", "C")
+
+    db.goals.update(g1.id, reminder_time="09:00:00")
+    db.goals.update(g3.id, reminder_time="10:00:00")
+
+    goals_with_reminders = db.goals.get_all_with_reminders()
+    assert len(goals_with_reminders) == 2
+    ids = {g.id for g in goals_with_reminders}
+    assert g1.id in ids
+    assert g3.id in ids
+    assert g2.id not in ids

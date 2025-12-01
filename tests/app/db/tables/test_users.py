@@ -25,6 +25,8 @@ def test_create_user() -> None:
     assert user.phone_number == "+1234567890"
     assert user.timezone == "America/New_York"
     assert user.id is not None
+    assert user.state is None
+    assert user.state_data is None
 
     # Act & Assert
     with pytest.raises(sqlite3.IntegrityError):
@@ -111,6 +113,28 @@ def test_update_user() -> None:
     assert updated_user.timezone == "Europe/Paris"
     assert updated_user.phone_number == "+1234567890"  # unchanged
     assert updated_user.send_transcript_file == 0
+
+
+def test_set_user_state() -> None:
+    """Test updating user conversational state."""
+    # Arrange
+    user = db.users.create("+1234567890", "UTC")
+
+    # Act - Set state
+    db.users.set_state(user.id, "WAITING_INPUT", '{"foo": "bar"}')
+    updated_user = db.users.get(user.id)
+
+    # Assert
+    assert updated_user.state == "WAITING_INPUT"
+    assert updated_user.state_data == '{"foo": "bar"}'
+
+    # Act - Clear state
+    db.users.set_state(user.id, None)
+    updated_user = db.users.get(user.id)
+
+    # Assert
+    assert updated_user.state is None
+    assert updated_user.state_data is None
 
 
 def test_delete_user() -> None:

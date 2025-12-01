@@ -82,6 +82,7 @@ def test_look_back_summary() -> None:
         goal_description="Run",
         boost_level=1,
         created_at=datetime.now(UTC),
+        reminder_time=None,
     )
     goal2 = Goal(
         id=2,
@@ -90,6 +91,7 @@ def test_look_back_summary() -> None:
         goal_description="Read",
         boost_level=1,
         created_at=datetime.now(UTC),
+        reminder_time=None,
     )
 
     # Mock rating returns

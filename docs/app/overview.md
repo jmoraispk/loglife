@@ -27,11 +27,11 @@ graph TD
     subgraph "App Implementation"
         Router -->|msg_type='chat'| Text[Text Processor]
         Router -->|msg_type='audio'| Audio[Audio Processor]
-        
+
         Text -->|Parse| Handlers{Command Handlers}
         Handlers -->|'add goal'| AddGoal
         Handlers -->|'rate'| RateGoal
-        
+
         Audio -->|Transcribe| AssemblyAI
         Audio -->|Summarize| OpenAI
     end
@@ -46,15 +46,15 @@ graph TD
 Text commands use a **State Machine** pattern.
 
 1.  User sends "add goal".
-2.  System checks `user_states` table.
-3.  If state is `WAIT_GOAL_NAME`, next message is treated as the name.
+2.  System checks `users` table for current state.
+3.  If state is `awaiting_reminder_time`, next message is treated as the time.
 
 ### Audio Journaling (`loglife.app.logic.audio`)
 
 1.  **Download**: Fetches media from WhatsApp.
 2.  **Transcribe**: Sends audio to AssemblyAI.
 3.  **Summarize**: Sends transcript to OpenAI GPT-4.
-4.  **Store**: Saves to `audio_journal_entries`.
+4.  **Store**: Saves to `audio_journals`.
 
 ### Reminders (`loglife.app.services.reminder`)
 

@@ -19,6 +19,7 @@ class Goal:
     goal_description: str
     boost_level: int
     created_at: datetime
+    reminder_time: datetime | None  # in sqlite is text (YYYY-MM-DD HH:MM:SS or just HH:MM:SS)
 
 
 class GoalsTable:
@@ -40,6 +41,12 @@ class GoalsTable:
         rows = self._conn.execute(query, (user_id,)).fetchall()
         return [self._row_to_model(row) for row in rows]
 
+    def get_all_with_reminders(self) -> list[Goal]:
+        """Retrieve all goals that have a reminder set."""
+        query = "SELECT * FROM user_goals WHERE reminder_time IS NOT NULL"
+        rows = self._conn.execute(query).fetchall()
+        return [self._row_to_model(row) for row in rows]
+
     def create(
         self,
         user_id: int,
@@ -53,7 +60,7 @@ class GoalsTable:
             VALUES (?, ?, ?, ?)
         """
         cursor = self._conn.execute(query, (user_id, goal_emoji, goal_description, boost_level))
-        return self.get(cursor.lastrowid)  # type: ignore[arg-type]
+        return self.get(cursor.lastrowid)
 
     def update(
         self,
@@ -61,6 +68,7 @@ class GoalsTable:
         goal_emoji: str | None = None,
         goal_description: str | None = None,
         boost_level: int | None = None,
+        reminder_time: str | None = None,
     ) -> Goal | None:
         """Update a goal record with provided fields."""
         updates = []
@@ -77,6 +85,10 @@ class GoalsTable:
         if boost_level is not None:
             updates.append("boost_level = ?")
             params.append(boost_level)
+
+        if reminder_time is not None:
+            updates.append("reminder_time = ?")
+            params.append(reminder_time)
 
         if not updates:
             return self.get(goal_id)

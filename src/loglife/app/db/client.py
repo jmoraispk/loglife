@@ -9,9 +9,7 @@ from loglife.app.db.tables import (
     GoalsTable,
     RatingsTable,
     ReferralsTable,
-    RemindersTable,
     UsersTable,
-    UserStatesTable,
 )
 
 
@@ -52,16 +50,6 @@ class Database:
     def ratings(self) -> RatingsTable:
         """Get the ratings table accessor."""
         return RatingsTable(self.conn)
-
-    @property
-    def reminders(self) -> RemindersTable:
-        """Get the reminders table accessor."""
-        return RemindersTable(self.conn)
-
-    @property
-    def user_states(self) -> UserStatesTable:
-        """Get the user_states table accessor."""
-        return UserStatesTable(self.conn)
 
     @property
     def audio_journal(self) -> AudioJournalTable:

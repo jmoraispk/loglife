@@ -18,6 +18,8 @@ class User:
     timezone: str
     created_at: datetime
     send_transcript_file: int  # 0 or 1
+    state: str | None
+    state_data: str | None
 
 
 class UsersTable:
@@ -90,6 +92,11 @@ class UsersTable:
         self._conn.execute(query, params)
 
         return self.get(user_id)
+
+    def set_state(self, user_id: int, state: str | None, state_data: str | None = None) -> None:
+        """Update the user's conversational state."""
+        query = "UPDATE users SET state = ?, state_data = ? WHERE id = ?"
+        self._conn.execute(query, (state, state_data, user_id))
 
     def delete(self, user_id: int) -> None:
         """Delete a user record."""

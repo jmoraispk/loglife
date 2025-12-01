@@ -15,12 +15,7 @@
       show_root_heading: true
       heading_level: 2
 
-::: loglife.app.db.tables.reminders
-    options:
-      show_root_heading: true
-      heading_level: 2
-
-::: loglife.app.db.tables.audio_journal
+::: loglife.app.db.tables.audio_journals
     options:
       show_root_heading: true
       heading_level: 2
@@ -29,9 +24,3 @@
     options:
       show_root_heading: true
       heading_level: 2
-
-::: loglife.app.db.tables.user_states
-    options:
-      show_root_heading: true
-      heading_level: 2
-

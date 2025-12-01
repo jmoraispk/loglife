@@ -11,7 +11,7 @@ from datetime import UTC, datetime
 
 from loglife.app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
 from loglife.app.db.client import db
-from loglife.app.db.tables import Goal, Reminder, User
+from loglife.app.db.tables import Goal, User
 from loglife.app.logic.timezone import get_timezone_safe
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
 from loglife.core.messaging import queue_async_message
@@ -22,20 +22,24 @@ MIN_WAIT_SECONDS = 10
 MAX_WAIT_SECONDS = 60
 
 
-def _is_reminder_due(reminder: Reminder, user: User, now_utc: datetime) -> bool:
+def _is_reminder_due(goal: Goal, user: User, now_utc: datetime) -> bool:
     """Check if a reminder is due at the current time for the user's timezone."""
+    if not goal.reminder_time:
+        return False
+
     tz = get_timezone_safe(user.timezone)
     local_now = now_utc.astimezone(tz)
 
     try:
-        time_parts = str(reminder.reminder_time).split(":")
+        # reminder_time is likely a string "HH:MM:SS" or datetime
+        time_parts = str(goal.reminder_time).split(":")
         rem_hour = int(time_parts[0])
         rem_minute = int(time_parts[1])
     except (ValueError, IndexError):
         logger.warning(
-            "Invalid reminder time format for reminder %s: %s",
-            reminder.id,
-            reminder.reminder_time,
+            "Invalid reminder time format for goal %s: %s",
+            goal.id,
+            goal.reminder_time,
         )
         return False
 
@@ -62,44 +66,40 @@ def _build_standard_reminder_message(goal: Goal) -> str:
     )
 
 
-def _process_due_reminder(user: User, reminder: Reminder) -> None:
+def _process_due_reminder(user: User, goal: Goal) -> None:
     """Process a due reminder by fetching the goal and sending the notification."""
-    user_goal: Goal | None = db.goals.get(reminder.user_goal_id)
-    if not user_goal:
-        return
-
-    is_journaling = user_goal.goal_emoji == "📓" and user_goal.goal_description == "journaling"
+    is_journaling = goal.goal_emoji == "📓" and goal.goal_description == "journaling"
 
     if is_journaling:
         message = _build_journal_reminder_message(user.id)
     else:
-        message = _build_standard_reminder_message(user_goal)
+        message = _build_standard_reminder_message(goal)
 
     queue_async_message(user.phone_number, message, client_type="whatsapp")
     logger.info(
         "Sent reminder '%s' to %s",
-        user_goal.goal_description,
+        goal.goal_description,
         user.phone_number,
     )
 
 
 def _check_reminders() -> None:
     """Check all reminders and send notifications when scheduled time matches."""
-    reminders: list[Reminder] = db.reminders.get_all()
-    if not reminders:
+    goals_with_reminders: list[Goal] = db.goals.get_all_with_reminders()
+    if not goals_with_reminders:
         return
 
     # Batch fetch all users to avoid N+1 queries
     users_map: dict[int, User] = {user.id: user for user in db.users.get_all()}
     now_utc: datetime = datetime.now(UTC)
 
-    for reminder in reminders:
-        user = users_map.get(reminder.user_id)
+    for goal in goals_with_reminders:
+        user = users_map.get(goal.user_id)
         if not user:
             continue
 
-        if _is_reminder_due(reminder, user, now_utc):
-            _process_due_reminder(user, reminder)
+        if _is_reminder_due(goal, user, now_utc):
+            _process_due_reminder(user, goal)
 
 
 def _reminder_worker() -> None:
