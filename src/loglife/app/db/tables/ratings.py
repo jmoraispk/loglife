@@ -4,6 +4,7 @@ This module defines the Rating data class and the RatingsTable class for handlin
 database interactions related to goal ratings.
 """
 
+import contextlib
 import sqlite3
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -100,13 +101,8 @@ class RatingsTable:
         # Convert timestamps
         for field in ("created_at", "updated_at", "rating_date"):
             if isinstance(data.get(field), str):
-                try:
+                with contextlib.suppress(ValueError):
                     # Try ISO format (handles YYYY-MM-DD and YYYY-MM-DD HH:MM:SS)
                     data[field] = datetime.fromisoformat(data[field]).replace(tzinfo=UTC)
-                except ValueError:
-                    # Fallback for potential legacy formats if necessary
-                    # But fromisoformat is quite robust in 3.11+
-                    # Ensure we catch it to avoid crash, maybe assume UTC if not present
-                    pass
 
         return Rating(**data)
