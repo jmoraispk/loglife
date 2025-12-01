@@ -98,7 +98,7 @@ def test_start_sender_worker_dispatches(monkeypatch):
     def fake_get_outbound_message(timeout=None):
         if messages:
             return messages.pop(0)
-        raise Empty
+        return Message(sender="stop", msg_type="_stop", raw_payload="", client_type="")
 
     dispatched: list[str] = []
     stop_event = Event()
@@ -128,7 +128,7 @@ def test_sender_worker_recovers_after_exception(monkeypatch):
     def fake_get_outbound_message(timeout=None):
         if messages:
             return messages.pop(0)
-        raise Empty
+        return Message(sender="stop", msg_type="_stop", raw_payload="", client_type="")
 
     calls: list[str] = []
     stop_event = Event()

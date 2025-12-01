@@ -11,8 +11,10 @@ from loglife.core.messaging import Message, enqueue_inbound_message, start_messa
 @pytest.fixture(autouse=True)
 def reset_worker_state():
     """Ensure clean slate for worker state."""
-    from loglife.core.messaging.receiver import _worker_started, _inbound_queue
-    _worker_started = False
+    import loglife.core.messaging.receiver as receiver_module
+    from loglife.core.messaging.receiver import _inbound_queue
+
+    receiver_module._worker_started = False
     # Drain queue
     while not _inbound_queue.empty():
         try:
@@ -21,7 +23,7 @@ def reset_worker_state():
             break
     yield
     # Cleanup after test
-    _worker_started = False
+    receiver_module._worker_started = False
     # Send stop signal if thread is running?
     while not _inbound_queue.empty():
         try:
