@@ -1,3 +1,10 @@
 """Chat interface core package (transports, clients, shared protocols)."""
 
-__all__: list[str] = []
+from loglife.core.interface import Message, init, recv_msg, send_msg
+
+__all__ = [
+    "Message",
+    "init",
+    "recv_msg",
+    "send_msg",
+]
