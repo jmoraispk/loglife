@@ -70,7 +70,7 @@ def test_sender_worker_http_failure(caplog):
         assert "Failed to deliver outbound message" in caplog.text
 
 
-def test_sender_worker_timeout_handling(timeout):
+def test_sender_worker_timeout_handling():
     """Test timeout behavior (empty queue swallowed)."""
     # We mock get_outbound_message to raise Empty then return stop
     

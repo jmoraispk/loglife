@@ -18,28 +18,26 @@ class TimeoutError(Exception):
     """Raised when a test exceeds the timeout."""
 
 
-@pytest.fixture
-def timeout():
-    """Fixture to add timeout to tests (1 second max).
-    
-    Usage:
-        def test_something(timeout):
-            # Test code here - will timeout after 1 second
-            pass
-    """
+@pytest.fixture(autouse=True)
+def global_timeout():
+    """Global timeout fixture to prevent hanging tests (5 seconds max)."""
     def timeout_handler(signum, frame):
-        raise TimeoutError("Test exceeded 1 second timeout")
+        raise TimeoutError("Test exceeded 5 second timeout")
     
     # Set up signal handler
-    old_handler = signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(1)  # 1 second timeout
-    
-    try:
+    # Only available on Unix-like systems (which this is)
+    if hasattr(signal, "SIGALRM"):
+        old_handler = signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(5)  # 5 second timeout
+        
+        try:
+            yield
+        finally:
+            # Always clear the alarm and restore old handler
+            signal.alarm(0)
+            signal.signal(signal.SIGALRM, old_handler)
+    else:
         yield
-    finally:
-        # Always clear the alarm and restore old handler
-        signal.alarm(0)
-        signal.signal(signal.SIGALRM, old_handler)
 
 
 @pytest.fixture

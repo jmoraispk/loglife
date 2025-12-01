@@ -1,1 +1,0 @@
-"""Text helpers tests package."""
