@@ -76,7 +76,7 @@ node index.js --reset-session
 
 ### Outgoing Messages
 
-The client exposes API endpoints to send messages programmatically. See the [API Documentation](../api/overview.md) for endpoint details.
+The client exposes API endpoints to send messages programmatically. See the [API Documentation](../api/whatsapp-client.md) for endpoint details.
 
 ---
 

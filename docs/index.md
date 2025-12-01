@@ -1,44 +1,32 @@
 # LogLife Documentation
 
----
-
-## Overview
-
-LogLife is an AI bot to help track goals, journal thoughts, and build better habits through simple conversations.
+Welcome to the LogLife documentation portal.
 
 ---
 
-## Quick Start
+## 🚀 Choose Your Path
 
-**For Users:**
+### 📖 [User Manual](usage/overview.md)
+**I want to USE the bot.**
+Learn how to track goals, send voice notes, and manage your daily reminders.
 
-Explore the [Usage Guide](usage/overview.md) to learn about audio journaling, referrals, and managing goals.
+### ⚡ [Core Framework](core/quickstart.md)
+**I want to BUILD a bot.**
+Use the `loglife.core` Python framework to build your own WhatsApp chatbots easily.
+> *Perfect for: Python Developers, Hobbyists.*
 
-**For Developers:**
-
-See the [Developer Guide](developer/overview.md) - it covers complete local/remote setup and system architecture.
-
----
-
-## Explore
-
-**Usage:**
-
-- [Audio Journaling](usage/audio-journaling.md) — Send voice notes for AI-powered transcription and summaries
-- [Referrals](usage/referrals.md) — Invite others by sharing contacts
-- [Managing Goals](usage/managing-goals.md) — Track, rate, and get reminders for your goals
-
-**Developer Guides:**
-
-- [Overview](developer/overview.md) — System architecture and quick start
-- [Backend](developer/backend.md) — Python/Flask backend details
-- [WhatsApp Client](developer/whatsapp-client.md) — Node.js client setup
-- [Twilio Setup](developer/twilio-whatsapp-number-setup.md) — Production WhatsApp configuration
-
-**API Documentation:**
-
-- [API Overview](api/overview.md) — HTTP endpoints and base URLs
-- [Backend API](api/backend/index.md) — Message processing endpoints
-- [WhatsApp Client API](api/whatsapp-client.md) — Automated messaging endpoints
+### 🏗️ [App Implementation](app/overview.md)
+**I want to CONTRIBUTE to LogLife.**
+Understand the internal architecture of the Goal Tracking & Journaling app.
+> *Perfect for: Project Contributors, Maintainers.*
 
 ---
+
+## 📚 Quick Links
+
+| Section | Description |
+| :--- | :--- |
+| [**Quickstart**](core/quickstart.md) | Build a bot in 5 minutes. |
+| [**Architecture**](core/architecture.md) | How the threading & queue system works. |
+| [**WhatsApp Setup**](core/whatsapp-setup.md) | Connect your code to real WhatsApp. |
+| [**API Reference**](api/backend/core.md) | Technical docs for `loglife.core`. |
