@@ -28,11 +28,9 @@ def init() -> None:
     """
     setup_logging()
     init_db()
+
     # Start the sender worker to handle outbound traffic
     start_sender_worker()
-    # Note: We do NOT start the message (router) worker here by default,
-    # enabling the user to write their own consumer loop using recv_msg().
-    # If they want the automatic router, they should call start_message_worker(handler).
 
 
 def recv_msg(block: bool = True, timeout: float | None = None) -> Message:  # noqa: FBT001, FBT002

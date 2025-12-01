@@ -3,6 +3,7 @@
 
 import json
 from datetime import UTC, datetime
+from unittest.mock import patch
 
 import pytest
 
@@ -29,10 +30,6 @@ def test_internal_extract_emoji() -> None:
     ]
     for text, expected in test_cases:
         assert _extract_emoji(text) == expected
-
-
-# is_valid_rating is no longer exposed in the same way or needed for this level of testing
-# as it is tested via RateAllHandler in test_process_text_handlers.py
 
 
 def test_process_text_add_goal() -> None:
@@ -293,13 +290,7 @@ def test_add_goal_special_chars(user: User) -> None:
     # Verify it was stored literally
     goals = db.goals.get_by_user(user.id)
     assert len(goals) == 1
-    # Note: The input handling might lowercase the input somewhere in process_text
-    # Wait, original test expected lowercase?
-    # The new logic preserves case in AddGoalHandler.
-    # But process_text does message.lower().
-    # Ah! process_text calls `message = message.strip().lower()` at the very top!
-    # So everything is lowercased before handler sees it.
-    # My handler implementation didn't change this behavior, process_text does it.
+    # The processor lowercases input before handlers see it
     assert goals[0].goal_description == dangerous_string.lower()
 
 
@@ -345,9 +336,6 @@ def test_delete_goal_zero_or_negative(user: User) -> None:
     db.goals.create(user.id, "🏃", "Run")
 
     assert "Invalid goal number" in process_text(user, "delete 0")
-    # "delete -1" is parsed as ["delete", "-1"]. int("-1") works.
-    # So it falls through to the logic check for > 0 or valid range.
-    # It shouldn't be "Invalid format", it should be "Invalid goal number".
     assert "Invalid goal number" in process_text(user, "delete -1")
 
 
@@ -355,10 +343,7 @@ def test_lookback_negative_days(user: User) -> None:
     """Test lookback with negative days."""
     db.goals.create(user.id, "🏃", "Run")
 
-    # Should probably default to 7 or handle gracefully
-    # Current logic: parts[1].isdigit() check prevents negative numbers from being parsed as days
-    # "lookback -5" -> parts len 2, but "-5".isdigit() is False.
-    # So it falls back to default 7 days.
+    # Negative numbers fall back to default 7 days
     response = process_text(user, "lookback -5")
     assert "7 Days" in response
 
@@ -369,4 +354,24 @@ def test_lookback_huge_days(user: User) -> None:
 
     response = process_text(user, "lookback 1000")
     assert "1000 Days" in response
-    # Should not crash, just return empty summary for most days
+
+
+def test_alias_collision_partial_word(user: User) -> None:
+    """Test if partial word replacement corrupts messages."""
+    # Define aliases that would cause collision
+    aliases = {"add": "add goal"}
+
+    with patch("loglife.app.logic.text.processor.COMMAND_ALIASES", aliases):
+        # "saddle" should NOT become "sadd goal le"
+        result = process_text(user, "saddle")
+        assert result == "Wrong command!"
+
+
+def test_unicode_and_emojis(user: User) -> None:
+    """Test handling of messages with only emojis or complex unicode."""
+    # 1. Only Emoji - should generally fail unless we have an emoji handler
+    assert process_text(user, "🏃") == "Wrong command!"
+
+    # 2. Zalgo text or weird unicode - should handle gracefully
+    zalgo = "Ĥell̂o"
+    assert process_text(user, zalgo) == "Wrong command!"

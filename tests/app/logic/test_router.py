@@ -98,3 +98,16 @@ def test_route_message_unknown_type(mock_queue: MagicMock) -> None:
     args, _kwargs = mock_queue.call_args
     assert "Can't process this type of message" in args[1]
     assert "Recognized types: chat, audio, ptt, vcard" in args[1]
+
+
+def test_route_message_handles_processing_exception(mock_queue: MagicMock) -> None:
+    """Router should catch exceptions from processors."""
+    # We patch process_text to raise an exception
+    with (
+        patch("loglife.app.logic.router.process_text", side_effect=ValueError("Boom")),
+        patch("loglife.app.logic.router.db.users.get_by_phone", return_value=MagicMock()),
+    ):
+        route_message(_make_message(msg_type="chat"))
+
+    args, _ = mock_queue.call_args
+    assert "Sorry, something went wrong" in args[1]

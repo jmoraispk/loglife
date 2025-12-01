@@ -61,9 +61,7 @@ def process_text(user: User, message: str) -> str:
     try:
         message: str = message.strip().lower()
 
-        # Add aliases
-        # Use word boundaries to avoid replacing partial words
-        # e.g. "saddle" should not become "sadd goal le" (if alias add -> add goal)
+        # Add aliases (with word boundaries to avoid replacing partial words)
         for alias, command in COMMAND_ALIASES.items():
             # Escape alias to be safe in regex
             pattern = r"\b" + re.escape(alias) + r"\b"
