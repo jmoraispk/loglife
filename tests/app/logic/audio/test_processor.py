@@ -126,7 +126,7 @@ def test_process_audio_transcribe_failure(user: User) -> None:
 
         assert response == "Transcription failed!"
         mock_queue.assert_called_once_with(
-            "+1234567890", "Audio received. Transcribing...", client_type="whatsapp"
+            "+1234567890", "Audio received. Transcribing...", client_type="whatsapp",
         )
 
 

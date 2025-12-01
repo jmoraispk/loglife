@@ -1,6 +1,5 @@
 """Utilities for working with user timezones based on phone numbers."""
 
-from __future__ import annotations
 
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 

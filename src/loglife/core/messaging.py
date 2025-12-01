@@ -1,31 +1,18 @@
 """Messaging module - unified interface for message handling."""
 
-from __future__ import annotations
-
 import logging
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from queue import Empty, Queue
 from threading import Thread
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import requests
 from flask import g
 
 from loglife.app.config import WHATSAPP_API_URL
 
-if TYPE_CHECKING:
-    from collections.abc import Callable, Mapping
-
 logger = logging.getLogger(__name__)
-
-# --- Globals ---
-
-_inbound_queue: Queue[Message] = Queue()
-_outbound_queue: Queue[Message] = Queue()
-log_queue: Queue[str] = Queue()  # For streaming logs to emulator
-
-_router_worker_started = False
-_sender_worker_started = False
 
 # --- Message Class ---
 
@@ -41,7 +28,7 @@ class Message:
     attachments: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_payload(cls, payload: Mapping[str, Any]) -> Message:
+    def from_payload(cls, payload: Mapping[str, Any]) -> "Message":
         """Construct a message from a raw transport payload."""
         return cls(
             sender=payload["sender"],
@@ -51,6 +38,15 @@ class Message:
             metadata=dict(payload.get("metadata") or {}),
         )
 
+# --- Globals ---
+# Defined after Message class to avoid forward reference issues
+_inbound_queue: Queue[Message] = Queue()
+_outbound_queue: Queue[Message] = Queue()
+log_queue: Queue[str] = Queue()  # For streaming logs to emulator
+
+_router_worker_started = False
+_sender_worker_started = False
+
 # --- Inbound / Receiver Logic ---
 
 def enqueue_inbound_message(message: Message) -> None:
@@ -59,7 +55,7 @@ def enqueue_inbound_message(message: Message) -> None:
 
 def start_message_worker(handler: Callable[[Message], None]) -> None:
     """Spin up a daemon thread that consumes inbound messages."""
-    global _router_worker_started
+    global _router_worker_started  # noqa: PLW0603
     if _router_worker_started:
         return
 
@@ -111,7 +107,7 @@ def build_outbound_message(
 
 def start_sender_worker() -> None:
     """Start a daemon worker that drains the outbound queue."""
-    global _sender_worker_started
+    global _sender_worker_started  # noqa: PLW0603
     if _sender_worker_started:
         return
 
@@ -187,7 +183,7 @@ def send_message(
         _send_whatsapp_message(number, message)
     else:
         logger.info(
-            "Queueing async message for %s (client_type=%s)", number, target_client or "unknown"
+            "Queueing async message for %s (client_type=%s)", number, target_client or "unknown",
         )
         queue_async_message(
             number,
@@ -196,4 +192,3 @@ def send_message(
             metadata=metadata,
             attachments=attachments,
         )
-

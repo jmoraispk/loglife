@@ -164,7 +164,7 @@ def test_reminder_time(user: User) -> None:
     # Setup state
     goal = db.goals.create(user.id, "🏃", "Run")
     db.user_states.create(
-        user.id, state="awaiting_reminder_time", temp_data=json.dumps({"goal_id": goal.id})
+        user.id, state="awaiting_reminder_time", temp_data=json.dumps({"goal_id": goal.id}),
     )
 
     response = handler.handle(user, message)

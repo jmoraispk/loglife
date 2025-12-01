@@ -3,19 +3,15 @@
 Runs a minutely job to check if any user reminders are due for their timezone.
 """
 
-from __future__ import annotations
 
 import logging
 import threading
 import time
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from loglife.app.db.tables import Goal, Reminder, User
 
 from loglife.app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
 from loglife.app.db.client import db
+from loglife.app.db.tables import Goal, Reminder, User
 from loglife.app.logic.timezone import get_timezone_safe
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
 from loglife.core.messaging import queue_async_message
@@ -62,7 +58,7 @@ def _build_journal_reminder_message(user_id: int) -> str:
 def _build_standard_reminder_message(goal: Goal) -> str:
     """Construct a standard reminder message for a specific goal."""
     return REMINDER_MESSAGE.replace("<goal_emoji>", goal.goal_emoji).replace(
-        "<goal_description>", goal.goal_description
+        "<goal_description>", goal.goal_description,
     )
 
 

@@ -1,20 +1,16 @@
 """Tests for process_text logic."""
 
-from __future__ import annotations
 
 import json
 from datetime import UTC, datetime
-from typing import TYPE_CHECKING
 
 import pytest
 
 from loglife.app.config import ERROR_NO_GOALS_SET, USAGE_RATE
 from loglife.app.db.client import db
+from loglife.app.db.tables import User
 from loglife.app.logic import process_text
 from loglife.app.logic.text.handlers import _extract_emoji
-
-if TYPE_CHECKING:
-    from loglife.app.db.tables import User
 
 
 @pytest.fixture
@@ -51,17 +47,7 @@ def test_process_text_add_goal() -> None:
     goals = db.goals.get_by_user(user.id)
     assert len(goals) == 1
     assert goals[0].goal_emoji == "🏃"
-    assert (
-        goals[0].goal_description == "run 5k"
-    )  # Note: Original was "run 5k", but handler strips/cleans?
-    # Wait, original assert was "run 5k" lowercase? Let's check handler logic.
-    # Handler logic: raw_goal.replace(goal_emoji, "").strip().
-    # It doesn't lowercase description.
-    # Ah, the handler was updated. Let's assume case sensitivity matters now or check
-    # previous implementation.
-    # Previous impl: goal_description: str = raw_goal.replace(goal_emoji, "").strip()
-    # My new handler: goal_description: str = raw_goal.replace(goal_emoji, "").strip()
-    # So it preserves case. "Run 5k" -> "Run 5k"
+    assert goals[0].goal_description == "run 5k"
 
     # Verify state transition
     state = db.user_states.get(user.id)

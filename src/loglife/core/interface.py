@@ -35,7 +35,7 @@ def init() -> None:
     # If they want the automatic router, they should call start_message_worker(handler).
 
 
-def recv_msg(block: bool = True, timeout: float | None = None) -> Message:
+def recv_msg(block: bool = True, timeout: float | None = None) -> Message:  # noqa: FBT001, FBT002
     """Receive the next message from the inbound queue.
 
     Blocks until a message is available unless block=False.
@@ -53,7 +53,8 @@ def send_msg(message: Message | str, to: str | None = None) -> None:
     """
     if isinstance(message, str):
         if not to:
-            raise ValueError("Target 'to' number is required when sending a string.")
+            msg = "Target 'to' number is required when sending a string."
+            raise ValueError(msg)
         queue_async_message(to, message)
     else:
         enqueue_outbound_message(message)

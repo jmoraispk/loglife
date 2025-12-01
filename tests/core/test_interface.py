@@ -8,7 +8,7 @@ from loglife import core
 from loglife.core.messaging import Message
 
 
-def test_init_starts_components():
+def test_init_starts_components() -> None:
     """Test that init starts logging, db, and sender worker."""
     with (
         patch("loglife.core.interface.setup_logging") as mock_log,
@@ -22,20 +22,20 @@ def test_init_starts_components():
         mock_sender.assert_called_once()
 
 
-def test_send_msg_string():
+def test_send_msg_string() -> None:
     """Test sending a simple string message."""
     with patch("loglife.core.interface.queue_async_message") as mock_queue:
         core.send_msg("Hello", to="+123")
         mock_queue.assert_called_once_with("+123", "Hello")
 
 
-def test_send_msg_string_missing_to():
+def test_send_msg_string_missing_to() -> None:
     """Test sending a string without a 'to' argument raises ValueError."""
     with pytest.raises(ValueError, match="Target 'to' number is required"):
         core.send_msg("Hello")
 
 
-def test_send_msg_object():
+def test_send_msg_object() -> None:
     """Test sending a Message object directly."""
     msg = Message(
         sender="+123",
@@ -48,7 +48,7 @@ def test_send_msg_object():
         mock_enqueue.assert_called_once_with(msg)
 
 
-def test_recv_msg():
+def test_recv_msg() -> None:
     """Test receiving a message from the queue."""
     # Need to mock the queue inside interface module
     with patch("loglife.core.interface._inbound_queue") as mock_queue:

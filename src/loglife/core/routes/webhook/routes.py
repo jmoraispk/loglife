@@ -3,19 +3,15 @@
 Receives POST requests, validates payloads, and enqueues messages for processing.
 """
 
-from __future__ import annotations
 
 import logging
-from typing import TYPE_CHECKING
 
 from flask import Blueprint, g, request
+from flask.typing import ResponseReturnValue
 
 from loglife.core.messaging import Message, enqueue_inbound_message
 
 from .utils import error_response, success_response
-
-if TYPE_CHECKING:
-    from flask.typing import ResponseReturnValue
 
 webhook_bp = Blueprint("webhook", __name__)
 

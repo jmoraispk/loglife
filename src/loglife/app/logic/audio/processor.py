@@ -60,7 +60,8 @@ def process_audio(sender: str, user: User, audio_data: str) -> str | tuple[str, 
             transcript_file: str = transcript_to_base64(transcript)
             return transcript_file, summary
 
-        return summary
     except Exception as exc:
         logger.exception("Error in audio processor")
         return f"Error in audio processor: {exc}"
+
+    return summary

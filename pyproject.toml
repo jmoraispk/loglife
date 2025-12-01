@@ -60,3 +60,6 @@ ignore = [
 "src/loglife/app/db/tables/*.py" = [
     "S608",    # Possible SQL injection vector through string-based query construction (whitelisted)
 ]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 from loglife.app.services.reminder.worker import _is_reminder_due
 
 
-def test_missed_reminder_window():
+def test_missed_reminder_window() -> None:
     """Test that reminders are missed if the worker sleeps too long.
 
     This documents a limitation in the current infrastructure:

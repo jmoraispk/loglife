@@ -1,6 +1,6 @@
 """Tests for webhook route."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 from flask import Flask
@@ -19,7 +19,7 @@ def client() -> FlaskClient:
 
 
 @patch("loglife.core.routes.webhook.routes.enqueue_inbound_message")
-def test_webhook_delegates_to_router(mock_enqueue, client: FlaskClient) -> None:
+def test_webhook_delegates_to_router(mock_enqueue: MagicMock, client: FlaskClient) -> None:
     """Ensure the route forwards payloads to the inbound queue."""
     response = client.post(
         "/webhook",
@@ -41,7 +41,7 @@ def test_webhook_delegates_to_router(mock_enqueue, client: FlaskClient) -> None:
     "loglife.core.routes.webhook.routes.enqueue_inbound_message",
     side_effect=RuntimeError("boom"),
 )
-def test_webhook_enqueue_error(mock_enqueue, client: FlaskClient) -> None:
+def test_webhook_enqueue_error(mock_enqueue: MagicMock, client: FlaskClient) -> None:
     """Errors while enqueueing should return error responses."""
     response = client.post(
         "/webhook",

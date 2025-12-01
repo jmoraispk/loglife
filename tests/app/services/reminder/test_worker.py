@@ -117,7 +117,7 @@ def test_build_standard_reminder_message() -> None:
     msg = reminder_worker._build_standard_reminder_message(mock_goal)  # noqa: SLF001
 
     expected = REMINDER_MESSAGE.replace("<goal_emoji>", "🏃").replace(
-        "<goal_description>", "Run 5k"
+        "<goal_description>", "Run 5k",
     )
     assert msg == expected
 
@@ -128,7 +128,7 @@ def test_build_journal_reminder_message_with_untracked() -> None:
     mock_goal1.goal_description = "Run 5k"
 
     with patch(
-        "loglife.app.services.reminder.worker.get_goals_not_tracked_today"
+        "loglife.app.services.reminder.worker.get_goals_not_tracked_today",
     ) as mock_get_goals:
         mock_get_goals.return_value = [mock_goal1]
 
@@ -141,7 +141,7 @@ def test_build_journal_reminder_message_with_untracked() -> None:
 def test_build_journal_reminder_message_all_tracked() -> None:
     """Test journaling reminder message when all goals are tracked."""
     with patch(
-        "loglife.app.services.reminder.worker.get_goals_not_tracked_today"
+        "loglife.app.services.reminder.worker.get_goals_not_tracked_today",
     ) as mock_get_goals:
         mock_get_goals.return_value = []
 

@@ -21,7 +21,7 @@ def test_process_vcard_success(referrer: User) -> None:
     """Test successful VCARD processing."""
     vcards = [
         "BEGIN:VCARD\nVERSION:3.0\nN:;Test;;;\nFN:Test\n"
-        "TEL;waid=9876543210:+98 765 43210\nEND:VCARD"
+        "TEL;waid=9876543210:+98 765 43210\nEND:VCARD",
     ]
     raw_vcards = json.dumps(vcards)
 

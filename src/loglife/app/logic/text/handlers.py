@@ -152,7 +152,7 @@ class DeleteGoalHandler(TextCommandHandler):
         db.goals.delete(goal.id)
 
         return messages.SUCCESS_GOAL_DELETED.format(
-            goal_emoji=goal.goal_emoji, goal_description=goal.goal_description
+            goal_emoji=goal.goal_emoji, goal_description=goal.goal_description,
         )
 
 
@@ -295,7 +295,7 @@ class UpdateReminderHandler(TextCommandHandler):
         goal_emoji = goal.goal_emoji
         goal_desc = goal.goal_description
         return messages.SUCCESS_REMINDER_UPDATED.format(
-            display_time=display_time, goal_emoji=goal_emoji, goal_desc=goal_desc
+            display_time=display_time, goal_emoji=goal_emoji, goal_desc=goal_desc,
         )
 
 

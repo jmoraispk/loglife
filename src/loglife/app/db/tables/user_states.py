@@ -46,7 +46,7 @@ class UserStatesTable:
         return self.get(user_id)  # type: ignore[arg-type]
 
     def update(
-        self, user_id: int, state: str | None = None, temp_data: str | None = None
+        self, user_id: int, state: str | None = None, temp_data: str | None = None,
     ) -> UserState | None:
         """Update a user state record with provided fields."""
         updates = []

@@ -3,6 +3,8 @@
 Serves the emulator UI and provides an SSE stream for realtime logs.
 """
 
+from collections.abc import Generator
+
 from flask import Blueprint, Response, render_template
 
 from loglife.core.messaging import log_queue
@@ -25,7 +27,7 @@ def emulator() -> str:
 def events() -> Response:
     """Stream realtime log events to the browser via SSE."""
 
-    def stream():
+    def stream() -> Generator[str, None, None]:
         while True:
             msg = log_queue.get()
             yield f"data: {msg}\n\n"

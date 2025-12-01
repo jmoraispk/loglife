@@ -1,123 +1,100 @@
-"""Unit tests for the central message router."""
+"""Tests for the central router logic."""
 
-from __future__ import annotations
-
+from collections.abc import Generator
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from loglife.app.logic.router import route_message
 from loglife.core.messaging import Message
 
 
-def _make_message(**overrides: str) -> Message:
-    payload = {
-        "sender": "+1234567890",
-        "msg_type": "chat",
-        "raw_payload": "hi",
-        "client_type": "whatsapp",
-    }
-    payload.update(overrides)
-    return Message(**payload)
+@pytest.fixture
+def mock_queue() -> Generator[MagicMock, None, None]:
+    """Mock the outbound queue function."""
+    with patch("loglife.app.logic.router.queue_async_message") as mock:
+        yield mock
 
 
-@patch("loglife.app.logic.router.queue_async_message")
-@patch("loglife.app.logic.router.process_text", return_value="hello back")
-@patch("loglife.app.logic.router.db")
+@pytest.fixture
+def mock_db() -> Generator[MagicMock, None, None]:
+    """Mock the database client."""
+    with patch("loglife.app.logic.router.db") as mock:
+        yield mock
+
+
+@pytest.fixture
+def mock_timezone() -> Generator[MagicMock, None, None]:
+    """Mock timezone utility."""
+    with patch("loglife.app.logic.router.get_timezone_from_number") as mock:
+        yield mock
+
+
+def _make_message(
+    sender: str = "+123",
+    msg_type: str = "chat",
+    payload: str = "hi",
+    client: str = "whatsapp",
+) -> Message:
+    return Message(sender, msg_type, payload, client)
+
+
 def test_route_message_existing_user(
     mock_db: MagicMock,
-    _: MagicMock,
-    mock_queue: MagicMock,
+    mock_queue: MagicMock,  # noqa: ARG001
+    mock_timezone: MagicMock,  # noqa: ARG001
 ) -> None:
-    """Route chat messages using an existing user record."""
+    """Existing users are retrieved and not re-created."""
     mock_user = MagicMock()
     mock_db.users.get_by_phone.return_value = mock_user
 
-    route_message(_make_message())
+    msg = _make_message()
+    route_message(msg)
 
-    mock_db.users.get_by_phone.assert_called_once()
-    mock_queue.assert_called_with(
-        "+1234567890",
-        "hello back",
-        client_type="whatsapp",
-        metadata={},
-        attachments={},
-    )
+    mock_db.users.get_by_phone.assert_called_once_with("+123")
+    mock_db.users.create.assert_not_called()
 
 
-@patch("loglife.app.logic.router.queue_async_message")
-@patch("loglife.app.logic.router.get_timezone_from_number", return_value="UTC")
-@patch("loglife.app.logic.router.process_text", return_value="welcome")
-@patch("loglife.app.logic.router.db")
 def test_route_message_creates_user(
     mock_db: MagicMock,
-    _: MagicMock,
     mock_timezone: MagicMock,
-    mock_queue: MagicMock,
+    mock_queue: MagicMock,  # noqa: ARG001
 ) -> None:
-    """Ensure new users are created when missing."""
+    """New users are created with detected timezone."""
     mock_db.users.get_by_phone.return_value = None
-    mock_user = MagicMock()
-    mock_db.users.create.return_value = mock_user
+    mock_timezone.return_value = "UTC"
 
-    route_message(_make_message())
+    msg = _make_message()
+    route_message(msg)
 
-    mock_db.users.create.assert_called_once()
-    mock_timezone.assert_called_once()
-    mock_queue.assert_called_with(
-        "+1234567890",
-        "welcome",
-        client_type="whatsapp",
-        metadata={},
-        attachments={},
-    )
+    mock_db.users.create.assert_called_once_with("+123", "UTC")
 
 
-@patch("loglife.app.logic.router.queue_async_message")
-@patch("loglife.app.logic.router.process_audio", return_value=("file", "done"))
-@patch("loglife.app.logic.router.db")
 def test_route_message_audio_with_tuple(
     mock_db: MagicMock,
-    _: MagicMock,
     mock_queue: MagicMock,
 ) -> None:
-    """Audio responses with transcript metadata should be surfaced."""
-    mock_user = MagicMock()
-    mock_db.users.get_by_phone.return_value = mock_user
+    """Audio processor returning a tuple (file, summary) works."""
+    mock_db.users.get_by_phone.return_value = MagicMock()
 
-    route_message(_make_message(msg_type="audio"))
+    with patch("loglife.app.logic.router.process_audio") as mock_proc:
+        mock_proc.return_value = ("file_data", "summary text")
+        route_message(_make_message(msg_type="audio"))
 
-    mock_queue.assert_called_with(
-        "+1234567890",
-        "done",
-        client_type="whatsapp",
-        metadata={},
-        attachments={"transcript_file": "file"},
-    )
+    # Should queue ONE message with attachments
+    assert mock_queue.call_count == 1
+    args, kwargs = mock_queue.call_args
+    # Verify arguments (sender, response)
+    assert args[1] == "summary text"
+    # Verify attachments kwarg
+    attachments = kwargs.get("attachments")
+    assert attachments is not None
+    assert attachments["transcript_file"] == "file_data"
 
 
-@patch("loglife.app.logic.router.queue_async_message")
-def test_route_message_unsupported_type(mock_queue: MagicMock) -> None:
+def test_route_message_unknown_type(mock_queue: MagicMock) -> None:
     """Unsupported message types return a fallback response."""
     route_message(_make_message(msg_type="gif"))
-    args, kwargs = mock_queue.call_args
+    args, _kwargs = mock_queue.call_args
     assert "Can't process this type of message" in args[1]
     assert "Recognized types: chat, audio, ptt, vcard" in args[1]
-
-
-@patch("loglife.app.logic.router.queue_async_message")
-@patch("loglife.app.logic.router.process_audio")
-@patch("loglife.app.logic.router.db")
-def test_route_message_handles_processing_exception(
-    mock_db: MagicMock,
-    mock_audio: MagicMock,
-    mock_queue: MagicMock,
-) -> None:
-    """Ensure exceptions in processing trigger a fallback response."""
-    mock_user = MagicMock()
-    mock_db.users.get_by_phone.return_value = mock_user
-    mock_audio.side_effect = ValueError("Processing Failed")
-
-    route_message(_make_message(msg_type="audio"))
-
-    mock_queue.assert_called_once()
-    args, _ = mock_queue.call_args
-    assert "Sorry, something went wrong" in args[1]

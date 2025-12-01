@@ -1,6 +1,5 @@
 """Weekly look-back text helpers for summaries."""
 
-from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING

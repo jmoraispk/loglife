@@ -6,6 +6,7 @@ from loglife.core.routes.webhook.utils import error_response, success_response
 
 
 def test_success_response() -> None:
+    """Test successful response format."""
     app = Flask(__name__)
     with app.app_context():
         response, status = success_response(message="ok", foo="bar")
@@ -17,6 +18,7 @@ def test_success_response() -> None:
 
 
 def test_error_response() -> None:
+    """Test error response format."""
     app = Flask(__name__)
     with app.app_context():
         response, status = error_response("boom", status_code=418)

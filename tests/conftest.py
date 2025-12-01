@@ -18,19 +18,19 @@ from loglife.app.db.client import db
 TIMEOUT = 1.0  # seconds
 
 
-class TimeoutError(Exception):
+class TestTimeoutError(Exception):
     """Raised when a test exceeds the timeout."""
 
 
 @pytest.fixture(autouse=True)
-def global_timeout():
+def global_timeout() -> Generator[None, None, None]:
     """Global timeout fixture to prevent hanging tests ({TIMEOUT} seconds max).
 
     Works on both Linux and Windows by using a separate thread to interrupt
     the main thread if the timeout is reached.
     """
 
-    def timeout_handler():
+    def timeout_handler() -> None:
         _thread.interrupt_main()
 
     # Increase timeout for E2E tests? Or make it configurable?
@@ -42,7 +42,8 @@ def global_timeout():
         yield
     except KeyboardInterrupt:
         # Caught the interrupt from our timer
-        raise TimeoutError(f"Test exceeded {TIMEOUT} second timeout")
+        msg = f"Test exceeded {TIMEOUT} second timeout"
+        raise TestTimeoutError(msg) from None
     finally:
         timer.cancel()
 

@@ -69,7 +69,7 @@ def test_look_back_summary() -> None:
     """
     # Test with no goals
     with patch(
-        "loglife.app.db.tables.goals.GoalsTable.get_by_user", return_value=[]
+        "loglife.app.db.tables.goals.GoalsTable.get_by_user", return_value=[],
     ) as mock_get_goals:
         summary = week_module.look_back_summary(1, 7, datetime.now(UTC))
         assert summary == LOOKBACK_NO_GOALS

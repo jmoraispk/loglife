@@ -48,7 +48,8 @@ def process_vcard(referrer_user: User, raw_vcards: str) -> str:
             db.referrals.create(referrer_user_id, referred_user.id)
             queue_async_message(referred_phone_number, WELCOME_MESSAGE, client_type="whatsapp")
 
-        return REFERRAL_SUCCESS
     except Exception as exc:
         logger.exception("Error in vcard processor")
         return f"Error in vcard processor: {exc}"
+
+    return REFERRAL_SUCCESS

@@ -14,37 +14,48 @@ Note regarding WhatsApp API:
 """
 
 import os
-import sqlite3
 import tempfile
 import time
-from unittest.mock import patch
+from collections.abc import Generator
+from pathlib import Path
+from typing import TYPE_CHECKING
+from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
+from flask import Flask
 
 from loglife.app import create_app
-from loglife.app.config.paths import SCHEMA_FILE
 from loglife.app.db.client import db
-from loglife.core.messaging import Message, enqueue_inbound_message, enqueue_outbound_message
+from loglife.core.messaging import Message, enqueue_inbound_message
+
+if TYPE_CHECKING:
+    from flask.testing import FlaskClient
 
 # We need to override the default conftest mocks for THIS file only.
 # pytest fixtures can be overridden by defining them locally.
 
+
 @pytest.fixture
-def real_db_path():
+def real_db_path() -> Generator[str, None, None]:
     """Create a real temporary file for the database."""
     fd, path = tempfile.mkstemp(suffix=".db")
     os.close(fd)
     yield path
-    os.remove(path)
+    Path(path).unlink(missing_ok=True)
+
 
 @pytest.fixture
-def app_and_mock(real_db_path):
+def app_and_mock(real_db_path: str) -> Generator[tuple[Flask, MagicMock], None, None]:
     """Create app WITH REAL WORKERS and REAL FILE DB."""
     # 1. Setup: Point the global DB client to our temp file
     # We need to initialize the DB schema manually since we aren't using the memory fixture
+    import sqlite3  # noqa: PLC0415
+
+    from loglife.app.config.paths import SCHEMA_FILE  # noqa: PLC0415
+
     conn = sqlite3.connect(real_db_path, check_same_thread=False)
-    with open(SCHEMA_FILE, encoding="utf-8") as f:
+    with Path(SCHEMA_FILE).open(encoding="utf-8") as f:
         conn.executescript(f.read())
     conn.close()
 
@@ -54,7 +65,11 @@ def app_and_mock(real_db_path):
     # AND the connection object must be the SAME object used by all threads.
     # Our singleton pattern (db._conn) supports this as long as we inject it BEFORE threads start.
 
-    real_conn = sqlite3.connect(real_db_path, check_same_thread=False, isolation_level=None) # Auto-commit mode!
+    real_conn = sqlite3.connect(
+        real_db_path,
+        check_same_thread=False,
+        isolation_level=None,
+    )  # Auto-commit mode!
     real_conn.row_factory = sqlite3.Row
     db.set_connection(real_conn)
 
@@ -66,11 +81,11 @@ def app_and_mock(real_db_path):
         mock_post.return_value.status_code = 200
 
         # We must ensure previous tests didn't leave "started" flags as True
-        import loglife.core.messaging as messaging_module
+        import loglife.core.messaging as messaging_module  # noqa: PLC0415
 
         # Force flags to False so threads restart
-        messaging_module._router_worker_started = False
-        messaging_module._sender_worker_started = False
+        messaging_module._router_worker_started = False  # noqa: SLF001
+        messaging_module._sender_worker_started = False  # noqa: SLF001
 
         # Start the app (this spawns real threads!)
         app = create_app()
@@ -88,6 +103,8 @@ def app_and_mock(real_db_path):
         # We can't easily access the sender worker from here if we don't expose its queue properly,
         # but startup.py starts it. It listens to _outbound_queue.
         # Let's import it from core.messaging
+        from loglife.core.messaging import enqueue_outbound_message  # noqa: PLC0415
+
         enqueue_outbound_message(Message("stop", "_stop", "", "w"))
 
         # Give threads a moment to shut down cleanly
@@ -97,18 +114,25 @@ def app_and_mock(real_db_path):
     db.clear_connection()
     real_conn.close()
 
-def test_real_threading_flow_success(app_and_mock, real_db_path):
+
+def test_real_threading_flow_success(
+    app_and_mock: tuple[Flask, MagicMock],
+    real_db_path: str,  # noqa: ARG001
+) -> None:
     """Verify successful message processing and delivery."""
     app, mock_post = app_and_mock
-    client = app.test_client()
+    client: FlaskClient = app.test_client()
 
     # 1. Send Webhook Request
-    response = client.post("/webhook", json={
-        "sender": "+15550001",
-        "msg_type": "chat",
-        "raw_msg": "add goal 🏃 Run Test",
-        "client_type": "whatsapp"
-    })
+    response = client.post(
+        "/webhook",
+        json={
+            "sender": "+15550001",
+            "msg_type": "chat",
+            "raw_msg": "add goal 🏃 Run Test",
+            "client_type": "whatsapp",
+        },
+    )
     assert response.status_code == 200
 
     # 2. Wait for background threads
@@ -128,25 +152,34 @@ def test_real_threading_flow_success(app_and_mock, real_db_path):
     assert payload["number"] == "+15550001"
     assert "When you would like to be reminded?" in payload["message"]
 
-def test_real_threading_api_failure(app_and_mock, real_db_path, caplog):
+
+def test_real_threading_api_failure(
+    app_and_mock: tuple[Flask, MagicMock],
+    real_db_path: str,  # noqa: ARG001
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     """Verify that the worker handles API failures (500) without crashing.
 
     This ensures that if WhatsApp is down, the worker catches the exception/error
     and logs it, rather than the thread dying.
     """
     app, mock_post = app_and_mock
-    client = app.test_client()
+    client: FlaskClient = app.test_client()
 
+    # Configure mock to simulate API failure
     # To test "Failure handling", we should make it RAISE an exception (like ConnectionError).
     mock_post.side_effect = requests.exceptions.ConnectionError("WhatsApp Down")
 
     # 1. Send Webhook Request
-    client.post("/webhook", json={
-        "sender": "+15550002",
-        "msg_type": "chat",
-        "raw_msg": "hi",
-        "client_type": "whatsapp"
-    })
+    client.post(
+        "/webhook",
+        json={
+            "sender": "+15550002",
+            "msg_type": "chat",
+            "raw_msg": "hi",
+            "client_type": "whatsapp",
+        },
+    )
 
     # 2. Wait for logs to appear (since we can't check call_count on a failing mock easily in loop?)
     # Actually call_count still increments even if side_effect raises.

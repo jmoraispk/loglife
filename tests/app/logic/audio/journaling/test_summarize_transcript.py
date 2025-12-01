@@ -13,7 +13,7 @@ def test_summarize_transcript() -> None:
     mock_response.raise_for_status.return_value = None
 
     with patch(
-        "loglife.app.logic.audio.journaling.summarize_transcript.requests.post"
+        "loglife.app.logic.audio.journaling.summarize_transcript.requests.post",
     ) as mock_post:
         mock_post.return_value = mock_response
 

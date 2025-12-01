@@ -1,0 +1,2 @@
+"""Routes tests package."""
+

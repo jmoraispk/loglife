@@ -27,7 +27,7 @@ def error_response(
                 "success": False,
                 "message": message,
                 "data": data,
-            }
+            },
         ),
         status_code,
     )
@@ -55,7 +55,7 @@ def success_response(
                 "success": True,
                 "message": message,
                 "data": kwargs,
-            }
+            },
         ),
         status_code,
     )
