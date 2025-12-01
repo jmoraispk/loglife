@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
+
 import phonenumbers
 from phonenumbers import NumberParseException, timezone
 
@@ -22,4 +24,28 @@ def get_timezone_from_number(number: str) -> str:
     timezones = timezone.time_zones_for_number(parsed)
     if not timezones:
         return "UTC"
-    return timezones[0]
+    
+    tz = timezones[0]
+    if tz == "Etc/Unknown":
+        return "UTC"
+        
+    return tz
+
+
+def get_timezone_safe(timezone_str: str) -> ZoneInfo:
+    """Get ZoneInfo, falling back to UTC if timezone is invalid or unknown.
+
+    Arguments:
+        timezone_str: Timezone string in IANA format (e.g., "Asia/Karachi",
+            "America/New_York")
+
+    Returns:
+        A ZoneInfo object for the given timezone string, or UTC if the timezone
+        is invalid or unknown.
+
+    """
+    timezone_str = timezone_str.strip()
+    try:
+        return ZoneInfo(timezone_str)
+    except (ZoneInfoNotFoundError, ValueError):
+        return ZoneInfo("UTC")

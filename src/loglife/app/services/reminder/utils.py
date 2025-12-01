@@ -1,29 +1,9 @@
 """Reminder service utility functions."""
 
 from datetime import UTC, datetime
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from loglife.app.db.client import db
 from loglife.app.db.tables import Goal, Rating
-
-
-def get_timezone_safe(timezone_str: str) -> ZoneInfo:
-    """Get ZoneInfo, falling back to UTC if timezone is invalid or unknown.
-
-    Arguments:
-        timezone_str: Timezone string in IANA format (e.g., "Asia/Karachi",
-            "America/New_York")
-
-    Returns:
-        A ZoneInfo object for the given timezone string, or UTC if the timezone
-        is invalid or unknown.
-
-    """
-    timezone_str = timezone_str.strip()
-    try:
-        return ZoneInfo(timezone_str)
-    except (ZoneInfoNotFoundError, ValueError):
-        return ZoneInfo("UTC")
 
 
 def get_goals_not_tracked_today(user_id: int) -> list[Goal]:

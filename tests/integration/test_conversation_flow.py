@@ -5,7 +5,8 @@ from typing import Any
 
 from flask.testing import FlaskClient
 
-from loglife.core.messaging import get_outbound_message
+from loglife.app.logic.router import route_message
+from loglife.core.messaging import _inbound_queue, get_outbound_message
 
 
 def _drain_outbound_queue() -> None:
@@ -14,6 +15,13 @@ def _drain_outbound_queue() -> None:
             get_outbound_message(timeout=0.01)
         except Empty:
             break
+
+
+def process_inbound_queue() -> None:
+    """Process all messages in the inbound queue synchronously."""
+    while not _inbound_queue.empty():
+        msg = _inbound_queue.get()
+        route_message(msg)
 
 
 def send_message(client: FlaskClient, text: str, sender: str = "+1234567890") -> dict[str, Any]:
@@ -31,6 +39,9 @@ def send_message(client: FlaskClient, text: str, sender: str = "+1234567890") ->
         },
     )
     assert response.status_code == 200
+
+    # Manually process the inbound message (since worker is disabled in tests)
+    process_inbound_queue()
 
     # Retrieve message directly from queue
     # Since sender worker is disabled in tests (via conftest), messages stay in queue
