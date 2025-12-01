@@ -22,6 +22,7 @@ def create_app() -> Flask:
 
     Returns:
         Configured Flask application instance.
+
     """
     app = Flask(__name__)
 

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import logging
-import queue
 from dataclasses import dataclass, field
 from queue import Empty, Queue
 from threading import Thread
