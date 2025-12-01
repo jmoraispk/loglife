@@ -25,7 +25,7 @@ Tracks the goals users have set for themselves, including reminder settings.
 | `goal_emoji` | `TEXT` | Visual icon for the goal. |
 | `goal_description` | `TEXT` | Text of the goal. |
 | `boost_level` | `INTEGER` | Importance/frequency multiplier. |
-| `reminder_time` | `TEXT` | Scheduled time (HH:MM:SS). |
+| `reminder_time` | `DATETIME` | Scheduled time (HH:MM:SS). |
 
 ### ⭐ `goal_ratings`
 Daily performance scores for goals.

@@ -6,7 +6,7 @@ database interactions related to users.
 
 import sqlite3
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -117,4 +117,17 @@ class UsersTable:
     def _row_to_model(self, row: sqlite3.Row) -> User:
         """Convert a SQLite row to a User model."""
         data = dict(row)
+
+        # Convert created_at from string to datetime
+        if isinstance(data["created_at"], str):
+            try:
+                data["created_at"] = datetime.fromisoformat(data["created_at"]).replace(tzinfo=UTC)
+            except ValueError:
+                # Handle legacy or potential non-iso formats if necessary
+                # For now assuming standard sqlite datetime/timestamp format "YYYY-MM-DD HH:MM:SS"
+                data["created_at"] = datetime.strptime(
+                    data["created_at"],
+                    "%Y-%m-%d %H:%M:%S",
+                ).replace(tzinfo=UTC)
+
         return User(**data)

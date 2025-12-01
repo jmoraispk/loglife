@@ -6,7 +6,7 @@ database interactions related to user goals.
 
 import sqlite3
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime, time
 
 
 @dataclass
@@ -19,7 +19,7 @@ class Goal:
     goal_description: str
     boost_level: int
     created_at: datetime
-    reminder_time: str | None  # Stored as TEXT in SQLite (HH:MM:SS)
+    reminder_time: time | None
 
 
 class GoalsTable:
@@ -106,4 +106,23 @@ class GoalsTable:
 
     def _row_to_model(self, row: sqlite3.Row) -> Goal:
         """Convert a SQLite row to a Goal model."""
-        return Goal(**dict(row))
+        data = dict(row)
+
+        # Convert created_at from string to datetime
+        if isinstance(data["created_at"], str):
+            data["created_at"] = datetime.strptime(
+                data["created_at"],
+                "%Y-%m-%d %H:%M:%S",
+            ).replace(tzinfo=UTC)
+
+        # Convert reminder_time from string to time
+        if isinstance(data.get("reminder_time"), str):
+            # Expected format is HH:MM:SS
+            try:
+                dt = datetime.strptime(data["reminder_time"], "%H:%M:%S")  # noqa: DTZ007
+                data["reminder_time"] = dt.time()
+            except ValueError:
+                # Fallback or handle parsing error if format is different
+                data["reminder_time"] = None
+
+        return Goal(**data)

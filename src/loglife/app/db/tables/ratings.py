@@ -6,7 +6,7 @@ database interactions related to goal ratings.
 
 import sqlite3
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -95,4 +95,18 @@ class RatingsTable:
 
     def _row_to_model(self, row: sqlite3.Row) -> Rating:
         """Convert a SQLite row to a Rating model."""
-        return Rating(**dict(row))
+        data = dict(row)
+
+        # Convert timestamps
+        for field in ("created_at", "updated_at", "rating_date"):
+            if isinstance(data.get(field), str):
+                try:
+                    # Try ISO format (handles YYYY-MM-DD and YYYY-MM-DD HH:MM:SS)
+                    data[field] = datetime.fromisoformat(data[field]).replace(tzinfo=UTC)
+                except ValueError:
+                    # Fallback for potential legacy formats if necessary
+                    # But fromisoformat is quite robust in 3.11+
+                    # Ensure we catch it to avoid crash, maybe assume UTC if not present
+                    pass
+
+        return Rating(**data)

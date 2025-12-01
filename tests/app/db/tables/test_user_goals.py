@@ -1,5 +1,7 @@
 """Tests for user_goals database operations."""
 
+from datetime import time
+
 from loglife.app.db.client import db
 from loglife.app.db.tables import Goal, User
 
@@ -144,7 +146,7 @@ def test_update_goal() -> None:
 
     # Test updating reminder_time
     updated_goal = db.goals.update(goal.id, reminder_time="09:00:00")
-    assert updated_goal.reminder_time == "09:00:00"
+    assert updated_goal.reminder_time == time(9, 0, 0)
 
     # Test updating all fields
     updated_goal = db.goals.update(
@@ -157,7 +159,7 @@ def test_update_goal() -> None:
     assert updated_goal.goal_emoji == "💎"
     assert updated_goal.goal_description == "Become Python expert"
     assert updated_goal.boost_level == 3
-    assert updated_goal.reminder_time == "09:00:00"
+    assert updated_goal.reminder_time == time(9, 0, 0)
 
     # Test updating with no fields returns existing goal
     unchanged_goal = db.goals.update(goal.id)

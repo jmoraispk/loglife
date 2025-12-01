@@ -6,7 +6,7 @@ for handling database interactions related to audio journal entries.
 
 import sqlite3
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 
 @dataclass
@@ -73,5 +73,13 @@ class AudioJournalsTable:
 
     def _row_to_model(self, row: sqlite3.Row) -> AudioJournalEntry:
         """Convert a SQLite row to an AudioJournalEntry model."""
-        return AudioJournalEntry(**dict(row))
+        data = dict(row)
 
+        # Convert created_at from string to datetime
+        if isinstance(data.get("created_at"), str):
+            data["created_at"] = datetime.strptime(
+                data["created_at"],
+                "%Y-%m-%d %H:%M:%S",
+            ).replace(tzinfo=UTC)
+
+        return AudioJournalEntry(**data)
