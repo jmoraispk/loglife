@@ -1,6 +1,8 @@
 """Application settings and configuration constants."""
 
-FLASK_ENV = "development"  # development or production
+import os
+
+FLASK_ENV = os.getenv("FLASK_ENV", "development")  # development or production
 
 OPENAI_CHAT_MODEL = "gpt-5.1"
 
