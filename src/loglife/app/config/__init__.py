@@ -25,13 +25,13 @@ from .messages import (
     WELCOME_MESSAGE,
 )
 from .paths import ACCESS_LOG, DATABASE_FILE, ERROR_LOG, LOGS, SCHEMA_FILE
+from .prompts import OPENAI_SUMMARIZATION_SYSTEM_PROMPT
 from .secrets import ASSEMBLYAI_API_KEY, OPENAI_API_KEY
 from .settings import (
     COMMAND_ALIASES,
     DEFAULT_GOAL_EMOJI,
     FLASK_ENV,
     OPENAI_CHAT_MODEL,
-    OPENAI_SUMMARIZATION_SYSTEM_PROMPT,
     STYLE,
 )
 
