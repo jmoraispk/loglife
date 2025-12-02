@@ -1,2 +1,1 @@
 """Text logic tests package."""
-

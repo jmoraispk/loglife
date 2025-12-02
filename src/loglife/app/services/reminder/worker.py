@@ -3,7 +3,6 @@
 Runs a minutely job to check if any user reminders are due for their timezone.
 """
 
-
 import logging
 import threading
 import time
@@ -62,7 +61,8 @@ def _build_journal_reminder_message(user_id: int) -> str:
 def _build_standard_reminder_message(goal: Goal) -> str:
     """Construct a standard reminder message for a specific goal."""
     return REMINDER_MESSAGE.replace("<goal_emoji>", goal.goal_emoji).replace(
-        "<goal_description>", goal.goal_description,
+        "<goal_description>",
+        goal.goal_description,
     )
 
 

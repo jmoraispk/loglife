@@ -3,7 +3,6 @@
 Receives POST requests, validates payloads, and enqueues messages for processing.
 """
 
-
 import logging
 
 from flask import Blueprint, g, request

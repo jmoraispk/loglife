@@ -59,4 +59,3 @@ def test_recv_msg() -> None:
 
         assert msg == expected_msg
         mock_queue.get.assert_called_once_with(block=True, timeout=5.0)
-

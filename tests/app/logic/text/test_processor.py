@@ -1,6 +1,5 @@
 """Tests for process_text logic."""
 
-
 import json
 from datetime import UTC, datetime
 from unittest.mock import patch
