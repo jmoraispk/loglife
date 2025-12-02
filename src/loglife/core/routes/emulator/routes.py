@@ -7,6 +7,7 @@ from collections.abc import Generator
 
 from flask import Blueprint, Response, render_template
 
+from loglife.app.config.settings import SQLITE_WEB_URL
 from loglife.core.messaging import log_queue
 
 emulator_bp = Blueprint(
@@ -20,7 +21,7 @@ emulator_bp = Blueprint(
 @emulator_bp.route("/")
 def emulator() -> str:
     """Render the emulator HTML interface."""
-    return render_template("emulator.html")
+    return render_template("emulator.html", db_url=SQLITE_WEB_URL)
 
 
 @emulator_bp.route("/events")

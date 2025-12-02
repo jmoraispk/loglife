@@ -17,3 +17,9 @@ STYLE = {
 COMMAND_ALIASES = {
     "journal now": "journal prompts",
 }
+
+SQLITE_WEB_URL = (
+    "http://5.161.234.127:8080/"
+    if FLASK_ENV == "production"
+    else "http://127.0.0.1:8080/"
+)
