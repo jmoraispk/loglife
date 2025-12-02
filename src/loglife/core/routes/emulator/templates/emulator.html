@@ -66,6 +66,33 @@
             font-size: 18px;
         }
 
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-minimal {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            height: 28px;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-minimal:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
         .container {
             max-width: 1280px;
             margin: 0 auto;
@@ -514,6 +541,9 @@
         <div class="nav-inner">
             <div class="brand">
                 <div class="brand-text">LogLife Emulator</div>
+            </div>
+            <div class="nav-actions">
+                <a href="{{ db_url }}" target="_blank" class="btn-minimal">Database</a>
             </div>
         </div>
     </div>
