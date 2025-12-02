@@ -4,7 +4,6 @@ Dispatches messages to the appropriate logic handler (Text, Audio, VCard)
 based on the message type.
 """
 
-
 import logging
 from typing import Any
 

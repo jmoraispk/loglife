@@ -1,2 +1,1 @@
 """Reminder service tests package."""
-

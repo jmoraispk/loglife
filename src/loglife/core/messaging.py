@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 # --- Message Class ---
 
+
 @dataclass(slots=True)
 class Message:
     """Normalized representation of transport messages."""
@@ -38,6 +39,7 @@ class Message:
             metadata=dict(payload.get("metadata") or {}),
         )
 
+
 # --- Globals ---
 # Defined after Message class to avoid forward reference issues
 _inbound_queue: Queue[Message] = Queue()
@@ -49,9 +51,11 @@ _sender_worker_started = False
 
 # --- Inbound / Receiver Logic ---
 
+
 def enqueue_inbound_message(message: Message) -> None:
     """Place an inbound message onto the queue for processing."""
     _inbound_queue.put(message)
+
 
 def start_message_worker(handler: Callable[[Message], None]) -> None:
     """Spin up a daemon thread that consumes inbound messages."""
@@ -77,15 +81,19 @@ def start_message_worker(handler: Callable[[Message], None]) -> None:
     Thread(target=_worker, daemon=True, name="router-worker").start()
     _router_worker_started = True
 
+
 # --- Outbound / Sender Logic ---
+
 
 def enqueue_outbound_message(message: Message) -> None:
     """Place a message onto the outbound queue."""
     _outbound_queue.put(message)
 
+
 def get_outbound_message(timeout: float | None = 0.1) -> Message:
     """Retrieve the next message destined for outbound transports."""
     return _outbound_queue.get(timeout=timeout)
+
 
 def build_outbound_message(
     number: str,
@@ -105,6 +113,7 @@ def build_outbound_message(
         attachments=attachments or {},
     )
 
+
 def start_sender_worker() -> None:
     """Start a daemon worker that drains the outbound queue."""
     global _sender_worker_started  # noqa: PLW0603
@@ -122,13 +131,16 @@ def start_sender_worker() -> None:
                 break
 
             try:
-                logger.debug("Dispatching outbound message to %s via %s", message.sender, message.client_type)
+                logger.debug(
+                    "Dispatching outbound message to %s via %s", message.sender, message.client_type
+                )
                 _dispatch_outbound(message)
             except Exception:
                 logger.exception("Failed to deliver outbound message to %s", message.sender)
 
     Thread(target=_worker, daemon=True, name="sender-worker").start()
     _sender_worker_started = True
+
 
 def _dispatch_outbound(message: Message) -> None:
     client = message.client_type or "whatsapp"
@@ -138,9 +150,11 @@ def _dispatch_outbound(message: Message) -> None:
     else:
         _send_whatsapp_message(message.sender, message.raw_payload)
 
+
 def _send_emulator_message(message: str) -> None:
     logger.info("Sending emulator message: %s", message)
     log_queue.put(message)
+
 
 def _send_whatsapp_message(number: str, message: str) -> None:
     payload = {"number": number, "message": message}
@@ -151,6 +165,7 @@ def _send_whatsapp_message(number: str, message: str) -> None:
         error = f"Error sending WhatsApp message > {exc}"
         logger.exception(error)
         raise RuntimeError(error) from exc
+
 
 def queue_async_message(
     number: str,
@@ -170,6 +185,7 @@ def queue_async_message(
     )
     enqueue_outbound_message(outbound)
 
+
 def send_message(
     number: str,
     message: str,
@@ -186,7 +202,9 @@ def send_message(
         _send_whatsapp_message(number, message)
     else:
         logger.info(
-            "Queueing async message for %s (client_type=%s)", number, target_client or "unknown",
+            "Queueing async message for %s (client_type=%s)",
+            number,
+            target_client or "unknown",
         )
         queue_async_message(
             number,

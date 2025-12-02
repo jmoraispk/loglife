@@ -112,7 +112,8 @@ def test_build_standard_reminder_message() -> None:
     msg = reminder_worker._build_standard_reminder_message(mock_goal)  # noqa: SLF001
 
     expected = REMINDER_MESSAGE.replace("<goal_emoji>", "🏃").replace(
-        "<goal_description>", "Run 5k",
+        "<goal_description>",
+        "Run 5k",
     )
     assert msg == expected
 

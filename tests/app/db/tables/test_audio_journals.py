@@ -168,4 +168,3 @@ def test_delete_audio_journal_entry() -> None:
     assert deleted_entry is None
     user_entries = db.audio_journals.get_by_user(user.id)
     assert len(user_entries) == 0
-

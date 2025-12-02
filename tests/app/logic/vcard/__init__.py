@@ -1,2 +1,1 @@
 """VCard logic tests package."""
-
