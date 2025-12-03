@@ -48,6 +48,7 @@ class LogBroadcaster:
     """Broadcasts logs to multiple listeners (SSE clients)."""
 
     def __init__(self) -> None:
+        """Initialize the log broadcaster."""
         self._listeners: set[Queue[str]] = set()
         self._lock = Lock()
 
@@ -187,7 +188,7 @@ def _dispatch_outbound(message: Message) -> None:
 
 def _send_emulator_message(message: str, attachments: dict[str, Any] | None = None) -> None:
     logger.info("Sending emulator message: %s", message)
-    
+
     if attachments and "transcript_file" in attachments:
         try:
             data = json.dumps({

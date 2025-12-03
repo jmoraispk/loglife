@@ -116,7 +116,7 @@ class JournalPromptsHandler(TextCommandHandler):
         if goals_not_tracked_today:
             return messages.JOURNAL_REMINDER_MESSAGE.replace(
                 "<goals_not_tracked_today>",
-                "- *Did you complete the goals?*\n"
+                messages.REMINDER_UNTRACKED_HEADER
                 + "\n".join([f"- {goal.goal_description}" for goal in goals_not_tracked_today]),
             )
 
@@ -189,11 +189,15 @@ class ReminderTimeHandler(TextCommandHandler):
         # Get the goal to display in confirmation
         goal: Goal | None = db.goals.get(goal_id)
         if not goal:
-            return "Goal not found."
+            return messages.ERROR_GOAL_NOT_FOUND
 
         goal_desc = goal.goal_description
         goal_emoji = goal.goal_emoji
-        return f"Got it! I'll remind you daily at {display_time} for {goal_emoji} {goal_desc}."
+        return messages.SUCCESS_REMINDER_SET.format(
+            display_time=display_time,
+            goal_emoji=goal_emoji,
+            goal_desc=goal_desc,
+        )
 
 
 class GoalsListHandler(TextCommandHandler):
@@ -230,11 +234,7 @@ class GoalsListHandler(TextCommandHandler):
             goal_lines.append(f"{i}. {goal_emoji} {goal_desc} (boost {boost}) {time_display}")
 
         response = "```" + "\n".join(goal_lines) + "```"
-        response += (
-            "\n\n💡 _Tips:_\n"
-            "_Update reminders with `update [goal#] [time]`_\n"
-            "_Delete goals with `delete [goal#]`_"
-        )
+        response += messages.GOALS_LIST_TIPS
         return response
 
 
@@ -299,7 +299,7 @@ class TranscriptToggleHandler(TextCommandHandler):
         if "off" in message:
             db.users.update(user_id, send_transcript_file=0)
             return messages.SUCCESS_TRANSCRIPT_DISABLED
-        return "Invalid command. Usage: transcript [on|off]"
+        return messages.ERROR_INVALID_TRANSCRIPT_CMD
 
 
 class WeekSummaryHandler(TextCommandHandler):
