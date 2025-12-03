@@ -638,6 +638,9 @@
                 <div class="empty-state">Send a message to start chatting...</div>
             </div>
             <div class="chat-input-area">
+                <div id="audioVisualizer" style="display: none; height: 4px; background: rgba(255, 255, 255, 0.1); margin-bottom: 12px; border-radius: 2px; overflow: hidden;">
+                    <div id="audioVolumeBar" style="width: 0%; height: 100%; background: #ef4444; transition: width 0.05s linear; box-shadow: 0 0 8px #ef4444;"></div>
+                </div>
                 <form id="chatForm">
                     <div class="chat-input-wrapper">
                         <textarea class="chat-textarea" id="messageInput" name="message" rows="1"
@@ -667,8 +670,14 @@
         const chatMessages = byId('chatMessages');
         const statusPill = byId('statusPill');
         const presetSelect = byId('presetSelect');
+        const audioVisualizer = byId('audioVisualizer');
+        const audioVolumeBar = byId('audioVolumeBar');
 
         let mediaRecorder = null;
+        let audioContext = null;
+        let analyser = null;
+        let microphone = null;
+        let javascriptNode = null;
         let audioChunks = [];
         let messageHistory = [];
         let sentMessages = []; // Store only sent text messages for arrow navigation
@@ -1087,6 +1096,27 @@
                     return;
                 }
 
+                // Stop visualizer
+                if (audioContext) {
+                    audioContext.close();
+                    audioContext = null;
+                }
+                if (javascriptNode) {
+                    javascriptNode.disconnect();
+                    javascriptNode = null;
+                }
+                if (analyser) {
+                    analyser.disconnect();
+                    analyser = null;
+                }
+                if (microphone) {
+                    microphone.disconnect();
+                    microphone = null;
+                }
+                
+                audioVisualizer.style.display = 'none';
+                audioVolumeBar.style.width = '0%';
+
                 const recordingDuration = Math.round((Date.now() - mediaRecorder.recordingStartTime) / 1000);
                 mediaRecorder.stop();
                 mediaRecorder.stream.getTracks().forEach(track => track.stop());
@@ -1204,6 +1234,51 @@
                     });
 
                     mediaRecorder.start();
+
+                    // Setup Audio Visualizer
+                    try {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        analyser = audioContext.createAnalyser();
+                        microphone = audioContext.createMediaStreamSource(stream);
+                        javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+                        analyser.smoothingTimeConstant = 0.8;
+                        analyser.fftSize = 1024;
+
+                        microphone.connect(analyser);
+                        analyser.connect(javascriptNode);
+                        javascriptNode.connect(audioContext.destination);
+
+                        audioVisualizer.style.display = 'block';
+
+                        javascriptNode.onaudioprocess = function() {
+                            const array = new Uint8Array(analyser.frequencyBinCount);
+                            analyser.getByteFrequencyData(array);
+                            let values = 0;
+                            const length = array.length;
+                            for (let i = 0; i < length; i++) {
+                                values += array[i];
+                            }
+                            const average = values / length;
+                            // Amplify the visual effect
+                            const volume = Math.min(100, Math.round(average * 2.5)); 
+                            audioVolumeBar.style.width = volume + '%';
+                            
+                            // Change color based on volume intensity
+                            if (volume > 75) {
+                                audioVolumeBar.style.background = '#ef4444'; // Red for loud
+                                audioVolumeBar.style.boxShadow = '0 0 8px #ef4444';
+                            } else if (volume > 40) {
+                                audioVolumeBar.style.background = '#f59e0b'; // Orange for medium
+                                audioVolumeBar.style.boxShadow = '0 0 8px #f59e0b';
+                            } else {
+                                audioVolumeBar.style.background = '#3b82f6'; // Blue for normal
+                                audioVolumeBar.style.boxShadow = '0 0 8px #3b82f6';
+                            }
+                        };
+                    } catch (e) {
+                        console.error('Error setting up audio visualizer:', e);
+                    }
 
                     micBtn.classList.add('recording');
                     micBtn.title = 'Stop recording';
