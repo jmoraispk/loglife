@@ -141,13 +141,17 @@ function createClient() {
             }
 
             const responseData = await response.json();
-            if (responseData.success && responseData.data && responseData.data.message) {
-                newClient.sendMessage(msg.from, responseData.data.message);
-            } else {
-                // Fallback if response structure is unexpected
-                const fallbackMessage = responseData?.data?.message || responseData?.message || 'Sorry, I encountered an error processing your message. Please try again.';
-                newClient.sendMessage(msg.from, fallbackMessage);
+            if (responseData.success) {
+                const messageToSend = responseData.data?.message || responseData.message;
+                if (messageToSend) {
+                    await newClient.sendMessage(msg.from, messageToSend);
+                }
+                return;
             }
+
+            // Fallback if success is false or structure is unexpected
+            const fallbackMessage = responseData?.data?.message || responseData?.message || 'Sorry, I encountered an error processing your message. Please try again.';
+            await newClient.sendMessage(msg.from, fallbackMessage);
         } catch (err) {
             console.error('Failed to fetch from backend:', err);
             try {
