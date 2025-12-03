@@ -767,12 +767,27 @@
             }
         }
 
-        function addMessage(content, type = 'bot', meta = null) {
+        function addMessage(content, type = 'bot', meta = null, audioUrl = null) {
             clearEmptyState();
             
             const messageDiv = document.createElement('div');
             messageDiv.className = `message message-${type}`;
             messageDiv.innerHTML = formatMessage(content);
+            
+            if (audioUrl) {
+                const audioContainer = document.createElement('div');
+                audioContainer.style.marginTop = '8px';
+                
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = audioUrl;
+                audio.style.width = '100%';
+                audio.style.minWidth = '300px'; // Ensure controls are usable
+                audio.style.height = '32px';
+                
+                audioContainer.appendChild(audio);
+                messageDiv.appendChild(audioContainer);
+            }
             
             if (meta) {
                 const metaDiv = document.createElement('div');
@@ -784,7 +799,7 @@
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
-            messageHistory.push({ content, type, meta, timestamp: Date.now() });
+            messageHistory.push({ content, type, meta, audioUrl, timestamp: Date.now() });
         }
 
         function addTranscriptMessage(transcriptFile) {
@@ -1130,7 +1145,8 @@
                     reader.onloadend = async () => {
                         const base64Audio = reader.result.split(',')[1];
                         
-                        addMessage(`🎤 Audio message (${recordingDuration}s)`, 'user');
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        addMessage(`🎤 Audio message (${recordingDuration}s)`, 'user', null, audioUrl);
 
                         const payload = { 
                             sender: senderEl.value, 
