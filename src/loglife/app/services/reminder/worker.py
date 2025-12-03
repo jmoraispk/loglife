@@ -8,7 +8,11 @@ import threading
 import time
 from datetime import UTC, datetime
 
-from loglife.app.config import JOURNAL_REMINDER_MESSAGE, REMINDER_MESSAGE
+from loglife.app.config import (
+    JOURNAL_REMINDER_MESSAGE,
+    REMINDER_MESSAGE,
+    messages,
+)
 from loglife.app.db import db
 from loglife.app.db.tables import Goal, User
 from loglife.app.logic.timezone import get_timezone_safe
@@ -53,7 +57,7 @@ def _build_journal_reminder_message(user_id: int) -> str:
         return JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
 
     goals_list = "\n".join([f"- {goal.goal_description}" for goal in goals_not_tracked])
-    replacement = f"- *Did you complete the goals?*\n{goals_list}"
+    replacement = f"{messages.REMINDER_UNTRACKED_HEADER}{goals_list}"
 
     return JOURNAL_REMINDER_MESSAGE.replace("<goals_not_tracked_today>", replacement)
 

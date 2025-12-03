@@ -149,3 +149,27 @@ Take a moment to journal your thoughts, experiences, and feelings.
 <goals_not_tracked_today>
 
 You can reply with a voice note. 💭"""
+
+
+# -------------------
+# New Centralized Messages
+# -------------------
+
+# From handlers.py
+ERROR_GOAL_NOT_FOUND = "Goal not found."
+SUCCESS_REMINDER_SET = (
+    "Got it! I'll remind you daily at {display_time} for {goal_emoji} {goal_desc}."
+)
+GOALS_LIST_TIPS = (
+    "\n\n💡 _Tips:_\n"
+    "_Update reminders with `update [goal#] [time]`_\n"
+    "_Delete goals with `delete [goal#]`_"
+)
+ERROR_INVALID_TRANSCRIPT_CMD = "Invalid command. Usage: transcript [on|off]"
+
+# From processor.py
+ERROR_TEXT_PROCESSOR = "Error in text processor: {exc}"
+ERROR_WRONG_COMMAND = "Wrong command!"
+
+# From services/reminder/worker.py
+REMINDER_UNTRACKED_HEADER = "- *Did you complete the goals?*\n"
