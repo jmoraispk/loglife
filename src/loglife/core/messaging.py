@@ -1,5 +1,6 @@
 """Messaging module - unified interface for message handling."""
 
+import json
 import logging
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
@@ -146,18 +147,37 @@ def _dispatch_outbound(message: Message) -> None:
     client = message.client_type or "whatsapp"
     logger.debug("Dispatching to client type: %s", client)
     if client == "emulator":
-        _send_emulator_message(message.raw_payload)
+        _send_emulator_message(message.raw_payload, attachments=message.attachments)
     else:
-        _send_whatsapp_message(message.sender, message.raw_payload)
+        _send_whatsapp_message(
+            message.sender, message.raw_payload, attachments=message.attachments
+        )
 
 
-def _send_emulator_message(message: str) -> None:
+def _send_emulator_message(message: str, attachments: dict[str, Any] | None = None) -> None:
     logger.info("Sending emulator message: %s", message)
-    log_queue.put(message)
+    
+    if attachments and "transcript_file" in attachments:
+        try:
+            data = json.dumps({
+                "text": message,
+                "transcript_file": attachments["transcript_file"]
+            })
+            log_queue.put(data)
+        except Exception:
+             logger.exception("Failed to serialize emulator message")
+             log_queue.put(message)
+    else:
+        log_queue.put(message)
 
 
-def _send_whatsapp_message(number: str, message: str) -> None:
+def _send_whatsapp_message(
+    number: str, message: str, attachments: dict[str, Any] | None = None
+) -> None:
     payload = {"number": number, "message": message}
+    if attachments:
+        payload["attachments"] = attachments
+
     headers = {"Content-Type": "application/json"}
     try:
         requests.post(WHATSAPP_API_URL, json=payload, headers=headers, timeout=30)
