@@ -919,7 +919,7 @@
             source.onmessage = (event) => {
                 // console.log('Event received:', event.data); // Debug
                 const payload = event.data;
-                if (payload.includes("Queueing async message") || payload.includes("Sending emulator message") || payload.includes("Audio received. Transcribing...") || payload.includes("Audio transcribed. Summarizing...") || payload.includes("Summary stored in Database.")) {
+                if (payload.includes("Queueing async message") || payload.includes("Sending emulator message")) {
                     return;
                 }
 
@@ -1122,7 +1122,23 @@
                                 if (transcriptFile) {
                                     addTranscriptMessage(transcriptFile);
                                 }
-                                addMessage(formattedText, 'bot', `${ms}ms`);
+
+                                // Only add message if it's not empty or if it's an error
+                                if (formattedText.trim() !== '') {
+                                   // Try to parse it to see if message is empty inside JSON
+                                   let showMessage = true;
+                                   try {
+                                       const jsonResp = JSON.parse(formattedText);
+                                       // Check if it's an empty success response
+                                       if (jsonResp.success && !jsonResp.message && (!jsonResp.data || Object.keys(jsonResp.data).length === 0)) {
+                                           showMessage = false;
+                                       }
+                                   } catch (e) {}
+
+                                   if (showMessage) {
+                                       addMessage(formattedText, 'bot', `${ms}ms`);
+                                   }
+                                }
                                 setStatus('success', 'Success');
                             } else {
                                 addMessage(formattedText || 'No response', 'bot', `Error • ${ms}ms`);
