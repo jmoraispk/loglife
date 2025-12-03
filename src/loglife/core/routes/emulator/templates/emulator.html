@@ -93,6 +93,28 @@
             border-color: rgba(255, 255, 255, 0.3);
         }
 
+        .btn-like-input {
+            width: 100%;
+            border: 1.5px solid var(--border);
+            background: #0D0226;
+            color: var(--text);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            font-size: 14px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color .2s, box-shadow .2s;
+            cursor: pointer;
+        }
+
+        .btn-like-input:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 6px var(--ring);
+            color: var(--text);
+        }
+
         .container {
             max-width: 1280px;
             margin: 0 auto;
@@ -543,7 +565,6 @@
                 <div class="brand-text">LogLife Emulator</div>
             </div>
             <div class="nav-actions">
-                <a href="{{ db_url }}" target="_blank" class="btn-minimal">Database</a>
             </div>
         </div>
     </div>
@@ -560,6 +581,18 @@
                         <label class="label" for="sender">Sender (from)</label>
                         <input class="input" type="text" id="sender" name="sender" value="12345678"
                             placeholder="Enter sender identifier">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database -->
+            <div class="card card-transparent">
+                <div class="card-header">
+                    <div class="card-title">Database</div>
+                </div>
+                <div class="card-body">
+                    <div class="field">
+                        <a href="{{ db_url }}" target="_blank" class="btn-like-input">Open Database</a>
                     </div>
                 </div>
             </div>
