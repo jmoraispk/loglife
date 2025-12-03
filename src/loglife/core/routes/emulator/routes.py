@@ -8,7 +8,7 @@ from collections.abc import Generator
 from flask import Blueprint, Response, render_template
 
 from loglife.app.config.settings import SQLITE_WEB_URL
-from loglife.core.messaging import log_queue
+from loglife.core.messaging import log_broadcaster
 
 emulator_bp = Blueprint(
     "emulator",
@@ -29,8 +29,8 @@ def events() -> Response:
     """Stream realtime log events to the browser via SSE."""
 
     def stream() -> Generator[str, None, None]:
-        while True:
-            msg = log_queue.get()
+        # Listen yields messages from the broadcaster
+        for msg in log_broadcaster.listen():
             yield f"data: {msg}\n\n"
 
     return Response(stream(), mimetype="text/event-stream")
