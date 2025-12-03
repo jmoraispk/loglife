@@ -31,6 +31,8 @@ def events() -> Response:
     def stream() -> Generator[str, None, None]:
         # Listen yields messages from the broadcaster
         for msg in log_broadcaster.listen():
-            yield f"data: {msg}\n\n"
+            # Handle multiline messages for SSE
+            formatted_msg = msg.replace("\n", "\ndata: ")
+            yield f"data: {formatted_msg}\n\n"
 
     return Response(stream(), mimetype="text/event-stream")
