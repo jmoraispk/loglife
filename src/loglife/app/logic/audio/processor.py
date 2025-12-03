@@ -16,20 +16,26 @@ from loglife.core.messaging import queue_async_message
 logger = logging.getLogger(__name__)
 
 
-def process_audio(sender: str, user: User, audio_data: str) -> str | tuple[str, str]:
+def process_audio(
+    sender: str,
+    user: User,
+    audio_data: str,
+    client_type: str = "whatsapp",
+) -> str | tuple[str, str]:
     """Process an incoming audio message from a user.
 
     Arguments:
         sender: The WhatsApp phone number of the sender
         user: The user record dictionary
         audio_data: Base64 encoded audio payload
+        client_type: The client type to send responses to (default: "whatsapp")
 
     Returns:
         The summarized text generated from the audio, or a tuple of
         (transcript_file_base64, summarized_text).
 
     """
-    queue_async_message(sender, "Audio received. Transcribing...", client_type="whatsapp")
+    queue_async_message(sender, "Audio received. Transcribing...", client_type=client_type)
 
     try:
         try:
@@ -41,7 +47,11 @@ def process_audio(sender: str, user: User, audio_data: str) -> str | tuple[str, 
         if not transcript.strip():
             return "Transcription was empty."
 
-        queue_async_message(sender, "Audio transcribed. Summarizing...", client_type="whatsapp")
+        queue_async_message(
+            sender,
+            "Audio transcribed. Summarizing...",
+            client_type=client_type,
+        )
 
         try:
             summary: str = summarize_transcript(transcript)
@@ -54,7 +64,11 @@ def process_audio(sender: str, user: User, audio_data: str) -> str | tuple[str, 
             transcription_text=transcript,
             summary_text=summary,
         )
-        queue_async_message(sender, "Summary stored in Database.", client_type="whatsapp")
+        queue_async_message(
+            sender,
+            "Summary stored in Database.",
+            client_type=client_type,
+        )
 
         if user.send_transcript_file:
             transcript_file: str = transcript_to_base64(transcript)
