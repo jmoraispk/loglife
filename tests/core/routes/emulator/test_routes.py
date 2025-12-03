@@ -14,13 +14,11 @@ def test_emulator_page(client: FlaskClient) -> None:
 
 def test_events_stream(client: FlaskClient) -> None:
     """Test that the events stream connects."""
-    # Mock log_queue.get to raise an exception to break the infinite loop
-    # This verifies the route is reachable and tries to access the queue
-    with patch("loglife.core.routes.emulator.routes.log_queue.get", side_effect=StopIteration):
-        try:
-            client.get("/events")
-        except StopIteration:
-            pass
-        except RuntimeError:
-            # Flask might wrap the generator exception
-            pass
+    # Mock log_broadcaster.listen to return a finite iterator
+    # This verifies the route is reachable and consumes the broadcaster
+    with patch("loglife.core.routes.emulator.routes.log_broadcaster.listen") as mock_listen:
+        mock_listen.return_value = iter(["hello"])
+        response = client.get("/events")
+        assert response.status_code == 200
+        # Verify the data format
+        assert b"data: hello\n\n" in response.data

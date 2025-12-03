@@ -2,10 +2,10 @@
 
 import json
 import logging
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Generator, Mapping
 from dataclasses import dataclass, field
 from queue import Empty, Queue
-from threading import Thread
+from threading import Lock, Thread
 from typing import Any
 
 import requests
@@ -41,11 +41,42 @@ class Message:
         )
 
 
+# --- Log Broadcaster ---
+
+
+class LogBroadcaster:
+    """Broadcasts logs to multiple listeners (SSE clients)."""
+
+    def __init__(self) -> None:
+        self._listeners: set[Queue[str]] = set()
+        self._lock = Lock()
+
+    def publish(self, message: str) -> None:
+        """Send a message to all active listeners."""
+        with self._lock:
+            for q in self._listeners:
+                q.put(message)
+
+    def listen(self) -> Generator[str, None, None]:
+        """Yield messages for a single listener."""
+        q: Queue[str] = Queue()
+        with self._lock:
+            self._listeners.add(q)
+        try:
+            while True:
+                msg = q.get()
+                yield msg
+        finally:
+            with self._lock:
+                if q in self._listeners:
+                    self._listeners.remove(q)
+
+
 # --- Globals ---
 # Defined after Message class to avoid forward reference issues
 _inbound_queue: Queue[Message] = Queue()
 _outbound_queue: Queue[Message] = Queue()
-log_queue: Queue[str] = Queue()  # For streaming logs to emulator
+log_broadcaster = LogBroadcaster()
 
 _router_worker_started = False
 _sender_worker_started = False
@@ -163,12 +194,12 @@ def _send_emulator_message(message: str, attachments: dict[str, Any] | None = No
                 "text": message,
                 "transcript_file": attachments["transcript_file"]
             })
-            log_queue.put(data)
+            log_broadcaster.publish(data)
         except Exception:
              logger.exception("Failed to serialize emulator message")
-             log_queue.put(message)
+             log_broadcaster.publish(message)
     else:
-        log_queue.put(message)
+        log_broadcaster.publish(message)
 
 
 def _send_whatsapp_message(
