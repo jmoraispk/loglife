@@ -1,4 +1,4 @@
-const { Client, LocalAuth } = require('whatsapp-web.js');
+const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const fetch = require('node-fetch');
 const qrcode = require('qrcode-terminal');
 const express = require('express');
@@ -210,7 +210,7 @@ function isClientReady() {
 // Endpoint to send WhatsApp message
 app.post('/send-message', async (req, res) => {
     try {
-        const { number, message } = req.body;
+        const { number, message, attachments } = req.body;
         
         // Validate input
         if (!number || !message) {
@@ -232,6 +232,23 @@ app.post('/send-message', async (req, res) => {
             // Remove any non-digit characters (expecting full number with country code)
             formattedNumber = formattedNumber.replace(/\D/g, '');
             formattedNumber = formattedNumber + '@c.us';
+        }
+
+        // Handle transcript file if present
+        if (attachments && attachments.transcript_file) {
+            const transcriptFile = attachments.transcript_file;
+            const base64TranscriptData = transcriptFile
+                .replace(/^data:.*?;base64,/, '')
+                .replace(/\s/g, '');
+            
+            if (base64TranscriptData) {
+                try {
+                    const media = new MessageMedia('text/plain', base64TranscriptData, 'transcript.txt');
+                    await client.sendMessage(formattedNumber, media);
+                } catch (err) {
+                    console.error('Failed to send transcript file:', err);
+                }
+            }
         }
         
         // Send message with one guarded retry on frame detachment

@@ -923,16 +923,40 @@
                     return;
                 }
 
+                // Try parsing as JSON to detect transcript
+                let displayText = payload;
+                let transcriptData = null;
+                
+                try {
+                    // Only attempt parse if it looks like JSON object
+                    if (payload.trim().startsWith('{')) {
+                        const data = JSON.parse(payload);
+                        if (data.transcript_file) {
+                            transcriptData = data.transcript_file;
+                            displayText = data.text || '';
+                        }
+                    }
+                } catch (e) {
+                    // Not valid JSON, use original payload
+                }
+
                 clearEmptyState();
-                addMessage(payload, 'event', 'Server Event');
-                // Add elapsed time for event messages too
-                const messageElements = chatMessages.querySelectorAll('.message-event');
-                const lastMessage = messageElements[messageElements.length - 1];
-                if (lastMessage) {
-                    const meta = lastMessage.querySelector('.message-meta');
-                    if (meta) {
-                        // We don't have precise elapsed time for SSE events, but we can show a timestamp
-                        meta.textContent = new Date().toLocaleTimeString();
+
+                if (transcriptData) {
+                    addTranscriptMessage(transcriptData);
+                }
+                
+                if (displayText) {
+                    addMessage(displayText, 'event', 'Server Event');
+                    // Add elapsed time for event messages too
+                    const messageElements = chatMessages.querySelectorAll('.message-event');
+                    const lastMessage = messageElements[messageElements.length - 1];
+                    if (lastMessage) {
+                        const meta = lastMessage.querySelector('.message-meta');
+                        if (meta) {
+                            // We don't have precise elapsed time for SSE events, but we can show a timestamp
+                            meta.textContent = new Date().toLocaleTimeString();
+                        }
                     }
                 }
                 setStatus('loading', 'Processing...');
