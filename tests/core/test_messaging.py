@@ -207,17 +207,6 @@ def test_start_sender_worker_dispatches() -> None:
 
     fake_dispatch = MagicMock()
 
-    with (
-        patch("loglife.core.messaging.get_outbound_message", fake_get_outbound_message),
-        patch("loglife.core.messaging._dispatch_outbound", fake_dispatch),
-        patch("loglife.core.messaging._sender_worker_started", False),  # noqa: FBT003
-    ):
-        start_sender_worker()
-        # Worker runs in background; since we mocked get to return stop immediately after msg,
-        # we just need to wait a tiny bit or join if we had thread handle
-        # But start_sender_worker spawns a thread we don't get handle to easily unless we mock Thread  # noqa: E501
-        # So let's mock Thread too to run synchronously or join
-
     # Ideally we mock Thread to run inline or capture it
     # Re-doing with Thread mock for better control is safer:
     with (
