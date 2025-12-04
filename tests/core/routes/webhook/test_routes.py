@@ -33,7 +33,7 @@ def test_webhook_delegates_to_router(mock_enqueue: MagicMock, client: FlaskClien
 
     assert response.status_code == 200
     assert response.json["success"] is True
-    assert response.json["message"] == "Message queued"
+    assert response.json["message"] == ""
     mock_enqueue.assert_called_once()
 
 
