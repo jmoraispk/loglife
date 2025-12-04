@@ -27,6 +27,6 @@ jobs:
       - name: Run Ruff lint
         run: uv run ruff check .
 
-      # - name: Run PyTest
-      #   run: uv run pytest -q
+      - name: Run PyTest
+        run: uv run pytest -q
 
