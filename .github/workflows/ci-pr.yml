@@ -1,13 +1,13 @@
-name: CI (Feature Branches)
+name: CI (Pull Requests)
 
 on:
-  push:
+  pull_request:
     branches:
-      - "feature/**"   # Run CI only for feature branches
+      - dev
+      - main
 
 jobs:
   ci:
-    if: github.event.pull_request == ''   # ❗ RUN ONLY if this push is NOT part of a PR
     runs-on: ubuntu-latest
 
     steps:
