@@ -28,5 +28,5 @@ jobs:
         run: uv run ruff check .
 
       - name: Run PyTest
-        run: uv run pytest -q
+        run: uv run pytest --cov=src/loglife/app --cov-report=term-missing
 
