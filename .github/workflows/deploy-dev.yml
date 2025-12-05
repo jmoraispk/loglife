@@ -20,6 +20,23 @@ jobs:
       - name: Deploy on server
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
-            touch /home/ali/github-action-test.txt &&
-            echo 'Deployed from GitHub Actions' >> /home/ali/github-action-test.txt
+            # =========== PULL LATEST CODE ===========
+            cd /home/ali/loglife &&
+            git pull &&
+
+            # =========== RESTART BACKEND SERVICES ===========
+            sudo systemctl restart life-bot &&
+            sudo systemctl restart life-bot-db.service &&
+
+            # =========== DEPLOY WHATSAPP CLIENT ===========
+            cd /home/ali/loglife/whatsapp-client &&
+            npm ci --only=production &&
+            screen -S loglife -X quit || true &&
+            screen -S loglife -dm node index.js &&
+
+            # =========== BUILD MKDOCS & DEPLOY DOCS ===========
+            cd /home/ali/loglife &&
+            uv run mkdocs build &&
+            sudo cp -r /home/ali/loglife/site/* /var/www/docs.loglife.co/ &&
+            sudo systemctl reload nginx
           "
