@@ -2,7 +2,7 @@ name: Deploy to Server (Dev)
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: [ "main", "dev" ]
 
 jobs:
   deploy:
@@ -17,26 +17,30 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy on server
+      # =========================
+      # 🚀 DEPLOY STAGING (DEV)
+      # =========================
+      - name: Deploy to DEV Server
+        if: github.ref == 'refs/heads/dev'
         run: |
           ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
             # =========== PULL LATEST CODE ===========
-            cd /home/ali/loglife &&
+            cd /home/ali/loglife-dev &&
             git pull &&
 
             # =========== RESTART BACKEND SERVICES ===========
-            sudo systemctl restart life-bot &&
-            sudo systemctl restart life-bot-db.service &&
+            sudo systemctl restart loglife-dev &&
+            sudo systemctl restart loglife-db-dev.service &&
 
             # =========== DEPLOY WHATSAPP CLIENT ===========
-            cd /home/ali/loglife/whatsapp-client &&
+            cd /home/ali/loglife-dev/whatsapp-client &&
             npm ci --only=production &&
-            screen -S loglife -X quit || true &&
-            screen -S loglife -dm node index.js &&
+            screen -S loglife-dev -X quit || true &&
+            screen -S loglife-dev -dm node index.js &&
 
             # =========== BUILD MKDOCS & DEPLOY DOCS ===========
-            cd /home/ali/loglife &&
+            cd /home/ali/loglife-dev &&
             uv run mkdocs build &&
-            sudo cp -r /home/ali/loglife/site/* /var/www/docs.loglife.co/ &&
+            sudo cp -r /home/ali/loglife-dev/site/* /var/www/docs.loglife.co/ &&
             sudo systemctl reload nginx
           "
