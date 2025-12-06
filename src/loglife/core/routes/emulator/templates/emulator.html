@@ -66,6 +66,124 @@
             font-size: 18px;
         }
 
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-minimal {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            height: 28px;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-minimal:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-like-input {
+            width: 100%;
+            border: 1.5px solid var(--border);
+            background: #0D0226;
+            color: var(--text);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            font-size: 14px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color .2s, box-shadow .2s;
+            cursor: pointer;
+        }
+
+        .btn-like-input:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 6px var(--ring);
+            color: var(--text);
+        }
+
+        .preset-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+
+        .preset-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .preset-list::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 999px;
+        }
+
+        .preset-item {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+        }
+
+        .preset-fill-btn {
+            flex: 1;
+            background: #0D0226;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            color: var(--text);
+            text-align: left;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: flex;
+            align-items: center;
+        }
+
+        .preset-send-btn {
+            width: 36px;
+            background: #0D0226;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: var(--muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .preset-fill-btn:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+            color: #ffffff;
+        }
+
+        .preset-send-btn:hover {
+            border-color: var(--primary);
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--primary);
+        }
+
         .container {
             max-width: 1280px;
             margin: 0 auto;
@@ -231,7 +349,7 @@
 
         .message-user {
             align-self: flex-end;
-            background: #1e40af;
+            background: #2ea043;
             color: #ffffff;
         }
 
@@ -515,6 +633,8 @@
             <div class="brand">
                 <div class="brand-text">LogLife Emulator</div>
             </div>
+            <div class="nav-actions">
+            </div>
         </div>
     </div>
 
@@ -534,30 +654,77 @@
                 </div>
             </div>
 
+            <!-- Database -->
+            <div class="card card-transparent">
+                <div class="card-header">
+                    <div class="card-title">Database</div>
+                </div>
+                <div class="card-body">
+                    <div class="field">
+                        <a href="{{ db_url }}" target="_blank" class="btn-like-input">Open Database</a>
+                    </div>
+                </div>
+            </div>
+
             <!-- Quick Presets -->
             <div class="card card-transparent">
                 <div class="card-header">
                     <div class="card-title">Quick Presets</div>
                 </div>
                 <div class="card-body">
-                    <div class="field">
-                        <label class="label" for="presetSelect">Select a command</label>
-                        <select class="select" id="presetSelect">
-                            <option value="">-- Choose preset --</option>
-                            <option value="goals">Goals</option>
-                            <option value="add goal 📖 Read 20 pages daily">Add Goal</option>
-                            <option value="6 PM">Set Reminder Time</option>
-                            <option value="rate 1 3">Rate Goal</option>
-                            <option value="week">Weekly Summary</option>
-                            <option value="31232">Rate All Goals</option>
-                            <option value="lookback 7">Lookback</option>
-                            <option value="enable journaling">Enable Journaling</option>
-                            <option value="help">Help</option>
-                            <option value="update 1 6PM">Update Reminder</option>
-                            <option value="delete 1">Delete Goal</option>
-                            <option value="transcript on">Enable Transcription</option>
-                            <option value="transcript off">Disable Transcription</option>
-                        </select>
+                    <div class="preset-list">
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="goals" title="Fill input">Goals</button>
+                            <button type="button" class="preset-send-btn" data-cmd="goals" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="add goal 📖 Read 20 pages daily" title="Fill input">Add Goal</button>
+                            <button type="button" class="preset-send-btn" data-cmd="add goal 📖 Read 20 pages daily" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="6 PM" title="Fill input">Set Reminder Time</button>
+                            <button type="button" class="preset-send-btn" data-cmd="6 PM" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="rate 1 3" title="Fill input">Rate Goal</button>
+                            <button type="button" class="preset-send-btn" data-cmd="rate 1 3" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="week" title="Fill input">Weekly Summary</button>
+                            <button type="button" class="preset-send-btn" data-cmd="week" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="31232" title="Fill input">Rate All Goals</button>
+                            <button type="button" class="preset-send-btn" data-cmd="31232" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="lookback 7" title="Fill input">Lookback</button>
+                            <button type="button" class="preset-send-btn" data-cmd="lookback 7" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="enable journaling" title="Fill input">Enable Journaling</button>
+                            <button type="button" class="preset-send-btn" data-cmd="enable journaling" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="help" title="Fill input">Help</button>
+                            <button type="button" class="preset-send-btn" data-cmd="help" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="update 1 6PM" title="Fill input">Update Reminder</button>
+                            <button type="button" class="preset-send-btn" data-cmd="update 1 6PM" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="delete 1" title="Fill input">Delete Goal</button>
+                            <button type="button" class="preset-send-btn" data-cmd="delete 1" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="transcript on" title="Fill input">Enable Transcription</button>
+                            <button type="button" class="preset-send-btn" data-cmd="transcript on" title="Send immediately">➤</button>
+                        </div>
+                        <div class="preset-item">
+                            <button type="button" class="preset-fill-btn" data-cmd="transcript off" title="Fill input">Disable Transcription</button>
+                            <button type="button" class="preset-send-btn" data-cmd="transcript off" title="Send immediately">➤</button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -575,6 +742,9 @@
                 <div class="empty-state">Send a message to start chatting...</div>
             </div>
             <div class="chat-input-area">
+                <div id="audioVisualizer" style="display: none; height: 4px; background: rgba(255, 255, 255, 0.1); margin-bottom: 12px; border-radius: 2px; overflow: hidden;">
+                    <div id="audioVolumeBar" style="width: 0%; height: 100%; background: #ef4444; transition: width 0.05s linear; box-shadow: 0 0 8px #ef4444;"></div>
+                </div>
                 <form id="chatForm">
                     <div class="chat-input-wrapper">
                         <textarea class="chat-textarea" id="messageInput" name="message" rows="1"
@@ -603,9 +773,14 @@
         const chatForm = byId('chatForm');
         const chatMessages = byId('chatMessages');
         const statusPill = byId('statusPill');
-        const presetSelect = byId('presetSelect');
+        const audioVisualizer = byId('audioVisualizer');
+        const audioVolumeBar = byId('audioVolumeBar');
 
         let mediaRecorder = null;
+        let audioContext = null;
+        let analyser = null;
+        let microphone = null;
+        let javascriptNode = null;
         let audioChunks = [];
         let messageHistory = [];
         let sentMessages = []; // Store only sent text messages for arrow navigation
@@ -625,14 +800,29 @@
             arrowDownBtn.disabled = historyIndex === -1;
         }
 
-        // Quick Presets Dropdown
-        presetSelect.addEventListener('change', () => {
-            const msg = presetSelect.value;
-            if (msg) {
-                messageInput.value = msg;
-                messageInput.focus();
-                presetSelect.value = ''; // Reset dropdown
-            }
+        // Quick Presets - Fill Input Only
+        document.querySelectorAll('.preset-fill-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const cmd = btn.dataset.cmd;
+                if (cmd) {
+                    messageInput.value = cmd;
+                    messageInput.style.height = 'auto';
+                    messageInput.style.height = Math.min(messageInput.scrollHeight, 120) + 'px';
+                    messageInput.focus();
+                }
+            });
+        });
+
+        // Quick Presets - Send Immediately
+        document.querySelectorAll('.preset-send-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const cmd = btn.dataset.cmd;
+                if (cmd) {
+                    messageInput.value = cmd;
+                    messageInput.style.height = 'auto';
+                    chatForm.dispatchEvent(new Event('submit'));
+                }
+            });
         });
 
         // Arrow button click handlers
@@ -695,12 +885,27 @@
             }
         }
 
-        function addMessage(content, type = 'bot', meta = null) {
+        function addMessage(content, type = 'bot', meta = null, audioUrl = null) {
             clearEmptyState();
             
             const messageDiv = document.createElement('div');
             messageDiv.className = `message message-${type}`;
             messageDiv.innerHTML = formatMessage(content);
+            
+            if (audioUrl) {
+                const audioContainer = document.createElement('div');
+                audioContainer.style.marginTop = '8px';
+                
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = audioUrl;
+                audio.style.width = '100%';
+                audio.style.minWidth = '300px'; // Ensure controls are usable
+                audio.style.height = '32px';
+                
+                audioContainer.appendChild(audio);
+                messageDiv.appendChild(audioContainer);
+            }
             
             if (meta) {
                 const metaDiv = document.createElement('div');
@@ -712,7 +917,7 @@
             chatMessages.appendChild(messageDiv);
             chatMessages.scrollTop = chatMessages.scrollHeight;
             
-            messageHistory.push({ content, type, meta, timestamp: Date.now() });
+            messageHistory.push({ content, type, meta, audioUrl, timestamp: Date.now() });
         }
 
         function addTranscriptMessage(transcriptFile) {
@@ -856,20 +1061,44 @@
             source.onmessage = (event) => {
                 // console.log('Event received:', event.data); // Debug
                 const payload = event.data;
-                if (payload.includes("Queueing async message") || payload.includes("Sending emulator message") || payload.includes("Audio received. Transcribing...") || payload.includes("Audio transcribed. Summarizing...") || payload.includes("Summary stored in Database.")) {
+                if (payload.includes("Queueing async message") || payload.includes("Sending emulator message")) {
                     return;
                 }
 
+                // Try parsing as JSON to detect transcript
+                let displayText = payload;
+                let transcriptData = null;
+                
+                try {
+                    // Only attempt parse if it looks like JSON object
+                    if (payload.trim().startsWith('{')) {
+                        const data = JSON.parse(payload);
+                        if (data.transcript_file) {
+                            transcriptData = data.transcript_file;
+                            displayText = data.text || '';
+                        }
+                    }
+                } catch (e) {
+                    // Not valid JSON, use original payload
+                }
+
                 clearEmptyState();
-                addMessage(payload, 'event', 'Server Event');
-                // Add elapsed time for event messages too
-                const messageElements = chatMessages.querySelectorAll('.message-event');
-                const lastMessage = messageElements[messageElements.length - 1];
-                if (lastMessage) {
-                    const meta = lastMessage.querySelector('.message-meta');
-                    if (meta) {
-                        // We don't have precise elapsed time for SSE events, but we can show a timestamp
-                        meta.textContent = new Date().toLocaleTimeString();
+
+                if (transcriptData) {
+                    addTranscriptMessage(transcriptData);
+                }
+                
+                if (displayText) {
+                    addMessage(displayText, 'event', 'Server Event');
+                    // Add elapsed time for event messages too
+                    const messageElements = chatMessages.querySelectorAll('.message-event');
+                    const lastMessage = messageElements[messageElements.length - 1];
+                    if (lastMessage) {
+                        const meta = lastMessage.querySelector('.message-meta');
+                        if (meta) {
+                            // We don't have precise elapsed time for SSE events, but we can show a timestamp
+                            meta.textContent = new Date().toLocaleTimeString();
+                        }
                     }
                 }
                 setStatus('loading', 'Processing...');
@@ -1000,6 +1229,27 @@
                     return;
                 }
 
+                // Stop visualizer
+                if (audioContext) {
+                    audioContext.close();
+                    audioContext = null;
+                }
+                if (javascriptNode) {
+                    javascriptNode.disconnect();
+                    javascriptNode = null;
+                }
+                if (analyser) {
+                    analyser.disconnect();
+                    analyser = null;
+                }
+                if (microphone) {
+                    microphone.disconnect();
+                    microphone = null;
+                }
+                
+                audioVisualizer.style.display = 'none';
+                audioVolumeBar.style.width = '0%';
+
                 const recordingDuration = Math.round((Date.now() - mediaRecorder.recordingStartTime) / 1000);
                 mediaRecorder.stop();
                 mediaRecorder.stream.getTracks().forEach(track => track.stop());
@@ -1013,7 +1263,8 @@
                     reader.onloadend = async () => {
                         const base64Audio = reader.result.split(',')[1];
                         
-                        addMessage(`🎤 Audio message (${recordingDuration}s)`, 'user');
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        addMessage(`🎤 Audio message (${recordingDuration}s)`, 'user', null, audioUrl);
 
                         const payload = { 
                             sender: senderEl.value, 
@@ -1059,7 +1310,23 @@
                                 if (transcriptFile) {
                                     addTranscriptMessage(transcriptFile);
                                 }
-                                addMessage(formattedText, 'bot', `${ms}ms`);
+
+                                // Only add message if it's not empty or if it's an error
+                                if (formattedText.trim() !== '') {
+                                   // Try to parse it to see if message is empty inside JSON
+                                   let showMessage = true;
+                                   try {
+                                       const jsonResp = JSON.parse(formattedText);
+                                       // Check if it's an empty success response
+                                       if (jsonResp.success && !jsonResp.message && (!jsonResp.data || Object.keys(jsonResp.data).length === 0)) {
+                                           showMessage = false;
+                                       }
+                                   } catch (e) {}
+
+                                   if (showMessage) {
+                                       addMessage(formattedText, 'bot', `${ms}ms`);
+                                   }
+                                }
                                 setStatus('success', 'Success');
                             } else {
                                 addMessage(formattedText || 'No response', 'bot', `Error • ${ms}ms`);
@@ -1101,6 +1368,51 @@
                     });
 
                     mediaRecorder.start();
+
+                    // Setup Audio Visualizer
+                    try {
+                        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        analyser = audioContext.createAnalyser();
+                        microphone = audioContext.createMediaStreamSource(stream);
+                        javascriptNode = audioContext.createScriptProcessor(2048, 1, 1);
+
+                        analyser.smoothingTimeConstant = 0.8;
+                        analyser.fftSize = 1024;
+
+                        microphone.connect(analyser);
+                        analyser.connect(javascriptNode);
+                        javascriptNode.connect(audioContext.destination);
+
+                        audioVisualizer.style.display = 'block';
+
+                        javascriptNode.onaudioprocess = function() {
+                            const array = new Uint8Array(analyser.frequencyBinCount);
+                            analyser.getByteFrequencyData(array);
+                            let values = 0;
+                            const length = array.length;
+                            for (let i = 0; i < length; i++) {
+                                values += array[i];
+                            }
+                            const average = values / length;
+                            // Amplify the visual effect
+                            const volume = Math.min(100, Math.round(average * 2.5)); 
+                            audioVolumeBar.style.width = volume + '%';
+                            
+                            // Change color based on volume intensity
+                            if (volume > 75) {
+                                audioVolumeBar.style.background = '#ef4444'; // Red for loud
+                                audioVolumeBar.style.boxShadow = '0 0 8px #ef4444';
+                            } else if (volume > 40) {
+                                audioVolumeBar.style.background = '#f59e0b'; // Orange for medium
+                                audioVolumeBar.style.boxShadow = '0 0 8px #f59e0b';
+                            } else {
+                                audioVolumeBar.style.background = '#3b82f6'; // Blue for normal
+                                audioVolumeBar.style.boxShadow = '0 0 8px #3b82f6';
+                            }
+                        };
+                    } catch (e) {
+                        console.error('Error setting up audio visualizer:', e);
+                    }
 
                     micBtn.classList.add('recording');
                     micBtn.title = 'Stop recording';
@@ -1175,3 +1487,4 @@
 </body>
 
 </html>
+

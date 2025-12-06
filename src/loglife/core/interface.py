@@ -56,4 +56,3 @@ def send_msg(message: Message | str, to: str | None = None) -> None:
         queue_async_message(to, message)
     else:
         enqueue_outbound_message(message)
-

@@ -3,7 +3,7 @@
 import logging
 import re
 
-from loglife.app.config import COMMAND_ALIASES
+from loglife.app.config import COMMAND_ALIASES, messages
 from loglife.app.db.tables import User
 from loglife.app.logic.text.handlers import (
     AddGoalHandler,
@@ -77,6 +77,6 @@ def process_text(user: User, message: str) -> str:
 
     except Exception as exc:
         logger.exception("Error in text processor")
-        return f"Error in text processor: {exc}"
+        return messages.ERROR_TEXT_PROCESSOR.format(exc=exc)
 
-    return "Wrong command!"
+    return messages.ERROR_WRONG_COMMAND

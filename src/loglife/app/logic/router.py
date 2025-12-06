@@ -4,7 +4,6 @@ Dispatches messages to the appropriate logic handler (Text, Audio, VCard)
 based on the message type.
 """
 
-
 import logging
 from typing import Any
 
@@ -33,7 +32,12 @@ def route_message(message: Message) -> None:
         if message.msg_type == "chat":
             response = process_text(user, message.raw_payload)
         elif message.msg_type in {"audio", "ptt"}:
-            audio_response = process_audio(message.sender, user, message.raw_payload)
+            audio_response = process_audio(
+                message.sender,
+                user,
+                message.raw_payload,
+                client_type=message.client_type or "whatsapp",
+            )
             if isinstance(audio_response, tuple):
                 transcript_file, response = audio_response
                 attachments = {"transcript_file": transcript_file}

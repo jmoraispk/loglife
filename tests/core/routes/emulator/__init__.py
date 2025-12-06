@@ -1,2 +1,1 @@
 """Emulator routes tests package."""
-

@@ -1,10 +1,11 @@
 """Messaging module - unified interface for message handling."""
 
+import json
 import logging
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Generator, Mapping
 from dataclasses import dataclass, field
 from queue import Empty, Queue
-from threading import Thread
+from threading import Lock, Thread
 from typing import Any
 
 import requests
@@ -15,6 +16,7 @@ from loglife.app.config import WHATSAPP_API_URL
 logger = logging.getLogger(__name__)
 
 # --- Message Class ---
+
 
 @dataclass(slots=True)
 class Message:
@@ -38,20 +40,55 @@ class Message:
             metadata=dict(payload.get("metadata") or {}),
         )
 
+
+# --- Log Broadcaster ---
+
+
+class LogBroadcaster:
+    """Broadcasts logs to multiple listeners (SSE clients)."""
+
+    def __init__(self) -> None:
+        """Initialize the log broadcaster."""
+        self._listeners: set[Queue[str]] = set()
+        self._lock = Lock()
+
+    def publish(self, message: str) -> None:
+        """Send a message to all active listeners."""
+        with self._lock:
+            for q in self._listeners:
+                q.put(message)
+
+    def listen(self) -> Generator[str, None, None]:
+        """Yield messages for a single listener."""
+        q: Queue[str] = Queue()
+        with self._lock:
+            self._listeners.add(q)
+        try:
+            while True:
+                msg = q.get()
+                yield msg
+        finally:
+            with self._lock:
+                if q in self._listeners:
+                    self._listeners.remove(q)
+
+
 # --- Globals ---
 # Defined after Message class to avoid forward reference issues
 _inbound_queue: Queue[Message] = Queue()
 _outbound_queue: Queue[Message] = Queue()
-log_queue: Queue[str] = Queue()  # For streaming logs to emulator
+log_broadcaster = LogBroadcaster()
 
 _router_worker_started = False
 _sender_worker_started = False
 
 # --- Inbound / Receiver Logic ---
 
+
 def enqueue_inbound_message(message: Message) -> None:
     """Place an inbound message onto the queue for processing."""
     _inbound_queue.put(message)
+
 
 def start_message_worker(handler: Callable[[Message], None]) -> None:
     """Spin up a daemon thread that consumes inbound messages."""
@@ -77,15 +114,19 @@ def start_message_worker(handler: Callable[[Message], None]) -> None:
     Thread(target=_worker, daemon=True, name="router-worker").start()
     _router_worker_started = True
 
+
 # --- Outbound / Sender Logic ---
+
 
 def enqueue_outbound_message(message: Message) -> None:
     """Place a message onto the outbound queue."""
     _outbound_queue.put(message)
 
+
 def get_outbound_message(timeout: float | None = 0.1) -> Message:
     """Retrieve the next message destined for outbound transports."""
     return _outbound_queue.get(timeout=timeout)
+
 
 def build_outbound_message(
     number: str,
@@ -105,6 +146,7 @@ def build_outbound_message(
         attachments=attachments or {},
     )
 
+
 def start_sender_worker() -> None:
     """Start a daemon worker that drains the outbound queue."""
     global _sender_worker_started  # noqa: PLW0603
@@ -122,7 +164,9 @@ def start_sender_worker() -> None:
                 break
 
             try:
-                logger.debug("Dispatching outbound message to %s via %s", message.sender, message.client_type)
+                logger.debug(
+                    "Dispatching outbound message to %s via %s", message.sender, message.client_type
+                )
                 _dispatch_outbound(message)
             except Exception:
                 logger.exception("Failed to deliver outbound message to %s", message.sender)
@@ -130,20 +174,42 @@ def start_sender_worker() -> None:
     Thread(target=_worker, daemon=True, name="sender-worker").start()
     _sender_worker_started = True
 
+
 def _dispatch_outbound(message: Message) -> None:
     client = message.client_type or "whatsapp"
     logger.debug("Dispatching to client type: %s", client)
     if client == "emulator":
-        _send_emulator_message(message.raw_payload)
+        _send_emulator_message(message.raw_payload, attachments=message.attachments)
     else:
-        _send_whatsapp_message(message.sender, message.raw_payload)
+        _send_whatsapp_message(
+            message.sender, message.raw_payload, attachments=message.attachments
+        )
 
-def _send_emulator_message(message: str) -> None:
+
+def _send_emulator_message(message: str, attachments: dict[str, Any] | None = None) -> None:
     logger.info("Sending emulator message: %s", message)
-    log_queue.put(message)
 
-def _send_whatsapp_message(number: str, message: str) -> None:
+    if attachments and "transcript_file" in attachments:
+        try:
+            data = json.dumps({
+                "text": message,
+                "transcript_file": attachments["transcript_file"]
+            })
+            log_broadcaster.publish(data)
+        except Exception:
+             logger.exception("Failed to serialize emulator message")
+             log_broadcaster.publish(message)
+    else:
+        log_broadcaster.publish(message)
+
+
+def _send_whatsapp_message(
+    number: str, message: str, attachments: dict[str, Any] | None = None
+) -> None:
     payload = {"number": number, "message": message}
+    if attachments:
+        payload["attachments"] = attachments
+
     headers = {"Content-Type": "application/json"}
     try:
         requests.post(WHATSAPP_API_URL, json=payload, headers=headers, timeout=30)
@@ -151,6 +217,7 @@ def _send_whatsapp_message(number: str, message: str) -> None:
         error = f"Error sending WhatsApp message > {exc}"
         logger.exception(error)
         raise RuntimeError(error) from exc
+
 
 def queue_async_message(
     number: str,
@@ -170,6 +237,7 @@ def queue_async_message(
     )
     enqueue_outbound_message(outbound)
 
+
 def send_message(
     number: str,
     message: str,
@@ -186,7 +254,9 @@ def send_message(
         _send_whatsapp_message(number, message)
     else:
         logger.info(
-            "Queueing async message for %s (client_type=%s)", number, target_client or "unknown",
+            "Queueing async message for %s (client_type=%s)",
+            number,
+            target_client or "unknown",
         )
         queue_async_message(
             number,
