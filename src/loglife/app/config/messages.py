@@ -39,7 +39,7 @@ What would you like to start with?"""
 # -----------------------------
 # Help Messages
 # -----------------------------
-HELP_MESSAGE = """hello 123 456 789 ❓ *LogLife Commands*
+HELP_MESSAGE = """❓ *LogLife Commands*
 
 📋 *GOALS*
 • `goals` - Show your personal goals
