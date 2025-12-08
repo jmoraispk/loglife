@@ -28,7 +28,7 @@ jobs:
 
             # =========== PULL LATEST CODE ===========
             cd /home/ali/loglife-dev &&
-            git pull origin feature/deploy-docs &&
+            git pull &&
 
             # =========== RESTART BACKEND SERVICES ===========
             sudo systemctl restart loglife-dev &&
