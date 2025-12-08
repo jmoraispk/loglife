@@ -38,6 +38,7 @@ jobs:
             cd /home/ali/loglife-dev/whatsapp-client &&
             npm ci --only=production &&
             screen -S loglife-dev -X quit || true &&
+            sleep 2 &&
             screen -S loglife-dev -dm node index.js &&
 
             # =========== BUILD MKDOCS & DEPLOY DOCS ===========
