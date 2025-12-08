@@ -23,7 +23,9 @@ jobs:
       - name: Deploy to DEV Server
         if: github.ref == 'refs/heads/dev'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+          ssh -A -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            export PATH=\$PATH:/home/ali/.cargo/bin:/home/ali/.local/bin
+
             # =========== PULL LATEST CODE ===========
             cd /home/ali/loglife-dev &&
             git pull &&
@@ -35,8 +37,7 @@ jobs:
             # =========== DEPLOY WHATSAPP CLIENT ===========
             cd /home/ali/loglife-dev/whatsapp-client &&
             npm ci --only=production &&
-            screen -S loglife-dev -X quit || true &&
-            screen -S loglife-dev -dm node index.js &&
+            sudo systemctl restart loglife-whatsapp &&
 
             # =========== BUILD MKDOCS & DEPLOY DOCS ===========
             cd /home/ali/loglife-dev &&
