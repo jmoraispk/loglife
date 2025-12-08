@@ -181,9 +181,7 @@ def _dispatch_outbound(message: Message) -> None:
     if client == "emulator":
         _send_emulator_message(message.raw_payload, attachments=message.attachments)
     else:
-        _send_whatsapp_message(
-            message.sender, message.raw_payload, attachments=message.attachments
-        )
+        _send_whatsapp_message(message.sender, message.raw_payload, attachments=message.attachments)
 
 
 def _send_emulator_message(message: str, attachments: dict[str, Any] | None = None) -> None:
@@ -191,14 +189,11 @@ def _send_emulator_message(message: str, attachments: dict[str, Any] | None = No
 
     if attachments and "transcript_file" in attachments:
         try:
-            data = json.dumps({
-                "text": message,
-                "transcript_file": attachments["transcript_file"]
-            })
+            data = json.dumps({"text": message, "transcript_file": attachments["transcript_file"]})
             log_broadcaster.publish(data)
         except Exception:
-             logger.exception("Failed to serialize emulator message")
-             log_broadcaster.publish(message)
+            logger.exception("Failed to serialize emulator message")
+            log_broadcaster.publish(message)
     else:
         log_broadcaster.publish(message)
 

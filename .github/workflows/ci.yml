@@ -25,8 +25,8 @@ jobs:
       - name: Install dependencies
         run: uv sync --extra dev
 
-      - name: Run Ruff lint
-        run: uv run ruff check .
+      - name: Run Ruff format
+        run: uv run ruff format --check .
 
       - name: Run PyTest
         run: uv run pytest --cov=src/loglife/app --cov-report=term-missing

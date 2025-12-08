@@ -8,4 +8,3 @@ OPENAI_SUMMARIZATION_SYSTEM_PROMPT = (
     "perspective, maintain a supportive tone, and highlight important insights. "
     "Aim for 2-4 sentences that capture the essence of the entry."
 )
-
