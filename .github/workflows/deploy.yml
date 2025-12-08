@@ -41,7 +41,7 @@ jobs:
 
             # =========== BUILD MKDOCS & DEPLOY DOCS ===========
             cd /home/ali/loglife-dev &&
-            uv run mkdocs build &&
+            uv run --extra dev mkdocs buil &&
             sudo cp -r /home/ali/loglife-dev/site/* /var/www/loglife-docs-dev/ &&
             sudo systemctl reload nginx
           "
@@ -70,7 +70,7 @@ jobs:
 
             # =========== BUILD MKDOCS & DEPLOY DOCS ===========
             cd /home/ali/loglife-prod &&
-            uv run mkdocs build &&
+            uv run --extra dev mkdocs buil &&
             sudo cp -r /home/ali/loglife-prod/site/* /var/www/loglife-docs-prod/ &&
             sudo systemctl reload nginx
           "
