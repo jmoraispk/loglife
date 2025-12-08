@@ -2,8 +2,7 @@ name: Deploy to Server (Dev)
 
 on:
   push:
-    branches: [ "main", "dev" ]
-  workflow_dispatch:
+    branches: [ "**" ]
 
 jobs:
   deploy:
@@ -22,7 +21,7 @@ jobs:
       # 🚀 DEPLOY STAGING (DEV)
       # =========================
       - name: Deploy to DEV Server
-        if: github.ref == 'refs/heads/dev' || github.event_name == 'workflow_dispatch'
+        # if: github.ref == 'refs/heads/dev'
         run: |
           ssh -A -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
             export PATH=\$PATH:/home/ali/.cargo/bin:/home/ali/.local/bin
