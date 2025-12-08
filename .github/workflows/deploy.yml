@@ -21,7 +21,7 @@ jobs:
       # 🚀 DEPLOY STAGING (DEV)
       # =========================
       - name: Deploy to DEV Server
-        # if: github.ref == 'refs/heads/dev'
+        if: github.ref == 'refs/heads/dev'
         run: |
           ssh -A -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
             export PATH=\$PATH:/home/ali/.cargo/bin:/home/ali/.local/bin
