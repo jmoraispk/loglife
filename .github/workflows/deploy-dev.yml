@@ -38,8 +38,11 @@ jobs:
             cd /home/ali/loglife-dev/whatsapp-client &&
             npm ci --only=production &&
             screen -S loglife-dev -X quit || true &&
-            sleep 2 &&
-            screen -S loglife-dev -dm node index.js &&
+            screen -wipe || true &&
+            sleep 5 &&
+            screen -S loglife-dev -dm bash -c \"node index.js > app.log 2>&1\" &&
+            sleep 1 &&
+            screen -list | grep loglife-dev || (echo \"Screen failed to start. Log output:\" && cat app.log && exit 1) &&
 
             # =========== BUILD MKDOCS & DEPLOY DOCS ===========
             cd /home/ali/loglife-dev &&
