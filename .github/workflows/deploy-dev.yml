@@ -23,7 +23,7 @@ jobs:
       - name: Deploy to DEV Server
         # if: github.ref == 'refs/heads/dev'
         run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+          ssh -A -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
             export PATH=\$PATH:/home/ali/.cargo/bin:/home/ali/.local/bin
 
             # =========== PULL LATEST CODE ===========
