@@ -19,7 +19,5 @@ COMMAND_ALIASES = {
 }
 
 SQLITE_WEB_URL = (
-    "https://test.loglife.co/database/"
-    if FLASK_ENV == "production"
-    else "http://127.0.0.1:8080/"
+    "https://test.loglife.co/database/" if FLASK_ENV == "production" else "http://127.0.0.1:8080/"
 )
