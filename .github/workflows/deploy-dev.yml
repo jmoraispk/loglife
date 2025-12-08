@@ -37,7 +37,7 @@ jobs:
             # =========== DEPLOY WHATSAPP CLIENT ===========
             cd /home/ali/loglife-dev/whatsapp-client &&
             npm ci --only=production &&
-            pm2 restart loglife-dev || pm2 start index.js --name "loglife-dev" &&
+            sudo systemctl restart loglife-whatsapp &&
 
             # =========== BUILD MKDOCS & DEPLOY DOCS ===========
             cd /home/ali/loglife-dev &&
