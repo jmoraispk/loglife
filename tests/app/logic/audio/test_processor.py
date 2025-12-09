@@ -6,7 +6,29 @@ import pytest
 
 from loglife.app.db import db
 from loglife.app.db.tables import User
-from loglife.app.logic.audio import process_audio
+from loglife.app.logic.audio import process_audio as _real_process_audio
+from loglife.core.messaging import Message
+
+
+def create_message(raw_payload: str, user: User, client_type: str = "whatsapp") -> Message:
+    """Create a dummy Message object for testing."""
+    return Message(
+        sender=user.phone_number,
+        msg_type="audio",
+        raw_payload=raw_payload,
+        client_type=client_type,
+    )
+
+
+def process_audio(
+    sender: str,  # noqa: ARG001
+    user: User,
+    audio_data: str,
+    client_type: str = "whatsapp",
+) -> str | tuple[str, str]:
+    """Wrapper to allow tests to call process_audio with old signature."""
+    message = create_message(audio_data, user, client_type)
+    return _real_process_audio(user, message)
 
 
 @pytest.fixture

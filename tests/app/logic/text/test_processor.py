@@ -9,8 +9,24 @@ import pytest
 from loglife.app.config import ERROR_NO_GOALS_SET, USAGE_RATE
 from loglife.app.db import db
 from loglife.app.db.tables import User
-from loglife.app.logic.text import process_text
+from loglife.app.logic.text import process_text as _real_process_text
 from loglife.app.logic.text.handlers import _extract_emoji
+from loglife.core.messaging import Message
+
+
+def create_message(text: str, user: User) -> Message:
+    """Create a dummy Message object for testing."""
+    return Message(
+        sender=user.phone_number,
+        msg_type="chat",
+        raw_payload=text,
+        client_type="whatsapp",
+    )
+
+
+def process_text(user: User, message: str) -> str:
+    """Wrapper to allow tests to call process_text with a string."""
+    return _real_process_text(user, create_message(message, user))
 
 
 @pytest.fixture

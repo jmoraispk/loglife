@@ -21,6 +21,7 @@ from loglife.app.logic.text.handlers import (
     UpdateReminderHandler,
     WeekSummaryHandler,
 )
+from loglife.core.messaging import Message
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ HANDLERS: list[TextCommandHandler] = [
 ]
 
 
-def process_text(user: User, message: str) -> str:
+def process_text(user: User, message: Message) -> str:
     """Route incoming text commands to the appropriate goal or rating handler.
 
     Handle commands such as adding goals, submitting ratings, configuring
@@ -52,25 +53,25 @@ def process_text(user: User, message: str) -> str:
 
     Arguments:
         user: The user record for the message sender
-        message: The incoming text message content
+        message: The incoming message object
 
     Returns:
         The WhatsApp response text to send back to the user.
 
     """
     try:
-        message: str = message.strip().lower()
+        text_content: str = message.raw_payload.strip().lower()
 
         # Add aliases (with word boundaries to avoid replacing partial words)
         for alias, command in COMMAND_ALIASES.items():
             # Escape alias to be safe in regex
             pattern = r"\b" + re.escape(alias) + r"\b"
-            message = re.sub(pattern, command, message)
+            text_content = re.sub(pattern, command, text_content)
 
         # Execute the first matching command handler
         for handler in HANDLERS:
-            if handler.matches(message):
-                result = handler.handle(user, message)
+            if handler.matches(text_content):
+                result = handler.handle(user, text_content)
                 # Special case: add_goal can return None if no goal text provided
                 if result is not None:
                     return result
