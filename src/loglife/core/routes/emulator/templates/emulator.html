@@ -787,6 +787,7 @@
         let historyIndex = -1; // Current position in history (-1 = not navigating)
         let currentDraft = ''; // Store current input when starting navigation
         let isRecording = false;
+        let lastRequestStart = 0;
 
         // Auto-resize textarea
         messageInput.addEventListener('input', function() {
@@ -1096,12 +1097,15 @@
                     if (lastMessage) {
                         const meta = lastMessage.querySelector('.message-meta');
                         if (meta) {
-                            // We don't have precise elapsed time for SSE events, but we can show a timestamp
-                            meta.textContent = new Date().toLocaleTimeString();
+                            let timeText = new Date().toLocaleTimeString();
+                            if (lastRequestStart > 0) {
+                                const duration = Math.round(performance.now() - lastRequestStart);
+                                timeText += ` • ${duration}ms`;
+                            }
+                            meta.textContent = timeText;
                         }
                     }
                 }
-                setStatus('loading', 'Processing...');
             };
 
             source.onerror = () => {
@@ -1148,6 +1152,7 @@
             setStatus('loading', 'Sending...');
 
             const start = performance.now();
+            lastRequestStart = start;
             try {
                 const res = await fetch('/webhook', {
                     method: 'POST',
@@ -1200,19 +1205,19 @@
                        } catch (e) {}
 
                        if (showMessage) {
-                           addMessage(formattedText, 'bot', `${ms}ms`);
+                           addMessage(formattedText, 'bot', `${new Date().toLocaleTimeString()} • ${ms}ms`);
                        }
                     }
                     setStatus('success', 'Success');
                 } else {
-                    addMessage(formattedText || 'No response', 'bot', `Error • ${ms}ms`);
+                    addMessage(formattedText || 'No response', 'bot', `${new Date().toLocaleTimeString()} • Error • ${ms}ms`);
                     setStatus('error', 'Error');
                 }
 
                 setTimeout(hideStatus, 3000);
             } catch (err) {
                 const ms = Math.max(1, Math.round(performance.now() - start));
-                addMessage('Network error: ' + (err && err.message ? err.message : 'Unknown'), 'bot', `Error • ${ms}ms`);
+                addMessage('Network error: ' + (err && err.message ? err.message : 'Unknown'), 'bot', `${new Date().toLocaleTimeString()} • Error • ${ms}ms`);
                 setStatus('error', 'Network Error');
                 setTimeout(hideStatus, 3000);
             } finally {
@@ -1276,6 +1281,7 @@
                         setStatus('loading', 'Sending Audio...');
 
                         const start = performance.now();
+                        lastRequestStart = start;
                         try {
                             const res = await fetch('/webhook', {
                                 method: 'POST',
@@ -1324,19 +1330,19 @@
                                    } catch (e) {}
 
                                    if (showMessage) {
-                                       addMessage(formattedText, 'bot', `${ms}ms`);
+                                       addMessage(formattedText, 'bot', `${new Date().toLocaleTimeString()} • ${ms}ms`);
                                    }
                                 }
                                 setStatus('success', 'Success');
                             } else {
-                                addMessage(formattedText || 'No response', 'bot', `Error • ${ms}ms`);
+                                addMessage(formattedText || 'No response', 'bot', `${new Date().toLocaleTimeString()} • Error • ${ms}ms`);
                                 setStatus('error', 'Error');
                             }
 
                             setTimeout(hideStatus, 3000);
                         } catch (err) {
                             const ms = Math.max(1, Math.round(performance.now() - start));
-                            addMessage('Network error: ' + (err && err.message ? err.message : 'Unknown'), 'bot', `Error • ${ms}ms`);
+                            addMessage('Network error: ' + (err && err.message ? err.message : 'Unknown'), 'bot', `${new Date().toLocaleTimeString()} • Error • ${ms}ms`);
                             setStatus('error', 'Network Error');
                             setTimeout(hideStatus, 3000);
                         } finally {
