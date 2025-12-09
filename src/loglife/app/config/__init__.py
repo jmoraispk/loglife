@@ -1,7 +1,7 @@
 """Configuration module for the Flask app."""
 
 from .api import ASSEMBLYAI_BASE_URL, OPENAI_API_URL, WHATSAPP_API_URL
-from .logging import setup_logging
+from .log_setup import setup_logging
 from .messages import (
     ERROR_ADD_GOAL_FIRST,
     ERROR_INVALID_DELETE_FORMAT,
