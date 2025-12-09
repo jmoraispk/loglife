@@ -7,7 +7,7 @@ import re
 from loglife.app.config import REFERRAL_SUCCESS, WELCOME_MESSAGE
 from loglife.app.db import db
 from loglife.app.db.tables import User
-from loglife.core.messaging import queue_async_message
+from loglife.core.messaging import Message, queue_async_message
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ def _extract_phone_number(vcard_str: str) -> str:
     return match.group(1) if match else ""
 
 
-def process_vcard(referrer_user: User, raw_vcards: str) -> str:
+def process_vcard(referrer_user: User, message: Message) -> str:
     """Create referral users from VCARD attachments.
 
     Parse the incoming VCARD JSON payload, ensure each contact exists as a
@@ -26,14 +26,14 @@ def process_vcard(referrer_user: User, raw_vcards: str) -> str:
 
     Arguments:
         referrer_user: The user dict of the person sharing the VCARDs
-        raw_vcards: JSON string containing the VCARD data list
+        message: The incoming message object
 
     Returns:
         The referral success message constant.
 
     """
     try:
-        vcards: list[str] = json.loads(raw_vcards)
+        vcards: list[str] = json.loads(message.raw_payload)
         referrer_user_id: int = referrer_user.id
 
         for vcard in vcards:

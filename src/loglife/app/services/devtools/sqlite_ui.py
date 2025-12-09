@@ -64,4 +64,3 @@ def start_sqlite_web() -> None:
         logger.info("🗄️  Database UI running at http://127.0.0.1:8080")
     except RuntimeError as exc:
         logger.warning("Failed to start sqlite_web thread: %s", exc)
-

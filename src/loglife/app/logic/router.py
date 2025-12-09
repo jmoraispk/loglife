@@ -30,21 +30,16 @@ def route_message(message: Message) -> None:
 
     try:
         if message.msg_type == "chat":
-            response = process_text(user, message.raw_payload)
+            response = process_text(user, message)
         elif message.msg_type in {"audio", "ptt"}:
-            audio_response = process_audio(
-                message.sender,
-                user,
-                message.raw_payload,
-                client_type=message.client_type or "whatsapp",
-            )
+            audio_response = process_audio(user, message)
             if isinstance(audio_response, tuple):
                 transcript_file, response = audio_response
                 attachments = {"transcript_file": transcript_file}
             else:
                 response = audio_response
         elif message.msg_type == "vcard":
-            response = process_vcard(user, message.raw_payload)
+            response = process_vcard(user, message)
         else:
             response = (
                 "Can't process this type of message. Recognized types: chat, audio, ptt, vcard"
