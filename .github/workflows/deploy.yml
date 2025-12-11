@@ -32,7 +32,6 @@ jobs:
 
             # =========== RESTART BACKEND SERVICES ===========
             sudo systemctl restart loglife-dev &&
-            sudo systemctl restart loglife-db-dev &&
 
             # =========== DEPLOY WHATSAPP CLIENT ===========
             cd /home/ali/loglife-dev/whatsapp-client &&
@@ -61,7 +60,6 @@ jobs:
 
             # =========== RESTART BACKEND SERVICES ===========
             sudo systemctl restart loglife-prod &&
-            sudo systemctl restart loglife-db-prod &&
 
             # =========== DEPLOY WHATSAPP CLIENT ===========
             cd /home/ali/loglife-prod/whatsapp-client &&
