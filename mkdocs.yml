@@ -31,7 +31,6 @@ nav:
     - Overview: app/overview.md
     - Database: app/database.md
     - Quick Access: developer/quick-access.md
-    - Deployment: developer/deployment.md
     - API Reference:
         - Routes: api/backend/routes.md
         - Business Logic: api/backend/logic.md

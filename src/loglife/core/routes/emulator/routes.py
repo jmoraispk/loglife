@@ -35,4 +35,7 @@ def events() -> Response:
             formatted_msg = msg.replace("\n", "\ndata: ")
             yield f"data: {formatted_msg}\n\n"
 
-    return Response(stream(), mimetype="text/event-stream")
+    response = Response(stream(), mimetype="text/event-stream")
+    response.headers["Cache-Control"] = "no-cache"
+    response.headers["X-Accel-Buffering"] = "no"
+    return response
