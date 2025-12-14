@@ -42,6 +42,13 @@ dev = [
 where = ["src"]
 include = ["loglife*"]
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+    "ignore:invalid escape sequence.*:DeprecationWarning:sqlite_web\\..*",
+    "ignore:invalid escape sequence.*:SyntaxWarning:sqlite_web\\..*",
+]
+
 [tool.ruff]
 line-length = 100
 target-version = "py312"
