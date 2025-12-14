@@ -18,7 +18,7 @@ COMMAND_ALIASES = {
     "journal now": "journal prompts",
 }
 
-DEFAULT_SQLITE_WEB_PORT = 8080
+DEFAULT_SQLITE_WEB_PORT = 8081
 _port = int(os.environ.get("SQLITE_WEB_PORT", str(DEFAULT_SQLITE_WEB_PORT)))
 SQLITE_WEB_URL = (
     (

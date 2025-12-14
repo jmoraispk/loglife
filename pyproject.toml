@@ -42,6 +42,10 @@ dev = [
 where = ["src"]
 include = ["loglife*"]
 
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+]
 
 [tool.ruff]
 line-length = 100

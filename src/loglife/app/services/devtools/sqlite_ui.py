@@ -7,7 +7,7 @@ import threading
 from loglife.app.config import DATABASE_FILE
 
 # Get port from environment, default to 8080 if not set
-SQLITE_PORT = int(os.environ.get("SQLITE_WEB_PORT", 8080))
+SQLITE_PORT = int(os.environ.get("SQLITE_WEB_PORT", "8080"))
 
 try:
     from sqlite_web import sqlite_web
@@ -39,7 +39,10 @@ def _run_sqlite_web_thread() -> None:
     # Run the Flask app for sqlite_web
     # use_reloader=False is crucial to avoid starting a new process
     # debug=False prevents the debugger from kicking in and potentially interfering
-    sqlite_web.app.run(host="127.0.0.1", port=SQLITE_PORT, debug=False, use_reloader=False)
+    try:
+        sqlite_web.app.run(host="127.0.0.1", port=SQLITE_PORT, debug=False, use_reloader=False)
+    except (OSError, SystemExit) as e:
+        logger.warning("Failed to start sqlite_web server: %s", e)
 
 
 def start_sqlite_web() -> None:
