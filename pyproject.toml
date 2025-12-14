@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "loglife"
 version = "0.1.0"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 description = "General Bot Package for Goal Tracking"
 authors = [{name = "Your Name"}]
 dependencies = [
@@ -44,7 +44,6 @@ include = ["loglife*"]
 
 [tool.pytest.ini_options]
 filterwarnings = [
-    "ignore:invalid escape sequence:SyntaxWarning",
     "error",
 ]
 
