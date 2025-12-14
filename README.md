@@ -14,6 +14,10 @@
   </p>
 </div>
 
+> [!IMPORTANT]
+> LogLife is in a pre-alpha state, and only suitable for use by developers
+>
+
 ## 🌿 About LogLife
 
 **LogLife** is an audio-first, chat-native tool for people who need a frictionless way to journal and think about their lives. Living inside your favorite chat app, LogLife helps you capture daily notes, see behavior patterns, and turn those insights into steady progress.
