@@ -1,5 +1,9 @@
 """Configuration module for the Flask app."""
 
+import os
+
+from dotenv import load_dotenv
+
 from .api import ASSEMBLYAI_BASE_URL, OPENAI_API_URL, WHATSAPP_API_URL
 from .log_setup import setup_logging
 from .messages import (
@@ -26,7 +30,6 @@ from .messages import (
 )
 from .paths import ACCESS_LOG, DATABASE_FILE, ERROR_LOG, LOGS, SCHEMA_FILE
 from .prompts import OPENAI_SUMMARIZATION_SYSTEM_PROMPT
-from .secrets import ASSEMBLYAI_API_KEY, OPENAI_API_KEY
 from .settings import (
     COMMAND_ALIASES,
     DEFAULT_GOAL_EMOJI,
@@ -34,6 +37,11 @@ from .settings import (
     OPENAI_CHAT_MODEL,
     STYLE,
 )
+
+load_dotenv()
+
+ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 __all__ = [
     "ACCESS_LOG",

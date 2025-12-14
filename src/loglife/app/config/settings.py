@@ -18,9 +18,14 @@ COMMAND_ALIASES = {
     "journal now": "journal prompts",
 }
 
-_port = int(os.environ.get("SQLITE_WEB_PORT", 8080))
+DEFAULT_SQLITE_WEB_PORT = 8080
+_port = int(os.environ.get("SQLITE_WEB_PORT", str(DEFAULT_SQLITE_WEB_PORT)))
 SQLITE_WEB_URL = (
-    ("https://prod.loglife.co/database/" if _port == 8080 else "https://test.loglife.co/database/")
+    (
+        "https://prod.loglife.co/database/"
+        if _port == DEFAULT_SQLITE_WEB_PORT
+        else "https://test.loglife.co/database/"
+    )
     if FLASK_ENV == "production"
-    else "http://127.0.0.1:8080/"
+    else f"http://127.0.0.1:{DEFAULT_SQLITE_WEB_PORT}/"
 )
