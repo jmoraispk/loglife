@@ -4,7 +4,10 @@ import logging
 import os
 import threading
 
-from loglife.app.config import DATABASE_FILE, FLASK_ENV
+from loglife.app.config import DATABASE_FILE
+
+# Get port from environment, default to 8080 if not set
+SQLITE_PORT = int(os.environ.get("SQLITE_WEB_PORT", 8080))
 
 try:
     from sqlite_web import sqlite_web
@@ -36,20 +39,16 @@ def _run_sqlite_web_thread() -> None:
     # Run the Flask app for sqlite_web
     # use_reloader=False is crucial to avoid starting a new process
     # debug=False prevents the debugger from kicking in and potentially interfering
-    sqlite_web.app.run(host="127.0.0.1", port=8080, debug=False, use_reloader=False)
+    sqlite_web.app.run(host="127.0.0.1", port=SQLITE_PORT, debug=False, use_reloader=False)
 
 
 def start_sqlite_web() -> None:
-    """Start sqlite_web in a background thread if in development mode.
+    """Start sqlite_web in a background thread.
 
-    This starts the sqlite_web interface on port 8080.
+    This starts the sqlite_web interface on the configured port.
     It respects the FLASK_ENV setting and prevents duplicate execution
     during Flask auto-reloads.
     """
-    # Only run in development
-    if FLASK_ENV != "development":
-        return
-
     # Prevent starting twice if Flask reloader is active (run only in main parent process)
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         return
@@ -61,6 +60,6 @@ def start_sqlite_web() -> None:
     try:
         thread = threading.Thread(target=_run_sqlite_web_thread, daemon=True)
         thread.start()
-        logger.info("🗄️  Database UI running at http://127.0.0.1:8080")
+        logger.info("🗄️  Database UI running at http://127.0.0.1:%s", SQLITE_PORT)
     except RuntimeError as exc:
         logger.warning("Failed to start sqlite_web thread: %s", exc)
