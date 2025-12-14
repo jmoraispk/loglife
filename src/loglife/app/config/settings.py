@@ -18,9 +18,16 @@ COMMAND_ALIASES = {
     "journal now": "journal prompts",
 }
 
-_port = int(os.environ.get("SQLITE_WEB_PORT", 8080))
-SQLITE_WEB_URL = (
-    ("https://prod.loglife.co/database/" if _port == 8080 else "https://test.loglife.co/database/")
-    if FLASK_ENV == "production"
-    else "http://127.0.0.1:8080/"
+DEFAULT_DATABASE_PORT = 8081 if FLASK_ENV == "production" else 8082
+DATABASE_PORT = int(os.environ.get("SQLITE_WEB_PORT", str(DEFAULT_DATABASE_PORT)))
+
+EMULATOR_BASE_URL_PREFIX = os.getenv("EMULATOR_BASE", "test")
+
+EMULATOR_BASE_URL = f"https://{EMULATOR_BASE_URL_PREFIX}.loglife.co"
+EMULATOR_LOCAL_URL = "http://127.0.0.1"
+
+EMULATOR_SQLITE_WEB_URL = (
+    f"{EMULATOR_BASE_URL}/database/"
+    if os.getenv("DEPLOYMENT", "local") == "local"
+    else f"{EMULATOR_LOCAL_URL}:{DATABASE_PORT}/"
 )
