@@ -35,7 +35,7 @@ dev = [
     # Tests
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",  # Summaries of line coverage in tests 
-    "sqlite-web==0.6.4",  # Web database
+    "sqlite-web:=0.6.5",  # Web database
 ]
 
 [tool.setuptools.packages.find]
@@ -45,6 +45,8 @@ include = ["loglife*"]
 [tool.pytest.ini_options]
 filterwarnings = [
     "error",
+    "ignore:invalid escape sequence.*:DeprecationWarning:sqlite_web\\..*",
+    "ignore:invalid escape sequence.*:SyntaxWarning:sqlite_web\\..*",
 ]
 
 [tool.ruff]
