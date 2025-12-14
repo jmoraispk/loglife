@@ -44,6 +44,7 @@ include = ["loglife*"]
 
 [tool.pytest.ini_options]
 filterwarnings = [
+    "ignore:invalid escape sequence:SyntaxWarning",
     "error",
 ]
 
