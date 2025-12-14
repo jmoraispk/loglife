@@ -11,30 +11,30 @@ from loglife.app.db.tables import User
 from loglife.app.logic.audio.journaling.summarize_transcript import summarize_transcript
 from loglife.app.logic.audio.journaling.transcript_to_base64 import transcript_to_base64
 from loglife.app.logic.audio.transcribe_audio import transcribe_audio
-from loglife.core.messaging import queue_async_message
+from loglife.core.messaging import Message, queue_async_message
 
 logger = logging.getLogger(__name__)
 
 
 def process_audio(
-    sender: str,
     user: User,
-    audio_data: str,
-    client_type: str = "whatsapp",
+    message: Message,
 ) -> str | tuple[str, str]:
     """Process an incoming audio message from a user.
 
     Arguments:
-        sender: The WhatsApp phone number of the sender
         user: The user record dictionary
-        audio_data: Base64 encoded audio payload
-        client_type: The client type to send responses to (default: "whatsapp")
+        message: The incoming message object
 
     Returns:
         The summarized text generated from the audio, or a tuple of
         (transcript_file_base64, summarized_text).
 
     """
+    client_type = message.client_type or "whatsapp"
+    sender = message.sender
+    audio_data = message.raw_payload
+
     queue_async_message(sender, "Audio received. Transcribing...", client_type=client_type)
 
     try:

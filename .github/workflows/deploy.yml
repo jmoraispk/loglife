@@ -1,0 +1,74 @@
+name: Deploy to Server
+
+on:
+  push:
+    branches: [ "main", "dev" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      # =========================
+      # 🚀 DEPLOY STAGING (DEV)
+      # =========================
+      - name: Deploy to DEV Server
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          ssh -A -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            export PATH=\$PATH:/home/ali/.cargo/bin:/home/ali/.local/bin
+
+            # =========== PULL LATEST CODE ===========
+            cd /home/ali/loglife-dev &&
+            git pull &&
+
+            # =========== RESTART BACKEND SERVICES ===========
+            sudo systemctl restart loglife-dev &&
+
+            # =========== DEPLOY WHATSAPP CLIENT ===========
+            cd /home/ali/loglife-dev/whatsapp-client &&
+            npm ci --only=production &&
+            sudo systemctl restart loglife-whatsapp-dev &&
+
+            # =========== BUILD MKDOCS & DEPLOY DOCS ===========
+            cd /home/ali/loglife-dev &&
+            uv run --extra dev mkdocs build &&
+            sudo cp -r /home/ali/loglife-dev/site/* /var/www/loglife-docs-dev/ &&
+            sudo systemctl reload nginx
+          "
+
+      # =========================
+      # 🟢 DEPLOY PRODUCTION (MAIN)
+      # =========================
+      - name: Deploy to MAIN Server
+        if: github.ref == 'refs/heads/main'
+        run: |
+          ssh -A -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            export PATH=\$PATH:/home/ali/.cargo/bin:/home/ali/.local/bin
+
+            # =========== PULL LATEST CODE ===========
+            cd /home/ali/loglife-prod &&
+            git pull &&
+
+            # =========== RESTART BACKEND SERVICES ===========
+            sudo systemctl restart loglife-prod &&
+
+            # =========== DEPLOY WHATSAPP CLIENT ===========
+            cd /home/ali/loglife-prod/whatsapp-client &&
+            npm ci --only=production &&
+            sudo systemctl restart loglife-whatsapp-prod &&
+
+            # =========== BUILD MKDOCS & DEPLOY DOCS ===========
+            cd /home/ali/loglife-prod &&
+            uv run --extra dev mkdocs build &&
+            sudo cp -r /home/ali/loglife-prod/site/* /var/www/loglife-docs-prod/ &&
+            sudo systemctl reload nginx
+          "

@@ -8,7 +8,23 @@ import pytest
 from loglife.app.config import REFERRAL_SUCCESS
 from loglife.app.db import db
 from loglife.app.db.tables import User
-from loglife.app.logic.vcard import process_vcard
+from loglife.app.logic.vcard import process_vcard as _real_process_vcard
+from loglife.core.messaging import Message
+
+
+def create_message(raw_payload: str, user: User) -> Message:
+    """Create a dummy Message object for testing."""
+    return Message(
+        sender=user.phone_number,
+        msg_type="vcard",
+        raw_payload=raw_payload,
+        client_type="whatsapp",
+    )
+
+
+def process_vcard(user: User, raw_vcards: str) -> str:
+    """Wrapper to allow tests to call process_vcard with string payload."""
+    return _real_process_vcard(user, create_message(raw_vcards, user))
 
 
 @pytest.fixture

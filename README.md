@@ -43,7 +43,7 @@ It combines a minimalist interface with powerful backend processing to help you:
 LogLife operates as a friendly bot in your WhatsApp. Here is the typical user flow:
 
 <div align="center">
-  <img src="docs/diagrams/pngs/user_flow.png" alt="LogLife User Flow" width="800" />
+  <img src="docs/figures/png/user-flow.png" alt="LogLife User Flow" width="800" />
 </div>
 
 1.  **Chat:** You interact with the bot via text or audio.
@@ -57,7 +57,7 @@ LogLife operates as a friendly bot in your WhatsApp. Here is the typical user fl
 LogLife is built with a microservices architecture to ensure scalability and separation of concerns:
 
 <div align="center">
-  <img src="docs/diagrams/pngs/system-overview.png" alt="LogLife Architecture" width="800" />
+  <img src="docs/figures/png/system-overview.png" alt="LogLife Architecture" width="800" />
 </div>
 
 *   **Backend:** Python (Flask) handling business logic, database operations (SQLite), and AI integration.

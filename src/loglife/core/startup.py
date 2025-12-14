@@ -9,7 +9,7 @@ from flask import Flask
 from loglife.app.config import setup_logging
 from loglife.app.db import init_db
 from loglife.app.logic import route_message
-from loglife.app.services import start_reminder_service
+from loglife.app.services import start_reminder_service, start_sqlite_web
 from loglife.core.messaging import start_message_worker, start_sender_worker
 from loglife.core.routes import emulator_bp, webhook_bp
 
@@ -30,6 +30,7 @@ def create_app() -> Flask:
 
     init_db()
 
+    start_sqlite_web()
     start_reminder_service()
     start_message_worker(route_message)
     start_sender_worker()
