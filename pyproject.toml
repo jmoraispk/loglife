@@ -35,12 +35,17 @@ dev = [
     # Tests
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",  # Summaries of line coverage in tests 
-    "sqlite-web>=0.6.5",  # Web database
+    "sqlite-web==0.6.4",  # Web database
 ]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["loglife*"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+]
 
 [tool.ruff]
 line-length = 100
