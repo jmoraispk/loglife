@@ -1,6 +1,7 @@
 import "./globals.css";
 import Link from "next/link";
 import type { Metadata } from "next";
+import WhatsAppWidget from "./components/WhatsAppWidget";
 
 export const metadata: Metadata = {
   title: "LogLife",
@@ -24,6 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </div>
         </header>
         {children}
+        <WhatsAppWidget />
       </body>
     </html>
   );
