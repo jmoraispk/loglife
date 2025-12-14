@@ -26,7 +26,8 @@ EMULATOR_BASE_URL_PREFIX = os.getenv("EMULATOR_BASE", "test")
 EMULATOR_BASE_URL = f"https://{EMULATOR_BASE_URL_PREFIX}.loglife.co"
 EMULATOR_LOCAL_URL = "http://127.0.0.1"
 
-EMULATOR_SQLITE_WEB_URL = (f"{EMULATOR_BASE_URL}/database/"
+EMULATOR_SQLITE_WEB_URL = (
+    f"{EMULATOR_BASE_URL}/database/"
     if os.getenv("DEPLOYMENT", "local") == "local"
     else f"{EMULATOR_LOCAL_URL}:{DATABASE_PORT}/"
 )
