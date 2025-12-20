@@ -29,13 +29,13 @@ export default function HomePage() {
               </p>
               
               <div className="flex flex-col sm:flex-row gap-4">
-            <a href="https://wa.me/17155157761?text=help" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all shadow-lg hover:shadow-xl">
+            <a href="https://wa.me/17155157761?text=help" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all">
               <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 448 512">
                 <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z" />
               </svg>
               Start your log
             </a>
-                <a href="#how-it-works" className="inline-flex items-center justify-center px-8 py-4 bg-white text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-all border-2 border-slate-200">
+                <a href="#how-it-works" className="inline-flex items-center justify-center px-8 py-4 bg-white text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-all">
                   See how it works
                   <svg className="w-4 h-4 ml-2" fill="currentColor" viewBox="0 0 384 512">
                     <path d="M169.4 470.6c12.5 12.5 32.8 12.5 45.3 0l160-160c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L224 370.8 224 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 306.7L54.6 265.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l160 160z" />
@@ -83,9 +83,9 @@ export default function HomePage() {
             </div>
             
             <div className="relative">
-              <div className="bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-3xl p-8 shadow-2xl">
+              <div className="bg-gradient-to-br from-emerald-100 to-emerald-200 rounded-3xl p-8">
                 <div className="bg-white rounded-2xl p-6 space-y-4">
-                  <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+                  <div className="flex items-center justify-between pb-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center">
                         <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 448 512">
@@ -128,7 +128,7 @@ export default function HomePage() {
                         </svg>
                       </div>
                       <div className="flex-1">
-                        <div className="bg-emerald-50 rounded-2xl rounded-tl-none p-4 border border-emerald-200">
+                        <div className="bg-emerald-50 rounded-2xl rounded-tl-none p-4">
                           <div className="flex items-center space-x-2 mb-2">
                             <svg className="w-3 h-3 text-emerald-600" fill="currentColor" viewBox="0 0 512 512">
                               <path d="M64 64c0-17.7-14.3-32-32-32S0 46.3 0 64V400c0 44.2 35.8 80 80 80H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H80c-8.8 0-16-7.2-16-16V64zm406.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L320 210.7l-57.4-57.4c-12.5-12.5-32.8-12.5-45.3 0l-112 112c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L240 221.3l57.4 57.4c12.5 12.5 32.8 12.5 45.3 0l128-128z" />
@@ -149,7 +149,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   
-                  <div className="pt-4 border-t border-slate-200">
+                  <div className="pt-4">
                     <div className="flex items-center space-x-2 text-slate-400">
                       <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 384 512">
                         <path d="M192 0C139 0 96 43 96 96V256c0 53 43 96 96 96s96-43 96-96V96c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 89.1 66.2 162.7 152 174.4V464H120c-13.3 0-24 10.7-24 24s10.7 24 24 24h72 72c13.3 0 24-10.7 24-24s-10.7-24-24-24H216V430.4c85.8-11.7 152-85.3 152-174.4V216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 70.7-57.3 128-128 128s-128-57.3-128-128V216z" />
@@ -175,7 +175,7 @@ export default function HomePage() {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="w-14 h-14 bg-emerald-500 rounded-xl flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 384 512">
                   <path d="M192 0C139 0 96 43 96 96V256c0 53 43 96 96 96s96-43 96-96V96c0-53-43-96-96-96zM64 216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 89.1 66.2 162.7 152 174.4V464H120c-13.3 0-24 10.7-24 24s10.7 24 24 24h72 72c13.3 0 24-10.7 24-24s-10.7-24-24-24H216V430.4c85.8-11.7 152-85.3 152-174.4V216c0-13.3-10.7-24-24-24s-24 10.7-24 24v40c0 70.7-57.3 128-128 128s-128-57.3-128-128V216z" />
@@ -185,7 +185,7 @@ export default function HomePage() {
               <p className="text-slate-600 leading-relaxed">Log your thoughts by voice—fast, hands-free, and natural. No typing required.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="w-14 h-14 bg-emerald-500 rounded-xl flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 640 512">
                   <path d="M208 352c114.9 0 208-78.8 208-176S322.9 0 208 0S0 78.8 0 176c0 38.6 14.7 74.3 39.6 103.4c-3.5 9.4-8.7 17.7-14.2 24.7c-4.8 6.2-9.7 11-13.3 14.3c-1.8 1.6-3.3 2.9-4.3 3.7c-.5 .4-.9 .7-1.1 .8l-.2 .2 0 0 0 0C1 327.2-1.4 334.4 .8 340.9S9.1 352 16 352c21.8 0 43.8-5.6 62.1-12.5c9.2-3.5 17.8-7.4 25.3-11.4C134.1 343.3 169.8 352 208 352zM448 176c0 112.3-99.1 196.9-216.5 207C255.8 457.4 336.4 512 432 512c38.2 0 73.9-8.7 104.7-23.9c7.5 4 16 7.9 25.2 11.4c18.3 6.9 40.3 12.5 62.1 12.5c6.9 0 13.1-4.5 15.2-11.1c2.1-6.6-.2-13.8-5.8-17.9l0 0 0 0-.2-.2c-.2-.2-.6-.4-1.1-.8c-1-.8-2.5-2-4.3-3.7c-3.6-3.3-8.5-8.1-13.3-14.3c-5.5-7-10.7-15.4-14.2-24.7c24.9-29 39.6-64.7 39.6-103.4c0-92.8-84.9-168.9-192.6-175.5c.4 5.1 .6 10.3 .6 15.5z" />
@@ -195,7 +195,7 @@ export default function HomePage() {
               <p className="text-slate-600 leading-relaxed">Works right in WhatsApp. Familiar, convenient, and always with you.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="w-14 h-14 bg-emerald-500 rounded-xl flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M64 64c0-17.7-14.3-32-32-32S0 46.3 0 64V400c0 44.2 35.8 80 80 80H480c17.7 0 32-14.3 32-32s-14.3-32-32-32H80c-8.8 0-16-7.2-16-16V64zm406.6 86.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L320 210.7l-57.4-57.4c-12.5-12.5-32.8-12.5-45.3 0l-112 112c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L240 221.3l57.4 57.4c12.5 12.5 32.8 12.5 45.3 0l128-128z" />
@@ -205,7 +205,7 @@ export default function HomePage() {
               <p className="text-slate-600 leading-relaxed">AI surfaces patterns in your logs, helping you see what's working and what needs attention.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="w-14 h-14 bg-emerald-500 rounded-xl flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
@@ -215,7 +215,7 @@ export default function HomePage() {
               <p className="text-slate-600 leading-relaxed">Query your logs in plain language. "How often did I exercise last month?" Get instant answers.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="w-14 h-14 bg-emerald-500 rounded-xl flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M448 256A192 192 0 1 0 64 256a192 192 0 1 0 384 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256 80a80 80 0 1 0 0-160 80 80 0 1 0 0 160zm0-224a144 144 0 1 1 0 288 144 144 0 1 1 0-288zM224 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z" />
@@ -225,7 +225,7 @@ export default function HomePage() {
               <p className="text-slate-600 leading-relaxed">Pick one habit to focus on each week. Small, sustainable changes that compound over time.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="w-14 h-14 bg-emerald-500 rounded-xl flex items-center justify-center mb-6">
                 <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z" />
@@ -246,7 +246,7 @@ export default function HomePage() {
           </div>
           
           <div className="max-w-4xl mx-auto space-y-8">
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 flex items-start space-x-6 hover:shadow-md transition-all">
+            <div className="bg-white rounded-2xl p-8 flex items-start space-x-6 transition-all">
               <div className="flex-shrink-0 w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">1</div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-slate-900 mb-3">Add habit(s)</h3>
@@ -254,7 +254,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 flex items-start space-x-6 hover:shadow-md transition-all">
+            <div className="bg-white rounded-2xl p-8 flex items-start space-x-6 transition-all">
               <div className="flex-shrink-0 w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">2</div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-slate-900 mb-3">Boost your habit</h3>
@@ -262,7 +262,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 flex items-start space-x-6 hover:shadow-md transition-all">
+            <div className="bg-white rounded-2xl p-8 flex items-start space-x-6 transition-all">
               <div className="flex-shrink-0 w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">3</div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-slate-900 mb-3">Log by voice or text</h3>
@@ -270,7 +270,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 flex items-start space-x-6 hover:shadow-md transition-all">
+            <div className="bg-white rounded-2xl p-8 flex items-start space-x-6 transition-all">
               <div className="flex-shrink-0 w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">4</div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-slate-900 mb-3">We structure it & surface patterns</h3>
@@ -278,7 +278,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 flex items-start space-x-6 hover:shadow-md transition-all">
+            <div className="bg-white rounded-2xl p-8 flex items-start space-x-6 transition-all">
               <div className="flex-shrink-0 w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">5</div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-slate-900 mb-3">Ask anything</h3>
@@ -288,7 +288,7 @@ export default function HomePage() {
           </div>
           
           <div className="mt-16 max-w-4xl mx-auto">
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-emerald-200">
+            <div className="bg-white rounded-2xl p-8">
               <button 
                 className="w-full flex items-center justify-between text-left group cursor-pointer"
                 onClick={() => setIsAccordionOpen(!isAccordionOpen)}
@@ -313,7 +313,7 @@ export default function HomePage() {
                   <p className="text-slate-600 leading-relaxed">LogLife is built on evidence-based principles that significantly increase your chances of building lasting habits:</p>
                   
                   <div className="grid md:grid-cols-2 gap-6">
-                    <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-100">
+                    <div className="bg-emerald-50 rounded-xl p-6">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-bold text-slate-900">1. Define</h4>
                         <span className="text-2xl font-bold text-emerald-600">+42%</span>
@@ -321,7 +321,7 @@ export default function HomePage() {
                       <p className="text-sm text-slate-600">Clearly defining your habit increases success by 42%</p>
                     </div>
                     
-                    <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-100">
+                    <div className="bg-emerald-50 rounded-xl p-6">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-bold text-slate-900">2. Why</h4>
                         <span className="text-2xl font-bold text-emerald-600">+38%</span>
@@ -329,7 +329,7 @@ export default function HomePage() {
                       <p className="text-sm text-slate-600">Understanding your motivation boosts success by 38%</p>
                     </div>
                     
-                    <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-100">
+                    <div className="bg-emerald-50 rounded-xl p-6">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-bold text-slate-900">3. Plan</h4>
                         <span className="text-2xl font-bold text-emerald-600">+91%</span>
@@ -337,7 +337,7 @@ export default function HomePage() {
                       <p className="text-sm text-slate-600">Scheduling when and where increases success by 91%</p>
                     </div>
                     
-                    <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-100">
+                    <div className="bg-emerald-50 rounded-xl p-6">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-bold text-slate-900">4. Design</h4>
                         <span className="text-2xl font-bold text-emerald-600">+67%</span>
@@ -345,7 +345,7 @@ export default function HomePage() {
                       <p className="text-sm text-slate-600">Environment design improves success by 67%</p>
                     </div>
                     
-                    <div className="bg-emerald-50 rounded-xl p-6 border border-emerald-100 md:col-span-2">
+                    <div className="bg-emerald-50 rounded-xl p-6 md:col-span-2">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-bold text-slate-900">5. Recover</h4>
                         <span className="text-2xl font-bold text-emerald-600">+53%</span>
@@ -368,7 +368,7 @@ export default function HomePage() {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
                 <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="Sarah M." className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
@@ -386,7 +386,7 @@ export default function HomePage() {
               <p className="text-slate-600 leading-relaxed">"The voice notes are a game changer. I can log while cooking, driving, or getting ready. No more excuses."</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
                 <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" alt="Michael T." className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
@@ -404,7 +404,7 @@ export default function HomePage() {
               <p className="text-slate-600 leading-relaxed">"Seeing patterns in my sleep schedule was eye-opening. I didn't realize how inconsistent I was until LogLife showed me."</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
                 <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="Emma L." className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
@@ -422,7 +422,7 @@ export default function HomePage() {
               <p className="text-slate-600 leading-relaxed">"Finally, a journaling tool that doesn't feel like homework. I love that it's private and my data stays mine."</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
                 <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" alt="David K." className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
@@ -440,7 +440,7 @@ export default function HomePage() {
               <p className="text-slate-600 leading-relaxed">"The query feature is brilliant. I asked 'How many times did I work out in January?' and got an instant answer."</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
                 <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-6.jpg" alt="Jessica R." className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
@@ -458,7 +458,7 @@ export default function HomePage() {
               <p className="text-slate-600 leading-relaxed">"No guilt, no pressure. Just honest tracking and gentle reminders. This is how habit tracking should be."</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl border border-emerald-100 shadow-sm hover:shadow-md transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
                 <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg" alt="Ryan P." className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
@@ -487,7 +487,7 @@ export default function HomePage() {
               <p className="text-xl text-slate-600">Our mission and values</p>
             </div>
             
-            <div className="bg-white rounded-2xl p-10 shadow-lg border border-slate-200 mb-12">
+            <div className="bg-white rounded-2xl p-10 mb-12">
               <div className="flex items-start space-x-4 mb-6">
                 <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center flex-shrink-0">
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 512 512">
@@ -501,7 +501,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl p-10 shadow-lg border border-slate-200 mb-12">
+            <div className="bg-white rounded-2xl p-10 mb-12">
               <h3 className="text-2xl font-bold text-slate-900 mb-8 flex items-center">
                 <svg className="w-6 h-6 text-emerald-500 mr-3" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M47.6 300.4L228.3 469.1c7.5 7 17.4 10.9 27.7 10.9s20.2-3.9 27.7-10.9L464.4 300.4c30.4-28.3 47.6-68 47.6-109.5v-5.8c0-69.9-50.5-129.5-119.4-141C347 36.5 300.6 51.4 268 84L256 96 244 84c-32.6-32.6-79-47.5-124.6-39.9C50.5 55.6 0 115.2 0 185.1v5.8c0 41.5 17.2 81.2 47.6 109.5z" />
@@ -592,7 +592,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-10 shadow-xl text-white mb-12">
+            <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl p-10 text-white mb-12">
               <h3 className="text-2xl font-bold mb-8 flex items-center">
                 <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M256 0c4.6 0 9.2 1 13.4 2.9L457.7 82.8c22 9.3 38.4 31 38.3 57.2c-.5 99.2-41.3 280.7-213.6 363.2c-16.7 8-36.1 8-52.8 0C57.3 420.7 16.5 239.2 16 140c-.1-26.2 16.3-47.9 38.3-57.2L242.7 2.9C246.8 1 251.4 0 256 0zm0 66.8V444.8C394 378 431.1 230.1 432 141.4L256 66.8l0 0z" />
@@ -675,7 +675,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl p-10 shadow-lg border border-slate-200 mb-12">
+            <div className="bg-white rounded-2xl p-10 mb-12">
               <h3 className="text-2xl font-bold text-slate-900 mb-8 flex items-center">
                 <svg className="w-6 h-6 text-emerald-500 mr-3" fill="currentColor" viewBox="0 0 640 512">
                   <path d="M323.4 85.2l-96.8 78.4c-16.1 13-19.2 36.4-7 53.1c12.9 17.8 38 21.3 55.3 7.8l99.3-77.2c7-5.4 17-4.2 22.5 2.8s4.2 17-2.8 22.5l-20.9 16.2L512 316.8V128h-.7l-3.9-2.5L434.8 79c-15.3-9.8-33.2-15-51.4-15c-21.8 0-43 7.5-60 21.2zm22.8 124.4l-51.7 40.2C263 274.4 217.3 268 193.7 235.6c-22.2-30.5-16.6-73.1 12.7-96.8l83.2-67.3c-11.6-4.9-24.1-7.4-36.8-7.4C234 64 215.7 69.6 200 80l-72 48V352h28.2l91.4 83.4c19.6 17.9 49.9 16.5 67.8-3.1c5.5-6.1 9.2-13.2 11.1-20.6l17 15.6c19.5 17.9 49.9 16.6 67.8-2.9c4.5-4.9 7.8-10.6 9.9-16.5c19.4 13 45.8 10.3 62.1-7.5c17.9-19.5 16.6-49.9-2.9-67.8l-134.2-123zM16 128c-8.8 0-16 7.2-16 16V352c0 17.7 14.3 32 32 32H64c17.7 0 32-14.3 32-32V128H16zM48 320a16 16 0 1 1 0 32 16 16 0 1 1 0-32zM544 128V352c0 17.7 14.3 32 32 32h32c17.7 0 32-14.3 32-32V144c0-8.8-7.2-16-16-16H544zm32 208a16 16 0 1 1 32 0 16 16 0 1 1 -32 0z" />
@@ -684,7 +684,7 @@ export default function HomePage() {
               </h3>
               
               <div className="space-y-6">
-                <div className="flex items-start space-x-4 p-6 bg-emerald-50 rounded-xl border border-emerald-100">
+                <div className="flex items-start space-x-4 p-6 bg-emerald-50 rounded-xl">
                   <svg className="w-6 h-6 text-emerald-600 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 512 512">
                     <path d="M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120V256c0 8 4 15.5 10.7 20l96 64c11 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2V120c0-13.3-10.7-24-24-24s-24 10.7-24 24z" />
                   </svg>
@@ -694,7 +694,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-4 p-6 bg-emerald-50 rounded-xl border border-emerald-100">
+                <div className="flex items-start space-x-4 p-6 bg-emerald-50 rounded-xl">
                   <svg className="w-6 h-6 text-emerald-600 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 512 512">
                     <path d="M256 48C141.1 48 48 141.1 48 256v40c0 13.3-10.7 24-24 24s-24-10.7-24-24V256C0 114.6 114.6 0 256 0S512 114.6 512 256V400.1c0 48.6-39.4 88-88.1 88L313.6 488c-8.3 14.3-23.8 24-41.6 24H240c-26.5 0-48-21.5-48-48s21.5-48 48-48h32c17.8 0 33.3 9.7 41.6 24l110.4 .1c22.1 0 40-17.9 40-40V256c0-114.9-93.1-208-208-208zM144 208h16c17.7 0 32 14.3 32 32V352c0 17.7-14.3 32-32 32H144c-35.3 0-64-28.7-64-64V272c0-35.3 28.7-64 64-64zm224 0c35.3 0 64 28.7 64 64v48c0 35.3-28.7 64-64 64H352c-17.7 0-32-14.3-32-32V240c0-17.7 14.3-32 32-32h16z" />
                   </svg>
@@ -704,7 +704,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 
-                <div className="flex items-start space-x-4 p-6 bg-emerald-50 rounded-xl border border-emerald-100">
+                <div className="flex items-start space-x-4 p-6 bg-emerald-50 rounded-xl">
                   <svg className="w-6 h-6 text-emerald-600 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 640 512">
                     <path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c1.8 0 3.5-.2 5.3-.5c-76.3-55.1-99.8-141-103.1-200.2c-16.1-4.8-33.1-7.3-50.7-7.3H178.3zm308.8-78.3l-120 48C358 277.4 352 286.2 352 296c0 63.3 25.9 168.8 134.8 214.2c5.9 2.5 12.6 2.5 18.5 0C614.1 464.8 640 359.3 640 296c0-9.8-6-18.6-15.1-22.3l-120-48c-5.7-2.3-12.1-2.3-17.8 0zM591.4 312c-3.9 50.7-27.2 116.7-95.4 149.7V273.8L591.4 312z" />
                   </svg>
@@ -716,7 +716,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <div className="bg-slate-100 rounded-2xl p-10 border border-slate-200">
+            <div className="bg-slate-100 rounded-2xl p-10">
               <div className="flex items-start space-x-4">
                 <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-8.jpg" alt="Founder" className="w-16 h-16 rounded-full object-cover" />
                 <div>
@@ -740,7 +740,7 @@ export default function HomePage() {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 640 512">
                   <path d="M0 241.1C0 161 65 96 145.1 96c38.5 0 75.4 15.3 102.6 42.5L320 210.7l72.2-72.2C419.5 111.3 456.4 96 494.9 96C575 96 640 161 640 241.1v29.7C640 351 575 416 494.9 416c-38.5 0-75.4-15.3-102.6-42.5L320 301.3l-72.2 72.2C220.5 400.7 183.6 416 145.1 416C65 416 0 351 0 270.9V241.1zM274.7 256l-72.2-72.2c-15.2-15.2-35.9-23.8-57.4-23.8C100.3 160 64 196.3 64 241.1v29.7c0 44.8 36.3 81.1 81.1 81.1c21.5 0 42.2-8.5 57.4-23.8L274.7 256zm90.5 0l72.2 72.2c15.2 15.2 35.9 23.8 57.4 23.8c44.8 0 81.1-36.3 81.1-81.1V241.1c0-44.8-36.3-81.1-81.1-81.1c-21.5 0-42.2 8.5-57.4 23.8L365.3 256z" />
@@ -750,7 +750,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">A compulsive pattern of behavior that continues despite negative consequences. Often driven by dopamine loops that hijack natural reward systems.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M0 224c0 17.7 14.3 32 32 32s32-14.3 32-32c0-53 43-96 96-96H320v32c0 12.9 7.8 24.6 19.8 29.6s25.7 2.2 34.9-6.9l64-64c12.5-12.5 12.5-32.8 0-45.3l-64-64c-9.2-9.2-22.9-11.9-34.9-6.9S320 19.1 320 32V64H160C71.6 64 0 135.6 0 224zm512 64c0-17.7-14.3-32-32-32s-32 14.3-32 32c0 53-43 96-96 96H192V352c0-12.9-7.8-24.6-19.8-29.6s-25.7-2.2-34.9 6.9l-64 64c-12.5 12.5-12.5 32.8 0 45.3l64 64c9.2 9.2 22.9 11.9 34.9 6.9s19.8-16.6 19.8-29.6V448H352c88.4 0 160-71.6 160-160z" />
@@ -760,7 +760,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">An automatic behavior triggered by context. Habits form through repetition and become nearly effortless over time. The key to lasting change.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 448 512">
                   <path d="M349.4 44.6c5.9-13.7 1.5-29.7-10.6-38.5s-28.6-8-39.9 1.8l-256 224c-10 8.8-13.6 22.9-8.9 35.3S50.7 288 64 288H175.5L98.6 467.4c-5.9 13.7-1.5 29.7 10.6 38.5s28.6 8 39.9-1.8l256-224c10-8.8 13.6-22.9 8.9-35.3s-16.6-20.7-30-20.7H272.5L349.4 44.6z" />
@@ -770,7 +770,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">The signal that initiates a habit. Can be a time, place, emotion, person, or preceding action. Identifying triggers is the first step to changing behavior.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 448 512">
                   <path d="M159.3 5.4c7.8-7.3 19.9-7.2 27.7 .1c27.6 25.9 53.5 53.8 77.7 84c11-14.4 23.5-30.1 37-42.9c7.9-7.4 20.1-7.4 28 .1c34.6 33 63.9 76.6 84.5 118c20.3 40.8 33.8 82.5 33.8 111.9C448 404.2 348.2 512 224 512C98.4 512 0 404.1 0 276.5c0-38.4 17.8-85.3 45.4-131.7C73.3 97.7 112.7 48.6 159.3 5.4zM225.7 416c25.3 0 47.7-7 68.8-21c42.1-29.4 53.4-88.2 28.1-134.4c-4.5-9-16-9.6-22.5-2l-25.2 29.3c-6.6 7.6-18.5 7.4-24.7-.5c-16.5-21-46-58.5-62.8-79.8c-6.3-8-18.3-8.1-24.7-.1c-33.8 42.5-50.8 69.3-50.8 99.4C112 375.4 162.6 416 225.7 416z" />
@@ -780,7 +780,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">The motivational force behind every habit. Not the habit itself, but the change in state it promises. Understanding cravings helps reshape behavior.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M512 96c0 50.2-59.1 125.1-84.6 155c-3.8 4.4-9.4 6.1-14.5 5H320c-17.7 0-32 14.3-32 32s14.3 32 32 32h96c53 0 96 43 96 96s-43 96-96 96H139.6c8.7-9.9 19.3-22.6 30-36.8c6.3-8.4 12.8-17.6 19-27.2H416c17.7 0 32-14.3 32-32s-14.3-32-32-32H320c-53 0-96-43-96-96s43-96 96-96h39.8c-21-31.5-39.8-67.7-39.8-96c0-53 43-96 96-96s96 43 96 96zM117.1 489.1c-3.8 4.3-7.2 8.1-10.1 11.3l-1.8 2-.2-.2c-6 4.6-14.6 4-20-1.8C59.8 473 0 402.5 0 352c0-53 43-96 96-96s96 43 96 96c0 30-21.1 67-43.5 97.9c-10.7 14.7-21.7 28-30.8 38.5l-.6 .7zM128 352a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM416 128a32 32 0 1 0 0-64 32 32 0 1 0 0 64z" />
@@ -790,7 +790,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">The actual behavior or action you take. The routine is what you want to change, establish, or eliminate. It sits between the cue and the reward.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M190.5 68.8L225.3 128H224 152c-22.1 0-40-17.9-40-40s17.9-40 40-40h2.2c14.9 0 28.8 7.9 36.3 20.8zM64 88c0 14.4 3.5 28 9.6 40H32c-17.7 0-32 14.3-32 32v64c0 17.7 14.3 32 32 32H480c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32H438.4c6.1-12 9.6-25.6 9.6-40c0-48.6-39.4-88-88-88h-2.2c-31.9 0-61.5 16.9-77.7 44.4L256 85.5l-24.1-41C215.7 16.9 186.1 0 154.2 0H152C103.4 0 64 39.4 64 88zm336 0c0 22.1-17.9 40-40 40H288h-1.3l34.8-59.2C329.1 55.9 342.9 48 357.8 48H360c22.1 0 40 17.9 40 40zM32 288V464c0 26.5 21.5 48 48 48H224V288H32zM288 512H432c26.5 0 48-21.5 48-48V288H288V512z" />
@@ -800,7 +800,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">The benefit you gain from completing the habit. Rewards satisfy cravings and teach your brain which behaviors are worth remembering and repeating.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M256 32c12.5 0 24.1 6.4 30.8 17L503.4 394.4c5.6 8.9 8.6 19.2 8.6 29.7c0 30.9-25 55.9-55.9 55.9H55.9C25 480 0 455 0 424.1c0-10.5 3-20.8 8.6-29.7L225.2 49c6.6-10.6 18.3-17 30.8-17zm65 192L256 120.4 176.9 246.5l18.3 24.4c6.4 8.5 19.2 8.5 25.6 0l25.6-34.1c6-8.1 15.5-12.8 25.6-12.8h49z" />
@@ -810,7 +810,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">The effort required to perform a behavior. Reduce friction for good habits, increase it for bad ones. Small changes in friction create big differences.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 576 512">
                   <path d="M575.8 255.5c0 18-15 32.1-32 32.1h-32l.7 160.2c0 2.7-.2 5.4-.5 8.1V472c0 22.1-17.9 40-40 40H456c-1.1 0-2.2 0-3.3-.1c-1.4 .1-2.8 .1-4.2 .1H416 392c-22.1 0-40-17.9-40-40V448 384c0-17.7-14.3-32-32-32H256c-17.7 0-32 14.3-32 32v64 24c0 22.1-17.9 40-40 40H160 128.1c-1.5 0-3-.1-4.5-.2c-1.2 .1-2.4 .2-3.6 .2H104c-22.1 0-40-17.9-40-40V360c0-.9 0-1.9 .1-2.8V287.6H32c-18 0-32-14-32-32.1c0-9 3-17 10-24L266.4 8c7-7 15-8 22-8s15 2 21 7L564.8 231.5c8 7 12 15 11 24z" />
@@ -820,7 +820,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">Shaping your physical and digital surroundings to make good habits easier and bad habits harder. Your environment often matters more than willpower.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M336 352c97.2 0 176-78.8 176-176S433.2 0 336 0S160 78.8 160 176c0 18.7 2.9 36.8 8.3 53.7L7 391c-4.5 4.5-7 10.6-7 17v80c0 13.3 10.7 24 24 24h80c13.3 0 24-10.7 24-24V448h40c13.3 0 24-10.7 24-24V384h40c6.4 0 12.5-2.5 17-7l33.3-33.3c16.9 5.4 35 8.3 53.7 8.3zM376 96a40 40 0 1 1 0 80 40 40 0 1 1 0-80z" />
@@ -830,7 +830,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">A habit that naturally triggers other positive behaviors. Exercise, for example, often leads to better eating, sleep, and productivity.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 448 512">
                   <path d="M128 0c17.7 0 32 14.3 32 32V64H288V32c0-17.7 14.3-32 32-32s32 14.3 32 32V64h48c26.5 0 48 21.5 48 48v48H0V112C0 85.5 21.5 64 48 64H96V32c0-17.7 14.3-32 32-32zM0 192H448V464c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V192zM329 305c9.4-9.4 9.4-24.6 0-33.9s-24.6-9.4-33.9 0l-95 95-47-47c-9.4-9.4-24.6-9.4-33.9 0s-9.4 24.6 0 33.9l64 64c9.4 9.4 24.6 9.4 33.9 0L329 305z" />
@@ -840,7 +840,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">Consecutive days of completing a habit. Streaks provide visual proof of progress and momentum. But don't let a broken streak derail you—recovery matters more.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 448 512">
                   <path d="M160 80c0-26.5 21.5-48 48-48h32c26.5 0 48 21.5 48 48V432c0 26.5-21.5 48-48 48H208c-26.5 0-48-21.5-48-48V80zM0 272c0-26.5 21.5-48 48-48H80c26.5 0 48 21.5 48 48V432c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V272zM368 96h32c26.5 0 48 21.5 48 48V432c0 26.5-21.5 48-48 48H368c-26.5 0-48-21.5-48-48V144c0-26.5 21.5-48 48-48z" />
@@ -850,7 +850,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">Recurring behaviors or correlations in your logs. LogLife surfaces patterns automatically so you can see what's working and what needs attention.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z" />
@@ -860,7 +860,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">Asking your data questions in plain language. "How often did I meditate last month?" LogLife turns your logs into searchable insights.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M184 0c30.9 0 56 25.1 56 56V456c0 30.9-25.1 56-56 56c-28.9 0-52.7-21.9-55.7-50.1c-5.2 1.4-10.7 2.1-16.3 2.1c-35.3 0-64-28.7-64-64c0-7.4 1.3-14.6 3.6-21.2C21.4 367.4 0 338.2 0 304c0-31.9 18.7-59.5 45.8-72.3C37.1 220.8 32 207 32 192c0-30.7 21.6-56.3 50.4-62.6C80.8 123.9 80 118 80 112c0-29.9 20.6-55.1 48.3-62.1C131.3 21.9 155.1 0 184 0zM328 0c28.9 0 52.6 21.9 55.7 49.9c27.8 7 48.3 32.1 48.3 62.1c0 6-.8 11.9-2.4 17.4c28.8 6.2 50.4 31.9 50.4 62.6c0 15-5.1 28.8-13.8 39.7C493.3 244.5 512 272.1 512 304c0 34.2-21.4 63.4-51.6 74.8c2.3 6.6 3.6 13.8 3.6 21.2c0 35.3-28.7 64-64 64c-5.6 0-11.1-.7-16.3-2.1c-3 28.2-26.8 50.1-55.7 50.1c-30.9 0-56-25.1-56-56V56c0-30.9 25.1-56 56-56z" />
@@ -870,7 +870,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">A neurotransmitter that drives motivation and reward-seeking. Dopamine spikes predict rewards, not just deliver them. Understanding this helps build better habits.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 448 512">
                   <path d="M368 128c0 44.4-25.4 83.5-64 106.4V256c0 17.7-14.3 32-32 32H176c-17.7 0-32-14.3-32-32V234.4c-38.6-23-64-62.1-64-106.4C80 57.3 144.5 0 224 0s144 57.3 144 128zM168 176a32 32 0 1 0 0-64 32 32 0 1 0 0 64zm144-32a32 32 0 1 0 -64 0 32 32 0 1 0 64 0zM3.4 273.7c7.9-15.8 27.1-22.2 42.9-14.3L224 348.2l177.7-88.8c15.8-7.9 35-1.5 42.9 14.3s1.5 35-14.3 42.9L295.6 384l134.8 67.4c15.8 7.9 22.2 27.1 14.3 42.9s-27.1 22.2-42.9 14.3L224 419.8 46.3 508.6c-15.8 7.9-35 1.5-42.9-14.3s-1.5-35 14.3-42.9L152.4 384 17.7 316.6C1.9 308.7-4.5 289.5 3.4 273.7z" />
@@ -880,7 +880,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">When constant high-dopamine activities (social media, gaming) make normal activities feel unrewarding. The antidote: reduce overstimulation, reset your baseline.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M512 32c0 113.6-84.6 207.5-194.2 222c-7.1-53.4-30.6-101.6-65.3-139.3C290.8 46.3 364 0 448 0h32c17.7 0 32 14.3 32 32zM0 96C0 78.3 14.3 64 32 64H64c123.7 0 224 100.3 224 224v32V480c0 17.7-14.3 32-32 32s-32-14.3-32-32V320C100.3 320 0 219.7 0 96z" />
@@ -890,7 +890,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">A tiny change that compounds over time. 1% better every day leads to 37x improvement in a year. Small habits are the foundation of remarkable results.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M448 256A192 192 0 1 0 64 256a192 192 0 1 0 384 0zM0 256a256 256 0 1 1 512 0A256 256 0 1 1 0 256zm256 80a80 80 0 1 0 0-160 80 80 0 1 0 0 160zm0-224a144 144 0 1 1 0 288 144 144 0 1 1 0-288zM224 256a32 32 0 1 1 64 0 32 32 0 1 1 -64 0z" />
@@ -900,7 +900,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">A plan that specifies when, where, and how you'll act. "I will [behavior] at [time] in [location]." This format increases follow-through by 91%.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 640 512">
                   <path d="M579.8 267.7c56.5-56.5 56.5-148 0-204.5c-50-50-128.8-56.5-186.3-15.4l-1.6 1.1c-14.4 10.3-17.7 30.3-7.4 44.6s30.3 17.7 44.6 7.4l1.6-1.1c32.1-22.9 76-19.3 103.8 8.6c31.5 31.5 31.5 82.5 0 114L422.3 334.8c-31.5 31.5-82.5 31.5-114 0c-27.9-27.9-31.5-71.8-8.6-103.8l1.1-1.6c10.3-14.4 6.9-34.4-7.4-44.6s-34.4-6.9-44.6 7.4l-1.1 1.6C206.5 251.2 213 330 263 380c56.5 56.5 148 56.5 204.5 0L579.8 267.7zM60.2 244.3c-56.5 56.5-56.5 148 0 204.5c50 50 128.8 56.5 186.3 15.4l1.6-1.1c14.4-10.3 17.7-30.3 7.4-44.6s-30.3-17.7-44.6-7.4l-1.6 1.1c-32.1 22.9-76 19.3-103.8-8.6C74 372 74 321 105.5 289.5L217.7 177.2c31.5-31.5 82.5-31.5 114 0c27.9 27.9 31.5 71.8 8.6 103.9l-1.1 1.6c-10.3 14.4-6.9 34.4 7.4 44.6s34.4 6.9 44.6-7.4l1.1-1.6C433.5 260.8 427 182 377 132c-56.5-56.5-148-56.5-204.5 0L60.2 244.3z" />
@@ -910,7 +910,7 @@ export default function HomePage() {
               <p className="text-slate-600 text-sm leading-relaxed">Linking a new habit to an existing one. "After I [current habit], I will [new habit]." Uses existing neural pathways to build new behaviors faster.</p>
             </div>
             
-            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl border border-emerald-100 hover:shadow-lg transition-all">
+            <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
               <div className="w-12 h-12 bg-emerald-500 rounded-lg flex items-center justify-center mb-4">
                 <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 512 512">
                   <path d="M463.5 224H472c13.3 0 24-10.7 24-24V72c0-9.7-5.8-18.5-14.8-22.2s-19.3-1.7-26.2 5.2L413.4 96.6c-87.6-86.5-228.7-86.2-315.8 1c-87.5 87.5-87.5 229.3 0 316.8s229.3 87.5 316.8 0c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0c-62.5 62.5-163.8 62.5-226.3 0s-62.5-163.8 0-226.3c62.2-62.2 162.7-62.5 225.3-1L327 183c-6.9 6.9-8.9 17.2-5.2 26.2s12.5 14.8 22.2 14.8H463.5z" />
@@ -931,7 +931,7 @@ export default function HomePage() {
           </div>
           
           <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-emerald-500">
+            <div className="bg-white rounded-2xl p-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-slate-900 flex items-center">
                   <svg className="w-6 h-6 text-emerald-500 mr-3" fill="currentColor" viewBox="0 0 512 512">
@@ -993,7 +993,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-slate-300">
+            <div className="bg-white rounded-2xl p-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-slate-900 flex items-center">
                   <svg className="w-6 h-6 text-slate-500 mr-3" fill="currentColor" viewBox="0 0 512 512">
@@ -1055,7 +1055,7 @@ export default function HomePage() {
               </div>
             </div>
             
-            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-slate-200">
+            <div className="bg-white rounded-2xl p-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-bold text-slate-900 flex items-center">
                   <svg className="w-6 h-6 text-slate-400 mr-3" fill="currentColor" viewBox="0 0 512 512">
@@ -1120,7 +1120,7 @@ export default function HomePage() {
           
           <div className="mt-12 text-center">
             <p className="text-slate-600 mb-4">Have a feature request or feedback?</p>
-            <a href="https://wa.me/17155157761?text=help" className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all shadow-lg">
+          <a href="#" className="inline-flex items-center px-6 py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-all">
               <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 512 512">
                 <path d="M64 0C28.7 0 0 28.7 0 64V352c0 35.3 28.7 64 64 64h96v80c0 6.1 3.4 11.6 8.8 14.3s11.9 2.1 16.8-1.5L309.3 416H448c35.3 0 64-28.7 64-64V64c0-35.3-28.7-64-64-64H64z" />
               </svg>
@@ -1135,7 +1135,7 @@ export default function HomePage() {
           <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Log life. Live better.</h2>
           <p className="text-xl text-emerald-50 mb-8 max-w-2xl mx-auto">Start a simple daily log and turn small notes into better habits.</p>
           
-          <a href="https://wa.me/17155157761?text=help" target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-10 py-5 bg-white text-emerald-700 rounded-2xl font-bold text-lg hover:bg-emerald-50 transition-all shadow-2xl hover:shadow-3xl mb-8">
+          <a href="https://wa.me/17155157761?text=help" target="_blank" rel="noopener noreferrer" className="inline-flex items-center px-10 py-5 bg-white text-emerald-700 rounded-2xl font-bold text-lg hover:bg-emerald-50 transition-all mb-8">
             <svg className="w-8 h-8 mr-3" fill="currentColor" viewBox="0 0 448 512">
               <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z" />
             </svg>
