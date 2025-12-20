@@ -49,6 +49,8 @@ export default function Navbar() {
           <div className="flex items-center space-x-4">
             <a
               href="https://wa.me/17155157761?text=help"
+              target="_blank"
+              rel="noopener noreferrer"
               className="hidden sm:inline-flex items-center px-5 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-all shadow-sm hover:shadow-md"
             >
               <svg
