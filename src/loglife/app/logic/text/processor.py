@@ -62,6 +62,21 @@ def process_text(user: User, message: Message) -> str:
     try:
         text_content: str = message.raw_payload.strip().lower()
 
+        # Check for blocking states
+        if user.state == "awaiting_reminder_time":
+            # Only allow time input or abort command
+            reminder_handler = ReminderTimeHandler()
+
+            # If input looks like a time, let ReminderTimeHandler process it
+            if reminder_handler.matches(text_content):
+                result = reminder_handler.handle(user, text_content)
+                if result:
+                    return result
+
+            # Check for specific abort command if desired, otherwise enforce flow
+            # For now, we strictly enforce flow as per requirements
+            return messages.ERROR_COMPLETE_REMINDER_TIME
+
         # Add aliases (with word boundaries to avoid replacing partial words)
         for alias, command in COMMAND_ALIASES.items():
             # Escape alias to be safe in regex
