@@ -209,3 +209,17 @@ def test_get_all_with_reminders() -> None:
     assert g1.id in ids
     assert g3.id in ids
     assert g2.id not in ids
+
+
+def test_get_user_goals_order() -> None:
+    """Test that goals are retrieved in ascending order of creation (oldest first)."""
+    user = db.users.create("+1234567890", "America/New_York")
+    g1 = db.goals.create(user.id, "1", "First")
+    g2 = db.goals.create(user.id, "2", "Second")
+    g3 = db.goals.create(user.id, "3", "Third")
+
+    goals = db.goals.get_by_user(user.id)
+    assert len(goals) == 3
+    assert goals[0].id == g1.id
+    assert goals[1].id == g2.id
+    assert goals[2].id == g3.id

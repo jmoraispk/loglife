@@ -37,7 +37,7 @@ class GoalsTable:
 
     def get_by_user(self, user_id: int) -> list[Goal]:
         """Retrieve all goals for a user."""
-        query = "SELECT * FROM user_goals WHERE user_id = ? ORDER BY created_at DESC"
+        query = "SELECT * FROM user_goals WHERE user_id = ? ORDER BY created_at ASC"
         rows = self._conn.execute(query, (user_id,)).fetchall()
         return [self._row_to_model(row) for row in rows]
 
