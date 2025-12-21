@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS users (
     timezone TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     send_transcript_file INTEGER DEFAULT 1,
+    client_type TEXT DEFAULT 'whatsapp',
     state TEXT,
     state_data TEXT,
     referred_by_id INTEGER REFERENCES users(id) ON DELETE SET NULL

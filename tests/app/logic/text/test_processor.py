@@ -6,7 +6,11 @@ from unittest.mock import patch
 
 import pytest
 
-from loglife.app.config import ERROR_NO_GOALS_SET, USAGE_RATE
+from loglife.app.config import (
+    ERROR_COMPLETE_REMINDER_TIME,
+    ERROR_NO_GOALS_SET,
+    USAGE_RATE,
+)
 from loglife.app.db import db
 from loglife.app.db.tables import User
 from loglife.app.logic.text import process_text as _real_process_text
@@ -78,6 +82,7 @@ def test_process_text_set_reminder_time() -> None:
         state="awaiting_reminder_time",
         state_data=json.dumps({"goal_id": goal.id}),
     )
+    user = db.users.get(user.id)  # Refresh user object
 
     response = process_text(user, "10:00")
 
@@ -91,6 +96,32 @@ def test_process_text_set_reminder_time() -> None:
     # Verify state cleared
     user = db.users.get(user.id)
     assert user.state is None
+
+
+def test_process_text_blocking_state() -> None:
+    """Test that unrelated commands are blocked when in 'awaiting_reminder_time' state."""
+    user = db.users.create("+1234567890", "UTC")
+    goal = db.goals.create(user.id, "🏃", "Run 5k")
+    db.users.set_state(
+        user.id,
+        state="awaiting_reminder_time",
+        state_data=json.dumps({"goal_id": goal.id}),
+    )
+    user = db.users.get(user.id)  # Refresh user object
+
+    # Try sending "goals" command
+    response = process_text(user, "goals")
+
+    # Should fail with reminder enforcement message
+    assert response == ERROR_COMPLETE_REMINDER_TIME
+
+    # Try sending "add goal" command
+    response = process_text(user, "add goal 📚 Read")
+    assert response == ERROR_COMPLETE_REMINDER_TIME
+
+    # State should remain
+    user = db.users.get(user.id)
+    assert user.state == "awaiting_reminder_time"
 
 
 def test_process_text_list_goals() -> None:

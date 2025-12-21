@@ -67,7 +67,7 @@ def test_route_message_creates_user(
     msg = _make_message()
     route_message(msg)
 
-    mock_db.users.create.assert_called_once_with("+123", "UTC")
+    mock_db.users.create.assert_called_once_with("+123", "UTC", client_type="whatsapp")
 
 
 def test_route_message_audio_with_tuple(
