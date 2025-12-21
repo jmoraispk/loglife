@@ -63,7 +63,10 @@ class UsersTable:
         client_type: str = "whatsapp",
     ) -> User:
         """Create a new user record."""
-        query = "INSERT INTO users (phone_number, timezone, referred_by_id, client_type) VALUES (?, ?, ?, ?)"
+        query = (
+            "INSERT INTO users (phone_number, timezone, referred_by_id, client_type) "
+            "VALUES (?, ?, ?, ?)"
+        )
         cursor = self._conn.execute(query, (phone_number, timezone, referred_by_id, client_type))
         # We need to fetch the created user to return the full model with ID and timestamps
         # The result of get() will not be None here because we just inserted it.
@@ -132,7 +135,8 @@ class UsersTable:
                     "%Y-%m-%d %H:%M:%S",
                 ).replace(tzinfo=UTC)
 
-        # Handle missing client_type for older records if any (though schema default handles new ones)
+        # Handle missing client_type for older records if any
+        # (though schema default handles new ones)
         if "client_type" not in data:
             data["client_type"] = "whatsapp"
 

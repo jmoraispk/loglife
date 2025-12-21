@@ -7,7 +7,6 @@ from unittest.mock import patch
 import pytest
 
 from loglife.app.config import (
-    ERROR_ADD_GOAL_FIRST,
     ERROR_COMPLETE_REMINDER_TIME,
     ERROR_NO_GOALS_SET,
     USAGE_RATE,
@@ -83,7 +82,7 @@ def test_process_text_set_reminder_time() -> None:
         state="awaiting_reminder_time",
         state_data=json.dumps({"goal_id": goal.id}),
     )
-    user = db.users.get(user.id) # Refresh user object
+    user = db.users.get(user.id)  # Refresh user object
 
     response = process_text(user, "10:00")
 
@@ -108,14 +107,14 @@ def test_process_text_blocking_state() -> None:
         state="awaiting_reminder_time",
         state_data=json.dumps({"goal_id": goal.id}),
     )
-    user = db.users.get(user.id) # Refresh user object
+    user = db.users.get(user.id)  # Refresh user object
 
     # Try sending "goals" command
     response = process_text(user, "goals")
 
     # Should fail with reminder enforcement message
     assert response == ERROR_COMPLETE_REMINDER_TIME
-    
+
     # Try sending "add goal" command
     response = process_text(user, "add goal 📚 Read")
     assert response == ERROR_COMPLETE_REMINDER_TIME
