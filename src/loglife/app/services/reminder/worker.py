@@ -79,7 +79,7 @@ def _process_due_reminder(user: User, goal: Goal) -> None:
     else:
         message = _build_standard_reminder_message(goal)
 
-    queue_async_message(user.phone_number, message, client_type="whatsapp")
+    queue_async_message(user.phone_number, message, client_type=user.client_type)
     logger.info(
         "Sent reminder '%s' to %s",
         goal.goal_description,

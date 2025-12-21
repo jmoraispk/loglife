@@ -22,7 +22,7 @@ def route_message(message: Message) -> None:
     user = db.users.get_by_phone(message.sender)
     if not user:
         timezone = get_timezone_from_number(message.sender)
-        user = db.users.create(message.sender, timezone)
+        user = db.users.create(message.sender, timezone, client_type=message.client_type)
 
     attachments: dict[str, Any] = {}
 
