@@ -202,7 +202,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Patterns → progress</h3>
-              <p className="text-slate-600 leading-relaxed">AI surfaces patterns in your logs, helping you see what's working and what needs attention.</p>
+              <p className="text-slate-600 leading-relaxed">AI surfaces patterns in your logs, helping you see what&apos;s working and what needs attention.</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
@@ -212,7 +212,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Ask your data</h3>
-              <p className="text-slate-600 leading-relaxed">Query your logs in plain language. "How often did I exercise last month?" Get instant answers.</p>
+              <p className="text-slate-600 leading-relaxed">Query your logs in plain language. &quot;How often did I exercise last month?&quot; Get instant answers.</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
@@ -258,7 +258,7 @@ export default function HomePage() {
               <div className="flex-shrink-0 w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center text-white text-2xl font-bold">2</div>
               <div className="flex-1">
                 <h3 className="text-2xl font-bold text-slate-900 mb-3">Boost your habit</h3>
-                <p className="text-slate-600 leading-relaxed">Set your why, schedule it, and design your environment for success. We'll help you think through what makes habits stick.</p>
+                <p className="text-slate-600 leading-relaxed">Set your why, schedule it, and design your environment for success. We&apos;ll help you think through what makes habits stick.</p>
               </div>
             </div>
             
@@ -370,7 +370,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
             <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
-                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="Sarah M." className="w-12 h-12 rounded-full object-cover mr-4" />
+                <Image src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-1.jpg" alt="Sarah M." width={48} height={48} className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
                   <div className="font-bold text-slate-900">Sarah M.</div>
                   <div className="text-sm text-slate-500">28-day streak</div>
@@ -383,12 +383,12 @@ export default function HomePage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-slate-600 leading-relaxed">"The voice notes are a game changer. I can log while cooking, driving, or getting ready. No more excuses."</p>
+              <p className="text-slate-600 leading-relaxed">&quot;The voice notes are a game changer. I can log while cooking, driving, or getting ready. No more excuses.&quot;</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
-                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" alt="Michael T." className="w-12 h-12 rounded-full object-cover mr-4" />
+                <Image src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-2.jpg" alt="Michael T." width={48} height={48} className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
                   <div className="font-bold text-slate-900">Michael T.</div>
                   <div className="text-sm text-slate-500">14-day streak</div>
@@ -401,12 +401,12 @@ export default function HomePage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-slate-600 leading-relaxed">"Seeing patterns in my sleep schedule was eye-opening. I didn't realize how inconsistent I was until LogLife showed me."</p>
+              <p className="text-slate-600 leading-relaxed">&quot;Seeing patterns in my sleep schedule was eye-opening. I didn&apos;t realize how inconsistent I was until LogLife showed me.&quot;</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
-                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="Emma L." className="w-12 h-12 rounded-full object-cover mr-4" />
+                <Image src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-5.jpg" alt="Emma L." width={48} height={48} className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
                   <div className="font-bold text-slate-900">Emma L.</div>
                   <div className="text-sm text-slate-500">42-day streak</div>
@@ -419,12 +419,12 @@ export default function HomePage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-slate-600 leading-relaxed">"Finally, a journaling tool that doesn't feel like homework. I love that it's private and my data stays mine."</p>
+              <p className="text-slate-600 leading-relaxed">&quot;Finally, a journaling tool that doesn&apos;t feel like homework. I love that it&apos;s private and my data stays mine.&quot;</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
-                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" alt="David K." className="w-12 h-12 rounded-full object-cover mr-4" />
+                <Image src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-3.jpg" alt="David K." width={48} height={48} className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
                   <div className="font-bold text-slate-900">David K.</div>
                   <div className="text-sm text-slate-500">21-day streak</div>
@@ -437,12 +437,12 @@ export default function HomePage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-slate-600 leading-relaxed">"The query feature is brilliant. I asked 'How many times did I work out in January?' and got an instant answer."</p>
+              <p className="text-slate-600 leading-relaxed">&quot;The query feature is brilliant. I asked &apos;How many times did I work out in January?&apos; and got an instant answer.&quot;</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
-                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-6.jpg" alt="Jessica R." className="w-12 h-12 rounded-full object-cover mr-4" />
+                <Image src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-6.jpg" alt="Jessica R." width={48} height={48} className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
                   <div className="font-bold text-slate-900">Jessica R.</div>
                   <div className="text-sm text-slate-500">35-day streak</div>
@@ -455,12 +455,12 @@ export default function HomePage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-slate-600 leading-relaxed">"No guilt, no pressure. Just honest tracking and gentle reminders. This is how habit tracking should be."</p>
+              <p className="text-slate-600 leading-relaxed">&quot;No guilt, no pressure. Just honest tracking and gentle reminders. This is how habit tracking should be.&quot;</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-8 rounded-2xl transition-all">
               <div className="flex items-center mb-6">
-                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg" alt="Ryan P." className="w-12 h-12 rounded-full object-cover mr-4" />
+                <Image src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-4.jpg" alt="Ryan P." width={48} height={48} className="w-12 h-12 rounded-full object-cover mr-4" />
                 <div>
                   <div className="font-bold text-slate-900">Ryan P.</div>
                   <div className="text-sm text-slate-500">49-day streak</div>
@@ -473,7 +473,7 @@ export default function HomePage() {
                   </svg>
                 ))}
               </div>
-              <p className="text-slate-600 leading-relaxed">"I've tried so many habit trackers. This is the first one that actually stuck. WhatsApp integration is genius."</p>
+              <p className="text-slate-600 leading-relaxed">&quot;I&apos;ve tried so many habit trackers. This is the first one that actually stuck. WhatsApp integration is genius.&quot;</p>
             </div>
           </div>
         </div>
@@ -586,7 +586,7 @@ export default function HomePage() {
                   </svg>
                   <div>
                     <h4 className="font-bold text-slate-900 mb-2">Honesty & Transparency</h4>
-                    <p className="text-slate-600">Clear about what we do and don't do with your data.</p>
+                    <p className="text-slate-600">Clear about what we do and don&apos;t do with your data.</p>
                   </div>
                 </div>
               </div>
@@ -609,7 +609,7 @@ export default function HomePage() {
                   </div>
                   <div>
                     <h4 className="font-bold mb-2">No ads, ever</h4>
-                    <p className="text-emerald-50">We'll never show you ads or use your data for advertising.</p>
+                    <p className="text-emerald-50">We&apos;ll never show you ads or use your data for advertising.</p>
                   </div>
                 </div>
                 
@@ -700,7 +700,7 @@ export default function HomePage() {
                   </svg>
                   <div>
                     <h4 className="font-bold text-slate-900 mb-2">Fast support</h4>
-                    <p className="text-slate-600">Real humans, quick responses. We're here to help when you need us.</p>
+                    <p className="text-slate-600">Real humans, quick responses. We&apos;re here to help when you need us.</p>
                   </div>
                 </div>
                 
@@ -718,11 +718,11 @@ export default function HomePage() {
             
             <div className="bg-slate-100 rounded-2xl p-10">
               <div className="flex items-start space-x-4">
-                <img src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-8.jpg" alt="Founder" className="w-16 h-16 rounded-full object-cover" />
+                <Image src="https://storage.googleapis.com/uxpilot-auth.appspot.com/avatars/avatar-8.jpg" alt="Founder" width={64} height={64} className="w-16 h-16 rounded-full object-cover" />
                 <div>
                   <h3 className="text-xl font-bold text-slate-900 mb-3">A note from the founder</h3>
                   <p className="text-slate-600 leading-relaxed mb-4">
-                    "I built LogLife because I was tired of habit trackers that felt like work. I wanted something that fit into my life, not another app demanding my attention. If you have feedback, ideas, or just want to chat, please reach out. This is a work in progress, and your input shapes where we go next."
+                    &quot;I built LogLife because I was tired of habit trackers that felt like work. I wanted something that fit into my life, not another app demanding my attention. If you have feedback, ideas, or just want to chat, please reach out. This is a work in progress, and your input shapes where we go next.&quot;
                   </p>
                   <p className="text-slate-600 font-medium">— The LogLife Team</p>
                 </div>
@@ -837,7 +837,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-3">Streak</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">Consecutive days of completing a habit. Streaks provide visual proof of progress and momentum. But don't let a broken streak derail you—recovery matters more.</p>
+              <p className="text-slate-600 text-sm leading-relaxed">Consecutive days of completing a habit. Streaks provide visual proof of progress and momentum. But don&apos;t let a broken streak derail you—recovery matters more.</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
@@ -847,7 +847,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-3">Pattern</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">Recurring behaviors or correlations in your logs. LogLife surfaces patterns automatically so you can see what's working and what needs attention.</p>
+              <p className="text-slate-600 text-sm leading-relaxed">Recurring behaviors or correlations in your logs. LogLife surfaces patterns automatically so you can see what&apos;s working and what needs attention.</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
@@ -857,7 +857,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-3">Query</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">Asking your data questions in plain language. "How often did I meditate last month?" LogLife turns your logs into searchable insights.</p>
+              <p className="text-slate-600 text-sm leading-relaxed">Asking your data questions in plain language. &quot;How often did I meditate last month?&quot; LogLife turns your logs into searchable insights.</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
@@ -897,7 +897,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-3">Implementation Intention</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">A plan that specifies when, where, and how you'll act. "I will [behavior] at [time] in [location]." This format increases follow-through by 91%.</p>
+              <p className="text-slate-600 text-sm leading-relaxed">A plan that specifies when, where, and how you&apos;ll act. &quot;I will [behavior] at [time] in [location].&quot; This format increases follow-through by 91%.</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
@@ -907,7 +907,7 @@ export default function HomePage() {
                 </svg>
               </div>
               <h3 className="text-lg font-bold text-slate-900 mb-3">Habit Stacking</h3>
-              <p className="text-slate-600 text-sm leading-relaxed">Linking a new habit to an existing one. "After I [current habit], I will [new habit]." Uses existing neural pathways to build new behaviors faster.</p>
+              <p className="text-slate-600 text-sm leading-relaxed">Linking a new habit to an existing one. &quot;After I [current habit], I will [new habit].&quot; Uses existing neural pathways to build new behaviors faster.</p>
             </div>
             
             <div className="bg-gradient-to-br from-emerald-50 to-white p-6 rounded-xl transition-all">
@@ -927,7 +927,7 @@ export default function HomePage() {
         <div className="container mx-auto px-12">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-slate-900 mb-4">Product Roadmap</h2>
-            <p className="text-xl text-slate-600">See what we're working on and what's coming next</p>
+            <p className="text-xl text-slate-600">See what we&apos;re working on and what&apos;s coming next</p>
           </div>
           
           <div className="max-w-6xl mx-auto grid lg:grid-cols-3 gap-8">
