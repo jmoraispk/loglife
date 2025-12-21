@@ -96,6 +96,7 @@ ERROR_INVALID_DELETE_FORMAT = "Invalid format. Usage: `delete [goal number]`\nEx
 ERROR_INVALID_UPDATE_FORMAT = "Usage: `update [goal number] [time]`\nExample: `update 1 8pm`"
 ERROR_INVALID_TIME_FORMAT = "Invalid time format. Try: 8pm, 9:30am, 20:00"
 ERROR_ADD_GOAL_FIRST = "Please add a goal first."
+ERROR_COMPLETE_REMINDER_TIME = "Please add the reminder time for the newly added goal."
 
 # Usage messages
 USAGE_RATE = "❌ Usage: rate 2 3 (goal number and rating 1-3)"

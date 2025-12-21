@@ -29,6 +29,7 @@ def test_check_reminders() -> None:
     mock_user.id = 1
     mock_user.timezone = "UTC"
     mock_user.phone_number = "1234567890"
+    mock_user.client_type = "whatsapp"
 
     mock_goal = MagicMock(spec=Goal)
     mock_goal.id = 10

@@ -35,7 +35,7 @@ dev = [
     # Tests
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",  # Summaries of line coverage in tests 
-    "sqlite-web>=0.6.5",  # Web database
+    "sqlite-web>=0.6.6",  # Web database
 ]
 
 [tool.setuptools.packages.find]
@@ -65,3 +65,8 @@ ignore = [
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "error",
+]
