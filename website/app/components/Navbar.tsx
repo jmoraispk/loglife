@@ -11,13 +11,13 @@ export default function Navbar() {
       <div className="container mx-auto px-12 py-3">
         <div className="flex items-center justify-between">
           <Link href="/#hero" className="flex items-center group">
-            <div className="flex items-center overflow-visible transition-transform duration-200 group-hover:scale-[1.02]">
+            <div className="flex items-center overflow-visible transition-transform duration-200 group-hover:scale-[1.02] pt-2.5 py-0.5">
               <Image
                 src="/logo.svg"
                 alt="LogLife"
                 width={140}
                 height={35}
-                className="h-11 w-auto"
+                className="h-10 w-auto"
                 priority
               />
             </div>
