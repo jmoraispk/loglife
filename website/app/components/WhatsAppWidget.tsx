@@ -1,6 +1,8 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
+import { useTheme } from "../contexts/ThemeContext";
 
 function IconWhatsApp() {
   return (
@@ -34,21 +36,28 @@ function IconQR() {
 }
 
 export default function WhatsAppWidget() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { isOpen, toggleWidget, closeWidget } = useWhatsAppWidget();
+  const { isDarkMode } = useTheme();
   const [isAnimating, setIsAnimating] = useState(false);
   const number = "17155157761"; 
   const message = "help";
   const link = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 
+  useEffect(() => {
+    if (isOpen) {
+      setIsAnimating(false);
+    }
+  }, [isOpen]);
+
   const handleToggle = () => {
     if (isOpen) {
       setIsAnimating(true);
       setTimeout(() => {
-        setIsOpen(false);
+        closeWidget();
         setIsAnimating(false);
       }, 100);
     } else {
-      setIsOpen(true);
+      toggleWidget();
     }
   };
 
@@ -56,7 +65,11 @@ export default function WhatsAppWidget() {
     <>
       {isOpen && (
         <div 
-          className={`fixed bottom-6 right-24 z-50 flex flex-col items-center rounded-3xl bg-gradient-to-br from-white to-gray-50 p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] border border-gray-200/50 backdrop-blur-sm max-w-sm transition-all ease-out ${
+          className={`fixed bottom-6 right-24 z-50 flex flex-col items-center rounded-3xl p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-sm max-w-sm transition-all ease-out ${
+            isDarkMode
+              ? "bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50"
+              : "bg-gradient-to-br from-white to-gray-50 border border-gray-200/50"
+          } ${
             isAnimating 
               ? 'opacity-0 translate-x-12 duration-200' 
               : 'opacity-100 translate-x-0 duration-300'
@@ -70,15 +83,21 @@ export default function WhatsAppWidget() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-gray-900">Start Logging</h3>
-              <p className="text-sm text-gray-500">Chat with LogLife on WhatsApp</p>
+              <h3 className={`text-lg font-bold transition-colors ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}>Start Logging</h3>
+              <p className={`text-sm transition-colors ${
+                isDarkMode ? "text-slate-400" : "text-gray-500"
+              }`}>Chat with LogLife on WhatsApp</p>
             </div>
           </div>
 
           {/* QR Code Section */}
           <div className="relative mb-6 group">
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
-            <div className="relative bg-white p-6 rounded-2xl">
+            <div className={`relative p-6 rounded-2xl transition-colors ${
+              isDarkMode ? "bg-slate-700" : "bg-white"
+            }`}>
               <div className="relative w-64 h-64">
                 <Image 
                   src="/qr_code.png" 
@@ -91,20 +110,32 @@ export default function WhatsAppWidget() {
           </div>
 
           {/* Info Section */}
-          <div className="flex items-center gap-2 mb-6 px-4 py-3 bg-emerald-50 rounded-xl border border-emerald-100">
-            <div className="text-emerald-600">
+          <div className={`flex items-center gap-2 mb-6 px-4 py-3 rounded-xl border transition-colors ${
+            isDarkMode
+              ? "bg-emerald-900/30 border-emerald-800/50"
+              : "bg-emerald-50 border-emerald-100"
+          }`}>
+            <div className={isDarkMode ? "text-emerald-400" : "text-emerald-600"}>
               <IconQR />
             </div>
-            <p className="text-sm text-emerald-800 font-medium">
+            <p className={`text-sm font-medium transition-colors ${
+              isDarkMode ? "text-emerald-300" : "text-emerald-800"
+            }`}>
               Scan QR code to start chatting
             </p>
           </div>
 
           {/* Divider */}
           <div className="w-full flex items-center gap-4 mb-6">
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
-            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">or</span>
-            <div className="flex-1 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent" />
+            <div className={`flex-1 h-px bg-gradient-to-r from-transparent to-transparent transition-colors ${
+              isDarkMode ? "via-slate-600" : "via-gray-300"
+            }`} />
+            <span className={`text-xs font-semibold uppercase tracking-wider transition-colors ${
+              isDarkMode ? "text-slate-500" : "text-gray-400"
+            }`}>or</span>
+            <div className={`flex-1 h-px bg-gradient-to-r from-transparent to-transparent transition-colors ${
+              isDarkMode ? "via-slate-600" : "via-gray-300"
+            }`} />
           </div>
 
           {/* Button */}
@@ -129,7 +160,9 @@ export default function WhatsAppWidget() {
         onClick={handleToggle}
         className={`fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full p-4 transition-all duration-300 ease-out cursor-pointer ${
           isOpen 
-            ? "bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white hover:scale-105 shadow-lg border border-gray-200 rotate-90" 
+            ? isDarkMode
+              ? "bg-slate-800/90 backdrop-blur-sm text-slate-200 hover:bg-slate-700 hover:scale-105 shadow-lg border border-slate-700 rotate-90"
+              : "bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white hover:scale-105 shadow-lg border border-gray-200 rotate-90"
             : "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white shadow-2xl hover:shadow-emerald-500/50 hover:scale-110 border border-emerald-400 rotate-0"
         }`}
         aria-label={isOpen ? "Close WhatsApp popup" : "Open WhatsApp popup"}
