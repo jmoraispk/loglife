@@ -16,17 +16,12 @@
 
 > [!IMPORTANT]
 > LogLife is in a pre-alpha state, and only suitable for use by developers
->
 
 ## 🌿 About LogLife
 
 **LogLife** is an audio-first, chat-native tool for people who need a frictionless way to journal and think about their lives. Living inside your favorite chat app, LogLife helps you capture daily notes, see behavior patterns, and turn those insights into steady progress.
 
-
-It combines a minimalist interface with powerful backend processing to help you:
-*   **Capture** thoughts instantly via voice notes.
-*   **Reflect** on your day with clear summaries.
-*   **Grow** by tracking your goals without the guilt.
+It combines a minimalist interface with powerful backend processing to help you **Capture** thoughts instantly, **Reflect** on your day, and **Grow** by tracking your goals without the guilt.
 
 ---
 
@@ -38,13 +33,41 @@ It combines a minimalist interface with powerful backend processing to help you:
 *   **🌱 Pattern Recognition:** Turn scattered thoughts into progress. Our AI spots patterns in your logs to help you reflect and grow.
 *   **🔔 Calm Nudges:** Smart, low-stress reminders that encourage consistency rather than demanding attention.
 *   **🤝 Frictionless Sharing:** Invite others to the journey simply by sharing a contact card.
-*   **🔒 Private by Design:** Your reflections are personal. Secure & encrypted from the ground up.
-*   **🧘‍♂️ Quiet Technology:** A tool that is calm, trustworthy, and encouraging, not flashy. 
+
+---
+
+## 📂 Repository Structure
+
+This repository acts as a **Monorepo** containing three distinct components:
+
+| Component | Path | Description |
+| :--- | :--- | :--- |
+| **Core Framework** | `src/loglife/core` | A reusable, unopinionated Python library for building WhatsApp bots. It handles **Threading**, **Queues**, and **Transport Adapters**. Use this if you want to build *your own* bot. |
+| **Reference App** | `src/loglife/app` | The "LogLife" product (Journaling & Goal Tracking) built *on top* of the Core Framework. It implements **Business Logic**, **Database Models**, and **AI Processing**. |
+| **Website** | `website/` | The Next.js landing page (loglife.co) that showcases the product and hosts blogposts. |
+
+```text
+loglife/
+├── src/loglife/
+│   ├── core/               # The reusable Bot Framework
+│   │   ├── messaging.py    # Threading Engine w/ Queues (Receiver & Sender)
+│   │   ├── transports.py   # Transport Adapters (WhatsApp/Emulator)
+│   │   ├── startup.py      # App Bootstrap Logic
+│   │   └── interface.py    # Public API (recv_msg, send_msg)
+│   └── app/                # The Journaling App Logic
+│       ├── logic/          # Business Logic (Text/Audio handlers)
+│       ├── db/             # SQLite Models & Schema
+│       └── services/       # Background Workers (Reminders, UI)
+├── website/                # The Next.js Landing Page
+└── whatsapp-client/        # The Node.js WhatsApp Bridge
+```
+
 ---
 
 ## 🚀 How It Works
 
-LogLife operates as a friendly bot in your WhatsApp. Here is the typical user flow:
+### The User Experience (App)
+This diagram shows the high-level flow of how a user interacts with the LogLife Journaling App:
 
 <div align="center">
   <img src="docs/figures/png/user-flow.png" alt="LogLife User Flow" width="800" />
@@ -54,28 +77,15 @@ LogLife operates as a friendly bot in your WhatsApp. Here is the typical user fl
 2.  **Process:** The system processes your input (transcribing audio, updating database).
 3.  **Respond:** LogLife replies with confirmations, summaries, or next steps.
 
----
-
-## 🏗️ System Architecture
-
-LogLife is built with a microservices architecture to ensure scalability and separation of concerns:
+### The Internals (Core)
+This diagram shows how the `loglife.core` library handles the threading and message queues under the hood:
 
 <div align="center">
   <img src="docs/figures/png/system-overview.png" alt="LogLife Architecture" width="800" />
 </div>
 
-*   **Backend:** Python (Flask) handling business logic, database operations (SQLite), and AI integration.
-*   **WhatsApp Client:** Node.js service using `whatsapp-web.js` to interface with the WhatsApp network.
-*   **AI Services:** Integration with **AssemblyAI** (transcription) and **OpenAI** (summarization).
-
----
-
-## 🛠️ Tech Stack
-
-*   **Backend:** Python 3.11+, Flask, SQLite
-*   **Client:** Node.js, whatsapp-web.js, Express
-*   **AI:** OpenAI GPT-4 (or similar), AssemblyAI
-*   **Tools:** `uv` (Python package manager), `pytest`, `ruff`
+*   **Producer-Consumer Architecture:** Ensures the web server (Webhook) is never blocked by slow processing tasks.
+*   **Transport Layer:** Decouples logic from the specific delivery mechanism (WhatsApp vs. Emulator).
 
 ---
 
@@ -84,11 +94,8 @@ LogLife is built with a microservices architecture to ensure scalability and sep
 Follow these steps to set up LogLife on your local machine.
 
 ### Prerequisites
-
-*   Python 3.11 or higher
-*   Node.js 16 or higher
-*   A WhatsApp account (to act as the bot)
-*   API Keys for OpenAI and AssemblyAI
+*   Python 3.11+ and Node.js 16+
+*   A WhatsApp account
 
 ### Installation
 
@@ -98,41 +105,39 @@ Follow these steps to set up LogLife on your local machine.
     cd loglife
     ```
 
-2.  **Set up the Backend:**
+2.  **Configure API Keys:**
+    Copy the example environment file and add your keys:
     ```bash
-    # Install dependencies and run the backend
-    uv run src/loglife/main.py
+    cp .env.example .env
+    # Edit .env to add OPENAI_API_KEY and ASSEMBLYAI_API_KEY
     ```
 
-3.  **Set up the WhatsApp Client:**
+3.  **Run the Backend (Python):**
+    ```bash
+    uv run src/loglife/main.py
+    ```
+    *The server will start at `http://localhost:8080`.*
+
+4.  **Run the Client (Node.js):**
     Open a new terminal window:
     ```bash
     cd whatsapp-client
-    npm install
-    node index.js
+    npm install && node index.js
     ```
-
-4.  **Connect WhatsApp:**
-    *   The Node.js client will generate a QR code in the terminal.
-    *   Open WhatsApp on your phone (Linked Devices) and scan the QR code.
-
-### 🧪 Running Tests
-
-To ensure everything is working correctly, run the backend tests:
-
-```bash
-uv run pytest tests
-```
+    *Scan the QR code with your WhatsApp mobile app (Linked Devices).*
 
 ---
 
 ## 📚 Documentation
 
-For more detailed information, check out the full documentation in the `docs/` folder:
+For deep dives into specific topics, check the `docs/` folder:
 
-*   **[Usage Guide](docs/usage/overview.md):** Learn how to use audio journaling and goal tracking.
-*   **[Developer Guide](docs/developer/overview.md):** Deep dive into the backend and client setup.
-*   **[API Reference](docs/api/overview.md):** Explore the internal API endpoints.
+| Section | Description |
+| :--- | :--- |
+| [**User Manual**](docs/usage/overview.md) | How to use the bot (Journaling, Goals, Reminders). |
+| [**Developer Guide**](docs/developer/overview.md) | Detailed Setup, Tech Stack, and Testing. |
+| [**Core Architecture**](docs/core/architecture.md) | Deep dive into Threads, Queues, and Transports. |
+| [**Quickstart**](docs/core/quickstart.md) | Guide to building your own custom bot. |
 
 ---
 

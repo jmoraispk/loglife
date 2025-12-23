@@ -1,17 +1,15 @@
 """Messaging module - unified interface for message handling."""
 
-import json
 import logging
-from collections.abc import Callable, Generator, Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from queue import Empty, Queue
-from threading import Lock, Thread
+from threading import Thread
 from typing import Any
 
-import requests
 from flask import g
 
-from loglife.app.config import WHATSAPP_API_URL
+from loglife.core.transports import send_emulator_message, send_whatsapp_message
 
 logger = logging.getLogger(__name__)
 
@@ -41,43 +39,10 @@ class Message:
         )
 
 
-# --- Log Broadcaster ---
-
-
-class LogBroadcaster:
-    """Broadcasts logs to multiple listeners (SSE clients)."""
-
-    def __init__(self) -> None:
-        """Initialize the log broadcaster."""
-        self._listeners: set[Queue[str]] = set()
-        self._lock = Lock()
-
-    def publish(self, message: str) -> None:
-        """Send a message to all active listeners."""
-        with self._lock:
-            for q in self._listeners:
-                q.put(message)
-
-    def listen(self) -> Generator[str, None, None]:
-        """Yield messages for a single listener."""
-        q: Queue[str] = Queue()
-        with self._lock:
-            self._listeners.add(q)
-        try:
-            while True:
-                msg = q.get()
-                yield msg
-        finally:
-            with self._lock:
-                if q in self._listeners:
-                    self._listeners.remove(q)
-
-
 # --- Globals ---
 # Defined after Message class to avoid forward reference issues
 _inbound_queue: Queue[Message] = Queue()
 _outbound_queue: Queue[Message] = Queue()
-log_broadcaster = LogBroadcaster()
 
 _router_worker_started = False
 _sender_worker_started = False
@@ -179,39 +144,9 @@ def _dispatch_outbound(message: Message) -> None:
     client = message.client_type or "whatsapp"
     logger.debug("Dispatching to client type: %s", client)
     if client == "emulator":
-        _send_emulator_message(message.raw_payload, attachments=message.attachments)
+        send_emulator_message(message.raw_payload, attachments=message.attachments)
     else:
-        _send_whatsapp_message(message.sender, message.raw_payload, attachments=message.attachments)
-
-
-def _send_emulator_message(message: str, attachments: dict[str, Any] | None = None) -> None:
-    logger.info("Sending emulator message: %s", message)
-
-    if attachments and "transcript_file" in attachments:
-        try:
-            data = json.dumps({"text": message, "transcript_file": attachments["transcript_file"]})
-            log_broadcaster.publish(data)
-        except Exception:
-            logger.exception("Failed to serialize emulator message")
-            log_broadcaster.publish(message)
-    else:
-        log_broadcaster.publish(message)
-
-
-def _send_whatsapp_message(
-    number: str, message: str, attachments: dict[str, Any] | None = None
-) -> None:
-    payload = {"number": number, "message": message}
-    if attachments:
-        payload["attachments"] = attachments
-
-    headers = {"Content-Type": "application/json"}
-    try:
-        requests.post(WHATSAPP_API_URL, json=payload, headers=headers, timeout=30)
-    except Exception as exc:
-        error = f"Error sending WhatsApp message > {exc}"
-        logger.exception(error)
-        raise RuntimeError(error) from exc
+        send_whatsapp_message(message.sender, message.raw_payload, attachments=message.attachments)
 
 
 def queue_async_message(
@@ -244,9 +179,9 @@ def send_message(
     """Send a message immediately whenever client context is available."""
     target_client = client_type or getattr(g, "client_type", None)
     if target_client == "emulator":
-        _send_emulator_message(message)
+        send_emulator_message(message)
     elif target_client == "whatsapp":
-        _send_whatsapp_message(number, message)
+        send_whatsapp_message(number, message)
     else:
         logger.info(
             "Queueing async message for %s (client_type=%s)",

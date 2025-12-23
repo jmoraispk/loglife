@@ -76,7 +76,7 @@ def app_and_mock(real_db_path: str) -> Generator[tuple[Flask, MagicMock], None, 
     # 2. Create App without mocks
     # We intentionally do NOT mock start_message_worker etc.
     # However, we might need to mock 'requests.post' if we don't want to hit real WhatsApp
-    with patch("loglife.core.messaging.requests.post") as mock_post:
+    with patch("loglife.core.transports.requests.post") as mock_post:
         # Default to success, but tests can override side_effect
         mock_post.return_value.status_code = 200
 
