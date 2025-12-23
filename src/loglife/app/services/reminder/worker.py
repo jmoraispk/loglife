@@ -21,8 +21,7 @@ from loglife.core.messaging import queue_async_message
 
 logger = logging.getLogger(__name__)
 
-MIN_WAIT_SECONDS = 10
-MAX_WAIT_SECONDS = 60
+WORKER_SLEEP_SECONDS = 60
 
 
 def _is_reminder_due(goal: Goal, user: User, now_utc: datetime) -> bool:
@@ -109,16 +108,14 @@ def _check_reminders() -> None:
 def _reminder_worker() -> None:
     """Run daemonized worker loop for checking and sending reminders."""
     while True:
-        # Calculate seconds until the start of the next minute
-        now = datetime.now(UTC)
-        sleep_seconds = 60 - now.second + 0.5  # +0.5s buffer to land in next minute
-        logger.debug("Reminder worker sleeping for %.2f seconds", sleep_seconds)
-        time.sleep(sleep_seconds)
-
         try:
             _check_reminders()
         except Exception:
             logger.exception("Unhandled error while checking reminders")
+
+        # Sleep for 60 seconds.
+        # We rely on _is_reminder_due matching the Hour:Minute of the current time.
+        time.sleep(WORKER_SLEEP_SECONDS)
 
 
 def start_reminder_service() -> threading.Thread:

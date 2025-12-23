@@ -8,7 +8,7 @@ from collections.abc import Generator
 from flask import Blueprint, Response, render_template
 
 from loglife.app.config.settings import EMULATOR_SQLITE_WEB_URL
-from loglife.core.messaging import log_broadcaster
+from loglife.core.transports import log_broadcaster
 
 emulator_bp = Blueprint(
     "emulator",
