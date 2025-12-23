@@ -15,6 +15,8 @@ from loglife.app.db.tables import Goal, Rating, User
 from loglife.app.logic.text.reminder_time import parse_time_string
 from loglife.app.logic.text.week import get_monday_before, look_back_summary
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
+from loglife.core.messaging import send_whatsapp_list_message
+from loglife.core.whatsapp_api.endpoints.messages import ListRow, ListSection
 
 MIN_PARTS_EXPECTED = 2
 
@@ -495,3 +497,52 @@ class HelpHandler(TextCommandHandler):
     def handle(self, _user: User, _message: str) -> str | None:
         """Process help command."""
         return messages.HELP_MESSAGE
+
+
+class ListHandler(TextCommandHandler):
+    """Return interactive menu with list buttons."""
+
+    COMMAND = "list"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'list'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process list command by sending interactive list message."""
+        # Create list sections with common commands
+        sections = [
+            ListSection(
+                title="Goals",
+                rows=[
+                    ListRow(id="goals", title="Goals"),
+                    ListRow(id="add goal", title="Add Goal"),
+                    ListRow(id="enable journaling", title="Enable Journaling"),
+                ],
+            ),
+            ListSection(
+                title="Viewing",
+                rows=[
+                    ListRow(id="week", title="Week Summary"),
+                    ListRow(id="lookback 7", title="Lookback 7 Days"),
+                ],
+            ),
+            ListSection(
+                title="More Commands",
+                rows=[
+                    ListRow(id="help", title="Full Help"),
+                ],
+            ),
+        ]
+
+        # Send list message
+        send_whatsapp_list_message(
+            number=user.phone_number,
+            button_text="Commands",
+            body="❓ *LogLife Commands*\n\nSelect a command from the list below:",
+            sections=sections,
+            footer="Tap a command to use it",
+        )
+
+        # Return None since we've already sent the message
+        return None

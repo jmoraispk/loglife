@@ -12,6 +12,7 @@ from loglife.app.logic.text.handlers import (
     GoalsListHandler,
     HelpHandler,
     JournalPromptsHandler,
+    ListHandler,
     LookbackHandler,
     RateAllHandler,
     RateSingleHandler,
@@ -40,11 +41,12 @@ HANDLERS: list[TextCommandHandler] = [
     LookbackHandler(),
     RateSingleHandler(),
     RateAllHandler(),
+    ListHandler(),
     HelpHandler(),
 ]
 
 
-def process_text(user: User, message: Message) -> str:
+def process_text(user: User, message: Message) -> str | None:
     """Route incoming text commands to the appropriate goal or rating handler.
 
     Handle commands such as adding goals, submitting ratings, configuring
@@ -88,8 +90,14 @@ def process_text(user: User, message: Message) -> str:
             if handler.matches(text_content):
                 result = handler.handle(user, text_content)
                 # Special case: add_goal can return None if no goal text provided
+                # In that case, continue to check other handlers
                 if result is not None:
                     return result
+                # If handler returns None and it's not AddGoalHandler,
+                # it means the message was already sent (e.g., ListHandler)
+                # Return None to prevent "Wrong command!" message
+                if not isinstance(handler, AddGoalHandler):
+                    return None
 
     except Exception as exc:
         logger.exception("Error in text processor")

@@ -95,20 +95,40 @@ def _process_meta_message(data: dict) -> ResponseReturnValue:
 
     message = messages[0]
     message_type = message.get("type")
-
-    # Process only text messages for now
-    if message_type != "text":
-        logger.debug("Ignoring non-text message type: %s", message_type)
-        return success_response(message=f"Ignored non-text message type: {message_type}")
-
-    # Extract sender and text content
     sender = message.get("from")
-    text_data = message.get("text", {})
-    raw_msg = text_data.get("body", "")
 
-    if not sender or not raw_msg:
-        logger.warning("Missing sender or message body in text message")
-        return error_response("Missing sender or message body")
+    if not sender:
+        logger.warning("Missing sender in message")
+        return error_response("Missing sender")
+
+    raw_msg = ""
+    # Handle text messages
+    if message_type == "text":
+        text_data = message.get("text", {})
+        raw_msg = text_data.get("body", "")
+        if not raw_msg:
+            logger.warning("Missing message body in text message")
+            return error_response("Missing message body")
+    # Handle interactive list messages
+    elif message_type == "interactive":
+        interactive_data = message.get("interactive", {})
+        interactive_type = interactive_data.get("type")
+
+        if interactive_type == "list_reply":
+            list_reply = interactive_data.get("list_reply", {})
+            raw_msg = list_reply.get("id", "")
+            if not raw_msg:
+                logger.warning("Missing list reply ID in interactive message")
+                return error_response("Missing list reply ID")
+            logger.info("Processing list reply: %s from %s", raw_msg, sender)
+        else:
+            logger.debug(
+                "Ignoring non-list-reply interactive message type: %s", interactive_type
+            )
+            return success_response(message=f"Ignored interactive type: {interactive_type}")
+    else:
+        logger.debug("Ignoring non-text/non-interactive message type: %s", message_type)
+        return success_response(message=f"Ignored message type: {message_type}")
 
     # Create custom payload matching the expected format
     custom_payload = {
@@ -130,7 +150,8 @@ def whatsapp_incoming() -> ResponseReturnValue:
     """Handle incoming messages from Meta WhatsApp Cloud API.
 
     GET: Webhook verification (Meta sends verification challenge)
-    POST: Processes only text messages, creates a custom payload, and forwards to /webhook.
+    POST: Processes text and interactive list messages, creates a custom payload,
+          and forwards to /webhook. List selections are sent as text commands.
     """
     if request.method == "GET":
         return _handle_webhook_verification()

@@ -50,10 +50,12 @@ def route_message(message: Message) -> None:
         response = "Sorry, something went wrong while processing your message."
         attachments = {}
 
-    queue_async_message(
-        message.sender,
-        response,
-        client_type=message.client_type or "whatsapp",
-        metadata=message.metadata,
-        attachments=attachments,
-    )
+    # Only queue message if response is not None (some handlers send messages directly)
+    if response is not None:
+        queue_async_message(
+            message.sender,
+            response,
+            client_type=message.client_type or "whatsapp",
+            metadata=message.metadata,
+            attachments=attachments,
+        )
