@@ -9,6 +9,7 @@ import pytest
 
 from loglife.core.messaging import (
     Message,
+    _dispatch_outbound,
     _inbound_queue,
     _outbound_queue,
     enqueue_inbound_message,
@@ -229,7 +230,6 @@ def test_sender_worker_dispatch_calls_transports() -> None:
         patch("loglife.core.messaging.send_emulator_message") as mock_emulator,
     ):
         # 1. WhatsApp
-        from loglife.core.messaging import _dispatch_outbound
         msg_wa = Message("+1", "chat", "hi", "whatsapp")
         _dispatch_outbound(msg_wa)
         mock_whatsapp.assert_called_once_with("+1", "hi", attachments={})
