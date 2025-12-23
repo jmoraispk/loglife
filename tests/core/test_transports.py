@@ -122,4 +122,3 @@ def test_send_emulator_message_json_failure() -> None:
 
         # Should fall back to publishing raw message
         mock_broadcaster.publish.assert_called_with("Text")
-
