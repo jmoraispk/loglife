@@ -55,6 +55,7 @@ def app() -> Generator[Flask, None, None]:
         patch("loglife.core.startup.start_reminder_service"),
         patch("loglife.core.startup.start_sender_worker"),  # Don't start sender worker in tests
         patch("loglife.core.startup.start_message_worker"),  # Don't start message worker in tests
+        patch("loglife.core.startup.start_sqlite_web"),  # Don't start devtools UI in tests
     ):
         app = create_app()
         app.config["TESTING"] = True

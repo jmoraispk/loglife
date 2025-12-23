@@ -12,10 +12,11 @@ The Framework is built on a **Producer-Consumer** architecture using Python's `q
 graph LR
     A[User] -->|WhatsApp Webhook| B(Main Thread)
     B -->|Push| C{Receive Queue}
-    C -->|Pop| D[Your Logic Loop]
+    C -->|Pop| D[Router Thread]
     D -->|Push| E{Send Queue}
     E -->|Pop| F[Sender Thread]
-    F -->|API Call| G[WhatsApp API]
+    F -->|Dispatch| G[Transport Adapter]
+    G -->|API Call| H[WhatsApp API]
 ```
 
 ---
@@ -27,11 +28,11 @@ The framework automatically manages the critical background threads for you.
 | Thread | Role | Efficiency |
 | :--- | :--- | :--- |
 | **MainThread** | **Web Server**. Receives Webhook & pushes to `Receive Queue`. Returns `200 OK` instantly. | ⚡ **High**. Non-blocking. |
-| **Your Loop** | **Logic**. You call `core.recv_msg()`. This is where your business logic lives. | 🐢 **Variable**. Depends on your code speed. |
-| **SenderThread** | **I/O Worker**. Pops from `Send Queue` and calls WhatsApp API. | 🐢 **Medium**. Handles network latency. |
+| **RouterWorker** | **Logic**. Consumes `Receive Queue`, processes logic (Text/Audio/VCard), and pushes replies to `Send Queue`. | 🐢 **Variable**. Depends on your code speed. |
+| **SenderWorker** | **I/O Worker**. Pops from `Send Queue` and delegates to the correct Transport. | 🐢 **Medium**. Handles network latency. |
 
 !!! tip "Why this matters"
-    Because the **SenderThread** is separate, your logic loop can queue 10 messages instantly and go back to listening for new inputs, while the Sender Thread handles the slow task of actually delivering them one by one.
+    Because the **SenderWorker** is separate, your logic loop can queue 10 messages instantly and go back to listening for new inputs, while the Sender Thread handles the slow task of actually delivering them one by one.
 
 ---
 
@@ -42,9 +43,15 @@ The core unifies all inputs (WhatsApp, Emulator, Tests) into a single `Message` 
 ### Workflow
 
 1.  **Ingestion**: Webhook receives JSON $\rightarrow$ Wraps in `Message` $\rightarrow$ Pushes to `Receive Queue`.
-2.  **Consumption**: You call `recv_msg()`, which blocks until a message is available.
-3.  **Production**: You call `send_msg()`, which wraps your text in a `Message` $\rightarrow$ Pushes to `Send Queue`.
-4.  **Delivery**: `SenderThread` wakes up $\rightarrow$ Pops message $\rightarrow$ Calls external API.
+2.  **Consumption**: `RouterWorker` calls `recv_msg()`, which blocks until a message is available.
+3.  **Production**: Your logic calls `send_msg()`, which wraps your text in a `Message` $\rightarrow$ Pushes to `Send Queue`.
+4.  **Delivery**: `SenderWorker` wakes up $\rightarrow$ Pops message $\rightarrow$ Calls `transports.send_whatsapp_message` (or Emulator).
+
+### Transport Layer
+
+The system decouples **Threading** from **Protocols**.
+*   **Threading**: `loglife.core.messaging` handles queues and workers.
+*   **Transports**: `loglife.core.transports` handles the actual API calls (Requests to WhatsApp, SSE to Emulator).
 
 ---
 

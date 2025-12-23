@@ -9,6 +9,7 @@ import pytest
 
 from loglife.core.messaging import (
     Message,
+    _dispatch_outbound,
     _inbound_queue,
     _outbound_queue,
     enqueue_inbound_message,
@@ -222,16 +223,38 @@ def test_start_sender_worker_dispatches() -> None:
     fake_dispatch.assert_called_once()
 
 
-def test_sender_worker_http_failure(caplog: pytest.LogCaptureFixture) -> None:
-    """Test that sender worker survives HTTP failures."""
+def test_sender_worker_dispatch_calls_transports() -> None:
+    """Test that _dispatch_outbound calls the correct transport functions."""
+    with (
+        patch("loglife.core.messaging.send_whatsapp_message") as mock_whatsapp,
+        patch("loglife.core.messaging.send_emulator_message") as mock_emulator,
+    ):
+        # 1. WhatsApp
+        msg_wa = Message("+1", "chat", "hi", "whatsapp")
+        _dispatch_outbound(msg_wa)
+        mock_whatsapp.assert_called_once_with("+1", "hi", attachments={})
+        mock_emulator.assert_not_called()
+
+        mock_whatsapp.reset_mock()
+
+        # 2. Emulator
+        msg_em = Message("em", "chat", "hi", "emulator")
+        _dispatch_outbound(msg_em)
+        mock_emulator.assert_called_once_with("hi", attachments={})
+        mock_whatsapp.assert_not_called()
+
+
+def test_sender_worker_transport_failure(caplog: pytest.LogCaptureFixture) -> None:
+    """Test that sender worker survives transport failures."""
     with (
         patch("loglife.core.messaging.Thread") as mock_thread_cls,
-        patch("loglife.core.messaging.requests.post") as mock_post,
+        # Patch the actual transport function called by _dispatch_outbound
+        patch("loglife.core.messaging.send_whatsapp_message") as mock_send,
         patch("loglife.core.messaging._sender_worker_started", False),  # noqa: FBT003
     ):
-        mock_post.side_effect = [
-            RuntimeError("HTTP 500"),  # First fails
-            MagicMock(status_code=200),  # Second succeeds
+        mock_send.side_effect = [
+            RuntimeError("Transport Error"),  # First fails
+            None,  # Second succeeds
         ]
 
         start_sender_worker()
@@ -246,7 +269,7 @@ def test_sender_worker_http_failure(caplog: pytest.LogCaptureFixture) -> None:
 
     assert "Failed to deliver outbound message" in caplog.text
     # Should have tried both messages
-    assert mock_post.call_count == 2
+    assert mock_send.call_count == 2
 
 
 def test_sender_worker_timeout_handling() -> None:
