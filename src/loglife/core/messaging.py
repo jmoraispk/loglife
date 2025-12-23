@@ -2,6 +2,7 @@
 
 import json
 import logging
+import os
 from collections.abc import Callable, Generator, Mapping
 from dataclasses import dataclass, field
 from queue import Empty, Queue
@@ -203,13 +204,9 @@ def _send_emulator_message(message: str, attachments: dict[str, Any] | None = No
         log_broadcaster.publish(message)
 
 
-# Hardcoded WhatsApp Business API credentials
-_WHATSAPP_ACCESS_TOKEN = (
-    "EAASsmCtrjdQBQTY8v8w7QvBjZBzP80grUKc323wJEm1qSaVKeXfwE5dZB0B0VgXx8UqrqWypj9ijnAowZA27"  # noqa: S105
-    "IfbrmuZCL51tKaYVuaQljvrxoMm3FUbbF0IWD2I5WDGXGCAlvVHe4LjeSzk3SXAaKCTmVv0C5uqZCvkygqEjs55"
-    "spt1dNYHwaHZCKkn986jkHXgQZDZD"
-)
-_WHATSAPP_PHONE_NUMBER_ID = "919401947920392"
+# WhatsApp Business API credentials from environment variables
+_WHATSAPP_ACCESS_TOKEN = os.getenv("WHATSAPP_ACCESS_TOKEN", "")
+_WHATSAPP_PHONE_NUMBER_ID = os.getenv("WHATSAPP_PHONE_NUMBER_ID", "")
 
 # Lazy-initialized WhatsApp client
 _whatsapp_client: WhatsAppClient | None = None

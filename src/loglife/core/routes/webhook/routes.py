@@ -4,6 +4,7 @@ Receives POST requests, validates payloads, and enqueues messages for processing
 """
 
 import logging
+import os
 
 from flask import Blueprint, current_app, g, request
 from flask.typing import ResponseReturnValue
@@ -16,6 +17,9 @@ from .utils import error_response, success_response
 webhook_bp = Blueprint("webhook", __name__)
 
 logger = logging.getLogger(__name__)
+
+# Webhook verification token for Meta webhook verification
+VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "")
 
 
 @webhook_bp.route("/webhook", methods=["POST"])
@@ -37,10 +41,6 @@ def webhook() -> ResponseReturnValue:
         error = f"Error processing webhook > {e}"
         logger.exception(error)
         return error_response(error)
-
-
-# Hardcoded verification token for Meta webhook verification
-VERIFY_TOKEN = "bluepanda321"  # noqa: S105
 
 
 def _handle_webhook_verification() -> ResponseReturnValue:
