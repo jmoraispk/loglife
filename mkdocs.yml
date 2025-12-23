@@ -20,6 +20,9 @@ nav:
     - Audio Journaling: usage/audio-journaling.md
     - Referrals: usage/referrals.md
     - Managing Goals: usage/managing-goals.md
+  - Developer Guide:
+    - Overview: developer/overview.md
+    - Quick Access: developer/quick-access.md
   - Core Framework:
     - Quickstart: core/quickstart.md
     - Architecture: core/architecture.md
@@ -30,7 +33,6 @@ nav:
   - App Implementation:
     - Overview: app/overview.md
     - Database: app/database.md
-    - Quick Access: developer/quick-access.md
     - API Reference:
         - Routes: api/backend/routes.md
         - Business Logic: api/backend/logic.md
