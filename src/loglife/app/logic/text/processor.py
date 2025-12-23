@@ -7,13 +7,16 @@ from loglife.app.config import COMMAND_ALIASES, messages
 from loglife.app.db.tables import User
 from loglife.app.logic.text.handlers import (
     AddGoalHandler,
+    CheckinHandler,
     DeleteGoalHandler,
     EnableJournalingHandler,
     GoalsListHandler,
+    HabitsHandler,
     HelpHandler,
     JournalPromptsHandler,
     ListHandler,
     LookbackHandler,
+    MenuHandler,
     RateAllHandler,
     RateSingleHandler,
     ReminderTimeHandler,
@@ -41,6 +44,9 @@ HANDLERS: list[TextCommandHandler] = [
     LookbackHandler(),
     RateSingleHandler(),
     RateAllHandler(),
+    CheckinHandler(),
+    HabitsHandler(),
+    MenuHandler(),
     ListHandler(),
     HelpHandler(),
 ]

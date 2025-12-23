@@ -15,8 +15,8 @@ from loglife.app.db.tables import Goal, Rating, User
 from loglife.app.logic.text.reminder_time import parse_time_string
 from loglife.app.logic.text.week import get_monday_before, look_back_summary
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
-from loglife.core.messaging import send_whatsapp_list_message
-from loglife.core.whatsapp_api.endpoints.messages import ListRow, ListSection
+from loglife.core.messaging import send_whatsapp_list_message, send_whatsapp_reply_buttons
+from loglife.core.whatsapp_api.endpoints.messages import ListRow, ListSection, ReplyButton
 
 MIN_PARTS_EXPECTED = 2
 
@@ -546,3 +546,61 @@ class ListHandler(TextCommandHandler):
 
         # Return None since we've already sent the message
         return None
+
+
+class MenuHandler(TextCommandHandler):
+    """Return interactive menu with reply buttons."""
+
+    COMMAND = "menu"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'menu'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process menu command by sending interactive reply buttons."""
+        # Create reply buttons
+        buttons = [
+            ReplyButton(id="checkin", title="Check in"),
+            ReplyButton(id="goals", title="Goals"),
+            ReplyButton(id="habits", title="Habits"),
+        ]
+
+        # Send button message
+        send_whatsapp_reply_buttons(
+            number=user.phone_number,
+            text="❓ *LogLife Menu*\n\nSelect an option:",
+            buttons=buttons,
+        )
+
+        # Return None since we've already sent the message
+        return None
+
+
+class CheckinHandler(TextCommandHandler):
+    """Handle 'checkin' command - echo message back."""
+
+    COMMAND = "checkin"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'checkin'."""
+        return message == self.COMMAND
+
+    def handle(self, _user: User, _message: str) -> str | None:
+        """Process checkin command - echo back."""
+        return "Check in"
+
+
+class HabitsHandler(TextCommandHandler):
+    """Handle 'habits' command - show week summary."""
+
+    COMMAND = "habits"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'habits'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process habits command - delegate to WeekSummaryHandler."""
+        week_handler = WeekSummaryHandler()
+        return week_handler.handle(user, "week")

@@ -14,7 +14,10 @@ from flask import g
 
 from loglife.app.config import WHATSAPP_API_URL
 from loglife.core.whatsapp_api.client import WhatsAppClient
-from loglife.core.whatsapp_api.endpoints.messages import ListRow, ListSection
+from loglife.core.whatsapp_api.endpoints.messages import (
+    ListSection,
+    ReplyButton,
+)
 from loglife.core.whatsapp_api.exceptions import WhatsAppHTTPError, WhatsAppRequestError
 
 logger = logging.getLogger(__name__)
@@ -315,6 +318,46 @@ def send_whatsapp_list_message(
         if footer:
             fallback_text = f"{fallback_text}\n\n{footer}"
         _send_whatsapp_message_via_api(number, fallback_text)
+
+
+def send_whatsapp_reply_buttons(
+    number: str,
+    text: str,
+    buttons: list[ReplyButton],
+) -> None:
+    """Send WhatsApp reply buttons message using WhatsApp Business API client.
+
+    Args:
+        number: Recipient phone number.
+        text: Message body text (displayed above buttons).
+        buttons: List of reply buttons (1-3 buttons allowed).
+    """
+    try:
+        client = _get_whatsapp_client()
+        # Remove any non-digit characters and ensure proper format
+        clean_number = number.replace("+", "").replace("-", "").replace(" ", "")
+        response = client.messages.send_reply_buttons(
+            to=clean_number,
+            text=text,
+            buttons=buttons,
+        )
+        logger.info(
+            "Sent WhatsApp reply buttons via API to %s, message_id: %s",
+            number,
+            response.message_id,
+        )
+    except (WhatsAppHTTPError, WhatsAppRequestError) as exc:
+        error = f"Error sending WhatsApp reply buttons via API > {exc}"
+        logger.exception(error)
+        # Fall back to text message on API error
+        logger.info("Falling back to text message")
+        _send_whatsapp_message_via_api(number, text)
+    except Exception as exc:
+        error = f"Unexpected error sending WhatsApp reply buttons via API > {exc}"
+        logger.exception(error)
+        # Fall back to text message on unexpected error
+        logger.info("Falling back to text message")
+        _send_whatsapp_message_via_api(number, text)
 
 
 def _send_whatsapp_message(

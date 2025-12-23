@@ -109,7 +109,7 @@ def _process_meta_message(data: dict) -> ResponseReturnValue:
         if not raw_msg:
             logger.warning("Missing message body in text message")
             return error_response("Missing message body")
-    # Handle interactive list messages
+    # Handle interactive messages (list and button replies)
     elif message_type == "interactive":
         interactive_data = message.get("interactive", {})
         interactive_type = interactive_data.get("type")
@@ -121,9 +121,16 @@ def _process_meta_message(data: dict) -> ResponseReturnValue:
                 logger.warning("Missing list reply ID in interactive message")
                 return error_response("Missing list reply ID")
             logger.info("Processing list reply: %s from %s", raw_msg, sender)
+        elif interactive_type == "button_reply":
+            button_reply = interactive_data.get("button_reply", {})
+            raw_msg = button_reply.get("id", "")
+            if not raw_msg:
+                logger.warning("Missing button reply ID in interactive message")
+                return error_response("Missing button reply ID")
+            logger.info("Processing button reply: %s from %s", raw_msg, sender)
         else:
             logger.debug(
-                "Ignoring non-list-reply interactive message type: %s", interactive_type
+                "Ignoring unsupported interactive message type: %s", interactive_type
             )
             return success_response(message=f"Ignored interactive type: {interactive_type}")
     else:
