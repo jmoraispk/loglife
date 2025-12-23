@@ -3,6 +3,7 @@
 Receives POST requests, validates payloads, and enqueues messages for processing.
 """
 
+import json
 import logging
 import os
 
@@ -90,7 +91,10 @@ def _process_meta_message(data: dict) -> ResponseReturnValue:
 
     if not messages:
         # This might be a status update or other non-message event
-        logger.debug("No messages in webhook payload, likely a status update")
+        logger.debug(
+            "No messages in webhook payload, likely a status update. Payload: %s",
+            json.dumps(data, indent=2),
+        )
         return success_response(message="No messages to process")
 
     message = messages[0]

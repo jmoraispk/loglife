@@ -8,7 +8,9 @@ from loglife.app.db.tables import User
 from loglife.app.logic.text.handlers import (
     AddGoalHandler,
     CheckinHandler,
+    CheckinNowHandler,
     DeleteGoalHandler,
+    EditTimeHandler,
     EnableJournalingHandler,
     GoalsListHandler,
     HabitsHandler,
@@ -44,6 +46,8 @@ HANDLERS: list[TextCommandHandler] = [
     LookbackHandler(),
     RateSingleHandler(),
     RateAllHandler(),
+    CheckinNowHandler(),
+    EditTimeHandler(),
     CheckinHandler(),
     HabitsHandler(),
     MenuHandler(),

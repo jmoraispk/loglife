@@ -1,6 +1,7 @@
 """Handlers for WhatsApp text commands using the Command Pattern."""
 
 import json
+import logging
 import re
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime, timedelta
@@ -15,8 +16,19 @@ from loglife.app.db.tables import Goal, Rating, User
 from loglife.app.logic.text.reminder_time import parse_time_string
 from loglife.app.logic.text.week import get_monday_before, look_back_summary
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
-from loglife.core.messaging import send_whatsapp_list_message, send_whatsapp_reply_buttons
-from loglife.core.whatsapp_api.endpoints.messages import ListRow, ListSection, ReplyButton
+from loglife.core.messaging import (
+    send_whatsapp_list_message,
+    send_whatsapp_reply_buttons,
+    send_whatsapp_voice_call_button,
+)
+from loglife.core.whatsapp_api.endpoints.messages import (
+    ListRow,
+    ListSection,
+    ReplyButton,
+    VoiceCallButton,
+)
+
+logger = logging.getLogger(__name__)
 
 MIN_PARTS_EXPECTED = 2
 
@@ -578,7 +590,7 @@ class MenuHandler(TextCommandHandler):
 
 
 class CheckinHandler(TextCommandHandler):
-    """Handle 'checkin' command - echo message back."""
+    """Handle 'checkin' command - show check-in options."""
 
     COMMAND = "checkin"
 
@@ -586,9 +598,68 @@ class CheckinHandler(TextCommandHandler):
         """Check if message is 'checkin'."""
         return message == self.COMMAND
 
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process checkin command - send reply buttons."""
+        # Create reply buttons for check-in
+        buttons = [
+            ReplyButton(id="checkin now", title="Check in now!"),
+            ReplyButton(id="edit time", title="Edit Time"),
+        ]
+
+        # Send button message
+        send_whatsapp_reply_buttons(
+            number=user.phone_number,
+            text="*Check in*",
+            buttons=buttons,
+        )
+
+        # Return None since we've already sent the message
+        return None
+
+
+class CheckinNowHandler(TextCommandHandler):
+    """Handle 'checkin now' command - initiate WhatsApp call."""
+
+    COMMAND = "checkin now"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'checkin now'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process checkin now command - send WhatsApp call button."""
+        logger.info("Check-in call requested for user %s", user.phone_number)
+
+        # Create voice call button
+        call_button = VoiceCallButton(
+            display_text="Call on WhatsApp",
+            ttl_minutes=100,
+            payload="checkin_call",
+        )
+
+        # Send voice call button message
+        send_whatsapp_voice_call_button(
+            number=user.phone_number,
+            body="You can call us on WhatsApp now for faster service!",
+            button=call_button,
+        )
+
+        # Return None since we've already sent the message
+        return None
+
+
+class EditTimeHandler(TextCommandHandler):
+    """Handle 'edit time' command - echo for testing."""
+
+    COMMAND = "edit time"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'edit time'."""
+        return message == self.COMMAND
+
     def handle(self, _user: User, _message: str) -> str | None:
-        """Process checkin command - echo back."""
-        return "Check in"
+        """Process edit time command - echo for testing."""
+        return "Edit Time"
 
 
 class HabitsHandler(TextCommandHandler):
