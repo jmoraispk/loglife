@@ -50,7 +50,7 @@ This repository acts as a **Monorepo** containing three distinct components:
 loglife/
 ├── src/loglife/
 │   ├── core/               # The reusable Bot Framework
-│   │   ├── messaging.py    # Threading Engine (Router & Sender)
+│   │   ├── messaging.py    # Threading Engine w/ Queues (Receiver & Sender)
 │   │   ├── transports.py   # Transport Adapters (WhatsApp/Emulator)
 │   │   ├── startup.py      # App Bootstrap Logic
 │   │   └── interface.py    # Public API (recv_msg, send_msg)
