@@ -5,8 +5,9 @@ Receives POST requests, validates payloads, and enqueues messages for processing
 
 import logging
 
-from flask import Blueprint, g, request
+from flask import Blueprint, current_app, g, request
 from flask.typing import ResponseReturnValue
+from flask.wrappers import Response
 
 from loglife.core.messaging import Message, enqueue_inbound_message
 
@@ -34,5 +35,93 @@ def webhook() -> ResponseReturnValue:
         return success_response(message="")
     except Exception as e:
         error = f"Error processing webhook > {e}"
+        logger.exception(error)
+        return error_response(error)
+
+
+# Hardcoded verification token for Meta webhook verification
+VERIFY_TOKEN = "bluepanda321"  # noqa: S105
+
+
+@webhook_bp.route("/whatsapp-incoming", methods=["GET", "POST"])
+def whatsapp_incoming() -> ResponseReturnValue:
+    """Handle incoming messages from Meta WhatsApp Cloud API.
+
+    GET: Webhook verification (Meta sends verification challenge)
+    POST: Processes only text messages, creates a custom payload, and forwards to /webhook.
+    """
+    if request.method == "GET":
+        # Handle webhook verification
+        mode = request.args.get("hub.mode")
+        token = request.args.get("hub.verify_token")
+        challenge = request.args.get("hub.challenge")
+
+        if mode == "subscribe" and token == VERIFY_TOKEN:
+            logger.info("Webhook verified successfully")
+            # Return the challenge as plain text (not JSON)
+            return Response(challenge, mimetype="text/plain"), 200
+
+        logger.warning(
+            "Webhook verification failed: mode=%s, token_match=%s", mode, token == VERIFY_TOKEN
+        )
+        return error_response("Verification failed", status_code=403)
+
+    # POST method - handle incoming messages
+    try:
+        data: dict = request.get_json()
+
+        # Extract message from Meta webhook payload structure
+        # Meta webhook format: {"entry": [{"changes": [{"value": {"messages": [...]}}]}]}
+        entry = data.get("entry", [])
+        if not entry:
+            logger.warning("No entry found in Meta webhook payload")
+            return success_response(message="No entry found")
+
+        changes = entry[0].get("changes", [])
+        if not changes:
+            logger.warning("No changes found in Meta webhook payload")
+            return success_response(message="No changes found")
+
+        value = changes[0].get("value", {})
+        messages = value.get("messages", [])
+
+        if not messages:
+            # This might be a status update or other non-message event
+            logger.debug("No messages in webhook payload, likely a status update")
+            return success_response(message="No messages to process")
+
+        message = messages[0]
+        message_type = message.get("type")
+
+        # Process only text messages for now
+        if message_type != "text":
+            logger.debug("Ignoring non-text message type: %s", message_type)
+            return success_response(message=f"Ignored non-text message type: {message_type}")
+
+        # Extract sender and text content
+        sender = message.get("from")
+        text_data = message.get("text", {})
+        raw_msg = text_data.get("body", "")
+
+        if not sender or not raw_msg:
+            logger.warning("Missing sender or message body in text message")
+            return error_response("Missing sender or message body")
+
+        # Create custom payload matching the expected format
+        custom_payload = {
+            "sender": sender,
+            "raw_msg": raw_msg,
+            "msg_type": "chat",
+            "client_type": "whatsapp",
+        }
+
+        # Forward to /webhook route internally
+        # Create a new request context with the custom payload and call webhook directly
+        with current_app.test_request_context("/webhook", method="POST", json=custom_payload):
+            # Call the webhook function directly with the modified request context
+            return webhook()
+
+    except Exception as e:
+        error = f"Error processing Meta webhook > {e}"
         logger.exception(error)
         return error_response(error)
