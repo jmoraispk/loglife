@@ -1,5 +1,6 @@
 """WhatsApp API client."""
 
+from .endpoints.calls import CallsAPI
 from .endpoints.messages import MessagesAPI
 from .http import HttpClient
 
@@ -35,3 +36,4 @@ class WhatsAppClient:
             backoff_factor=backoff_factor,
         )
         self.messages = MessagesAPI(self._http, phone_number_id)
+        self.calls = CallsAPI(self._http, phone_number_id)
