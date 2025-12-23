@@ -3,7 +3,7 @@
 from dataclasses import dataclass
 from typing import Any
 
-from ..http import HttpClient
+from loglife.core.whatsapp_api.http import HttpClient
 
 MAX_BUTTON_ID_LENGTH = 256
 MAX_BUTTON_TITLE_LENGTH = 20

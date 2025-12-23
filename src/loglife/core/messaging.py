@@ -189,9 +189,7 @@ def _dispatch_outbound(message: Message) -> None:
         )
 
 
-def _send_emulator_message(
-    message: str, attachments: dict[str, Any] | None = None
-) -> None:
+def _send_emulator_message(message: str, attachments: dict[str, Any] | None = None) -> None:
     logger.info("Sending emulator message: %s", message)
 
     if attachments and "transcript_file" in attachments:
@@ -207,7 +205,9 @@ def _send_emulator_message(
 
 # Hardcoded WhatsApp Business API credentials
 _WHATSAPP_ACCESS_TOKEN = (
-    "EAASsmCtrjdQBQTY8v8w7QvBjZBzP80grUKc323wJEm1qSaVKeXfwE5dZB0B0VgXx8UqrqWypj9ijnAowZA27IfbrmuZCL51tKaYVuaQljvrxoMm3FUbbF0IWD2I5WDGXGCAlvVHe4LjeSzk3SXAaKCTmVv0C5uqZCvkygqEjs55spt1dNYHwaHZCKkn986jkHXgQZDZD"  # noqa: S105
+    "EAASsmCtrjdQBQTY8v8w7QvBjZBzP80grUKc323wJEm1qSaVKeXfwE5dZB0B0VgXx8UqrqWypj9ijnAowZA27"  # noqa: S105
+    "IfbrmuZCL51tKaYVuaQljvrxoMm3FUbbF0IWD2I5WDGXGCAlvVHe4LjeSzk3SXAaKCTmVv0C5uqZCvkygqEjs55"
+    "spt1dNYHwaHZCKkn986jkHXgQZDZD"
 )
 _WHATSAPP_PHONE_NUMBER_ID = "919401947920392"
 
@@ -232,9 +232,7 @@ def _send_whatsapp_message_via_api(
     """Send WhatsApp message using WhatsApp Business API client (for text messages only)."""
     if attachments:
         # For now, only support text messages. Fall back to old method if attachments present.
-        logger.warning(
-            "Attachments not supported via API client, falling back to old method"
-        )
+        logger.warning("Attachments not supported via API client, falling back to old method")
         _send_whatsapp_message(number, message, attachments)
         return
 
@@ -242,9 +240,7 @@ def _send_whatsapp_message_via_api(
         client = _get_whatsapp_client()
         # Remove any non-digit characters and ensure proper format
         clean_number = number.replace("+", "").replace("-", "").replace(" ", "")
-        response = client.messages.send_text(
-            to=clean_number, text=message, preview_url=False
-        )
+        response = client.messages.send_text(to=clean_number, text=message, preview_url=False)
         logger.info(
             "Sent WhatsApp message via API to %s, message_id: %s",
             number,
