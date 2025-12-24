@@ -29,6 +29,9 @@ webhook_bp = Blueprint("webhook", __name__)
 
 logger = logging.getLogger(__name__)
 
+# Silence noisy aiortc packet logs
+logging.getLogger("aiortc").setLevel(logging.WARNING)
+
 # Webhook verification token for Meta webhook verification
 VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "")
 
