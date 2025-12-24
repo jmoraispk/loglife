@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { VapiWidget } from "@vapi-ai/client-sdk-react";
 import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
 import { useTheme } from "../contexts/ThemeContext";
+import Vapi from "@vapi-ai/web";
 
 function IconMic() {
   return (
@@ -37,6 +37,8 @@ function IconHistory() {
 export default function CallPage() {
   const { hideWidgetButton, showWidgetButton } = useWhatsAppWidget();
   const { isDarkMode } = useTheme();
+  const vapiRef = useRef<Vapi | null>(null);
+  const [isCallActive, setIsCallActive] = useState(false);
 
   useEffect(() => {
     hideWidgetButton();
@@ -44,6 +46,60 @@ export default function CallPage() {
       showWidgetButton();
     };
   }, [hideWidgetButton, showWidgetButton]);
+
+  useEffect(() => {
+    // Initialize Vapi
+    const vapi = new Vapi("fb209f9a-5269-4157-90e7-30198fad3e08");
+    vapiRef.current = vapi;
+
+    // Listen for events
+    vapi.on("call-start", () => {
+      console.log("Call started");
+      setIsCallActive(true);
+    });
+
+    vapi.on("call-end", () => {
+      console.log("Call ended");
+      setIsCallActive(false);
+    });
+
+    vapi.on("message", (message) => {
+      if (message.type === "transcript") {
+        console.log(`${message.role}: ${message.transcript}`);
+      }
+    });
+
+    vapi.on("error", (error) => {
+      console.error("Vapi error:", error);
+    });
+
+    return () => {
+      // Cleanup: stop call if active
+      if (vapiRef.current) {
+        vapiRef.current.stop();
+      }
+    };
+  }, []);
+
+  const handleStartCall = () => {
+    if (vapiRef.current && !isCallActive) {
+      const assistantOverrides = {
+        variableValues: {
+          customerName: "Atif"
+        }
+      };
+      vapiRef.current.start(
+        "1038c0b6-3be5-4516-95fb-176e3be14b58",
+        assistantOverrides
+      );
+    }
+  };
+
+  const handleEndCall = () => {
+    if (vapiRef.current && isCallActive) {
+      vapiRef.current.stop();
+    }
+  };
 
   return (
     <main className={`min-h-screen relative overflow-hidden transition-colors duration-300 ${
@@ -167,27 +223,48 @@ export default function CallPage() {
           <div className="relative z-10">
             <h3 className="text-lg font-semibold text-white mb-2">Ready to try?</h3>
             <p className="text-emerald-200 mb-4">
-              Tap the microphone button in the bottom right corner to start a conversation with your AI companion.
+              Click the button below to start a conversation with your AI companion.
             </p>
-            <div className={`flex items-center gap-2 text-sm font-medium ${
-              isDarkMode ? "text-emerald-400" : "text-emerald-300"
-            }`}>
-              <span>Try saying:</span>
-              <span className="bg-emerald-800/50 px-2 py-1 rounded">"Help me reflect on my day"</span>
+            <div className="flex flex-col items-center gap-4 mt-4">
+              {!isCallActive ? (
+                <button
+                  onClick={handleStartCall}
+                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${
+                    isDarkMode
+                      ? "bg-emerald-600 hover:bg-emerald-500 text-white"
+                      : "bg-emerald-500 hover:bg-emerald-600 text-white"
+                  }`}
+                >
+                  <IconMic />
+                  Start Conversation
+                </button>
+              ) : (
+                <button
+                  onClick={handleEndCall}
+                  className={`inline-flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${
+                    isDarkMode
+                      ? "bg-red-600 hover:bg-red-500 text-white"
+                      : "bg-red-500 hover:bg-red-600 text-white"
+                  }`}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="6" y="6" width="12" height="12" />
+                  </svg>
+                  End Call
+                </button>
+              )}
+              <div className={`flex items-center gap-2 text-sm font-medium ${
+                isDarkMode ? "text-emerald-400" : "text-emerald-300"
+              }`}>
+                <span>Try saying:</span>
+                <span className="bg-emerald-800/50 px-2 py-1 rounded">"Help me reflect on my day"</span>
+              </div>
             </div>
           </div>
           <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
         </div>
 
       </div>
-
-      <VapiWidget
-        publicKey="fb209f9a-5269-4157-90e7-30198fad3e08"
-        assistantId="1038c0b6-3be5-4516-95fb-176e3be14b58"
-        mode="voice"
-        size="compact"
-        theme={isDarkMode ? 'dark' : 'light'}
-      />
     </main>
   );
 }

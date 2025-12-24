@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@vapi-ai/client-sdk-react": "^0.1.1",
+    "@vapi-ai/web": "^2.5.2",
     "next": "15.5.9",
     "react": "19.1.0",
     "react-dom": "19.1.0"
