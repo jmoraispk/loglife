@@ -36,7 +36,7 @@ function IconQR() {
 }
 
 export default function WhatsAppWidget() {
-  const { isOpen, toggleWidget, closeWidget } = useWhatsAppWidget();
+  const { isOpen, toggleWidget, closeWidget, isVisible } = useWhatsAppWidget();
   const { isDarkMode } = useTheme();
   const [isAnimating, setIsAnimating] = useState(false);
   const number = "17155157761"; 
@@ -60,6 +60,8 @@ export default function WhatsAppWidget() {
       toggleWidget();
     }
   };
+
+  if (!isVisible) return null;
 
   return (
     <>
