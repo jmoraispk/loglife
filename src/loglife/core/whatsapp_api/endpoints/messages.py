@@ -371,6 +371,54 @@ class MessagesAPI:
         msg_id = (data.get("messages") or [{}])[0].get("id", "")
         return SendTextResponse(message_id=msg_id)
 
+    def send_cta_url(
+        self,
+        *,
+        to: str,
+        body: str,
+        button: URLButton,
+    ) -> SendTextResponse:
+        """Send an interactive message with a CTA URL button (simplified, body only).
+
+        Args:
+            to: Recipient phone number.
+            body: Message body text (max 1024 characters).
+            button: URL button with display_text and url.
+
+        Returns:
+            SendTextResponse with message ID.
+
+        Raises:
+            ValueError: If validation fails (text length limits).
+        """
+        # Validate body text length
+        if len(body) > MAX_LIST_BODY_TEXT_LENGTH:
+            msg = f"Body text must not exceed {MAX_LIST_BODY_TEXT_LENGTH} characters"
+            raise ValueError(msg)
+
+        path = f"/{self._phone_number_id}/messages"
+        payload: dict[str, Any] = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": to,
+            "type": "interactive",
+            "interactive": {
+                "type": "cta_url",
+                "body": {"text": body},
+                "action": {
+                    "name": "cta_url",
+                    "parameters": {
+                        "display_text": button.display_text,
+                        "url": button.url,
+                    },
+                },
+            },
+        }
+
+        data = self._http.request("POST", path, json=payload)
+        msg_id = (data.get("messages") or [{}])[0].get("id", "")
+        return SendTextResponse(message_id=msg_id)
+
     def send_voice_call_button(
         self,
         *,

@@ -17,6 +17,7 @@ from loglife.core.whatsapp_api.client import WhatsAppClient
 from loglife.core.whatsapp_api.endpoints.messages import (
     ListSection,
     ReplyButton,
+    URLButton,
     VoiceCallButton,
 )
 from loglife.core.whatsapp_api.exceptions import WhatsAppHTTPError, WhatsAppRequestError
@@ -395,6 +396,46 @@ def send_whatsapp_voice_call_button(
         _send_whatsapp_message_via_api(number, body)
     except Exception as exc:
         error = f"Unexpected error sending WhatsApp voice call button via API > {exc}"
+        logger.exception(error)
+        # Fall back to text message on unexpected error
+        logger.info("Falling back to text message")
+        _send_whatsapp_message_via_api(number, body)
+
+
+def send_whatsapp_cta_url(
+    number: str,
+    body: str,
+    button: URLButton,
+) -> None:
+    """Send WhatsApp CTA URL button message using WhatsApp Business API client.
+
+    Args:
+        number: Recipient phone number.
+        body: Message body text (max 1024 characters).
+        button: URL button with display_text and url.
+    """
+    try:
+        client = _get_whatsapp_client()
+        # Remove any non-digit characters and ensure proper format
+        clean_number = number.replace("+", "").replace("-", "").replace(" ", "")
+        response = client.messages.send_cta_url(
+            to=clean_number,
+            body=body,
+            button=button,
+        )
+        logger.info(
+            "Sent WhatsApp CTA URL button via API to %s, message_id: %s",
+            number,
+            response.message_id,
+        )
+    except (WhatsAppHTTPError, WhatsAppRequestError) as exc:
+        error = f"Error sending WhatsApp CTA URL button via API > {exc}"
+        logger.exception(error)
+        # Fall back to text message on API error
+        logger.info("Falling back to text message")
+        _send_whatsapp_message_via_api(number, body)
+    except Exception as exc:
+        error = f"Unexpected error sending WhatsApp CTA URL button via API > {exc}"
         logger.exception(error)
         # Fall back to text message on unexpected error
         logger.info("Falling back to text message")

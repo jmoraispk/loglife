@@ -17,6 +17,7 @@ from loglife.app.logic.text.reminder_time import parse_time_string
 from loglife.app.logic.text.week import get_monday_before, look_back_summary
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
 from loglife.core.messaging import (
+    send_whatsapp_cta_url,
     send_whatsapp_list_message,
     send_whatsapp_reply_buttons,
     send_whatsapp_voice_call_button,
@@ -25,6 +26,7 @@ from loglife.core.whatsapp_api.endpoints.messages import (
     ListRow,
     ListSection,
     ReplyButton,
+    URLButton,
     VoiceCallButton,
 )
 
@@ -627,21 +629,20 @@ class CheckinNowHandler(TextCommandHandler):
         return message == self.COMMAND
 
     def handle(self, user: User, _message: str) -> str | None:
-        """Process checkin now command - send WhatsApp call button."""
+        """Process checkin now command - send CTA URL button."""
         logger.info("Check-in call requested for user %s", user.phone_number)
 
-        # Create voice call button
-        call_button = VoiceCallButton(
-            display_text="Call on WhatsApp",
-            ttl_minutes=100,
-            payload="checkin_call",
+        # Create URL button for check-in
+        url_button = URLButton(
+            display_text="Call",
+            url="http://localhost:3000/call",
         )
 
-        # Send voice call button message
-        send_whatsapp_voice_call_button(
+        # Send CTA URL button message
+        send_whatsapp_cta_url(
             number=user.phone_number,
-            body="You can call us on WhatsApp now for faster service!",
-            button=call_button,
+            body="*Check in*",
+            button=url_button,
         )
 
         # Return None since we've already sent the message
