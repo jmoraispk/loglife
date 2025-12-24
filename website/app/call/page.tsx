@@ -82,7 +82,8 @@ export default function CallPage() {
       setIsConnecting(true);
       const assistantOverrides = {
         variableValues: {
-          customerName: "Ali"
+          customer_name: "Ali",
+          external_user_id: "923186491240"
         }
       };
       vapiRef.current.start(

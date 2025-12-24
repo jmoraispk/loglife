@@ -11,7 +11,7 @@ from loglife.app.db import init_db
 from loglife.app.logic import route_message
 from loglife.app.services import start_reminder_service, start_sqlite_web
 from loglife.core.messaging import start_message_worker, start_sender_worker
-from loglife.core.routes import emulator_bp, webhook_bp
+from loglife.core.routes import emulator_bp, voice_bp, webhook_bp
 
 
 def create_app() -> Flask:
@@ -36,6 +36,8 @@ def create_app() -> Flask:
     start_sender_worker()
 
     app.register_blueprint(emulator_bp)
+
+    app.register_blueprint(voice_bp)
 
     app.register_blueprint(webhook_bp)
 
