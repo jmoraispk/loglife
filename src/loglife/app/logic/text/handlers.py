@@ -5,7 +5,6 @@ import logging
 import re
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime, timedelta
-from urllib.parse import quote
 
 from itsdangerous import URLSafeTimedSerializer
 
@@ -21,7 +20,6 @@ from loglife.app.logic.text.reminder_time import parse_time_string
 from loglife.app.logic.text.week import get_monday_before, look_back_summary
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
 from loglife.core.messaging import (
-    Message,
     send_whatsapp_cta_url,
     send_whatsapp_list_message,
     send_whatsapp_reply_buttons,
@@ -622,6 +620,53 @@ class CheckinHandler(TextCommandHandler):
         return None
 
 
+class CallHandler(TextCommandHandler):
+    """Handle 'call' command - send 3 URL button messages."""
+
+    COMMAND = "call"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'call'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process call command - send 3 CTA URL button messages.
+
+        Args:
+            user: The user record
+            _message: The text message (unused)
+        """
+        logger.info("Call command requested for user %s", user.phone_number)
+
+        # Generate token from phone number
+        s = URLSafeTimedSerializer(SECRET_KEY)
+        token = s.dumps(user.phone_number)
+
+        # Button configurations: (number, display_text, body)
+        button_configs = [
+            (1, "Check in", "*Check in*"),
+            (2, "Goal Setup", "*Goal Setup*"),
+            (3, "Temptation Support", "*Temptation Support*"),
+        ]
+
+        # Send 3 CTA URL button messages with different paths and text
+        for number, display_text, body in button_configs:
+            url = f"https://dev.loglife.co/call/{number}/{token}"
+            # url = f"http://localhost:3000/call/{number}/{token}"
+            url_button = URLButton(
+                display_text=display_text,
+                url=url,
+            )
+            send_whatsapp_cta_url(
+                number=user.phone_number,
+                body=body,
+                button=url_button,
+            )
+
+        # Return None since we've already sent the messages
+        return None
+
+
 class CheckinNowHandler(TextCommandHandler):
     """Handle 'checkin now' command - initiate WhatsApp call."""
 
@@ -631,13 +676,12 @@ class CheckinNowHandler(TextCommandHandler):
         """Check if message is 'checkin now'."""
         return message == self.COMMAND
 
-    def handle(self, user: User, _message: str, message_obj: "Message | None" = None) -> str | None:
+    def handle(self, user: User, _message: str) -> str | None:
         """Process checkin now command - send CTA URL button.
 
         Args:
             user: The user record
             _message: The text message (unused)
-            message_obj: Optional Message object to extract profile name from metadata
         """
         logger.info("Check-in call requested for user %s", user.phone_number)
 
@@ -645,18 +689,9 @@ class CheckinNowHandler(TextCommandHandler):
         s = URLSafeTimedSerializer(SECRET_KEY)
         token = s.dumps(user.phone_number)
 
-        # Extract name from message metadata if available
-        profile_name = None
-        if message_obj and message_obj.metadata:
-            profile_name = message_obj.metadata.get("profile_name")
-
-        # Use profile name if available, otherwise use empty string
-        name = quote(profile_name) if profile_name else ""
-
-        # Create URL button for check-in with token and name
-        url = f"https://dev.loglife.co/call?token={token}"
-        if name:
-            url += f"&name={name}"
+        # Create URL button for check-in with token as path parameter
+        url = f"https://dev.loglife.co/call/{token}"
+        # url = f"http://localhost:3000/call/{token}"
         url_button = URLButton(
             display_text="Call",
             url=url,

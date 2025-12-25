@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useState, useRef, Suspense } from "react";
-import { useSearchParams } from "next/navigation";
-import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
-import { useTheme } from "../contexts/ThemeContext";
+import { useParams } from "next/navigation";
+import { useWhatsAppWidget } from "../../../contexts/WhatsAppWidgetContext";
+import { useTheme } from "../../../contexts/ThemeContext";
 import Vapi from "@vapi-ai/web";
 
 function CallPageContent() {
-  const searchParams = useSearchParams();
+  const params = useParams();
   const { hideWidgetButton, showWidgetButton } = useWhatsAppWidget();
   const { isDarkMode } = useTheme();
   const vapiRef = useRef<Vapi | null>(null);
@@ -15,13 +15,26 @@ function CallPageContent() {
   const [isCallActive, setIsCallActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
 
-  // Get parameters from URL
-  const token = searchParams.get("token");
-  const nameParam = searchParams.get("name");
-  
-  // Decode the name parameter (it's URL-encoded phone number)
-  const customerName = nameParam ? decodeURIComponent(nameParam) : "";
+  // Get number and token from path parameters
+  const number = params?.number as string | undefined;
+  const token = params?.token as string | undefined;
   const externalUserId = token ? decodeURIComponent(token) : "";
+
+  // Map number to VAPI assistant ID
+  const getAssistantId = (num: string | undefined): string => {
+    switch (num) {
+      case "1":
+        return "1038c0b6-3be5-4516-95fb-176e3be14b58";
+      case "2":
+        return "b50776cd-e535-4f3e-951e-672c6639d4e6";
+      case "3":
+        return "ed481b3b-85a8-47dd-a22c-a85959900561";
+      default:
+        return "1038c0b6-3be5-4516-95fb-176e3be14b58"; // Default to 1
+    }
+  };
+
+  const assistantId = getAssistantId(number);
 
   useEffect(() => {
     hideWidgetButton();
@@ -92,12 +105,11 @@ function CallPageContent() {
       setIsConnecting(true);
       const assistantOverrides = {
         variableValues: {
-          customer_name: customerName,
           external_user_id: externalUserId
         }
       };
       vapiRef.current.start(
-        "1038c0b6-3be5-4516-95fb-176e3be14b58",
+        assistantId,
         assistantOverrides
       );
       
@@ -238,3 +250,4 @@ export default function CallPage() {
     </Suspense>
   );
 }
+

@@ -1,6 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import Navbar from "./components/Navbar";
+import ConditionalNavbar from "./components/ConditionalNavbar";
 import WhatsAppWidget from "./components/WhatsAppWidget";
 import PageWrapper from "./components/PageWrapper";
 import { ThemeProvider } from "./contexts/ThemeContext";
@@ -22,7 +22,7 @@ export default function RootLayout({
       <body>
         <ThemeProvider>
           <WhatsAppWidgetProvider>
-            <Navbar />
+            <ConditionalNavbar />
             <PageWrapper>{children}</PageWrapper>
             <WhatsAppWidget />
           </WhatsAppWidgetProvider>

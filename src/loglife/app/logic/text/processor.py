@@ -7,6 +7,7 @@ from loglife.app.config import COMMAND_ALIASES, messages
 from loglife.app.db.tables import User
 from loglife.app.logic.text.handlers import (
     AddGoalHandler,
+    CallHandler,
     CheckinHandler,
     CheckinNowHandler,
     DeleteGoalHandler,
@@ -49,6 +50,7 @@ HANDLERS: list[TextCommandHandler] = [
     CheckinNowHandler(),
     EditTimeHandler(),
     CheckinHandler(),
+    CallHandler(),
     HabitsHandler(),
     MenuHandler(),
     ListHandler(),
@@ -90,36 +92,32 @@ def _apply_command_aliases(text_content: str) -> str:
 
 
 def _try_handler(
-    handler: TextCommandHandler, user: User, text_content: str, message: Message
-) -> str | None:
+    handler: TextCommandHandler, user: User, text_content: str
+) -> tuple[str | None, bool]:
     """Try to handle a message with a specific handler.
 
     Args:
         handler: The handler to try
         user: The user record
         text_content: The normalized message text
-        message: The original message object
 
     Returns:
-        Response message if handled, None otherwise
+        Tuple of (response message if handled, whether handler matched).
+        If handler matched but returned None, returns (None, True) to indicate
+        the message was already sent by the handler.
     """
     if not handler.matches(text_content):
-        return None
+        return None, False
 
-    if isinstance(handler, CheckinNowHandler):
-        result = handler.handle(user, text_content, message_obj=message)
-    else:
-        result = handler.handle(user, text_content)
+    result = handler.handle(user, text_content)
 
     if result is not None:
-        return result
+        return result, True
 
     # If handler returns None and it's not AddGoalHandler,
-    # it means the message was already sent (e.g., ListHandler)
-    if not isinstance(handler, AddGoalHandler):
-        return None
-
-    return None
+    # it means the message was already sent (e.g., ListHandler, MenuHandler)
+    # Return (None, True) to indicate handler matched and processed the message
+    return None, True
 
 
 def process_text(user: User, message: Message) -> str | None:
@@ -149,12 +147,16 @@ def process_text(user: User, message: Message) -> str | None:
 
         # Execute the first matching command handler
         for handler in HANDLERS:
-            result = _try_handler(handler, user, text_content, message)
-            if result is not None:
+            result, matched = _try_handler(handler, user, text_content)
+            if matched:
+                # Handler matched - if it returned a message, return it
+                # If it returned None, it means it already sent the message, so return None
                 return result
+            # If handler didn't match, continue to next handler
 
     except Exception as exc:
         logger.exception("Error in text processor")
         return messages.ERROR_TEXT_PROCESSOR.format(exc=exc)
 
+    # No handler matched the message
     return messages.ERROR_WRONG_COMMAND
