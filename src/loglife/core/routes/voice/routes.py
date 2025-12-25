@@ -169,7 +169,7 @@ def voice_turn() -> ResponseReturnValue:
                 ), 200
 
         # Handle different modes
-        if mode in ("daily_checkin", "goal_setup", "temptation_support"):
+        if mode in ("daily_checkin", "goal_setup", "temptation_support", "onboarding"):
             reply = _handle_daily_checkin(user, user_text)
         else:
             reply = "Mode not supported yet. Please try again. endCall=true"
