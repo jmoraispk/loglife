@@ -31,3 +31,5 @@ EMULATOR_SQLITE_WEB_URL = (
     if os.getenv("DEPLOYMENT", "local") == "local"
     else f"{EMULATOR_LOCAL_URL}:{DATABASE_PORT}/"
 )
+
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")

@@ -6,6 +6,14 @@ from .messages import (
     ReplyButton,
     SendTextResponse,
     URLButton,
+    VoiceCallButton,
 )
 
-__all__ = ["ListRow", "ListSection", "ReplyButton", "SendTextResponse", "URLButton"]
+__all__ = [
+    "ListRow",
+    "ListSection",
+    "ReplyButton",
+    "SendTextResponse",
+    "URLButton",
+    "VoiceCallButton",
+]

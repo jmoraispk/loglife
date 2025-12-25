@@ -99,6 +99,27 @@ class URLButton:
             raise ValueError(msg)
 
 
+@dataclass(frozen=True)
+class VoiceCallButton:
+    """Voice call button definition for interactive messages."""
+
+    display_text: str
+    ttl_minutes: int
+    payload: str
+
+    def __post_init__(self) -> None:
+        """Validate voice call button parameters."""
+        if len(self.display_text) > MAX_BUTTON_TITLE_LENGTH:
+            msg = f"Display text must not exceed {MAX_BUTTON_TITLE_LENGTH} characters"
+            raise ValueError(msg)
+        if not self.display_text:
+            msg = "Display text is required"
+            raise ValueError(msg)
+        if self.ttl_minutes <= 0:
+            msg = "TTL minutes must be greater than 0"
+            raise ValueError(msg)
+
+
 class MessagesAPI:
     """API for sending WhatsApp messages."""
 
@@ -345,6 +366,103 @@ class MessagesAPI:
         # Add optional footer if provided
         if footer:
             payload["interactive"]["footer"] = {"text": footer}
+
+        data = self._http.request("POST", path, json=payload)
+        msg_id = (data.get("messages") or [{}])[0].get("id", "")
+        return SendTextResponse(message_id=msg_id)
+
+    def send_cta_url(
+        self,
+        *,
+        to: str,
+        body: str,
+        button: URLButton,
+    ) -> SendTextResponse:
+        """Send an interactive message with a CTA URL button (simplified, body only).
+
+        Args:
+            to: Recipient phone number.
+            body: Message body text (max 1024 characters).
+            button: URL button with display_text and url.
+
+        Returns:
+            SendTextResponse with message ID.
+
+        Raises:
+            ValueError: If validation fails (text length limits).
+        """
+        # Validate body text length
+        if len(body) > MAX_LIST_BODY_TEXT_LENGTH:
+            msg = f"Body text must not exceed {MAX_LIST_BODY_TEXT_LENGTH} characters"
+            raise ValueError(msg)
+
+        path = f"/{self._phone_number_id}/messages"
+        payload: dict[str, Any] = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": to,
+            "type": "interactive",
+            "interactive": {
+                "type": "cta_url",
+                "body": {"text": body},
+                "action": {
+                    "name": "cta_url",
+                    "parameters": {
+                        "display_text": button.display_text,
+                        "url": button.url,
+                    },
+                },
+            },
+        }
+
+        data = self._http.request("POST", path, json=payload)
+        msg_id = (data.get("messages") or [{}])[0].get("id", "")
+        return SendTextResponse(message_id=msg_id)
+
+    def send_voice_call_button(
+        self,
+        *,
+        to: str,
+        body: str,
+        button: VoiceCallButton,
+    ) -> SendTextResponse:
+        """Send an interactive message with a WhatsApp Call Button.
+
+        Args:
+            to: Recipient phone number.
+            body: Message body text (max 1024 characters).
+            button: Voice call button with display_text, ttl_minutes, and payload.
+
+        Returns:
+            SendTextResponse with message ID.
+
+        Raises:
+            ValueError: If validation fails (text length limits).
+        """
+        # Validate body text length
+        if len(body) > MAX_LIST_BODY_TEXT_LENGTH:
+            msg = f"Body text must not exceed {MAX_LIST_BODY_TEXT_LENGTH} characters"
+            raise ValueError(msg)
+
+        path = f"/{self._phone_number_id}/messages"
+        payload: dict[str, Any] = {
+            "messaging_product": "whatsapp",
+            "recipient_type": "individual",
+            "to": to,
+            "type": "interactive",
+            "interactive": {
+                "type": "voice_call",
+                "body": {"text": body},
+                "action": {
+                    "name": "voice_call",
+                    "parameters": {
+                        "display_text": button.display_text,
+                        "ttl_minutes": button.ttl_minutes,
+                        "payload": button.payload,
+                    },
+                },
+            },
+        }
 
         data = self._http.request("POST", path, json=payload)
         msg_id = (data.get("messages") or [{}])[0].get("id", "")

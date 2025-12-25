@@ -1,12 +1,17 @@
 """Handlers for WhatsApp text commands using the Command Pattern."""
 
 import json
+import logging
 import re
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime, timedelta
+from urllib.parse import quote
+
+from itsdangerous import URLSafeTimedSerializer
 
 from loglife.app.config import (
     DEFAULT_GOAL_EMOJI,
+    SECRET_KEY,
     STYLE,
     messages,
 )
@@ -15,8 +20,20 @@ from loglife.app.db.tables import Goal, Rating, User
 from loglife.app.logic.text.reminder_time import parse_time_string
 from loglife.app.logic.text.week import get_monday_before, look_back_summary
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
-from loglife.core.messaging import send_whatsapp_list_message
-from loglife.core.whatsapp_api.endpoints.messages import ListRow, ListSection
+from loglife.core.messaging import (
+    Message,
+    send_whatsapp_cta_url,
+    send_whatsapp_list_message,
+    send_whatsapp_reply_buttons,
+)
+from loglife.core.whatsapp_api.endpoints.messages import (
+    ListRow,
+    ListSection,
+    ReplyButton,
+    URLButton,
+)
+
+logger = logging.getLogger(__name__)
 
 MIN_PARTS_EXPECTED = 2
 
@@ -546,3 +563,140 @@ class ListHandler(TextCommandHandler):
 
         # Return None since we've already sent the message
         return None
+
+
+class MenuHandler(TextCommandHandler):
+    """Return interactive menu with reply buttons."""
+
+    COMMAND = "menu"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'menu'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process menu command by sending interactive reply buttons."""
+        # Create reply buttons
+        buttons = [
+            ReplyButton(id="checkin", title="Check in"),
+            ReplyButton(id="goals", title="Goals"),
+            ReplyButton(id="habits", title="Habits"),
+        ]
+
+        # Send button message
+        send_whatsapp_reply_buttons(
+            number=user.phone_number,
+            text="❓ *LogLife Menu*\n\nSelect an option:",
+            buttons=buttons,
+        )
+
+        # Return None since we've already sent the message
+        return None
+
+
+class CheckinHandler(TextCommandHandler):
+    """Handle 'checkin' command - show check-in options."""
+
+    COMMAND = "checkin"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'checkin'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process checkin command - send reply buttons."""
+        # Create reply buttons for check-in
+        buttons = [
+            ReplyButton(id="checkin now", title="Check in now!"),
+            ReplyButton(id="edit time", title="Edit Time"),
+        ]
+
+        # Send button message
+        send_whatsapp_reply_buttons(
+            number=user.phone_number,
+            text="*Check in*",
+            buttons=buttons,
+        )
+
+        # Return None since we've already sent the message
+        return None
+
+
+class CheckinNowHandler(TextCommandHandler):
+    """Handle 'checkin now' command - initiate WhatsApp call."""
+
+    COMMAND = "checkin now"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'checkin now'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str, message_obj: "Message | None" = None) -> str | None:
+        """Process checkin now command - send CTA URL button.
+
+        Args:
+            user: The user record
+            _message: The text message (unused)
+            message_obj: Optional Message object to extract profile name from metadata
+        """
+        logger.info("Check-in call requested for user %s", user.phone_number)
+
+        # Generate token from phone number
+        s = URLSafeTimedSerializer(SECRET_KEY)
+        token = s.dumps(user.phone_number)
+
+        # Extract name from message metadata if available
+        profile_name = None
+        if message_obj and message_obj.metadata:
+            profile_name = message_obj.metadata.get("profile_name")
+
+        # Use profile name if available, otherwise use empty string
+        name = quote(profile_name) if profile_name else ""
+
+        # Create URL button for check-in with token and name
+        url = f"https://www.loglife.co/call?token={token}"
+        if name:
+            url += f"&name={name}"
+        url_button = URLButton(
+            display_text="Call",
+            url=url,
+        )
+
+        # Send CTA URL button message
+        send_whatsapp_cta_url(
+            number=user.phone_number,
+            body="*Check in*",
+            button=url_button,
+        )
+
+        # Return None since we've already sent the message
+        return None
+
+
+class EditTimeHandler(TextCommandHandler):
+    """Handle 'edit time' command - echo for testing."""
+
+    COMMAND = "edit time"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'edit time'."""
+        return message == self.COMMAND
+
+    def handle(self, _user: User, _message: str) -> str | None:
+        """Process edit time command - echo for testing."""
+        return "Edit Time"
+
+
+class HabitsHandler(TextCommandHandler):
+    """Handle 'habits' command - show week summary."""
+
+    COMMAND = "habits"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'habits'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process habits command - delegate to WeekSummaryHandler."""
+        week_handler = WeekSummaryHandler()
+        return week_handler.handle(user, "week")

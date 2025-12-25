@@ -2,6 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { useTheme } from "../contexts/ThemeContext";
 import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
 
@@ -9,6 +10,11 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isDarkMode, toggleTheme } = useTheme();
   const { openWidget } = useWhatsAppWidget();
+  const pathname = usePathname();
+
+  if (pathname === "/call") {
+    return null;
+  }
 
   return (
     <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-200 ${
@@ -94,9 +100,10 @@ export default function Navbar() {
             </Link>
           </nav>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+
             <button
-              className={`flex items-center justify-center w-10 h-10 transition-colors cursor-pointer ${
+              className={`flex items-center justify-center w-10 h-10 transition-colors cursor-pointer rounded-lg ${
                 isDarkMode 
                   ? "text-slate-300 hover:text-emerald-400" 
                   : "text-slate-600 hover:text-emerald-600"
