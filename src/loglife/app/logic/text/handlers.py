@@ -652,7 +652,6 @@ class CallHandler(TextCommandHandler):
         # Send 3 CTA URL button messages with different paths and text
         for number, display_text, body in button_configs:
             url = f"https://dev.loglife.co/call/{number}/{token}"
-            # url = f"http://localhost:3000/call/{number}/{token}"
             url_button = URLButton(
                 display_text=display_text,
                 url=url,
@@ -691,7 +690,6 @@ class CheckinNowHandler(TextCommandHandler):
 
         # Create URL button for check-in with token as path parameter
         url = f"https://dev.loglife.co/call/{token}"
-        # url = f"http://localhost:3000/call/{token}"
         url_button = URLButton(
             display_text="Call",
             url=url,

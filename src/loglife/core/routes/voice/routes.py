@@ -38,8 +38,7 @@ def _decode_phone_number(external_user_id: str) -> tuple[str | None, str | None]
     except SignatureExpired:
         logger.warning("Token expired for external_user_id: %s", external_user_id)
         return None, (
-            "Your token is expired, you need select checkin in "
-            "WhatsApp again. endCall=true"
+            "Your token is expired, you need select checkin in WhatsApp again. endCall=true"
         )
     except (BadSignature, BadTimeSignature) as e:
         # If decoding fails, assume external_user_id is already a phone number
@@ -93,18 +92,13 @@ def _format_habits_response(goals: list[Goal], *, is_asking: bool, user_text: st
         )
 
     # Format habits list
-    habits_list = "\n".join(
-        f"• {goal.goal_emoji} {goal.goal_description}" for goal in goals
-    )
+    habits_list = "\n".join(f"• {goal.goal_emoji} {goal.goal_description}" for goal in goals)
 
     if is_asking:
         habit_word = "habit" if num_habits == 1 else "habits"
         return f"You have {num_habits} {habit_word}:\n{habits_list}"
 
-    return (
-        f'Thanks. You said: "{user_text}". '
-        f"Here are your current habits:\n{habits_list}"
-    )
+    return f'Thanks. You said: "{user_text}". Here are your current habits:\n{habits_list}'
 
 
 def _handle_daily_checkin(user: User | None, user_text: str) -> str:

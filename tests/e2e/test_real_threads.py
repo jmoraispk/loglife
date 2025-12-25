@@ -192,7 +192,19 @@ def test_real_threading_api_failure(
 
     assert mock_post.call_count >= 1
 
-    # 3. Verify the error was caught and logged
+    # 3. Wait a bit longer for the log to be written and captured from the background thread
+    time.sleep(0.5)
+
+    # 4. Verify the error was caught and logged
     # The worker should NOT crash. If it crashed, subsequent tests or logic would fail.
     # We check the logs for the specific error message from messaging.py
-    assert "Failed to deliver outbound message" in caplog.text
+    # Check both caplog.text and caplog.records for reliability
+    log_found = (
+        "Failed to deliver outbound message" in caplog.text
+        or any(
+            "Failed to deliver outbound message" in record.getMessage()
+            for record in caplog.records
+            if record.levelname == "ERROR"
+        )
+    )
+    assert log_found, f"Expected log message not found. caplog.text: {caplog.text[:500]}"
