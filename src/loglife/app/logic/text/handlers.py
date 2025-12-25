@@ -25,14 +25,12 @@ from loglife.core.messaging import (
     send_whatsapp_cta_url,
     send_whatsapp_list_message,
     send_whatsapp_reply_buttons,
-    send_whatsapp_voice_call_button,
 )
 from loglife.core.whatsapp_api.endpoints.messages import (
     ListRow,
     ListSection,
     ReplyButton,
     URLButton,
-    VoiceCallButton,
 )
 
 logger = logging.getLogger(__name__)

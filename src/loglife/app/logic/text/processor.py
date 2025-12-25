@@ -56,6 +56,72 @@ HANDLERS: list[TextCommandHandler] = [
 ]
 
 
+def _handle_reminder_time_state(user: User, text_content: str) -> str | None:
+    """Handle messages when user is in awaiting_reminder_time state.
+
+    Args:
+        user: The user record
+        text_content: The normalized message text
+
+    Returns:
+        Response message if handled, None otherwise
+    """
+    reminder_handler = ReminderTimeHandler()
+    if reminder_handler.matches(text_content):
+        result = reminder_handler.handle(user, text_content)
+        if result:
+            return result
+    return messages.ERROR_COMPLETE_REMINDER_TIME
+
+
+def _apply_command_aliases(text_content: str) -> str:
+    """Apply command aliases to text content.
+
+    Args:
+        text_content: The original text content
+
+    Returns:
+        Text content with aliases replaced
+    """
+    for alias, command in COMMAND_ALIASES.items():
+        pattern = r"\b" + re.escape(alias) + r"\b"
+        text_content = re.sub(pattern, command, text_content)
+    return text_content
+
+
+def _try_handler(
+    handler: TextCommandHandler, user: User, text_content: str, message: Message
+) -> str | None:
+    """Try to handle a message with a specific handler.
+
+    Args:
+        handler: The handler to try
+        user: The user record
+        text_content: The normalized message text
+        message: The original message object
+
+    Returns:
+        Response message if handled, None otherwise
+    """
+    if not handler.matches(text_content):
+        return None
+
+    if isinstance(handler, CheckinNowHandler):
+        result = handler.handle(user, text_content, message_obj=message)
+    else:
+        result = handler.handle(user, text_content)
+
+    if result is not None:
+        return result
+
+    # If handler returns None and it's not AddGoalHandler,
+    # it means the message was already sent (e.g., ListHandler)
+    if not isinstance(handler, AddGoalHandler):
+        return None
+
+    return None
+
+
 def process_text(user: User, message: Message) -> str | None:
     """Route incoming text commands to the appropriate goal or rating handler.
 
@@ -76,42 +142,16 @@ def process_text(user: User, message: Message) -> str | None:
 
         # Check for blocking states
         if user.state == "awaiting_reminder_time":
-            # Only allow time input or abort command
-            reminder_handler = ReminderTimeHandler()
-
-            # If input looks like a time, let ReminderTimeHandler process it
-            if reminder_handler.matches(text_content):
-                result = reminder_handler.handle(user, text_content)
-                if result:
-                    return result
-
-            # Check for specific abort command if desired, otherwise enforce flow
-            # For now, we strictly enforce flow as per requirements
-            return messages.ERROR_COMPLETE_REMINDER_TIME
+            return _handle_reminder_time_state(user, text_content)
 
         # Add aliases (with word boundaries to avoid replacing partial words)
-        for alias, command in COMMAND_ALIASES.items():
-            # Escape alias to be safe in regex
-            pattern = r"\b" + re.escape(alias) + r"\b"
-            text_content = re.sub(pattern, command, text_content)
+        text_content = _apply_command_aliases(text_content)
 
         # Execute the first matching command handler
         for handler in HANDLERS:
-            if handler.matches(text_content):
-                # Pass Message object to CheckinNowHandler to access profile name
-                if isinstance(handler, CheckinNowHandler):
-                    result = handler.handle(user, text_content, message_obj=message)
-                else:
-                    result = handler.handle(user, text_content)
-                # Special case: add_goal can return None if no goal text provided
-                # In that case, continue to check other handlers
-                if result is not None:
-                    return result
-                # If handler returns None and it's not AddGoalHandler,
-                # it means the message was already sent (e.g., ListHandler)
-                # Return None to prevent "Wrong command!" message
-                if not isinstance(handler, AddGoalHandler):
-                    return None
+            result = _try_handler(handler, user, text_content, message)
+            if result is not None:
+                return result
 
     except Exception as exc:
         logger.exception("Error in text processor")

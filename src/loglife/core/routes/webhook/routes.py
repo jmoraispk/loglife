@@ -14,6 +14,7 @@ from flask.typing import ResponseReturnValue
 from flask.wrappers import Response
 
 from loglife.core.messaging import Message, _get_whatsapp_client, enqueue_inbound_message
+
 from .audio import RoboticHelloTrack
 from .utils import error_response, success_response
 
@@ -24,6 +25,8 @@ try:
     AIORTC_AVAILABLE = True
 except ImportError:
     AIORTC_AVAILABLE = False
+    # Type stub for when aiortc is not available
+    RTCPeerConnection = Any  # type: ignore[assignment,misc]
 
 webhook_bp = Blueprint("webhook", __name__)
 
@@ -38,27 +41,39 @@ VERIFY_TOKEN = os.getenv("VERIFY_TOKEN", "")
 # Track processed call IDs to deduplicate repeated connect events
 _processed_call_ids: set[str] = set()
 
+
 # Global background loop for handling calls
-_call_loop: asyncio.AbstractEventLoop | None = None
-_call_thread: threading.Thread | None = None
+class _CallLoopManager:
+    """Manages the global background event loop for calls."""
+
+    def __init__(self) -> None:
+        """Initialize the call loop manager."""
+        self._loop: asyncio.AbstractEventLoop | None = None
+        self._thread: threading.Thread | None = None
+
+    def get_loop(self) -> asyncio.AbstractEventLoop:
+        """Get or create the global background event loop for calls."""
+        if self._loop is None:
+            self._loop = asyncio.new_event_loop()
+
+            def run_loop() -> None:
+                asyncio.set_event_loop(self._loop)
+                if self._loop is not None:
+                    self._loop.run_forever()
+
+            self._thread = threading.Thread(target=run_loop, daemon=True)
+            self._thread.start()
+        return self._loop
+
+
+_call_loop_manager = _CallLoopManager()
 # Store active peer connections: call_id -> RTCPeerConnection
 _active_calls: dict[str, Any] = {}
 
 
 def _get_call_loop() -> asyncio.AbstractEventLoop:
     """Get or create the global background event loop for calls."""
-    global _call_loop, _call_thread
-    if _call_loop is None:
-        _call_loop = asyncio.new_event_loop()
-
-        def run_loop() -> None:
-            asyncio.set_event_loop(_call_loop)
-            if _call_loop is not None:
-                _call_loop.run_forever()
-
-        _call_thread = threading.Thread(target=run_loop, daemon=True)
-        _call_thread.start()
-    return _call_loop
+    return _call_loop_manager.get_loop()
 
 
 @webhook_bp.route("/webhook", methods=["POST"])
@@ -103,6 +118,161 @@ def _handle_webhook_verification() -> ResponseReturnValue:
     return error_response("Verification failed", status_code=403)
 
 
+def _extract_webhook_entry(data: dict) -> dict | None:
+    """Extract entry from Meta webhook payload.
+
+    Args:
+        data: The JSON payload from Meta webhook.
+
+    Returns:
+        The first entry if found, None otherwise.
+    """
+    entry = data.get("entry", [])
+    if not entry:
+        logger.warning("No entry found in Meta webhook payload")
+        return None
+    return entry[0]
+
+
+def _extract_webhook_change(entry: dict) -> dict | None:
+    """Extract change from Meta webhook entry.
+
+    Args:
+        entry: The entry object from Meta webhook.
+
+    Returns:
+        The first change if found, None otherwise.
+    """
+    changes = entry.get("changes", [])
+    if not changes:
+        logger.warning("No changes found in Meta webhook payload")
+        return None
+    return changes[0]
+
+
+def _extract_message_content(message: dict, sender: str) -> str | None:
+    """Extract message content from message object.
+
+    Args:
+        message: The message object from Meta webhook.
+        sender: The sender phone number.
+
+    Returns:
+        The extracted message content, or None if extraction fails.
+    """
+    message_type = message.get("type")
+
+    if message_type == "text":
+        text_data = message.get("text", {})
+        raw_msg = text_data.get("body", "")
+        if not raw_msg:
+            logger.warning("Missing message body in text message")
+            return None
+        return raw_msg
+
+    if message_type == "interactive":
+        return _extract_interactive_content(message, sender)
+
+    logger.debug("Ignoring non-text/non-interactive message type: %s", message_type)
+    return None
+
+
+def _handle_missing_message_content(message: dict) -> ResponseReturnValue:
+    """Handle case when message content extraction fails.
+
+    Args:
+        message: The message object from Meta webhook.
+
+    Returns:
+        Appropriate response based on message type.
+    """
+    message_type = message.get("type")
+    if message_type == "interactive":
+        interactive_data = message.get("interactive", {})
+        interactive_type = interactive_data.get("type")
+        return success_response(message=f"Ignored interactive type: {interactive_type}")
+    if message_type != "text":
+        return success_response(message=f"Ignored message type: {message_type}")
+    return error_response("Missing message body")
+
+
+def _extract_interactive_content(message: dict, sender: str) -> str | None:
+    """Extract content from interactive message.
+
+    Args:
+        message: The message object from Meta webhook.
+        sender: The sender phone number.
+
+    Returns:
+        The extracted message content, or None if extraction fails.
+    """
+    interactive_data = message.get("interactive", {})
+    interactive_type = interactive_data.get("type")
+
+    if interactive_type == "list_reply":
+        list_reply = interactive_data.get("list_reply", {})
+        raw_msg = list_reply.get("id", "")
+        if not raw_msg:
+            logger.warning("Missing list reply ID in interactive message")
+            return None
+        logger.info("Processing list reply: %s from %s", raw_msg, sender)
+        return raw_msg
+
+    if interactive_type == "button_reply":
+        button_reply = interactive_data.get("button_reply", {})
+        raw_msg = button_reply.get("id", "")
+        if not raw_msg:
+            logger.warning("Missing button reply ID in interactive message")
+            return None
+        logger.info("Processing button reply: %s from %s", raw_msg, sender)
+        return raw_msg
+
+    logger.debug("Ignoring unsupported interactive message type: %s", interactive_type)
+    return None
+
+
+def _process_message_payload(value: dict, message: dict, sender: str) -> ResponseReturnValue:
+    """Process a message payload and forward to webhook.
+
+    Args:
+        value: The value object from the webhook change.
+        message: The message object.
+        sender: The sender phone number.
+
+    Returns:
+        Response from webhook processing.
+    """
+    raw_msg = _extract_message_content(message, sender)
+    if raw_msg is None:
+        return _handle_missing_message_content(message)
+
+    # Extract profile name from contacts if available
+    contacts = value.get("contacts", [])
+    profile_name: str | None = None
+    if contacts:
+        contact = contacts[0]
+        profile = contact.get("profile", {})
+        profile_name = profile.get("name")
+
+    # Create custom payload matching the expected format
+    custom_payload = {
+        "sender": sender,
+        "raw_msg": raw_msg,
+        "msg_type": "chat",
+        "client_type": "whatsapp",
+    }
+
+    # Add profile name to metadata if available
+    if profile_name:
+        custom_payload["metadata"] = {"profile_name": profile_name}
+
+    # Forward to /webhook route internally
+    # Create a new request context with the custom payload and call webhook directly
+    with current_app.test_request_context("/webhook", method="POST", json=custom_payload):
+        # Call the webhook function directly with the modified request context
+        return webhook()
+
+
 def _process_meta_message(data: dict) -> ResponseReturnValue:
     """Process incoming Meta webhook message (POST request).
 
@@ -114,17 +284,14 @@ def _process_meta_message(data: dict) -> ResponseReturnValue:
     """
     # Extract message from Meta webhook payload structure
     # Meta webhook format: {"entry": [{"changes": [{"value": {"messages": [...]}}]}]}
-    entry = data.get("entry", [])
-    if not entry:
-        logger.warning("No entry found in Meta webhook payload")
+    entry = _extract_webhook_entry(data)
+    if entry is None:
         return success_response(message="No entry found")
 
-    changes = entry[0].get("changes", [])
-    if not changes:
-        logger.warning("No changes found in Meta webhook payload")
+    change = _extract_webhook_change(entry)
+    if change is None:
         return success_response(message="No changes found")
 
-    change = changes[0]
     field = change.get("field", "")
 
     # Handle call events
@@ -142,74 +309,125 @@ def _process_meta_message(data: dict) -> ResponseReturnValue:
         return success_response(message="No messages to process")
 
     message = messages[0]
-    message_type = message.get("type")
     sender = message.get("from")
 
     if not sender:
         logger.warning("Missing sender in message")
         return error_response("Missing sender")
 
-    # Extract profile name from contacts if available
-    contacts = value.get("contacts", [])
-    profile_name: str | None = None
-    if contacts:
-        contact = contacts[0]
-        profile = contact.get("profile", {})
-        profile_name = profile.get("name")
+    return _process_message_payload(value, message, sender)
 
-    raw_msg = ""
-    # Handle text messages
-    if message_type == "text":
-        text_data = message.get("text", {})
-        raw_msg = text_data.get("body", "")
-        if not raw_msg:
-            logger.warning("Missing message body in text message")
-            return error_response("Missing message body")
-    # Handle interactive messages (list and button replies)
-    elif message_type == "interactive":
-        interactive_data = message.get("interactive", {})
-        interactive_type = interactive_data.get("type")
 
-        if interactive_type == "list_reply":
-            list_reply = interactive_data.get("list_reply", {})
-            raw_msg = list_reply.get("id", "")
-            if not raw_msg:
-                logger.warning("Missing list reply ID in interactive message")
-                return error_response("Missing list reply ID")
-            logger.info("Processing list reply: %s from %s", raw_msg, sender)
-        elif interactive_type == "button_reply":
-            button_reply = interactive_data.get("button_reply", {})
-            raw_msg = button_reply.get("id", "")
-            if not raw_msg:
-                logger.warning("Missing button reply ID in interactive message")
-                return error_response("Missing button reply ID")
-            logger.info("Processing button reply: %s from %s", raw_msg, sender)
-        else:
-            logger.debug(
-                "Ignoring unsupported interactive message type: %s", interactive_type
-            )
-            return success_response(message=f"Ignored interactive type: {interactive_type}")
+def _handle_call_connect(call: dict) -> ResponseReturnValue:
+    """Handle call connect event.
+
+    Args:
+        call: The call object from the event.
+
+    Returns:
+        Response after processing the connect event.
+    """
+    call_id = call.get("id")
+    sdp_type = call.get("session", {}).get("sdp_type", "")
+
+    # Deduplicate repeated connect events by call_id
+    # Meta may retry if we don't successfully pre_accept quickly
+    if call_id in _processed_call_ids:
+        logger.info("Ignoring duplicate connect event for call_id=%s", call_id)
+        return success_response(message="Duplicate connect event ignored")
+
+    # Extract SDP offer
+    session = call.get("session", {})
+    sdp_offer = session.get("sdp", "")
+
+    if not call_id or not sdp_offer:
+        logger.warning("Missing call_id or SDP offer in connect event")
+        return error_response("Missing call_id or SDP offer")
+
+    # Mark call as processed immediately to prevent race conditions
+    _processed_call_ids.add(call_id)
+
+    try:
+        logger.info("Processing call connect: call_id=%s, sdp_type=%s", call_id, sdp_type)
+
+        # Generate WebRTC SDP answer from SDP offer using aiortc on global loop
+        sdp_answer = _generate_sdp_answer(call_id, sdp_offer)
+
+        # Send pre_accept and accept
+        _send_call_pre_accept(call_id, sdp_answer)
+        logger.info("Sent pre_accept for call_id=%s", call_id)
+
+        _send_call_accept(call_id, sdp_answer)
+        logger.info("Sent accept for call_id=%s", call_id)
+
+    except (ValueError, RuntimeError, TimeoutError) as e:
+        # Remove from processed set on failure so we can retry
+        _processed_call_ids.discard(call_id)
+        return error_response(str(e))
     else:
-        logger.debug("Ignoring non-text/non-interactive message type: %s", message_type)
-        return success_response(message=f"Ignored message type: {message_type}")
+        return success_response(message="Call accepted")
 
-    # Create custom payload matching the expected format
-    custom_payload = {
-        "sender": sender,
-        "raw_msg": raw_msg,
-        "msg_type": "chat",
-        "client_type": "whatsapp",
-    }
-    
-    # Add profile name to metadata if available
-    if profile_name:
-        custom_payload["metadata"] = {"profile_name": profile_name}
 
-    # Forward to /webhook route internally
-    # Create a new request context with the custom payload and call webhook directly
-    with current_app.test_request_context("/webhook", method="POST", json=custom_payload):
-        # Call the webhook function directly with the modified request context
-        return webhook()
+def _generate_sdp_answer(call_id: str, sdp_offer: str) -> str:
+    """Generate SDP answer from SDP offer.
+
+    Args:
+        call_id: The call ID.
+        sdp_offer: The SDP offer string.
+
+    Returns:
+        The SDP answer string.
+
+    Raises:
+        ValueError: If SDP answer generation fails.
+        RuntimeError: If there's a runtime error.
+        TimeoutError: If the operation times out.
+    """
+    try:
+        loop = _get_call_loop()
+        # Run the setup coroutine in the background thread loop
+        # This keeps the PC alive on that loop
+        future = asyncio.run_coroutine_threadsafe(
+            _create_and_configure_pc(call_id, sdp_offer), loop
+        )
+        # Wait for the result (pc, sdp_answer) - sync wait here is fine as it's quick
+        _, sdp_answer = future.result(timeout=10)  # 10s timeout safety
+    except TimeoutError as exc:
+        logger.exception("Timeout generating SDP answer")
+        error_msg = "Failed to generate SDP answer: timeout"
+        raise TimeoutError(error_msg) from exc
+    except (ValueError, RuntimeError) as exc:
+        logger.exception("Failed to generate SDP answer")
+        error_msg = f"Failed to generate SDP answer: {exc}"
+        raise ValueError(error_msg) from exc
+    else:
+        return sdp_answer
+
+
+def _handle_call_terminate(call: dict) -> ResponseReturnValue:
+    """Handle call terminate event.
+
+    Args:
+        call: The call object from the event.
+
+    Returns:
+        Response after processing the terminate event.
+    """
+    call_id = call.get("id")
+    status = call.get("status", "")
+    logger.info("Call terminated: call_id=%s, status=%s", call_id, status)
+
+    # Cleanup active call resources
+    if call_id in _active_calls:
+        logger.info("Cleaning up resources for call_id=%s", call_id)
+        pc = _active_calls.pop(call_id)
+        loop = _get_call_loop()
+        asyncio.run_coroutine_threadsafe(pc.close(), loop)
+
+    # Remove from processed set when call terminates
+    if call_id:
+        _processed_call_ids.discard(call_id)
+    return success_response(message="Call terminated")
 
 
 def _process_call_event(value: dict) -> ResponseReturnValue:
@@ -239,88 +457,16 @@ def _process_call_event(value: dict) -> ResponseReturnValue:
     )
 
     if event == "connect":
-        # Deduplicate repeated connect events by call_id
-        # Meta may retry if we don't successfully pre_accept quickly
-        if call_id in _processed_call_ids:
-            logger.info("Ignoring duplicate connect event for call_id=%s", call_id)
-            return success_response(message="Duplicate connect event ignored")
-
-        # Extract SDP offer
-        session = call.get("session", {})
-        sdp_offer = session.get("sdp", "")
-        sdp_type = session.get("sdp_type", "")
-
-        if not call_id or not sdp_offer:
-            logger.warning("Missing call_id or SDP offer in connect event")
-            return error_response("Missing call_id or SDP offer")
-
-        # Mark call as processed immediately to prevent race conditions
-        _processed_call_ids.add(call_id)
-
-        try:
-            logger.info("Processing call connect: call_id=%s, sdp_type=%s", call_id, sdp_type)
-
-            # Generate WebRTC SDP answer from SDP offer using aiortc on global loop
-            try:
-                loop = _get_call_loop()
-                # Run the setup coroutine in the background thread loop
-                # This keeps the PC alive on that loop
-                future = asyncio.run_coroutine_threadsafe(
-                    _create_and_configure_pc(call_id, sdp_offer), loop
-                )
-                # Wait for the result (pc, sdp_answer) - sync wait here is fine as it's quick
-                _, sdp_answer = future.result(timeout=10)  # 10s timeout safety
-            except Exception as exc:
-                logger.exception("Failed to generate SDP answer")
-                msg = f"Failed to generate SDP answer: {exc}"
-                raise ValueError(msg) from exc
-
-            # Send pre_accept
-            try:
-                _send_call_pre_accept(call_id, sdp_answer)
-                logger.info("Sent pre_accept for call_id=%s", call_id)
-            except Exception as exc:
-                logger.exception("Failed to send pre_accept")
-                msg = f"Failed to send pre_accept: {exc}"
-                raise ValueError(msg) from exc
-
-            # Send accept
-            try:
-                _send_call_accept(call_id, sdp_answer)
-                logger.info("Sent accept for call_id=%s", call_id)
-            except Exception as exc:
-                logger.exception("Failed to send accept")
-                msg = f"Failed to send accept: {exc}"
-                raise ValueError(msg) from exc
-
-            return success_response(message="Call accepted")
-
-        except Exception as e:
-            # Remove from processed set on failure so we can retry
-            _processed_call_ids.discard(call_id)
-            return error_response(str(e))
+        return _handle_call_connect(call)
 
     if event == "terminate":
-        status = call.get("status", "")
-        logger.info("Call terminated: call_id=%s, status=%s", call_id, status)
-
-        # Cleanup active call resources
-        if call_id in _active_calls:
-            logger.info("Cleaning up resources for call_id=%s", call_id)
-            pc = _active_calls.pop(call_id)
-            loop = _get_call_loop()
-            asyncio.run_coroutine_threadsafe(pc.close(), loop)
-
-        # Remove from processed set when call terminates
-        if call_id:
-            _processed_call_ids.discard(call_id)
-        return success_response(message="Call terminated")
+        return _handle_call_terminate(call)
 
     logger.debug("Unhandled call event: event=%s", event)
     return success_response(message=f"Unhandled call event: {event}")
 
 
-async def wait_for_ice_complete(pc: Any) -> None:
+async def wait_for_ice_complete(pc: RTCPeerConnection) -> None:
     """Wait for ICE gathering to complete."""
     if pc.iceGatheringState == "complete":
         return
@@ -333,6 +479,16 @@ async def wait_for_ice_complete(pc: Any) -> None:
             fut.set_result(True)
 
     await fut
+
+
+def _raise_sdp_generation_error() -> None:
+    """Raise error for failed SDP generation.
+
+    Raises:
+        ValueError: Always raised to indicate SDP generation failure.
+    """
+    error_msg = "Failed to generate SDP answer"
+    raise ValueError(error_msg)
 
 
 def _sanitize_whatsapp_sdp(sdp: str) -> str:
@@ -378,10 +534,6 @@ async def _create_and_configure_pc(call_id: str, sdp_offer: str) -> tuple[Any, s
     _active_calls[call_id] = pc
 
     try:
-        # Add audio transceiver (sendrecv) to ensure we can receive audio
-        # and also send silence/audio back.
-        # pc.addTransceiver("audio", direction="sendrecv")
-
         # Add a generated audio track (beep) to make the call 2-way
         # This confirms audio is flowing Bot -> User
         track = RoboticHelloTrack()
@@ -399,14 +551,12 @@ async def _create_and_configure_pc(call_id: str, sdp_offer: str) -> tuple[Any, s
 
         sdp_answer = pc.localDescription.sdp
         if not sdp_answer:
-            error_msg = "Failed to generate SDP answer"
-            raise ValueError(error_msg)
+            _raise_sdp_generation_error()
 
         # Sanitize SDP for WhatsApp
         sdp_answer = _sanitize_whatsapp_sdp(sdp_answer)
 
         logger.info("Generated SDP answer successfully for call_id=%s", call_id)
-        return pc, sdp_answer
     except Exception:
         # Cleanup if setup fails
         logger.exception("Failed to setup call %s", call_id)

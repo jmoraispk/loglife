@@ -54,7 +54,8 @@ def voice_turn() -> ResponseReturnValue:
                 return jsonify(
                     {
                         "reply_text": (
-                            "Your token is expired, you need select checkin in WhatsApp again. endCall=true"
+                            "Your token is expired, you need select checkin in "
+                            "WhatsApp again. endCall=true"
                         )
                     }
                 ), 200
@@ -88,8 +89,7 @@ def voice_turn() -> ResponseReturnValue:
                 ]
                 habits_list = "\n".join(f"• {habit}" for habit in habits)
                 reply = (
-                    f'Thanks. You said: "{user_text}". '
-                    f"Here are your current habits:\n{habits_list}"
+                    f'Thanks. You said: "{user_text}". Here are your current habits:\n{habits_list}'
                 )
         else:
             reply = "Mode not supported yet. Please try again. endCall=true"
@@ -100,4 +100,3 @@ def voice_turn() -> ResponseReturnValue:
         error = f"Error processing voice turn > {e}"
         logger.exception(error)
         return jsonify({"error": "Internal server error"}), 500
-

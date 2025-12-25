@@ -263,7 +263,18 @@ def _send_whatsapp_message_via_api(
         _send_whatsapp_message(number, message, attachments)
 
 
-def send_whatsapp_list_message(
+@dataclass
+class ListMessageContent:
+    """Content for a WhatsApp list message."""
+
+    button_text: str
+    body: str
+    sections: list[ListSection]
+    header: str | None = None
+    footer: str | None = None
+
+
+def send_whatsapp_list_message(  # noqa: PLR0913
     number: str,
     button_text: str,
     body: str,
@@ -281,17 +292,34 @@ def send_whatsapp_list_message(
         header: Optional header text (max 60 characters). Defaults to None.
         footer: Optional footer text (max 60 characters). Defaults to None.
     """
+    content = ListMessageContent(
+        button_text=button_text,
+        body=body,
+        sections=sections,
+        header=header,
+        footer=footer,
+    )
+    _send_whatsapp_list_message_impl(number, content)
+
+
+def _send_whatsapp_list_message_impl(number: str, content: ListMessageContent) -> None:
+    """Internal implementation for sending WhatsApp list message.
+
+    Args:
+        number: Recipient phone number.
+        content: List message content.
+    """
     try:
         client = _get_whatsapp_client()
         # Remove any non-digit characters and ensure proper format
         clean_number = number.replace("+", "").replace("-", "").replace(" ", "")
         response = client.messages.send_list(
             to=clean_number,
-            button_text=button_text,
-            body=body,
-            sections=sections,
-            header=header,
-            footer=footer,
+            button_text=content.button_text,
+            body=content.body,
+            sections=content.sections,
+            header=content.header,
+            footer=content.footer,
         )
         logger.info(
             "Sent WhatsApp list message via API to %s, message_id: %s",
@@ -303,22 +331,22 @@ def send_whatsapp_list_message(
         logger.exception(error)
         # Fall back to text message on API error
         logger.info("Falling back to text message")
-        fallback_text = body
-        if header:
-            fallback_text = f"{header}\n\n{fallback_text}"
-        if footer:
-            fallback_text = f"{fallback_text}\n\n{footer}"
+        fallback_text = content.body
+        if content.header:
+            fallback_text = f"{content.header}\n\n{fallback_text}"
+        if content.footer:
+            fallback_text = f"{fallback_text}\n\n{content.footer}"
         _send_whatsapp_message_via_api(number, fallback_text)
     except Exception as exc:
         error = f"Unexpected error sending WhatsApp list message via API > {exc}"
         logger.exception(error)
         # Fall back to text message on unexpected error
         logger.info("Falling back to text message")
-        fallback_text = body
-        if header:
-            fallback_text = f"{header}\n\n{fallback_text}"
-        if footer:
-            fallback_text = f"{fallback_text}\n\n{footer}"
+        fallback_text = content.body
+        if content.header:
+            fallback_text = f"{content.header}\n\n{fallback_text}"
+        if content.footer:
+            fallback_text = f"{fallback_text}\n\n{content.footer}"
         _send_whatsapp_message_via_api(number, fallback_text)
 
 

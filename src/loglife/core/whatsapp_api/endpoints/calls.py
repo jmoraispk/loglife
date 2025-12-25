@@ -81,4 +81,3 @@ class CallsAPI:
         }
 
         return self._http.request("POST", path, json=payload)
-
