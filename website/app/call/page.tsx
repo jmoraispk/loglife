@@ -1,17 +1,27 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
 import { useTheme } from "../contexts/ThemeContext";
 import Vapi from "@vapi-ai/web";
 
 export default function CallPage() {
+  const searchParams = useSearchParams();
   const { hideWidgetButton, showWidgetButton } = useWhatsAppWidget();
   const { isDarkMode } = useTheme();
   const vapiRef = useRef<Vapi | null>(null);
   const connectingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isCallActive, setIsCallActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+
+  // Get parameters from URL
+  const token = searchParams.get("token");
+  const nameParam = searchParams.get("name");
+  
+  // Decode the name parameter (it's URL-encoded phone number)
+  const customerName = nameParam ? decodeURIComponent(nameParam) : "";
+  const externalUserId = token ? decodeURIComponent(token) : "";
 
   useEffect(() => {
     hideWidgetButton();
@@ -82,8 +92,8 @@ export default function CallPage() {
       setIsConnecting(true);
       const assistantOverrides = {
         variableValues: {
-          customer_name: "Ali",
-          external_user_id: "923186491240"
+          customer_name: customerName,
+          external_user_id: externalUserId
         }
       };
       vapiRef.current.start(

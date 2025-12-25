@@ -149,6 +149,14 @@ def _process_meta_message(data: dict) -> ResponseReturnValue:
         logger.warning("Missing sender in message")
         return error_response("Missing sender")
 
+    # Extract profile name from contacts if available
+    contacts = value.get("contacts", [])
+    profile_name: str | None = None
+    if contacts:
+        contact = contacts[0]
+        profile = contact.get("profile", {})
+        profile_name = profile.get("name")
+
     raw_msg = ""
     # Handle text messages
     if message_type == "text":
@@ -192,6 +200,10 @@ def _process_meta_message(data: dict) -> ResponseReturnValue:
         "msg_type": "chat",
         "client_type": "whatsapp",
     }
+    
+    # Add profile name to metadata if available
+    if profile_name:
+        custom_payload["metadata"] = {"profile_name": profile_name}
 
     # Forward to /webhook route internally
     # Create a new request context with the custom payload and call webhook directly

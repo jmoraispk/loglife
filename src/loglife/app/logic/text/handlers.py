@@ -5,9 +5,13 @@ import logging
 import re
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime, timedelta
+from urllib.parse import quote
+
+from itsdangerous import URLSafeTimedSerializer
 
 from loglife.app.config import (
     DEFAULT_GOAL_EMOJI,
+    SECRET_KEY,
     STYLE,
     messages,
 )
@@ -17,6 +21,7 @@ from loglife.app.logic.text.reminder_time import parse_time_string
 from loglife.app.logic.text.week import get_monday_before, look_back_summary
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
 from loglife.core.messaging import (
+    Message,
     send_whatsapp_cta_url,
     send_whatsapp_list_message,
     send_whatsapp_reply_buttons,
@@ -628,14 +633,35 @@ class CheckinNowHandler(TextCommandHandler):
         """Check if message is 'checkin now'."""
         return message == self.COMMAND
 
-    def handle(self, user: User, _message: str) -> str | None:
-        """Process checkin now command - send CTA URL button."""
+    def handle(self, user: User, _message: str, message_obj: "Message | None" = None) -> str | None:
+        """Process checkin now command - send CTA URL button.
+
+        Args:
+            user: The user record
+            _message: The text message (unused)
+            message_obj: Optional Message object to extract profile name from metadata
+        """
         logger.info("Check-in call requested for user %s", user.phone_number)
 
-        # Create URL button for check-in
+        # Generate token from phone number
+        s = URLSafeTimedSerializer(SECRET_KEY)
+        token = s.dumps(user.phone_number)
+
+        # Extract name from message metadata if available
+        profile_name = None
+        if message_obj and message_obj.metadata:
+            profile_name = message_obj.metadata.get("profile_name")
+
+        # Use profile name if available, otherwise use empty string
+        name = quote(profile_name) if profile_name else ""
+
+        # Create URL button for check-in with token and name
+        url = f"http://localhost:3000/call?token={token}"
+        if name:
+            url += f"&name={name}"
         url_button = URLButton(
             display_text="Call",
-            url="http://localhost:3000/call",
+            url=url,
         )
 
         # Send CTA URL button message

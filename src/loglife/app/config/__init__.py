@@ -37,6 +37,7 @@ from .settings import (
     DEFAULT_GOAL_EMOJI,
     FLASK_ENV,
     OPENAI_CHAT_MODEL,
+    SECRET_KEY,
     STYLE,
 )
 
@@ -74,6 +75,7 @@ __all__ = [
     "REFERRAL_SUCCESS",
     "REMINDER_MESSAGE",
     "SCHEMA_FILE",
+    "SECRET_KEY",
     "STYLE",
     "SUCCESS_GOAL_ADDED",
     "SUCCESS_INDIVIDUAL_RATING",

@@ -7,6 +7,9 @@ import logging
 
 from flask import Blueprint, jsonify, request
 from flask.typing import ResponseReturnValue
+from itsdangerous import BadSignature, BadTimeSignature, SignatureExpired, URLSafeTimedSerializer
+
+from loglife.app.config import SECRET_KEY
 
 voice_bp = Blueprint("voice", __name__)
 
@@ -38,9 +41,32 @@ def voice_turn() -> ResponseReturnValue:
         external_user_id = data.get("external_user_id")
         user_text = (data.get("user_text") or "").strip()
 
+        # Decode token from external_user_id if it's a token
+        phone_number = None
+        if external_user_id:
+            try:
+                s = URLSafeTimedSerializer(SECRET_KEY)
+                phone_number = s.loads(external_user_id, max_age=300)  # 5 minutes
+                logger.info("Decoded token to phone number: %s", phone_number)
+            except SignatureExpired:
+                # Token has expired
+                logger.warning("Token expired for external_user_id: %s", external_user_id)
+                return jsonify(
+                    {
+                        "reply_text": (
+                            "Your token is expired, you need select checkin in WhatsApp again. endCall=true"
+                        )
+                    }
+                ), 200
+            except (BadSignature, BadTimeSignature) as e:
+                # If decoding fails, assume external_user_id is already a phone number
+                logger.debug("Token decode failed (may not be a token): %s", e)
+                phone_number = external_user_id
+
         logger.info(
-            "Voice turn request: external_user_id=%s, mode=%s, user_text=%s",
+            "Voice turn request: external_user_id=%s, phone_number=%s, mode=%s, user_text=%s",
             external_user_id,
+            phone_number,
             mode,
             user_text,
         )
@@ -66,7 +92,7 @@ def voice_turn() -> ResponseReturnValue:
                     f"Here are your current habits:\n{habits_list}"
                 )
         else:
-            reply = "Mode not supported yet."
+            reply = "Mode not supported yet. Please try again. endCall=true"
 
         logger.info("Voice turn response: reply_length=%d", len(reply))
         return jsonify({"reply_text": reply}), 200

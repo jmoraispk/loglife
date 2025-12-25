@@ -98,7 +98,11 @@ def process_text(user: User, message: Message) -> str | None:
         # Execute the first matching command handler
         for handler in HANDLERS:
             if handler.matches(text_content):
-                result = handler.handle(user, text_content)
+                # Pass Message object to CheckinNowHandler to access profile name
+                if isinstance(handler, CheckinNowHandler):
+                    result = handler.handle(user, text_content, message_obj=message)
+                else:
+                    result = handler.handle(user, text_content)
                 # Special case: add_goal can return None if no goal text provided
                 # In that case, continue to check other handlers
                 if result is not None:
