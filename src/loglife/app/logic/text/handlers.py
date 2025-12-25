@@ -621,7 +621,7 @@ class CheckinHandler(TextCommandHandler):
 
 
 class CallHandler(TextCommandHandler):
-    """Handle 'call' command - send 3 URL button messages."""
+    """Handle 'call' command - send 2 URL button messages."""
 
     COMMAND = "call"
 
@@ -630,7 +630,7 @@ class CallHandler(TextCommandHandler):
         return message == self.COMMAND
 
     def handle(self, user: User, _message: str) -> str | None:
-        """Process call command - send 3 CTA URL button messages.
+        """Process call command - send 2 CTA URL button messages.
 
         Args:
             user: The user record
@@ -646,10 +646,9 @@ class CallHandler(TextCommandHandler):
         button_configs = [
             (1, "Check in", "*Check in*"),
             (2, "Goal Setup", "*Goal Setup*"),
-            (3, "Temptation Support", "*Temptation Support*"),
         ]
 
-        # Send 3 CTA URL button messages with different paths and text
+        # Send 2 CTA URL button messages with different paths and text
         for number, display_text, body in button_configs:
             url = f"https://dev.loglife.co/call/{number}/{token}"
             url_button = URLButton(
