@@ -39,6 +39,12 @@ jobs:
             npm ci --only=production &&
             sudo systemctl restart loglife-whatsapp-dev &&
 
+            # =========== BUILD & DEPLOY WEBSITE ===========
+            cd /home/ali/loglife-dev/website &&
+            npm ci &&
+            npm run build &&
+            sudo systemctl restart loglife-website.service &&
+
             # =========== BUILD MKDOCS & DEPLOY DOCS ===========
             cd /home/ali/loglife-dev &&
             uv run --extra dev mkdocs build &&

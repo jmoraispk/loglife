@@ -654,7 +654,7 @@ class CheckinNowHandler(TextCommandHandler):
         name = quote(profile_name) if profile_name else ""
 
         # Create URL button for check-in with token and name
-        url = f"https://www.loglife.co/call?token={token}"
+        url = f"https://dev.loglife.co/call?token={token}"
         if name:
             url += f"&name={name}"
         url_button = URLButton(
