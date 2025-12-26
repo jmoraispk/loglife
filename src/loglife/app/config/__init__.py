@@ -4,6 +4,9 @@ import os
 
 from dotenv import load_dotenv
 
+# Load environment variables BEFORE importing settings that depend on them
+load_dotenv()
+
 from .api import ASSEMBLYAI_BASE_URL, OPENAI_API_URL, WHATSAPP_API_URL
 from .log_setup import setup_logging
 from .messages import (
@@ -39,9 +42,8 @@ from .settings import (
     OPENAI_CHAT_MODEL,
     SECRET_KEY,
     STYLE,
+    WHATSAPP_CLIENT_TYPE,
 )
-
-load_dotenv()
 
 ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -86,5 +88,6 @@ __all__ = [
     "USAGE_RATE",
     "WELCOME_MESSAGE",
     "WHATSAPP_API_URL",
+    "WHATSAPP_CLIENT_TYPE",
     "setup_logging",
 ]

@@ -9,6 +9,9 @@ from typing import Any
 
 from flask import g
 
+import os
+
+from loglife.app.config import WHATSAPP_CLIENT_TYPE
 from loglife.core.transports import send_emulator_message, send_whatsapp_message
 
 logger = logging.getLogger(__name__)
@@ -195,3 +198,155 @@ def send_message(
             metadata=metadata,
             attachments=attachments,
         )
+
+
+def send_whatsapp_reply_buttons(
+    number: str,
+    text: str,
+    buttons: list[Any],
+) -> None:
+    """Send a WhatsApp message with reply buttons.
+
+    Args:
+        number: Recipient phone number.
+        text: Message text.
+        buttons: List of ReplyButton objects.
+    """
+    client_type = WHATSAPP_CLIENT_TYPE.lower()
+
+    if client_type == "business_api":
+        # Use WhatsApp Business API
+        from loglife.core.transports import format_phone_for_business_api, get_whatsapp_business_client
+
+        try:
+            client = get_whatsapp_business_client()
+            formatted_number = format_phone_for_business_api(number)
+            client.messages.send_reply_buttons(
+                to=formatted_number,
+                text=text,
+                buttons=buttons,
+            )
+        except Exception as exc:
+            logger.exception("Error sending WhatsApp reply buttons: %s", exc)
+            raise
+    else:
+        # WhatsApp Web JS client doesn't support interactive buttons
+        # Fall back to sending text message
+        logger.warning(
+            "Reply buttons are not supported with WhatsApp Web JS client. "
+            "Sending text message instead."
+        )
+        send_whatsapp_message(number, text)
+
+
+def send_whatsapp_list_message(
+    number: str,
+    button_text: str,
+    body: str,
+    sections: list[Any],
+    header: str | None = None,
+    footer: str | None = None,
+) -> None:
+    """Send a WhatsApp list message.
+
+    Args:
+        number: Recipient phone number.
+        button_text: Text for the action button.
+        body: Message body text.
+        sections: List of ListSection objects.
+        header: Optional header text.
+        footer: Optional footer text.
+    """
+    client_type = WHATSAPP_CLIENT_TYPE.lower()
+
+    if client_type == "business_api":
+        # Use WhatsApp Business API
+        from loglife.core.transports import format_phone_for_business_api, get_whatsapp_business_client
+
+        try:
+            client = get_whatsapp_business_client()
+            formatted_number = format_phone_for_business_api(number)
+            client.messages.send_list(
+                to=formatted_number,
+                button_text=button_text,
+                body=body,
+                sections=sections,
+                header=header,
+                footer=footer,
+            )
+        except Exception as exc:
+            logger.exception("Error sending WhatsApp list message: %s", exc)
+            raise
+    else:
+        # WhatsApp Web JS client doesn't support interactive lists
+        # Fall back to sending text message
+        logger.warning(
+            "List messages are not supported with WhatsApp Web JS client. "
+            "Sending text message instead."
+        )
+        send_whatsapp_message(number, body)
+
+
+def send_whatsapp_cta_url(
+    number: str,
+    body: str,
+    button: Any,
+) -> None:
+    """Send a WhatsApp message with a CTA URL button.
+
+    Args:
+        number: Recipient phone number.
+        body: Message body text.
+        button: URLButton object.
+    """
+    client_type = WHATSAPP_CLIENT_TYPE.lower()
+
+    if client_type == "business_api":
+        # Use WhatsApp Business API
+        from loglife.core.transports import format_phone_for_business_api, get_whatsapp_business_client
+
+        try:
+            client = get_whatsapp_business_client()
+            formatted_number = format_phone_for_business_api(number)
+            client.messages.send_cta_url(
+                to=formatted_number,
+                body=body,
+                button=button,
+            )
+        except Exception as exc:
+            logger.exception("Error sending WhatsApp CTA URL: %s", exc)
+            raise
+    else:
+        # WhatsApp Web JS client doesn't support interactive buttons
+        # Fall back to sending text message with URL
+        logger.warning(
+            "CTA URL buttons are not supported with WhatsApp Web JS client. "
+            "Sending text message with URL instead."
+        )
+        message_with_url = f"{body}\n\n{button.url}"
+        send_whatsapp_message(number, message_with_url)
+
+
+def _get_whatsapp_client():
+    """Get the WhatsApp Business API client.
+
+    This function is used by webhook routes to access the WhatsApp Business API client
+    for making calls and other API operations.
+
+    Returns:
+        WhatsAppClient instance.
+
+    Raises:
+        RuntimeError: If WhatsApp Business API is not configured.
+    """
+    from loglife.app.config import WHATSAPP_CLIENT_TYPE
+    from loglife.core.transports import get_whatsapp_business_client
+
+    client_type = WHATSAPP_CLIENT_TYPE.lower()
+    if client_type != "business_api":
+        raise RuntimeError(
+            "WhatsApp Business API client is only available when "
+            "WHATSAPP_CLIENT_TYPE is set to 'business_api'"
+        )
+
+    return get_whatsapp_business_client()

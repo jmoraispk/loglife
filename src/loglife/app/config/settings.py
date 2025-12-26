@@ -33,3 +33,6 @@ EMULATOR_SQLITE_WEB_URL = (
 )
 
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
+
+# WhatsApp client type: "web" for WhatsApp Web JS client, "business_api" for WhatsApp Business API
+WHATSAPP_CLIENT_TYPE = os.getenv("WHATSAPP_CLIENT_TYPE", "web")
