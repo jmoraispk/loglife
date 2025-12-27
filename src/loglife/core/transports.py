@@ -15,11 +15,18 @@ from typing import Any
 import requests
 
 from loglife.app.config import WHATSAPP_API_URL, WHATSAPP_CLIENT_TYPE
+from loglife.core.whatsapp_api import WhatsAppClient
 
 logger = logging.getLogger(__name__)
 
 # Lazy-loaded WhatsApp Business API client
-_whatsapp_business_client: Any = None
+_whatsapp_business_client: WhatsAppClient | None = None
+
+# Exception messages
+_ERR_WHATSAPP_CONFIG_MISSING = (
+    "WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID must be set "
+    "when using WhatsApp Business API"
+)
 
 
 # --- Log Broadcaster ---
@@ -76,20 +83,15 @@ def send_emulator_message(message: str, attachments: dict[str, Any] | None = Non
         log_broadcaster.publish(message)
 
 
-def get_whatsapp_business_client():
+def get_whatsapp_business_client() -> WhatsAppClient:
     """Get or initialize the WhatsApp Business API client."""
     global _whatsapp_business_client  # noqa: PLW0603
     if _whatsapp_business_client is None:
-        from loglife.core.whatsapp_api import WhatsAppClient
-
         access_token = os.getenv("WHATSAPP_ACCESS_TOKEN")
         phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
 
         if not access_token or not phone_number_id:
-            raise RuntimeError(
-                "WHATSAPP_ACCESS_TOKEN and WHATSAPP_PHONE_NUMBER_ID must be set "
-                "when using WhatsApp Business API"
-            )
+            raise RuntimeError(_ERR_WHATSAPP_CONFIG_MISSING)
 
         _whatsapp_business_client = WhatsAppClient(
             access_token=access_token,

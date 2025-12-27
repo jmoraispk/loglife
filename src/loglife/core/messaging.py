@@ -5,14 +5,21 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from queue import Empty, Queue
 from threading import Thread
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from flask import g
 
-import os
-
 from loglife.app.config import WHATSAPP_CLIENT_TYPE
-from loglife.core.transports import send_emulator_message, send_whatsapp_message
+from loglife.core.transports import (
+    format_phone_for_business_api,
+    get_whatsapp_business_client,
+    send_emulator_message,
+    send_whatsapp_message,
+)
+
+if TYPE_CHECKING:
+    from loglife.core.whatsapp_api import WhatsAppClient
+    from loglife.core.whatsapp_api.endpoints import ListSection, ReplyButton, URLButton
 
 logger = logging.getLogger(__name__)
 
@@ -203,7 +210,7 @@ def send_message(
 def send_whatsapp_reply_buttons(
     number: str,
     text: str,
-    buttons: list[Any],
+    buttons: list["ReplyButton"],
 ) -> None:
     """Send a WhatsApp message with reply buttons.
 
@@ -216,8 +223,6 @@ def send_whatsapp_reply_buttons(
 
     if client_type == "business_api":
         # Use WhatsApp Business API
-        from loglife.core.transports import format_phone_for_business_api, get_whatsapp_business_client
-
         try:
             client = get_whatsapp_business_client()
             formatted_number = format_phone_for_business_api(number)
@@ -226,8 +231,8 @@ def send_whatsapp_reply_buttons(
                 text=text,
                 buttons=buttons,
             )
-        except Exception as exc:
-            logger.exception("Error sending WhatsApp reply buttons: %s", exc)
+        except Exception:
+            logger.exception("Error sending WhatsApp reply buttons")
             raise
     else:
         # WhatsApp Web JS client doesn't support interactive buttons
@@ -239,11 +244,11 @@ def send_whatsapp_reply_buttons(
         send_whatsapp_message(number, text)
 
 
-def send_whatsapp_list_message(
+def send_whatsapp_list_message(  # noqa: PLR0913
     number: str,
     button_text: str,
     body: str,
-    sections: list[Any],
+    sections: list["ListSection"],
     header: str | None = None,
     footer: str | None = None,
 ) -> None:
@@ -261,8 +266,6 @@ def send_whatsapp_list_message(
 
     if client_type == "business_api":
         # Use WhatsApp Business API
-        from loglife.core.transports import format_phone_for_business_api, get_whatsapp_business_client
-
         try:
             client = get_whatsapp_business_client()
             formatted_number = format_phone_for_business_api(number)
@@ -274,8 +277,8 @@ def send_whatsapp_list_message(
                 header=header,
                 footer=footer,
             )
-        except Exception as exc:
-            logger.exception("Error sending WhatsApp list message: %s", exc)
+        except Exception:
+            logger.exception("Error sending WhatsApp list message")
             raise
     else:
         # WhatsApp Web JS client doesn't support interactive lists
@@ -290,7 +293,7 @@ def send_whatsapp_list_message(
 def send_whatsapp_cta_url(
     number: str,
     body: str,
-    button: Any,
+    button: "URLButton",
 ) -> None:
     """Send a WhatsApp message with a CTA URL button.
 
@@ -303,8 +306,6 @@ def send_whatsapp_cta_url(
 
     if client_type == "business_api":
         # Use WhatsApp Business API
-        from loglife.core.transports import format_phone_for_business_api, get_whatsapp_business_client
-
         try:
             client = get_whatsapp_business_client()
             formatted_number = format_phone_for_business_api(number)
@@ -313,8 +314,8 @@ def send_whatsapp_cta_url(
                 body=body,
                 button=button,
             )
-        except Exception as exc:
-            logger.exception("Error sending WhatsApp CTA URL: %s", exc)
+        except Exception:
+            logger.exception("Error sending WhatsApp CTA URL")
             raise
     else:
         # WhatsApp Web JS client doesn't support interactive buttons
@@ -327,7 +328,14 @@ def send_whatsapp_cta_url(
         send_whatsapp_message(number, message_with_url)
 
 
-def _get_whatsapp_client():
+# Exception messages
+_ERR_WHATSAPP_CLIENT_NOT_AVAILABLE = (
+    "WhatsApp Business API client is only available when "
+    "WHATSAPP_CLIENT_TYPE is set to 'business_api'"
+)
+
+
+def _get_whatsapp_client() -> "WhatsAppClient":
     """Get the WhatsApp Business API client.
 
     This function is used by webhook routes to access the WhatsApp Business API client
@@ -339,14 +347,8 @@ def _get_whatsapp_client():
     Raises:
         RuntimeError: If WhatsApp Business API is not configured.
     """
-    from loglife.app.config import WHATSAPP_CLIENT_TYPE
-    from loglife.core.transports import get_whatsapp_business_client
-
     client_type = WHATSAPP_CLIENT_TYPE.lower()
     if client_type != "business_api":
-        raise RuntimeError(
-            "WhatsApp Business API client is only available when "
-            "WHATSAPP_CLIENT_TYPE is set to 'business_api'"
-        )
+        raise RuntimeError(_ERR_WHATSAPP_CLIENT_NOT_AVAILABLE)
 
     return get_whatsapp_business_client()
