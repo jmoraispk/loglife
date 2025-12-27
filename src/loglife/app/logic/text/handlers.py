@@ -10,8 +10,10 @@ from itsdangerous import URLSafeTimedSerializer
 
 from loglife.app.config import (
     DEFAULT_GOAL_EMOJI,
+    LOGLIFE_DOMAIN,
     SECRET_KEY,
     STYLE,
+    WHATSAPP_CLIENT_TYPE,
     messages,
 )
 from loglife.app.db import db
@@ -24,6 +26,7 @@ from loglife.core.messaging import (
     send_whatsapp_list_message,
     send_whatsapp_reply_buttons,
 )
+from loglife.core.transports import send_whatsapp_message
 from loglife.core.whatsapp_api.endpoints.messages import (
     ListRow,
     ListSection,
@@ -638,9 +641,12 @@ class CallHandler(TextCommandHandler):
         """
         logger.info("Call command requested for user %s", user.phone_number)
 
-        # Generate token from phone number
+        # Normalize phone number by removing @c.us suffix if present
+        phone_number_normalized = user.phone_number.replace("@c.us", "")
+
+        # Generate token from normalized phone number
         s = URLSafeTimedSerializer(SECRET_KEY)
-        token = s.dumps(user.phone_number)
+        token = s.dumps(phone_number_normalized)
 
         # Button configurations: (number, display_text, body)
         button_configs = [
@@ -650,18 +656,32 @@ class CallHandler(TextCommandHandler):
             (4, "Onboarding", "*Onboarding*"),
         ]
 
-        # Send CTA URL button messages with different paths and text
-        for number, display_text, body in button_configs:
-            url = f"https://dev.loglife.co/call/{number}/{token}"
-            url_button = URLButton(
-                display_text=display_text,
-                url=url,
-            )
-            send_whatsapp_cta_url(
-                number=user.phone_number,
-                body=body,
-                button=url_button,
-            )
+        client_type = WHATSAPP_CLIENT_TYPE.lower()
+
+        # For web client type, send all links in one message
+        if client_type == "web":
+            # Build a single message with all 4 links
+            message_parts = []
+            for number, _display_text, body in button_configs:
+                url = f"{LOGLIFE_DOMAIN}/call/{number}/{token}"
+                # Format each link with title and URL
+                message_parts.append(f"{body}\n🔗 {url}")
+            # Join all parts with double newline for spacing
+            combined_message = "\n\n".join(message_parts)
+            send_whatsapp_message(user.phone_number, combined_message)
+        else:
+            # For business_api, send CTA URL button messages
+            for number, display_text, body in button_configs:
+                url = f"{LOGLIFE_DOMAIN}/call/{number}/{token}"
+                url_button = URLButton(
+                    display_text=display_text,
+                    url=url,
+                )
+                send_whatsapp_cta_url(
+                    number=user.phone_number,
+                    body=body,
+                    button=url_button,
+                )
 
         # Return None since we've already sent the messages
         return None
@@ -685,23 +705,34 @@ class CheckinNowHandler(TextCommandHandler):
         """
         logger.info("Check-in call requested for user %s", user.phone_number)
 
-        # Generate token from phone number
+        # Normalize phone number by removing @c.us suffix if present
+        phone_number_normalized = user.phone_number.replace("@c.us", "")
+
+        # Generate token from normalized phone number
         s = URLSafeTimedSerializer(SECRET_KEY)
-        token = s.dumps(user.phone_number)
+        token = s.dumps(phone_number_normalized)
 
-        # Create URL button for check-in with token as path parameter
-        url = f"https://dev.loglife.co/call/{token}"
-        url_button = URLButton(
-            display_text="Call",
-            url=url,
-        )
+        client_type = WHATSAPP_CLIENT_TYPE.lower()
 
-        # Send CTA URL button message
-        send_whatsapp_cta_url(
-            number=user.phone_number,
-            body="*Check in*",
-            button=url_button,
-        )
+        # Create URL for check-in with token as path parameter
+        url = f"{LOGLIFE_DOMAIN}/call/{token}"
+
+        # For web client type, send plain text message with link
+        if client_type == "web":
+            # Format message with URL on its own line with proper spacing for detection
+            message_with_url = f"*Check in*\n\n🔗 {url}"
+            send_whatsapp_message(user.phone_number, message_with_url)
+        else:
+            # For business_api, send CTA URL button message
+            url_button = URLButton(
+                display_text="Call",
+                url=url,
+            )
+            send_whatsapp_cta_url(
+                number=user.phone_number,
+                body="*Check in*",
+                button=url_button,
+            )
 
         # Return None since we've already sent the message
         return None

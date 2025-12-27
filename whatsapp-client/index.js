@@ -4,7 +4,15 @@ const qrcode = require('qrcode-terminal');
 const express = require('express');
 const os = require('os');
 
-require('dotenv').config();
+const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+
+// Validate required environment variables
+if (!process.env.PY_BACKEND_URL) {
+    console.error('❌ Error: PY_BACKEND_URL environment variable is not set');
+    console.error('   Please ensure .env file exists and contains PY_BACKEND_URL');
+    process.exit(1);
+}
 
 const CLEAR_SESSION = process.argv.includes('--reset-session');
 const SESSION_PATH = './session';
@@ -86,7 +94,20 @@ function createClient() {
 
     newClient.on('message', async msg => {
         try {
-            const phoneNumber = msg.from.split('@')[0];
+            // Get phone number from LID (Linked ID) - WhatsApp Web.js now uses LID instead of phone numbers
+            let phoneNumber;
+            try {
+                const contactInfo = await newClient.getContactLidAndPhone([msg.from]);
+                console.log('Contact info:', JSON.stringify(contactInfo));
+                // contactInfo is an array, each element has 'pn' (phone number) and 'lid' properties
+                phoneNumber = contactInfo[0]?.pn || msg.from.split('@')[0];
+            } catch (contactErr) {
+                console.error('Error getting contact info:', contactErr);
+                // Fallback to msg.from if getContactLidAndPhone fails
+                phoneNumber = msg.from.split('@')[0];
+            }
+
+            console.log('Extracted phone number:', phoneNumber);
 
             // console.log(msg);
 
@@ -120,7 +141,11 @@ function createClient() {
 				payload.raw_msg = typeof msg.body === 'string' ? msg.body : '';
 			}
 			
-            const response = await fetch(process.env.PY_BACKEND_URL, {
+            const backendUrl = process.env.PY_BACKEND_URL;
+            if (!backendUrl) {
+                throw new Error('PY_BACKEND_URL environment variable is not set');
+            }
+            const response = await fetch(backendUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -197,7 +222,7 @@ async function restartClient(reason) {
 
 // Express server setup
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());
