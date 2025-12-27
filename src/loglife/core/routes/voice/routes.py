@@ -159,9 +159,13 @@ def voice_turn() -> ResponseReturnValue:
         )
 
         # Get user from database using phone number
+        # Try both formats: with and without @c.us suffix
         user = None
         if phone_number:
             user = db.users.get_by_phone(phone_number)
+            # If not found and phone_number doesn't have @c.us, try with suffix
+            if not user and "@c.us" not in phone_number:
+                user = db.users.get_by_phone(f"{phone_number}@c.us")
             if not user:
                 logger.warning("User not found for phone number: %s", phone_number)
                 return jsonify(
