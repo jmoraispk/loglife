@@ -559,7 +559,7 @@ class ListHandler(TextCommandHandler):
             button_text="Commands",
             body="❓ *LogLife Commands*\n\nSelect a command from the list below:",
             sections=sections,
-            footer="Tap a command to use it",
+            options={"footer": "Tap a command to use it"},
         )
 
         # Return None since we've already sent the message

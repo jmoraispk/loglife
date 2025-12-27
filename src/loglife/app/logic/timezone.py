@@ -6,6 +6,23 @@ import phonenumbers
 from phonenumbers import NumberParseException, timezone
 
 
+def normalize_phone_number(phone_number: str) -> str:
+    """Normalize phone number by removing WhatsApp-specific suffixes.
+
+    Removes '@c.us' suffix that WhatsApp adds to phone numbers.
+    This ensures phone numbers are stored in a clean format in the database.
+
+    Args:
+        phone_number: Phone number that may include '@c.us' suffix.
+
+    Returns:
+        Phone number without '@c.us' suffix.
+    """
+    if phone_number.endswith("@c.us"):
+        return phone_number[:-5]
+    return phone_number
+
+
 def get_timezone_from_number(number: str) -> str:
     """Derive an IANA timezone string for a given phone number.
 

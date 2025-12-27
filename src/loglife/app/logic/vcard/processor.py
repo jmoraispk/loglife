@@ -7,6 +7,7 @@ import re
 from loglife.app.config import REFERRAL_SUCCESS, WELCOME_MESSAGE
 from loglife.app.db import db
 from loglife.app.db.tables import User
+from loglife.app.logic.timezone import normalize_phone_number
 from loglife.core.messaging import Message, queue_async_message
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,9 @@ logger = logging.getLogger(__name__)
 def _extract_phone_number(vcard_str: str) -> str:
     """Extract phone_number from a vcard string."""
     match: re.Match[str] | None = re.search(r"waid=([0-9]+)", vcard_str)
-    return match.group(1) if match else ""
+    phone_number = match.group(1) if match else ""
+    # Normalize phone number to ensure it doesn't have @c.us suffix
+    return normalize_phone_number(phone_number)
 
 
 def process_vcard(referrer_user: User, message: Message) -> str:

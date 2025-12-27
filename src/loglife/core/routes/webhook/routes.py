@@ -13,6 +13,7 @@ from flask import Blueprint, current_app, g, request
 from flask.typing import ResponseReturnValue
 from flask.wrappers import Response
 
+from loglife.app.logic.timezone import normalize_phone_number
 from loglife.core.messaging import Message, _get_whatsapp_client, enqueue_inbound_message
 
 from .audio import RoboticHelloTrack
@@ -314,6 +315,9 @@ def _process_meta_message(data: dict) -> ResponseReturnValue:
     if not sender:
         logger.warning("Missing sender in message")
         return error_response("Missing sender")
+
+    # Normalize phone number by removing WhatsApp suffix (@c.us)
+    sender = normalize_phone_number(sender)
 
     return _process_message_payload(value, message, sender)
 
