@@ -31,3 +31,11 @@ EMULATOR_SQLITE_WEB_URL = (
     if os.getenv("DEPLOYMENT", "local") == "local"
     else f"{EMULATOR_LOCAL_URL}:{DATABASE_PORT}/"
 )
+
+SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change-in-production")
+
+# WhatsApp client type: "web" for WhatsApp Web JS client, "business_api" for WhatsApp Business API
+WHATSAPP_CLIENT_TYPE = os.getenv("WHATSAPP_CLIENT_TYPE", "web")
+
+# LogLife domain for call URLs
+LOGLIFE_DOMAIN = os.getenv("LOGLIFE_DOMAIN", "https://dev.loglife.co")

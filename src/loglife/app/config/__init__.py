@@ -4,9 +4,13 @@ import os
 
 from dotenv import load_dotenv
 
-from .api import ASSEMBLYAI_BASE_URL, OPENAI_API_URL, WHATSAPP_API_URL
-from .log_setup import setup_logging
-from .messages import (
+# Load environment variables BEFORE importing settings that depend on them
+load_dotenv()
+
+# Imports must come after load_dotenv() because settings.py uses os.getenv() at module level
+from .api import ASSEMBLYAI_BASE_URL, OPENAI_API_URL, WHATSAPP_API_URL  # noqa: E402
+from .log_setup import setup_logging  # noqa: E402
+from .messages import (  # noqa: E402
     ERROR_ADD_GOAL_FIRST,
     ERROR_COMPLETE_REMINDER_TIME,
     ERROR_INVALID_DELETE_FORMAT,
@@ -29,18 +33,19 @@ from .messages import (
     USAGE_RATE,
     WELCOME_MESSAGE,
 )
-from .paths import ACCESS_LOG, DATABASE_FILE, ERROR_LOG, LOGS, SCHEMA_FILE
-from .prompts import OPENAI_SUMMARIZATION_SYSTEM_PROMPT
-from .settings import (
+from .paths import ACCESS_LOG, DATABASE_FILE, ERROR_LOG, LOGS, SCHEMA_FILE  # noqa: E402
+from .prompts import OPENAI_SUMMARIZATION_SYSTEM_PROMPT  # noqa: E402
+from .settings import (  # noqa: E402
     COMMAND_ALIASES,
     DATABASE_PORT,
     DEFAULT_GOAL_EMOJI,
     FLASK_ENV,
+    LOGLIFE_DOMAIN,
     OPENAI_CHAT_MODEL,
+    SECRET_KEY,
     STYLE,
+    WHATSAPP_CLIENT_TYPE,
 )
-
-load_dotenv()
 
 ASSEMBLYAI_API_KEY = os.getenv("ASSEMBLYAI_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -65,6 +70,7 @@ __all__ = [
     "FLASK_ENV",
     "HELP_MESSAGE",
     "JOURNAL_REMINDER_MESSAGE",
+    "LOGLIFE_DOMAIN",
     "LOGS",
     "LOOKBACK_NO_GOALS",
     "OPENAI_API_KEY",
@@ -74,6 +80,7 @@ __all__ = [
     "REFERRAL_SUCCESS",
     "REMINDER_MESSAGE",
     "SCHEMA_FILE",
+    "SECRET_KEY",
     "STYLE",
     "SUCCESS_GOAL_ADDED",
     "SUCCESS_INDIVIDUAL_RATING",
@@ -84,5 +91,6 @@ __all__ = [
     "USAGE_RATE",
     "WELCOME_MESSAGE",
     "WHATSAPP_API_URL",
+    "WHATSAPP_CLIENT_TYPE",
     "setup_logging",
 ]

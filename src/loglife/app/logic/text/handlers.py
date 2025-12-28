@@ -1,13 +1,19 @@
 """Handlers for WhatsApp text commands using the Command Pattern."""
 
 import json
+import logging
 import re
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime, timedelta
 
+from itsdangerous import URLSafeTimedSerializer
+
 from loglife.app.config import (
     DEFAULT_GOAL_EMOJI,
+    LOGLIFE_DOMAIN,
+    SECRET_KEY,
     STYLE,
+    WHATSAPP_CLIENT_TYPE,
     messages,
 )
 from loglife.app.db import db
@@ -15,6 +21,23 @@ from loglife.app.db.tables import Goal, Rating, User
 from loglife.app.logic.text.reminder_time import parse_time_string
 from loglife.app.logic.text.week import get_monday_before, look_back_summary
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
+from loglife.core.messaging import (
+    send_whatsapp_cta_url,
+    send_whatsapp_list_message,
+    send_whatsapp_reply_buttons,
+)
+from loglife.core.transports import send_whatsapp_message
+from loglife.core.whatsapp_api.endpoints.messages import (
+    ListRow,
+    ListSection,
+    ReplyButton,
+    URLButton,
+)
+
+logger = logging.getLogger(__name__)
+
+# Cache the serializer to avoid recreating it on every call (performance optimization)
+_serializer = URLSafeTimedSerializer(SECRET_KEY)
 
 MIN_PARTS_EXPECTED = 2
 
@@ -495,3 +518,251 @@ class HelpHandler(TextCommandHandler):
     def handle(self, _user: User, _message: str) -> str | None:
         """Process help command."""
         return messages.HELP_MESSAGE
+
+
+class ListHandler(TextCommandHandler):
+    """Return interactive menu with list buttons."""
+
+    COMMAND = "list"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'list'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process list command by sending interactive list message."""
+        # Create list sections with common commands
+        sections = [
+            ListSection(
+                title="Goals",
+                rows=[
+                    ListRow(id="goals", title="Goals"),
+                    ListRow(id="add goal", title="Add Goal"),
+                    ListRow(id="enable journaling", title="Enable Journaling"),
+                ],
+            ),
+            ListSection(
+                title="Viewing",
+                rows=[
+                    ListRow(id="week", title="Week Summary"),
+                    ListRow(id="lookback 7", title="Lookback 7 Days"),
+                ],
+            ),
+            ListSection(
+                title="More Commands",
+                rows=[
+                    ListRow(id="help", title="Full Help"),
+                ],
+            ),
+        ]
+
+        # Send list message
+        send_whatsapp_list_message(
+            number=user.phone_number,
+            button_text="Commands",
+            body="❓ *LogLife Commands*\n\nSelect a command from the list below:",
+            sections=sections,
+            options={"footer": "Tap a command to use it"},
+        )
+
+        # Return None since we've already sent the message
+        return None
+
+
+class MenuHandler(TextCommandHandler):
+    """Return interactive menu with reply buttons."""
+
+    COMMAND = "menu"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'menu'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process menu command by sending interactive reply buttons."""
+        # Create reply buttons
+        buttons = [
+            ReplyButton(id="checkin", title="Check in"),
+            ReplyButton(id="goals", title="Goals"),
+            ReplyButton(id="habits", title="Habits"),
+        ]
+
+        # Send button message
+        send_whatsapp_reply_buttons(
+            number=user.phone_number,
+            text="❓ *LogLife Menu*\n\nSelect an option:",
+            buttons=buttons,
+        )
+
+        # Return None since we've already sent the message
+        return None
+
+
+class CheckinHandler(TextCommandHandler):
+    """Handle 'checkin' command - show check-in options."""
+
+    COMMAND = "checkin"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'checkin'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process checkin command - send reply buttons."""
+        # Create reply buttons for check-in
+        buttons = [
+            ReplyButton(id="checkin now", title="Check in now!"),
+            ReplyButton(id="edit time", title="Edit Time"),
+        ]
+
+        # Send button message
+        send_whatsapp_reply_buttons(
+            number=user.phone_number,
+            text="*Check in*",
+            buttons=buttons,
+        )
+
+        # Return None since we've already sent the message
+        return None
+
+
+class CallHandler(TextCommandHandler):
+    """Handle 'call' command - send 4 URL button messages."""
+
+    COMMAND = "call"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'call'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process call command - send 4 CTA URL button messages.
+
+        Args:
+            user: The user record
+            _message: The text message (unused)
+        """
+        logger.info("Call command requested for user %s", user.phone_number)
+
+        # Normalize phone number by removing @c.us suffix if present
+        phone_number_normalized = user.phone_number.replace("@c.us", "")
+
+        # Generate token from normalized phone number (use cached serializer for performance)
+        token = _serializer.dumps(phone_number_normalized)
+
+        # Button configurations: (number, display_text, body)
+        button_configs = [
+            (1, "Check in", "*Check in*"),
+            (2, "Goal Setup", "*Goal Setup*"),
+            (3, "Temptation Support", "*Temptation Support*"),
+            (4, "Onboarding", "*Onboarding*"),
+        ]
+
+        client_type = WHATSAPP_CLIENT_TYPE.lower()
+
+        # For web client type, send all links in one message
+        if client_type == "web":
+            # Build a single message with all 4 links
+            message_parts = []
+            for number, _display_text, body in button_configs:
+                url = f"{LOGLIFE_DOMAIN}/call/{number}/{token}"
+                # Format each link with title and URL
+                message_parts.append(f"{body}\n🔗 {url}")
+            # Join all parts with double newline for spacing
+            combined_message = "\n\n".join(message_parts)
+            send_whatsapp_message(user.phone_number, combined_message)
+        else:
+            # For business_api, send CTA URL button messages
+            for number, display_text, body in button_configs:
+                url = f"{LOGLIFE_DOMAIN}/call/{number}/{token}"
+                url_button = URLButton(
+                    display_text=display_text,
+                    url=url,
+                )
+                send_whatsapp_cta_url(
+                    number=user.phone_number,
+                    body=body,
+                    button=url_button,
+                )
+
+        # Return None since we've already sent the messages
+        return None
+
+
+class CheckinNowHandler(TextCommandHandler):
+    """Handle 'checkin now' command - initiate WhatsApp call."""
+
+    COMMAND = "checkin now"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'checkin now'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process checkin now command - send CTA URL button.
+
+        Args:
+            user: The user record
+            _message: The text message (unused)
+        """
+        logger.info("Check-in call requested for user %s", user.phone_number)
+
+        # Normalize phone number by removing @c.us suffix if present
+        phone_number_normalized = user.phone_number.replace("@c.us", "")
+
+        # Generate token from normalized phone number (use cached serializer for performance)
+        token = _serializer.dumps(phone_number_normalized)
+
+        client_type = WHATSAPP_CLIENT_TYPE.lower()
+
+        # Create URL for check-in with token as path parameter
+        url = f"{LOGLIFE_DOMAIN}/call/{token}"
+
+        # For web client type, send plain text message with link
+        if client_type == "web":
+            # Format message with URL on its own line with proper spacing for detection
+            message_with_url = f"*Check in*\n\n🔗 {url}"
+            send_whatsapp_message(user.phone_number, message_with_url)
+        else:
+            # For business_api, send CTA URL button message
+            url_button = URLButton(
+                display_text="Call",
+                url=url,
+            )
+            send_whatsapp_cta_url(
+                number=user.phone_number,
+                body="*Check in*",
+                button=url_button,
+            )
+
+        # Return None since we've already sent the message
+        return None
+
+
+class EditTimeHandler(TextCommandHandler):
+    """Handle 'edit time' command - echo for testing."""
+
+    COMMAND = "edit time"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'edit time'."""
+        return message == self.COMMAND
+
+    def handle(self, _user: User, _message: str) -> str | None:
+        """Process edit time command - echo for testing."""
+        return "Edit Time"
+
+
+class HabitsHandler(TextCommandHandler):
+    """Handle 'habits' command - show week summary."""
+
+    COMMAND = "habits"
+
+    def matches(self, message: str) -> bool:
+        """Check if message is 'habits'."""
+        return message == self.COMMAND
+
+    def handle(self, user: User, _message: str) -> str | None:
+        """Process habits command - delegate to WeekSummaryHandler."""
+        week_handler = WeekSummaryHandler()
+        return week_handler.handle(user, "week")

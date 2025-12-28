@@ -10,7 +10,7 @@ from typing import Any
 from loglife.app.db import db
 from loglife.app.logic.audio import process_audio
 from loglife.app.logic.text import process_text
-from loglife.app.logic.timezone import get_timezone_from_number
+from loglife.app.logic.timezone import get_timezone_from_number, normalize_phone_number
 from loglife.app.logic.vcard import process_vcard
 from loglife.core.messaging import Message, queue_async_message
 
@@ -19,10 +19,12 @@ logger = logging.getLogger(__name__)
 
 def route_message(message: Message) -> None:
     """Route an inbound message to the correct processor and queue a reply."""
-    user = db.users.get_by_phone(message.sender)
+    # Normalize phone number by removing WhatsApp suffix (@c.us)
+    normalized_sender = normalize_phone_number(message.sender)
+    user = db.users.get_by_phone(normalized_sender)
     if not user:
-        timezone = get_timezone_from_number(message.sender)
-        user = db.users.create(message.sender, timezone, client_type=message.client_type)
+        timezone = get_timezone_from_number(normalized_sender)
+        user = db.users.create(normalized_sender, timezone, client_type=message.client_type)
 
     attachments: dict[str, Any] = {}
 
@@ -50,10 +52,12 @@ def route_message(message: Message) -> None:
         response = "Sorry, something went wrong while processing your message."
         attachments = {}
 
-    queue_async_message(
-        message.sender,
-        response,
-        client_type=message.client_type or "whatsapp",
-        metadata=message.metadata,
-        attachments=attachments,
-    )
+    # Only queue message if response is not None (some handlers send messages directly)
+    if response is not None:
+        queue_async_message(
+            normalized_sender,
+            response,
+            client_type=message.client_type or "whatsapp",
+            metadata=message.metadata,
+            attachments=attachments,
+        )
