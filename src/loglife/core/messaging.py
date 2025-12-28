@@ -1,7 +1,6 @@
 """Messaging module - unified interface for message handling."""
 
 import logging
-import os
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from queue import Empty, Queue
