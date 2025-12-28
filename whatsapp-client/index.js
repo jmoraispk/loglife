@@ -5,7 +5,7 @@ const express = require('express');
 const os = require('os');
 
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 
 // Validate required environment variables
 if (!process.env.PY_BACKEND_URL) {
