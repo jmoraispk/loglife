@@ -6,8 +6,6 @@ import re
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime, timedelta
 
-from itsdangerous import URLSafeTimedSerializer
-
 from loglife.app.config import (
     DEFAULT_GOAL_EMOJI,
     LOGLIFE_DOMAIN,
@@ -26,6 +24,7 @@ from loglife.core.messaging import (
     send_whatsapp_list_message,
     send_whatsapp_reply_buttons,
 )
+from loglife.core.tokens import generate_short_token
 from loglife.core.transports import send_whatsapp_message
 from loglife.core.whatsapp_api.endpoints.messages import (
     ListRow,
@@ -35,9 +34,6 @@ from loglife.core.whatsapp_api.endpoints.messages import (
 )
 
 logger = logging.getLogger(__name__)
-
-# Cache the serializer to avoid recreating it on every call (performance optimization)
-_serializer = URLSafeTimedSerializer(SECRET_KEY)
 
 MIN_PARTS_EXPECTED = 2
 
@@ -647,8 +643,8 @@ class CallHandler(TextCommandHandler):
         # Normalize phone number by removing @c.us suffix if present
         phone_number_normalized = user.phone_number.replace("@c.us", "")
 
-        # Generate token from normalized phone number (use cached serializer for performance)
-        token = _serializer.dumps(phone_number_normalized)
+        # Generate token from normalized phone number
+        token = generate_short_token(phone_number_normalized, SECRET_KEY)
 
         # Button configurations: (number, display_text, body)
         button_configs = [
@@ -710,8 +706,8 @@ class CheckinNowHandler(TextCommandHandler):
         # Normalize phone number by removing @c.us suffix if present
         phone_number_normalized = user.phone_number.replace("@c.us", "")
 
-        # Generate token from normalized phone number (use cached serializer for performance)
-        token = _serializer.dumps(phone_number_normalized)
+        # Generate token from normalized phone number
+        token = generate_short_token(phone_number_normalized, SECRET_KEY)
 
         client_type = WHATSAPP_CLIENT_TYPE.lower()
 

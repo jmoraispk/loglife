@@ -8,11 +8,10 @@ import re
 
 from flask import Blueprint, jsonify, request
 from flask.typing import ResponseReturnValue
-from itsdangerous import BadSignature, BadTimeSignature, SignatureExpired, URLSafeTimedSerializer
 
-from loglife.app.config import SECRET_KEY
 from loglife.app.db import db
 from loglife.app.db.tables import Goal, User
+from loglife.core.tokens import get_phone_from_token
 
 voice_bp = Blueprint("voice", __name__)
 
@@ -22,8 +21,12 @@ logger = logging.getLogger(__name__)
 API_KEY = "my-super-secret-123"
 
 
-def _decode_phone_number(external_user_id: str) -> tuple[str | None, str | None]:
-    """Decode phone number from token or return as-is.
+def _extract_phone_number(external_user_id: str) -> tuple[str | None, str | None]:
+    """Extract phone number from external_user_id (token or phone number).
+
+    Since HMAC tokens cannot be decoded directly, we use a cache to map tokens
+    to phone numbers. If external_user_id is a token, we look it up in the cache.
+    Otherwise, we treat it as a phone number.
 
     Args:
         external_user_id: Token or phone number string
@@ -31,21 +34,20 @@ def _decode_phone_number(external_user_id: str) -> tuple[str | None, str | None]
     Returns:
         Tuple of (phone_number, error_message). error_message is None on success.
     """
-    try:
-        s = URLSafeTimedSerializer(SECRET_KEY)
-        phone_number = s.loads(external_user_id, max_age=300)  # 5 minutes
-        logger.info("Decoded token to phone number: %s", phone_number)
-    except SignatureExpired:
-        logger.warning("Token expired for external_user_id: %s", external_user_id)
-        return None, (
-            "Your token is expired, you need select checkin in WhatsApp again. endCall=true"
-        )
-    except (BadSignature, BadTimeSignature) as e:
-        # If decoding fails, assume external_user_id is already a phone number
-        logger.debug("Token decode failed (may not be a token): %s", e)
+    # Try to get phone number from token cache (for HMAC tokens)
+    phone_from_cache = get_phone_from_token(external_user_id)
+    if phone_from_cache:
+        logger.info("Decoded token to phone number: %s", phone_from_cache)
+        return phone_from_cache, None
+
+    # If not found in cache, check if it looks like a phone number (contains digits)
+    if any(c.isdigit() for c in external_user_id):
+        logger.info("Using external_user_id as phone number: %s", external_user_id)
         return external_user_id, None
-    else:
-        return phone_number, None
+
+    # If it doesn't look like a phone number and not in cache, token might be expired
+    logger.warning("Token not found in cache or expired: %s", external_user_id)
+    return None, ("Your token is expired, you need select checkin in WhatsApp again. endCall=true")
 
 
 def _is_asking_about_habits(user_text: str) -> bool:
@@ -145,8 +147,8 @@ def voice_turn() -> ResponseReturnValue:
             logger.warning("Voice turn request missing external_user_id or user_text")
             return jsonify({"reply_text": "I didn't catch that. Can you repeat?"}), 200
 
-        # Decode token from external_user_id if it's a token
-        phone_number, error_msg = _decode_phone_number(external_user_id)
+        # Extract phone number from external_user_id
+        phone_number, error_msg = _extract_phone_number(external_user_id)
         if error_msg:
             return jsonify({"reply_text": error_msg}), 200
 
