@@ -1,12 +1,25 @@
-"""Messages API endpoint."""
+"""WhatsApp Business API client.
 
+Consolidated client with HTTP handling, exceptions, and message sending capabilities.
+"""
+
+import time
 from dataclasses import dataclass
 from typing import Any
 
-from loglife.core.whatsapp_business_api.http import HttpClient
+import requests
 
-MAX_BUTTON_ID_LENGTH = 256
-MAX_BUTTON_TITLE_LENGTH = 20
+from .buttons import (
+    ListSection,
+    ReplyButton,
+    URLButton,
+    VoiceCallButton,
+)
+
+# Constants
+HTTP_BAD_REQUEST = 400
+_MAX_RETRIES_EXCEEDED_MSG = "Max retries exceeded"
+
 MAX_BUTTONS = 3
 MIN_BUTTONS = 1
 MAX_LIST_SECTIONS = 10
@@ -15,9 +28,128 @@ MAX_LIST_BUTTON_TEXT_LENGTH = 20
 MAX_LIST_HEADER_TEXT_LENGTH = 60
 MAX_LIST_FOOTER_TEXT_LENGTH = 60
 MAX_LIST_BODY_TEXT_LENGTH = 1024
-MAX_LIST_ROW_TITLE_LENGTH = 24
-MAX_LIST_ROW_DESCRIPTION_LENGTH = 72
-MAX_LIST_SECTION_TITLE_LENGTH = 24
+
+
+# --- Exceptions ---
+
+
+class WhatsAppSDKError(Exception):
+    """Base error for the SDK."""
+
+
+class WhatsAppHTTPError(WhatsAppSDKError):
+    """HTTP error from WhatsApp API."""
+
+    def __init__(self, status_code: int, message: str, details: dict | None = None) -> None:
+        """Initialize HTTP error.
+
+        Args:
+            status_code: HTTP status code.
+            message: Error message.
+            details: Optional error details dictionary.
+        """
+        super().__init__(f"HTTP {status_code}: {message}")
+        self.status_code = status_code
+        self.details = details or {}
+
+
+class WhatsAppRequestError(WhatsAppSDKError):
+    """Network/timeout/etc."""
+
+
+# --- HTTP Client ---
+
+
+class HttpClient:
+    """HTTP client with retry logic and error handling."""
+
+    def __init__(  # noqa: PLR0913
+        self,
+        base_url: str,
+        access_token: str,
+        timeout: float = 15.0,
+        max_retries: int = 3,
+        backoff_factor: float = 0.5,
+        session: requests.Session | None = None,
+    ) -> None:
+        """Initialize HTTP client.
+
+        Args:
+            base_url: Base URL for API requests.
+            access_token: Bearer token for authentication.
+            timeout: Request timeout in seconds. Defaults to 15.0.
+            max_retries: Maximum retry attempts. Defaults to 3.
+            backoff_factor: Exponential backoff factor. Defaults to 0.5.
+            session: Optional requests session. Creates new if None.
+        """
+        self.base_url = base_url.rstrip("/")
+        self.access_token = access_token
+        self.timeout = timeout
+        self.max_retries = max_retries
+        self.backoff_factor = backoff_factor
+        self.session = session or requests.Session()
+
+    def request(
+        self,
+        method: str,
+        path: str,
+        *,
+        json: dict | None = None,
+        params: dict | None = None,
+    ) -> dict:
+        """Make HTTP request with retry logic.
+
+        Args:
+            method: HTTP method (GET, POST, etc.).
+            path: API endpoint path.
+            json: Optional JSON payload.
+            params: Optional query parameters.
+
+        Returns:
+            Response JSON data.
+
+        Raises:
+            WhatsAppHTTPError: For HTTP errors (status >= 400).
+            WhatsAppRequestError: For network/timeout errors.
+        """
+        url = f"{self.base_url}{path}"
+        headers = {
+            "Authorization": f"Bearer {self.access_token}",
+            "Content-Type": "application/json",
+        }
+
+        for attempt in range(self.max_retries + 1):
+            try:
+                resp = self.session.request(
+                    method=method,
+                    url=url,
+                    headers=headers,
+                    json=json,
+                    params=params,
+                    timeout=self.timeout,
+                )
+            except (requests.Timeout, requests.ConnectionError) as e:
+                if attempt < self.max_retries:
+                    time.sleep(self.backoff_factor * (2**attempt))
+                    continue
+                error_msg = f"Network error: {e}"
+                raise WhatsAppRequestError(error_msg) from e
+
+            if resp.status_code >= HTTP_BAD_REQUEST:
+                try:
+                    data = resp.json()
+                except (ValueError, requests.JSONDecodeError):
+                    data = {"raw": resp.text}
+                msg = data.get("error", {}).get("message", "Request failed")
+                raise WhatsAppHTTPError(resp.status_code, msg, data)
+
+            return resp.json()
+
+        # This should never be reached, but satisfies RET503
+        raise WhatsAppRequestError(_MAX_RETRIES_EXCEEDED_MSG)
+
+
+# --- Response Models ---
 
 
 @dataclass(frozen=True)
@@ -27,110 +159,39 @@ class SendTextResponse:
     message_id: str
 
 
-@dataclass(frozen=True)
-class ReplyButton:
-    """Reply button definition."""
-
-    id: str
-    title: str
-
-    def __post_init__(self) -> None:
-        """Validate button parameters."""
-        if len(self.id) > MAX_BUTTON_ID_LENGTH:
-            msg = f"Button ID must not exceed {MAX_BUTTON_ID_LENGTH} characters"
-            raise ValueError(msg)
-        if len(self.title) > MAX_BUTTON_TITLE_LENGTH:
-            msg = f"Button title must not exceed {MAX_BUTTON_TITLE_LENGTH} characters"
-            raise ValueError(msg)
+# --- WhatsApp Client ---
 
 
-@dataclass(frozen=True)
-class ListRow:
-    """List row definition for interactive list messages."""
+class WhatsAppClient:
+    """Main client for interacting with WhatsApp Business API."""
 
-    id: str
-    title: str
-    description: str | None = None
-
-    def __post_init__(self) -> None:
-        """Validate list row parameters."""
-        if len(self.id) > MAX_BUTTON_ID_LENGTH:
-            msg = f"Row ID must not exceed {MAX_BUTTON_ID_LENGTH} characters"
-            raise ValueError(msg)
-        if len(self.title) > MAX_LIST_ROW_TITLE_LENGTH:
-            msg = f"Row title must not exceed {MAX_LIST_ROW_TITLE_LENGTH} characters"
-            raise ValueError(msg)
-        if self.description and len(self.description) > MAX_LIST_ROW_DESCRIPTION_LENGTH:
-            msg = f"Row description must not exceed {MAX_LIST_ROW_DESCRIPTION_LENGTH} characters"
-            raise ValueError(msg)
-
-
-@dataclass(frozen=True)
-class ListSection:
-    """List section definition for interactive list messages."""
-
-    title: str
-    rows: list[ListRow]
-
-    def __post_init__(self) -> None:
-        """Validate list section parameters."""
-        if len(self.title) > MAX_LIST_SECTION_TITLE_LENGTH:
-            msg = f"Section title must not exceed {MAX_LIST_SECTION_TITLE_LENGTH} characters"
-            raise ValueError(msg)
-        if not self.rows:
-            msg = "Section must have at least one row"
-            raise ValueError(msg)
-
-
-@dataclass(frozen=True)
-class URLButton:
-    """URL button definition for interactive messages."""
-
-    display_text: str
-    url: str
-
-    def __post_init__(self) -> None:
-        """Validate URL button parameters."""
-        if len(self.display_text) > MAX_BUTTON_TITLE_LENGTH:
-            msg = f"Display text must not exceed {MAX_BUTTON_TITLE_LENGTH} characters"
-            raise ValueError(msg)
-        if not self.url:
-            msg = "URL is required"
-            raise ValueError(msg)
-
-
-@dataclass(frozen=True)
-class VoiceCallButton:
-    """Voice call button definition for interactive messages."""
-
-    display_text: str
-    ttl_minutes: int
-    payload: str
-
-    def __post_init__(self) -> None:
-        """Validate voice call button parameters."""
-        if len(self.display_text) > MAX_BUTTON_TITLE_LENGTH:
-            msg = f"Display text must not exceed {MAX_BUTTON_TITLE_LENGTH} characters"
-            raise ValueError(msg)
-        if not self.display_text:
-            msg = "Display text is required"
-            raise ValueError(msg)
-        if self.ttl_minutes <= 0:
-            msg = "TTL minutes must be greater than 0"
-            raise ValueError(msg)
-
-
-class MessagesAPI:
-    """API for sending WhatsApp messages."""
-
-    def __init__(self, http: HttpClient, phone_number_id: str) -> None:
-        """Initialize Messages API.
+    def __init__(  # noqa: PLR0913
+        self,
+        *,
+        access_token: str,
+        phone_number_id: str,
+        base_url: str = "https://graph.facebook.com/v24.0",
+        timeout: float = 15.0,
+        max_retries: int = 3,
+        backoff_factor: float = 0.5,
+    ) -> None:
+        """Initialize WhatsApp client.
 
         Args:
-            http: HTTP client instance.
+            access_token: WhatsApp Business API access token.
             phone_number_id: WhatsApp Business phone number ID.
+            base_url: Base URL for the API. Defaults to v24.0.
+            timeout: Request timeout in seconds. Defaults to 15.0.
+            max_retries: Maximum number of retry attempts. Defaults to 3.
+            backoff_factor: Backoff factor for retries. Defaults to 0.5.
         """
-        self._http = http
+        self._http = HttpClient(
+            base_url=base_url,
+            access_token=access_token,
+            timeout=timeout,
+            max_retries=max_retries,
+            backoff_factor=backoff_factor,
+        )
         self._phone_number_id = phone_number_id
 
     def send_text(self, *, to: str, text: str, preview_url: bool = False) -> SendTextResponse:

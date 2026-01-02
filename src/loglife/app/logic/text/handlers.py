@@ -26,7 +26,7 @@ from loglife.core.messaging import (
 )
 from loglife.core.tokens import generate_short_token
 from loglife.core.transports import send_whatsapp_message
-from loglife.core.whatsapp_business_api.endpoints.messages import (
+from loglife.core.whatsapp_business_api import (
     ListRow,
     ListSection,
     ReplyButton,
