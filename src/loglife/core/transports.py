@@ -15,7 +15,7 @@ from typing import Any
 import requests
 
 from loglife.app.config import WHATSAPP_API_URL, WHATSAPP_CLIENT_TYPE
-from loglife.core.whatsapp_api import WhatsAppClient
+from loglife.core.whatsapp_business_api import WhatsAppClient
 
 logger = logging.getLogger(__name__)
 

@@ -18,8 +18,8 @@ from loglife.core.transports import (
 )
 
 if TYPE_CHECKING:
-    from loglife.core.whatsapp_api import WhatsAppClient
-    from loglife.core.whatsapp_api.endpoints import ListSection, ReplyButton, URLButton
+    from loglife.core.whatsapp_business_api import WhatsAppClient
+    from loglife.core.whatsapp_business_api.endpoints import ListSection, ReplyButton, URLButton
 
 logger = logging.getLogger(__name__)
 
