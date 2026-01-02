@@ -2,7 +2,8 @@
 
 from zoneinfo import ZoneInfo
 
-from loglife.app.logic import get_timezone_from_number, get_timezone_safe
+from loglife.app.logic.router import get_timezone_from_number
+from loglife.app.services.reminder.worker import get_timezone_safe
 
 
 def test_get_timezone_from_number() -> None:
