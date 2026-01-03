@@ -90,5 +90,5 @@ The `core.recv_msg()` function returns a `Message` dataclass with everything you
 ## ⏭️ Next Steps
 
 *   [Understand the Architecture](architecture.md) - How threads and queues work under the hood.
-*   [Setup WhatsApp](whatsapp-setup.md) - Connect your bot to the real world.
+*   [WhatsApp Flow](whatsapp-flow.md) - Connect your bot to the real world.
 
