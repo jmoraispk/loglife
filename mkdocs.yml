@@ -28,6 +28,7 @@ nav:
     - Architecture: core/architecture.md
     - WhatsApp Flow: core/whatsapp-flow.md
     - Twilio Setup: core/twilio-setup.md
+    - VAPI Conversational AI: core/vapi-conversational-ai.md
     - API Reference:
         - Core API: api/backend/core.md
   - App Implementation:
