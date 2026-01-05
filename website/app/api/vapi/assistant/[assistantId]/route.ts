@@ -93,51 +93,30 @@ export async function GET(
     // Prepend habits to the start of the system prompt
     const modifiedPrompt = habitsText ? `${habitsText}${currentPrompt}` : currentPrompt;
     
-    // Update the assistant via VAPI API to inject the modified prompt
-    if (habitsText) {
-      try {
-        // Create updated model configuration with modified prompt
-        const updatedModel = {
-          ...assistant.model,
-          messages: assistant.model.messages.map((msg: { role: string; content: string }) => 
-            msg.role === 'system' 
-              ? { ...msg, content: modifiedPrompt }
-              : msg
-          )
-        };
-        
-        // Update assistant via PATCH request
-        const updateResponse = await fetch(
-          `https://api.vapi.ai/assistant/${assistantId}`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Authorization': `Bearer ${vapiPrivateKey}`,
-              'Accept': 'application/json',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: updatedModel
-            }),
-          }
-        );
-        
-        if (!updateResponse.ok) {
-          const errorText = await updateResponse.text();
-          console.error("Failed to update assistant:", errorText);
-          // Continue with original prompt if update fails
-        } else {
-          console.log("Assistant updated with modified prompt");
-        }
-      } catch (error) {
-        console.error("Error updating assistant:", error);
-        // Continue with original prompt if update fails
-      }
-    }
+    // Create modified messages array with updated system prompt
+    // This will be passed via assistantOverrides.model.messages (per-call only, doesn't update saved assistant)
+    const modifiedMessages = assistant.model.messages.map((msg: { role: string; content: string }) => 
+      msg.role === 'system' 
+        ? { ...msg, content: modifiedPrompt }
+        : msg
+    );
+
+    // Return the full model structure needed for assistantOverrides
+    // VAPI requires provider and other model properties when overriding messages
+    const modelOverride = {
+      provider: assistant.model.provider,
+      model: assistant.model.model,
+      messages: modifiedMessages,
+      // Include other model properties if they exist (temperature, etc.)
+      ...(assistant.model.temperature !== undefined && { temperature: assistant.model.temperature }),
+      ...(assistant.model.maxTokens !== undefined && { maxTokens: assistant.model.maxTokens }),
+      ...(assistant.model.topP !== undefined && { topP: assistant.model.topP }),
+    };
 
     return NextResponse.json({
       originalPrompt: currentPrompt,
       modifiedPrompt: modifiedPrompt,
+      model: modelOverride,
     });
   } catch (error) {
     console.error('Error fetching assistant:', error);

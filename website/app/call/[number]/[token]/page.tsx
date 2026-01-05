@@ -93,6 +93,7 @@ function CallPageContent() {
 
     vapi.on("error", (error) => {
       console.error("Vapi error:", error);
+      console.error("Vapi error details:", JSON.stringify(error, null, 2));
       setIsConnecting(false);
       // Clear any pending timeout
       if (connectingTimeoutRef.current) {
@@ -147,15 +148,25 @@ function CallPageContent() {
         const data = await response.json();
         const modifiedPrompt = data.modifiedPrompt;
         const originalPrompt = data.originalPrompt;
+        const modelOverride = data.model;
         
         // Log the prompts for debugging
         console.log("Original prompt:", originalPrompt);
         console.log("Modified prompt (with habits at start):", modifiedPrompt);
         
-        // Note: VAPI doesn't support model.messages override in assistantOverrides
-        // The habits will be injected server-side when VAPI calls our /voice-turn endpoint
-        // For now, we'll just pass the variableValues
+        // Clean messages to only include role and content (remove any extra properties)
+        const cleanMessages = modelOverride.messages.map((msg: { role: string; content: string }) => ({
+          role: msg.role,
+          content: msg.content
+        }));
+        
+        // Pass modified prompt via assistantOverrides.model (per-call only, doesn't update saved assistant)
+        // VAPI requires provider and other model properties when overriding messages
         const assistantOverrides = {
+          model: {
+            ...modelOverride,
+            messages: cleanMessages
+          },
           variableValues: {
             external_user_id: externalUserId
           }
