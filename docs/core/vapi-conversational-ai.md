@@ -14,6 +14,15 @@ VAPI provides a platform for building voice AI assistants. When a user initiates
 | **Static** | ✅ Supported | Pre-defined conversation flows without AI model |
 | **Dynamic** | ❌ Not Yet Supported | Fully AI-driven conversations with dynamic configuration |
 
+### 🆕 Dynamic Prompt Injection
+
+LogLife now supports **dynamic system prompt injection** that personalizes the VAPI assistant with user-specific context (habits/goals) before each call. This feature:
+
+- ✅ Validates user tokens before call initiation
+- ✅ Fetches user's current habits from the database
+- ✅ Dynamically updates the assistant's system prompt with user habits
+- ✅ Enables personalized, context-aware conversations
+
 ---
 
 ## 🔀 Mixed/Hybrid Approach (Current Implementation)
@@ -219,13 +228,99 @@ Currently, the following modes are supported in the mixed/hybrid approach:
 - `temptation_support`: Support during temptation moments
 - `onboarding`: New user onboarding flow
 
+### Additional Endpoints
+
+#### Token Validation
+
+**Endpoint**: `GET /validate-token`
+
+Validates if a user's token is valid and not expired before allowing call initiation.
+
+**Query Parameters**:
+- `token` (string, required) - The user's token from the call URL
+
+**Response**:
+```json
+{
+  "valid": true,
+  "phone_number": "923325727426"
+}
+```
+
+Or if expired:
+```json
+{
+  "valid": false,
+  "error": "Token is expired or invalid"
+}
+```
+
+#### User Habits Retrieval
+
+**Endpoint**: `GET /user-habits`
+
+Retrieves a user's current habits/goals formatted for injection into the system prompt.
+
+**Query Parameters**:
+- `token` (string, required) - The user's token from the call URL
+
+**Response**:
+```json
+{
+  "habits": "User's current habits:\n- 🎯 Read 30 minutes daily\n- 💪 Exercise 3 times per week\n\nIf the user asks about their habits, goals, or what they're tracking, tell them about these habits.\n\n"
+}
+```
+
+#### Assistant Prompt Modification
+
+**Endpoint**: `GET /api/vapi/assistant/[assistantId]`
+
+Fetches the assistant's current system prompt, retrieves user habits, and updates the assistant with the modified prompt.
+
+**Query Parameters**:
+- `token` (string, optional) - User token to fetch habits for
+
+**Response**:
+```json
+{
+  "originalPrompt": "You are LogLife Coach...",
+  "modifiedPrompt": "User's current habits:\n- 🎯 Read 30 minutes daily\n\n...You are LogLife Coach..."
+}
+```
+
 ### Frontend Integration
 
 The frontend call page (```website/app/call/[number]/[token]/page.tsx```) initializes VAPI and starts voice calls:
 
 - Maps call numbers to VAPI assistant IDs
+- Validates user tokens before starting calls
+- Dynamically injects user habits into the assistant's system prompt
 - Passes `external_user_id` as a variable to VAPI
 - Handles call events (start, end, errors)
+
+### Dynamic Prompt Injection
+
+Before starting a call, the system dynamically updates the VAPI assistant's system prompt with the user's current habits:
+
+1. **Token Validation**: Validates the user's token to ensure it's not expired
+2. **Habit Retrieval**: Fetches the user's current habits/goals from the database
+3. **Prompt Modification**: Prepends the user's habits to the assistant's system prompt
+4. **Assistant Update**: Updates the VAPI assistant configuration via API to inject the modified prompt
+5. **Call Initiation**: Starts the call with the personalized assistant configuration
+
+This allows the AI assistant to be aware of the user's specific habits and goals during the conversation, enabling more personalized and context-aware responses.
+
+**Example Modified Prompt**:
+```
+User's current habits:
+- 🎯 Read 30 minutes daily
+- 💪 Exercise 3 times per week
+- 🧘 Meditate every morning
+
+If the user asks about their habits, goals, or what they're tracking, tell them about these habits.
+
+[Original system prompt continues...]
+```
 
 ---
 
