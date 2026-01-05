@@ -14,6 +14,7 @@ function CallPageContent() {
   const connectingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isCallActive, setIsCallActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [configError, setConfigError] = useState<string | null>(null);
 
   // Get number and token from path parameters
   const number = params?.number as string | undefined;
@@ -22,17 +23,20 @@ function CallPageContent() {
 
   // Map number to VAPI assistant ID
   const getAssistantId = (num: string | undefined): string => {
+    const assistantId1 = process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID_1;
+    const defaultId = assistantId1 || "";
+    
     switch (num) {
       case "1":
-        return "1038c0b6-3be5-4516-95fb-176e3be14b58";
+        return process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID_1 || defaultId;
       case "2":
-        return "b50776cd-e535-4f3e-951e-672c6639d4e6";
+        return process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID_2 || defaultId;
       case "3":
-        return "ed481b3b-85a8-47dd-a22c-a85959900561";
+        return process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID_3 || defaultId;
       case "4":
-        return "e9e93eff-027c-45c9-9e75-3c35c8bb82b5";
+        return process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID_4 || defaultId;
       default:
-        return "1038c0b6-3be5-4516-95fb-176e3be14b58"; // Default to 1
+        return defaultId; // Default to 1
     }
   };
 
@@ -47,7 +51,15 @@ function CallPageContent() {
 
   useEffect(() => {
     // Initialize Vapi
-    const vapi = new Vapi("fb209f9a-5269-4157-90e7-30198fad3e08");
+    const vapiApiKey = process.env.NEXT_PUBLIC_VAPI_API_KEY;
+    if (!vapiApiKey) {
+      const errorMsg = "VAPI API key is not configured. Please ensure NEXT_PUBLIC_VAPI_API_KEY is set in your .env file and restart the Next.js dev server.";
+      console.error(errorMsg);
+      setConfigError(errorMsg);
+      return;
+    }
+    setConfigError(null);
+    const vapi = new Vapi(vapiApiKey);
     vapiRef.current = vapi;
 
     // Listen for events
@@ -102,24 +114,72 @@ function CallPageContent() {
     };
   }, []);
 
-  const handleStartCall = () => {
+  const handleStartCall = async () => {
     if (vapiRef.current && !isCallActive && !isConnecting) {
       setIsConnecting(true);
-      const assistantOverrides = {
-        variableValues: {
-          external_user_id: externalUserId
-        }
-      };
-      vapiRef.current.start(
-        assistantId,
-        assistantOverrides
-      );
       
-      // Fallback timeout: clear connecting state after 10 seconds if call-start doesn't fire
-      connectingTimeoutRef.current = setTimeout(() => {
+      try {
+        // First, validate the token
+        if (!token) {
+          throw new Error("Token is required");
+        }
+        
+        const validateResponse = await fetch(`/api/vapi/validate-token?token=${encodeURIComponent(token)}`);
+        if (!validateResponse.ok) {
+          throw new Error("Failed to validate token");
+        }
+        
+        const validateData = await validateResponse.json();
+        if (!validateData.valid) {
+          console.error("Token is expired or invalid:", validateData.error);
+          setIsConnecting(false);
+          setConfigError("Your session has expired. Please get a new call link from WhatsApp.");
+          return;
+        }
+        
+        // Token is valid, proceed with fetching the modified prompt
+        const tokenParam = token ? `?token=${encodeURIComponent(token)}` : "";
+        const response = await fetch(`/api/vapi/assistant/${assistantId}${tokenParam}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch assistant prompt: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        const modifiedPrompt = data.modifiedPrompt;
+        const originalPrompt = data.originalPrompt;
+        
+        // Log the prompts for debugging
+        console.log("Original prompt:", originalPrompt);
+        console.log("Modified prompt (with habits at start):", modifiedPrompt);
+        
+        // Note: VAPI doesn't support model.messages override in assistantOverrides
+        // The habits will be injected server-side when VAPI calls our /voice-turn endpoint
+        // For now, we'll just pass the variableValues
+        const assistantOverrides = {
+          variableValues: {
+            external_user_id: externalUserId
+          }
+        };
+        
+        vapiRef.current.start(
+          assistantId,
+          assistantOverrides
+        );
+        
+        // Fallback timeout: clear connecting state after 10 seconds if call-start doesn't fire
+        connectingTimeoutRef.current = setTimeout(() => {
+          setIsConnecting(false);
+          connectingTimeoutRef.current = null;
+        }, 10000);
+      } catch (error) {
+        console.error("Error starting call:", error);
         setIsConnecting(false);
-        connectingTimeoutRef.current = null;
-      }, 10000);
+        if (connectingTimeoutRef.current) {
+          clearTimeout(connectingTimeoutRef.current);
+          connectingTimeoutRef.current = null;
+        }
+        setConfigError(error instanceof Error ? error.message : "Failed to start call. Please try again.");
+      }
     }
   };
 
@@ -156,6 +216,19 @@ function CallPageContent() {
         }`}>
           Talk to your LogLife
         </h1>
+
+        {/* Configuration Error */}
+        {configError && (
+          <div className={`mb-6 p-4 rounded-lg max-w-md ${
+            isDarkMode ? "bg-red-900/20 border border-red-800" : "bg-red-50 border border-red-200"
+          }`}>
+            <p className={`text-sm ${
+              isDarkMode ? "text-red-300" : "text-red-700"
+            }`}>
+              {configError}
+            </p>
+          </div>
+        )}
 
         {/* Main CTA Button - Hero Element */}
         <div className="flex flex-col items-center gap-6">

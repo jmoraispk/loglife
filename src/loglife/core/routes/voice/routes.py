@@ -186,3 +186,111 @@ def voice_turn() -> ResponseReturnValue:
         error = f"Error processing voice turn > {e}"
         logger.exception(error)
         return jsonify({"error": "Internal server error"}), 500
+
+
+def _format_habits_for_prompt(goals: list[Goal]) -> str:
+    """Format user habits/goals for prepending to system prompt.
+
+    Args:
+        goals: List of Goal objects
+
+    Returns:
+        Formatted habits string to prepend to system prompt
+    """
+    if not goals:
+        return ""
+
+    habits_list = "\n".join(f"- {goal.goal_emoji} {goal.goal_description}" for goal in goals)
+    instruction = (
+        "If the user asks about their habits, goals, or what they're tracking, "
+        "tell them about these habits."
+    )
+    return f"User's current habits:\n{habits_list}\n\n{instruction}\n\n"
+
+
+@voice_bp.get("/validate-token")
+def validate_token() -> ResponseReturnValue:
+    """Validate if a token is valid (not expired).
+
+    Takes a token as a query parameter and checks if it's valid and not expired.
+
+    Query Parameters:
+        token: The user's token (from URL path)
+
+    Returns:
+        JSON response with validation status
+    """
+    try:
+        token = request.args.get("token")
+
+        if not token:
+            logger.warning("validate_token: Missing token parameter")
+            return jsonify({"error": "Token is required"}), 400
+
+        # Extract phone number from token
+        phone_number, error_msg = _extract_phone_number(token)
+        if error_msg:
+            logger.warning("validate_token: Token is expired or invalid: %s", error_msg)
+            return jsonify({"valid": False, "error": "Token is expired or invalid"}), 200
+
+        # If we got a phone number, the token is valid
+        logger.info("validate_token: Token is valid for phone number: %s", phone_number)
+        return jsonify({"valid": True, "phone_number": phone_number}), 200
+
+    except Exception as e:
+        error = f"Error validating token > {e}"
+        logger.exception(error)
+        return jsonify({"error": "Internal server error"}), 500
+
+
+@voice_bp.get("/user-habits")
+def get_user_habits() -> ResponseReturnValue:
+    """Get user's habits/goals from token.
+
+    Takes a token as a query parameter, decodes it to get phone number,
+    retrieves user's habits from database, and returns formatted habits.
+
+    Query Parameters:
+        token: The user's token (from URL path)
+
+    Returns:
+        JSON response with formatted habits string
+    """
+    try:
+        token = request.args.get("token")
+
+        if not token:
+            logger.warning("get_user_habits: Missing token parameter")
+            return jsonify({"error": "Token is required"}), 400
+
+        # Extract phone number from token
+        phone_number, error_msg = _extract_phone_number(token)
+        if error_msg:
+            logger.warning("get_user_habits: Failed to extract phone number: %s", error_msg)
+            return jsonify({"error": "Invalid or expired token"}), 401
+
+        # Get user from database
+        user = None
+        if phone_number:
+            user = db.users.get_by_phone(phone_number)
+            # If not found and phone_number doesn't have @c.us, try with suffix
+            if not user and "@c.us" not in phone_number:
+                user = db.users.get_by_phone(f"{phone_number}@c.us")
+
+        if not user:
+            logger.warning("get_user_habits: User not found for phone number: %s", phone_number)
+            return jsonify({"habits": ""}), 200  # Return empty string if user not found
+
+        # Get user's goals/habits
+        goals = db.goals.get_by_user(user.id)
+
+        # Format habits for prompt
+        habits_text = _format_habits_for_prompt(goals)
+
+        logger.info("get_user_habits: Found %d habits for user %s", len(goals), phone_number)
+        return jsonify({"habits": habits_text}), 200
+
+    except Exception as e:
+        error = f"Error getting user habits > {e}"
+        logger.exception(error)
+        return jsonify({"error": "Internal server error"}), 500
