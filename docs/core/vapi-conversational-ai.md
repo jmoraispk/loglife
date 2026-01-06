@@ -6,180 +6,55 @@ LogLife uses [VAPI](https://vapi.ai) to enable voice conversations with users. T
 
 ## 📋 Overview
 
-VAPI provides a platform for building voice AI assistants. When a user initiates a voice call through LogLife, VAPI handles the speech-to-text conversion and calls your backend endpoint to generate responses. The backend can implement conversational logic in three different ways:
-
 | Approach | Status | Description |
 | :--- | :--- | :--- |
-| **Mixed/Hybrid** | ✅ Supported | Combination of AI model and hard-coded business logic |
-| **Static** | ✅ Supported | Pre-defined conversation flows without AI model |
-| **Dynamic** | ❌ Not Yet Supported | Fully AI-driven conversations with dynamic configuration |
+| **Static** | ✅ Supported | AI-driven conversations with no assistant updates (permanent or during call). Only uses `assistantOverrides` for temporary per-call configuration. |
+| **Mixed/Hybrid** | ✅ Supported | AI-driven with server tools for user-specific data. Uses `assistantOverrides` for temporary per-call updates. No permanent or during-call assistant updates. |
+| **Dynamic** | ❌ Not Yet Supported | Full AI-driven with server tools, `assistantOverrides`, plus real-time assistant updates during calls (system messages, final messages, etc.) |
 
 ### 🆕 Dynamic Prompt Injection
 
-LogLife now supports **dynamic system prompt injection** that personalizes the VAPI assistant with user-specific context (habits/goals) before each call. This feature:
-
-- ✅ Validates user tokens before call initiation
-- ✅ Fetches user's current habits from the database
-- ✅ Dynamically updates the assistant's system prompt with user habits
-- ✅ Enables personalized, context-aware conversations
-
----
-
-## 🔀 Mixed/Hybrid Approach (Current Implementation)
-
-The **Mixed/Hybrid** approach combines VAPI's AI capabilities (speech-to-text) with hard-coded business logic in the backend. This is the current implementation in LogLife.
-
-### How It Works
-
-```mermaid
-graph LR
-    A[User Voice] -->|Speech| B[VAPI Platform]
-    B -->|Transcribe| C[User Text]
-    C -->|POST /voice-turn| D[Backend Logic]
-    D -->|Hard-coded Rules| E[Response Generation]
-    E -->|JSON Response| B
-    B -->|Text-to-Speech| A
-```
-
-### Implementation
-
-1. **VAPI Configuration**: VAPI assistant is configured with a server URL endpoint (`/voice-turn`)
-2. **Speech Processing**: VAPI converts user speech to text
-3. **Backend Call**: VAPI sends the transcribed text to your backend endpoint:
-   ```json
-   {
-     "external_user_id": "user_token_or_phone",
-     "user_text": "What are my habits?",
-     "mode": "daily_checkin"
-   }
-   ```
-4. **Hard-coded Logic**: Backend processes the text using predefined rules and business logic
-5. **Response**: Backend returns a JSON response:
-   ```json
-   {
-     "reply_text": "You have 3 habits:\n• 📚 Read 30 mins\n• 💪 Exercise\n• 🧘 Meditate"
-   }
-   ```
-6. **Speech Synthesis**: VAPI converts the response text back to speech
-
-### Current Implementation
-
-The current implementation in ```124:189:src/loglife/core/routes/voice/routes.py``` shows this approach:
-
-- **Mode Detection**: Checks the `mode` field to determine conversation type
-- **Pattern Matching**: Uses regex to detect specific user intents (e.g., asking about habits)
-- **Database Queries**: Fetches user data from the database
-- **Response Formatting**: Formats responses using hard-coded templates
-
-### Advantages
-
-- ✅ **Full Control**: Complete control over conversation flow and responses
-- ✅ **Predictable**: Responses are deterministic and testable
-- ✅ **Cost-Effective**: No LLM API costs for response generation
-- ✅ **Fast**: No AI model inference latency
-
-### Limitations
-
-- ❌ **Limited Flexibility**: Cannot handle unexpected user inputs naturally
-- ❌ **Maintenance**: Requires code changes for new conversation patterns
-- ❌ **Scalability**: Hard to scale to complex multi-turn conversations
+LogLife supports **dynamic system prompt injection** that personalizes the VAPI assistant with user-specific context (habits/goals) before each call via `assistantOverrides`.
 
 ---
 
 ## 📝 Static Approach
 
-The **Static** approach uses pre-defined conversation flows configured entirely within VAPI, without any backend logic for response generation.
+AI-driven conversations with fixed assistant configuration. Only `assistantOverrides` can temporarily modify settings per-call.
 
-### How It Works
+**Key Points:**
+- ✅ AI-driven, no backend integration
+- ✅ Fixed configuration, no permanent or during-call updates
+- ✅ `assistantOverrides` for per-call customization
+- ❌ Cannot fetch user-specific data
 
-```mermaid
-graph LR
-    A[User Voice] -->|Speech| B[VAPI Platform]
-    B -->|Pre-defined Flow| C[Response Logic]
-    C -->|Text-to-Speech| A
-```
+---
 
-### Implementation
+## 🔀 Mixed/Hybrid Approach (Current Implementation)
 
-1. **VAPI Configuration**: Conversation flows are configured directly in VAPI's dashboard
-2. **No Backend Calls**: VAPI handles all conversation logic internally
-3. **Pre-defined Responses**: Responses are static templates or simple conditional logic
-4. **Variables**: Can use variables from VAPI's context (e.g., user name, session data)
+AI-driven conversations with server tools to fetch user-specific data. Assistant can call backend APIs to retrieve dynamic information.
 
-### Use Cases
+**Key Points:**
+- ✅ AI-driven with server tools
+- ✅ Can fetch user-specific data via tool calls
+- ✅ `assistantOverrides` for per-call context injection
+- ❌ No permanent or during-call assistant updates
 
-- Simple FAQ bots
-- Menu navigation systems
-- Information lookup (e.g., "What's the weather?")
-- Pre-recorded message playback
-
-### Advantages
-
-- ✅ **Simple**: No backend code required
-- ✅ **Fast**: No network latency for response generation
-- ✅ **Reliable**: No dependency on backend availability
-
-### Limitations
-
-- ❌ **Limited Intelligence**: Cannot access dynamic data (e.g., user's goals from database)
-- ❌ **No Personalization**: Cannot customize responses based on user context
-- ❌ **Rigid**: Difficult to handle complex, multi-turn conversations
+**Current Implementation:**
+- Server tools configured to call backend endpoints
+- `assistantOverrides` injects user habits/goals before call
+- AI uses tool results for personalized responses
 
 ---
 
 ## 🤖 Dynamic Approach (Not Yet Supported)
 
-The **Dynamic** approach uses an AI model (LLM) to generate responses dynamically based on conversation context, user data, and system prompts.
+Extends Hybrid approach with real-time assistant updates during calls. Includes all Hybrid features plus ability to modify assistant configuration mid-conversation.
 
-### How It Would Work
-
-```mermaid
-graph LR
-    A[User Voice] -->|Speech| B[VAPI Platform]
-    B -->|Transcribe| C[User Text]
-    C -->|POST /voice-turn| D[Backend Logic]
-    D -->|Fetch Context| E[User Data + History]
-    E -->|LLM Call| F[AI Model]
-    F -->|Generated Response| D
-    D -->|JSON Response| B
-    B -->|Text-to-Speech| A
-```
-
-### Proposed Implementation
-
-1. **VAPI Configuration**: VAPI assistant configured with server URL endpoint
-2. **Context Gathering**: Backend fetches relevant user data and conversation history
-3. **LLM Integration**: Backend calls an LLM (e.g., OpenAI GPT-4, Anthropic Claude) with:
-   - System prompt defining the assistant's role
-   - User's conversation history
-   - Current user data (goals, habits, etc.)
-   - Current user message
-4. **Dynamic Response**: LLM generates a contextual, natural response
-5. **Response Return**: Backend returns the AI-generated response to VAPI
-
-### Advantages
-
-- ✅ **Natural Conversations**: Handles unexpected inputs gracefully
-- ✅ **Contextual**: Responses adapt to user's history and current state
-- ✅ **Scalable**: Easy to add new conversation capabilities without code changes
-- ✅ **Personalized**: Can provide highly personalized responses
-
-### Limitations
-
-- ❌ **Cost**: LLM API calls can be expensive at scale
-- ❌ **Latency**: AI inference adds response time
-- ❌ **Unpredictability**: Responses may vary and need careful prompt engineering
-- ❌ **Complexity**: Requires prompt engineering and context management
-
-### Future Implementation
-
-When implementing the dynamic approach, consider:
-
-- **Caching**: Cache common responses to reduce LLM calls
-- **Streaming**: Use streaming responses for better user experience
-- **Fallbacks**: Implement fallback to hybrid approach if LLM fails
-- **Rate Limiting**: Protect against excessive LLM API usage
-- **Prompt Templates**: Maintain versioned prompt templates for different conversation modes
+**Key Points:**
+- ✅ Everything from Hybrid
+- ✅ Real-time assistant updates during calls (system messages, final messages, configuration)
+- ✅ Adaptive behavior based on conversation progress
 
 ---
 
@@ -187,16 +62,11 @@ When implementing the dynamic approach, consider:
 
 ### Voice Turn Endpoint
 
-The backend endpoint `/voice-turn` handles voice conversation requests:
-
 **Endpoint**: `POST /voice-turn`
 
-**Headers**:
-```
-x-api-key: my-super-secret-123
-```
+**Headers**: `x-api-key: my-super-secret-123`
 
-**Request Body**:
+**Request**:
 ```json
 {
   "external_user_id": "user_token_or_phone",
@@ -212,32 +82,20 @@ x-api-key: my-super-secret-123
 }
 ```
 
-**Special Response Format**: To end the call, include `endCall=true` in the response:
-```json
-{
-  "reply_text": "Thank you for calling. Goodbye! endCall=true"
-}
-```
+**End Call**: Include `endCall=true` in response text.
 
 ### Supported Modes
 
-Currently, the following modes are supported in the mixed/hybrid approach:
-
-- `daily_checkin`: Daily habit check-in conversation
-- `goal_setup`: Goal setup and configuration
-- `temptation_support`: Support during temptation moments
-- `onboarding`: New user onboarding flow
+- `daily_checkin` - Daily habit check-in
+- `goal_setup` - Goal setup and configuration
+- `temptation_support` - Support during temptation moments
+- `onboarding` - New user onboarding
 
 ### Additional Endpoints
 
 #### Token Validation
 
-**Endpoint**: `GET /validate-token`
-
-Validates if a user's token is valid and not expired before allowing call initiation.
-
-**Query Parameters**:
-- `token` (string, required) - The user's token from the call URL
+**Endpoint**: `GET /validate-token?token=<token>`
 
 **Response**:
 ```json
@@ -247,77 +105,66 @@ Validates if a user's token is valid and not expired before allowing call initia
 }
 ```
 
-Or if expired:
-```json
-{
-  "valid": false,
-  "error": "Token is expired or invalid"
-}
-```
-
 #### User Habits Retrieval
 
-**Endpoint**: `GET /user-habits`
-
-Retrieves a user's current habits/goals formatted for injection into the system prompt.
-
-**Query Parameters**:
-- `token` (string, required) - The user's token from the call URL
+**Endpoint**: `GET /user-habits?token=<token>`
 
 **Response**:
 ```json
 {
-  "habits": "User's current habits:\n- 🎯 Read 30 minutes daily\n- 💪 Exercise 3 times per week\n\nIf the user asks about their habits, goals, or what they're tracking, tell them about these habits.\n\n"
+  "habits": "User's current habits:\n- 🎯 Read 30 minutes daily\n..."
 }
 ```
 
 #### Assistant Prompt Modification
 
-**Endpoint**: `GET /api/vapi/assistant/[assistantId]`
+**Endpoint**: `GET /api/vapi/assistant/[assistantId]?token=<token>`
 
-Fetches the assistant's current system prompt, retrieves user habits, and updates the assistant with the modified prompt.
-
-**Query Parameters**:
-- `token` (string, optional) - User token to fetch habits for
+Fetches assistant's system prompt and returns modified version with user habits prepended.
 
 **Response**:
 ```json
 {
   "originalPrompt": "You are LogLife Coach...",
-  "modifiedPrompt": "User's current habits:\n- 🎯 Read 30 minutes daily\n\n...You are LogLife Coach..."
+  "modifiedPrompt": "User's current habits:\n...\nYou are LogLife Coach..."
 }
 ```
 
+#### VAPI Assistant Admin Panel
+
+**Endpoint**: `GET /vapi-admin`
+
+Web-based admin panel for managing VAPI assistant configurations. Accessible from emulator page.
+
+**API Endpoints**:
+- `GET /vapi-admin/api/assistant/<assistant_id>` - Fetch assistant config
+- `PATCH /vapi-admin/api/assistant/<assistant_id>` - Update assistant config
+
+**Editable Fields**: `name`, `firstMessage`, `voicemailMessage`, `endCallMessage`, `endCallPhrases`, `model`, `voice`, `transcriber`, `clientMessages`, `serverMessages`
+
+**Read-Only Fields**: `id`, `orgId`, `createdAt`, `updatedAt`, `isServerUrlSecretSet`, `backgroundDenoisingEnabled`, `compliancePlan`, `hipaaEnabled`
+
 ### Frontend Integration
 
-The frontend call page (```website/app/call/[number]/[token]/page.tsx```) initializes VAPI and starts voice calls:
-
+The frontend call page (```website/app/call/[number]/[token]/page.tsx```):
 - Maps call numbers to VAPI assistant IDs
-- Validates user tokens before starting calls
-- Dynamically injects user habits into the assistant's system prompt
-- Passes `external_user_id` as a variable to VAPI
-- Handles call events (start, end, errors)
+- Validates user tokens
+- Injects user habits via `assistantOverrides` before call
+- Passes `external_user_id` to VAPI
+- Handles call events
 
-### Dynamic Prompt Injection
+### Dynamic Prompt Injection Flow
 
-Before starting a call, the system dynamically updates the VAPI assistant's system prompt with the user's current habits:
-
-1. **Token Validation**: Validates the user's token to ensure it's not expired
-2. **Habit Retrieval**: Fetches the user's current habits/goals from the database
-3. **Prompt Modification**: Prepends the user's habits to the assistant's system prompt
-4. **Assistant Update**: Updates the VAPI assistant configuration via API to inject the modified prompt
-5. **Call Initiation**: Starts the call with the personalized assistant configuration
-
-This allows the AI assistant to be aware of the user's specific habits and goals during the conversation, enabling more personalized and context-aware responses.
+1. Validate user token
+2. Fetch user habits from database
+3. Inject habits into system prompt via `assistantOverrides.model.messages`
+4. Start call with personalized configuration
 
 **Example Modified Prompt**:
 ```
 User's current habits:
 - 🎯 Read 30 minutes daily
 - 💪 Exercise 3 times per week
-- 🧘 Meditate every morning
-
-If the user asks about their habits, goals, or what they're tracking, tell them about these habits.
 
 [Original system prompt continues...]
 ```
@@ -329,4 +176,3 @@ If the user asks about their habits, goals, or what they're tracking, tell them 
 - [Core Architecture](architecture.md): Understanding the overall system architecture
 - [WhatsApp Flow](whatsapp-flow.md): How WhatsApp integration works
 - [API Reference - Routes](../api/backend/routes.md): Detailed API documentation
-
