@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VAPI Assistant Admin - LogLife</title>
+    <link rel="icon" type="image/png" href="{{ url_for('emulator.static', filename='favicon.png') }}">
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card: #161b22;
+            --text: #e6edf3;
+            --muted: #8b9eb1;
+            --border: #30363d;
+            --primary: #3b82f6;
+            --primary-600: #2563eb;
+            --accent: linear-gradient(135deg, #3b82f6, #2563eb 60%, #1d4ed8 90%);
+            --ring: rgba(37, 99, 235, 0.25);
+            --page-padding: clamp(16px, 4vw, 48px);
+            --radius: 2px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            background: radial-gradient(120% 120% at 10% 10%, #1a0f3a, transparent 55%),
+                radial-gradient(120% 120% at 90% 0%, #0d0c37, transparent 60%),
+                linear-gradient(135deg, #050421, #13072d 35%, #1c0836 70%, #050421);
+            color: var(--text);
+            padding: 0 var(--page-padding);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .nav {
+            backdrop-filter: saturate(1.2) blur(8px);
+            background: #0D0226;
+            margin: 0 calc(var(--page-padding) * -1);
+            padding: 0 var(--page-padding);
+        }
+
+        .nav-inner {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 12px 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+        }
+
+        .brand-text {
+            color: #ffffff;
+            font-size: 18px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-minimal {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: var(--radius);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            height: 28px;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-minimal:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            gap: 24px;
+            padding: 24px 0;
+            min-height: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar {
+            width: 280px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            flex-shrink: 0;
+        }
+
+        .card {
+            background: #131313;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+        }
+
+        .card-header {
+            padding: 18px 18px 0 18px;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .card-body {
+            padding: 18px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 13px;
+        }
+
+        .select {
+            width: 100%;
+            border: 1.5px solid var(--border);
+            background: #0D0226;
+            color: var(--text);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            cursor: pointer;
+        }
+
+        .select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 6px var(--ring);
+        }
+
+        .select option {
+            background: #0D0226;
+            color: var(--text);
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            min-width: 0;
+        }
+
+        .form-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #050421;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius);
+            min-height: 0;
+        }
+
+        .form-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: #0D0226;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .form-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #ffffff;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 0 20px;
+            border-radius: var(--radius);
+            color: #050421;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform .05s ease, box-shadow .2s ease, filter .2s ease;
+            background: #ffffff;
+            box-shadow: none;
+            font-size: 14px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn:hover:not(:disabled) {
+            filter: brightness(1.1);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .btn-secondary:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.05);
+            color: #ffffff;
+        }
+
+        .form-content {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+
+        .form-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .form-content::-webkit-scrollbar-thumb {
+            background: rgba(148, 163, 184, 0.25);
+            border-radius: 999px;
+        }
+
+        .section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 16px;
+            color: #ffffff;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .input,
+        .textarea {
+            width: 100%;
+            border: 1.5px solid var(--border);
+            background: #0D0226;
+            color: var(--text);
+            border-radius: var(--radius);
+            padding: 10px 12px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            font-family: inherit;
+        }
+
+        .textarea {
+            min-height: 80px;
+            resize: vertical;
+            font-family: 'Courier New', monospace;
+        }
+
+        .textarea.json-field {
+            min-height: 200px;
+            font-size: 12px;
+        }
+
+        .input:focus,
+        .textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 6px var(--ring);
+        }
+
+        .input:disabled,
+        .textarea:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .status-message {
+            padding: 12px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            background: #0D0226;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-message.success {
+            color: #10b981;
+        }
+
+        .status-message.error {
+            color: #ef4444;
+        }
+
+        .status-message.info {
+            color: var(--muted);
+        }
+
+        .info-card {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: var(--radius);
+            padding: 16px;
+            font-size: 13px;
+            color: #60a5fa;
+        }
+
+        .info-card-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .loading-overlay {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        .nested-field {
+            margin-left: 20px;
+            padding-left: 16px;
+            border-left: 2px solid rgba(255, 255, 255, 0.1);
+            margin-top: 12px;
+        }
+
+        .array-item {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            align-items: flex-start;
+        }
+
+        .array-item input {
+            flex: 1;
+        }
+
+        .btn-remove {
+            background: transparent;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 12px;
+            height: auto;
+        }
+
+        .btn-remove:hover {
+            background: rgba(239, 68, 68, 0.1);
+        }
+
+        .btn-add {
+            background: transparent;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: #60a5fa;
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 12px;
+            height: auto;
+            margin-top: 8px;
+        }
+
+        .btn-add:hover {
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        @media (max-width: 900px) {
+            .container {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="nav">
+        <div class="nav-inner">
+            <div class="brand">
+                <div class="brand-text">VAPI Assistant Admin</div>
+            </div>
+            <div class="nav-actions">
+                <a href="{{ url_for('emulator.emulator') }}" class="btn-minimal">← Back to Emulator</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <!-- Assistant Selection -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Assistant Selection</div>
+                </div>
+                <div class="card-body">
+                    <div class="field">
+                        <label class="label" for="assistantSelect">Select Assistant</label>
+                        <select class="select" id="assistantSelect">
+                            <option value="1">Assistant 1 (Default)</option>
+                            <option value="2">Assistant 2</option>
+                            <option value="3">Assistant 3</option>
+                            <option value="4">Assistant 4</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Card -->
+            <div class="info-card">
+                <div class="info-card-title">ℹ️ Editable Fields</div>
+                <div>
+                    Only editable fields are shown. Read-only fields (id, orgId, createdAt, updatedAt) are hidden.
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="form-container">
+                <div class="form-header">
+                    <div class="form-title">Assistant Configuration</div>
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" id="resetBtn">Reset</button>
+                        <button class="btn" id="saveBtn">Save Changes</button>
+                    </div>
+                </div>
+                <div class="form-content" id="formContent">
+                    <div class="loading-overlay">Loading assistant configuration...</div>
+                </div>
+                <div class="status-message info" id="statusMessage" style="display: none;">
+                    <span id="statusText">Ready</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const byId = (id) => document.getElementById(id);
+
+        const assistantSelect = byId('assistantSelect');
+        const formContent = byId('formContent');
+        const saveBtn = byId('saveBtn');
+        const resetBtn = byId('resetBtn');
+        const statusMessage = byId('statusMessage');
+        const statusText = byId('statusText');
+
+        // Assistant IDs from backend
+        const assistantIds = {{ assistant_ids | tojson }};
+
+        // Read-only fields to exclude
+        const readOnlyFields = ['id', 'orgId', 'createdAt', 'updatedAt', 'isServerUrlSecretSet', 'backgroundDenoisingEnabled', 'compliancePlan', 'hipaaEnabled'];
+
+        let currentAssistantNumber = '1';
+        let currentAssistantId = assistantIds['1'] || '';
+        let originalConfig = null;
+        let currentConfig = null;
+        let eventDelegationSetup = false;
+
+        function showStatus(message, type = 'info') {
+            statusMessage.className = `status-message ${type}`;
+            statusText.textContent = message;
+            statusMessage.style.display = 'flex';
+        }
+
+        function hideStatus() {
+            statusMessage.style.display = 'none';
+        }
+
+        function setLoading(loading) {
+            saveBtn.disabled = loading;
+            resetBtn.disabled = loading;
+            assistantSelect.disabled = loading;
+            
+            if (loading) {
+                formContent.innerHTML = '<div class="loading-overlay">⏳ Fetching assistant configuration from VAPI...</div>';
+                showStatus('⏳ Fetching assistant configuration from VAPI...', 'info');
+            }
+        }
+
+        function filterEditableFields(config) {
+            const editable = {};
+            for (const [key, value] of Object.entries(config)) {
+                if (!readOnlyFields.includes(key)) {
+                    editable[key] = value;
+                }
+            }
+            return editable;
+        }
+
+        function setupEventDelegation() {
+            if (eventDelegationSetup) return;
+            eventDelegationSetup = true;
+            
+            // Event delegation for array item buttons
+            formContent.addEventListener('click', (e) => {
+                if (e.target.classList.contains('btn-remove')) {
+                    const fieldName = e.target.getAttribute('data-field');
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    if (fieldName && !isNaN(index)) {
+                        removeArrayItem(fieldName, index);
+                    }
+                } else if (e.target.classList.contains('btn-add')) {
+                    const fieldName = e.target.getAttribute('data-field');
+                    if (fieldName) {
+                        addArrayItem(fieldName);
+                    }
+                }
+            });
+        }
+
+        function renderForm(config) {
+            const editable = filterEditableFields(config);
+            let html = '';
+
+            // Basic Information
+            html += '<div class="section">';
+            html += '<div class="section-title">Basic Information</div>';
+            
+            if (editable.name !== undefined) {
+                html += '<div class="field"><label class="label" for="name">Name</label>';
+                html += `<input type="text" class="input" id="name" value="${escapeHtml(String(editable.name || ''))}">`;
+                html += '</div>';
+            }
+
+            if (editable.firstMessage !== undefined) {
+                html += '<div class="field"><label class="label" for="firstMessage">First Message</label>';
+                html += `<textarea class="textarea" id="firstMessage">${escapeHtml(String(editable.firstMessage || ''))}</textarea>`;
+                html += '</div>';
+            }
+
+            if (editable.voicemailMessage !== undefined) {
+                html += '<div class="field"><label class="label" for="voicemailMessage">Voicemail Message</label>';
+                html += `<textarea class="textarea" id="voicemailMessage">${escapeHtml(String(editable.voicemailMessage || ''))}</textarea>`;
+                html += '</div>';
+            }
+
+            if (editable.endCallMessage !== undefined) {
+                html += '<div class="field"><label class="label" for="endCallMessage">End Call Message</label>';
+                html += `<textarea class="textarea" id="endCallMessage">${escapeHtml(String(editable.endCallMessage || ''))}</textarea>`;
+                html += '</div>';
+            }
+
+            if (editable.endCallPhrases !== undefined && Array.isArray(editable.endCallPhrases)) {
+                html += '<div class="field"><label class="label">End Call Phrases</label>';
+                html += '<div id="endCallPhrasesContainer">';
+                editable.endCallPhrases.forEach((phrase, index) => {
+                    html += `<div class="array-item"><input type="text" class="input" data-index="${index}" value="${escapeHtml(String(phrase))}"><button type="button" class="btn-remove" data-field="endCallPhrases" data-index="${index}">Remove</button></div>`;
+                });
+                html += '</div>';
+                html += '<button type="button" class="btn-add" data-field="endCallPhrases">Add Phrase</button>';
+                html += '</div>';
+            }
+
+            html += '</div>';
+
+            // Model Configuration
+            if (editable.model !== undefined) {
+                html += '<div class="section">';
+                html += '<div class="section-title">Model Configuration</div>';
+                html += '<div class="nested-field">';
+
+                const model = editable.model || {};
+
+                if (model.provider !== undefined) {
+                    html += '<div class="field"><label class="label" for="model.provider">Provider</label>';
+                    html += `<input type="text" class="input" id="model.provider" value="${escapeHtml(String(model.provider || ''))}">`;
+                    html += '</div>';
+                }
+
+                if (model.model !== undefined) {
+                    html += '<div class="field"><label class="label" for="model.model">Model</label>';
+                    html += `<input type="text" class="input" id="model.model" value="${escapeHtml(String(model.model || ''))}">`;
+                    html += '</div>';
+                }
+
+                if (model.temperature !== undefined) {
+                    html += '<div class="field"><label class="label" for="model.temperature">Temperature</label>';
+                    html += `<input type="number" step="0.1" class="input" id="model.temperature" value="${escapeHtml(String(model.temperature || ''))}">`;
+                    html += '</div>';
+                }
+
+                if (model.maxTokens !== undefined) {
+                    html += '<div class="field"><label class="label" for="model.maxTokens">Max Tokens</label>';
+                    html += `<input type="number" class="input" id="model.maxTokens" value="${escapeHtml(String(model.maxTokens || ''))}">`;
+                    html += '</div>';
+                }
+
+                if (model.messages !== undefined && Array.isArray(model.messages)) {
+                    html += '<div class="field"><label class="label">Messages (JSON)</label>';
+                    html += `<textarea class="textarea json-field" id="model.messages">${escapeHtml(JSON.stringify(model.messages, null, 2))}</textarea>`;
+                    html += '</div>';
+                }
+
+                if (model.toolIds !== undefined && Array.isArray(model.toolIds)) {
+                    html += '<div class="field"><label class="label">Tool IDs</label>';
+                    html += '<div id="model.toolIdsContainer">';
+                    model.toolIds.forEach((toolId, index) => {
+                        html += `<div class="array-item"><input type="text" class="input" data-index="${index}" value="${escapeHtml(String(toolId))}"><button type="button" class="btn-remove" data-field="model.toolIds" data-index="${index}">Remove</button></div>`;
+                    });
+                    html += '</div>';
+                    html += '<button type="button" class="btn-add" data-field="model.toolIds">Add Tool ID</button>';
+                    html += '</div>';
+                }
+
+                html += '</div></div>';
+            }
+
+            // Voice Configuration
+            if (editable.voice !== undefined) {
+                html += '<div class="section">';
+                html += '<div class="section-title">Voice Configuration</div>';
+                html += '<div class="nested-field">';
+                html += '<div class="field"><label class="label">Voice (JSON)</label>';
+                html += `<textarea class="textarea json-field" id="voice">${escapeHtml(JSON.stringify(editable.voice, null, 2))}</textarea>`;
+                html += '</div></div></div>';
+            }
+
+            // Transcriber Configuration
+            if (editable.transcriber !== undefined) {
+                html += '<div class="section">';
+                html += '<div class="section-title">Transcriber Configuration</div>';
+                html += '<div class="nested-field">';
+                html += '<div class="field"><label class="label">Transcriber (JSON)</label>';
+                html += `<textarea class="textarea json-field" id="transcriber">${escapeHtml(JSON.stringify(editable.transcriber, null, 2))}</textarea>`;
+                html += '</div></div></div>';
+            }
+
+            // Client Messages
+            if (editable.clientMessages !== undefined) {
+                html += '<div class="section">';
+                html += '<div class="section-title">Client Messages</div>';
+                html += '<div class="field"><label class="label">Client Messages (JSON)</label>';
+                html += `<textarea class="textarea json-field" id="clientMessages">${escapeHtml(JSON.stringify(editable.clientMessages, null, 2))}</textarea>`;
+                html += '</div></div>';
+            }
+
+            // Server Messages
+            if (editable.serverMessages !== undefined) {
+                html += '<div class="section">';
+                html += '<div class="section-title">Server Messages</div>';
+                html += '<div class="field"><label class="label">Server Messages (JSON)</label>';
+                html += `<textarea class="textarea json-field" id="serverMessages">${escapeHtml(JSON.stringify(editable.serverMessages, null, 2))}</textarea>`;
+                html += '</div></div>';
+            }
+
+            formContent.innerHTML = html;
+            setupEventDelegation();
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function collectFormData() {
+            const editable = {};
+            const form = formContent;
+
+            // Basic fields
+            const nameInput = form.querySelector('#name');
+            if (nameInput) editable.name = nameInput.value.trim();
+
+            const firstMessageInput = form.querySelector('#firstMessage');
+            if (firstMessageInput) editable.firstMessage = firstMessageInput.value.trim();
+
+            const voicemailMessageInput = form.querySelector('#voicemailMessage');
+            if (voicemailMessageInput) editable.voicemailMessage = voicemailMessageInput.value.trim();
+
+            const endCallMessageInput = form.querySelector('#endCallMessage');
+            if (endCallMessageInput) editable.endCallMessage = endCallMessageInput.value.trim();
+
+            // End call phrases array
+            const endCallPhrasesInputs = form.querySelectorAll('#endCallPhrasesContainer input');
+            if (endCallPhrasesInputs.length > 0) {
+                editable.endCallPhrases = Array.from(endCallPhrasesInputs)
+                    .map(input => input.value.trim())
+                    .filter(v => v);
+            }
+
+            // Model configuration
+            const modelProviderInput = form.querySelector('#model\\.provider');
+            const modelModelInput = form.querySelector('#model\\.model');
+            const modelTempInput = form.querySelector('#model\\.temperature');
+            const modelMaxTokensInput = form.querySelector('#model\\.maxTokens');
+            const modelMessagesInput = form.querySelector('#model\\.messages');
+            const modelToolIdsInputs = form.querySelectorAll('#model\\.toolIdsContainer input');
+
+            if (modelProviderInput || modelModelInput || modelTempInput || modelMaxTokensInput || modelMessagesInput || modelToolIdsInputs.length > 0) {
+                editable.model = {};
+                if (modelProviderInput) editable.model.provider = modelProviderInput.value.trim();
+                if (modelModelInput) editable.model.model = modelModelInput.value.trim();
+                if (modelTempInput) editable.model.temperature = parseFloat(modelTempInput.value) || undefined;
+                if (modelMaxTokensInput) editable.model.maxTokens = parseInt(modelMaxTokensInput.value) || undefined;
+                if (modelMessagesInput) {
+                    try {
+                        editable.model.messages = JSON.parse(modelMessagesInput.value);
+                    } catch (e) {
+                        throw new Error('Invalid JSON in Model Messages');
+                    }
+                }
+                if (modelToolIdsInputs.length > 0) {
+                    editable.model.toolIds = Array.from(modelToolIdsInputs)
+                        .map(input => input.value.trim())
+                        .filter(v => v);
+                }
+            }
+
+            // Voice
+            const voiceInput = form.querySelector('#voice');
+            if (voiceInput) {
+                try {
+                    editable.voice = JSON.parse(voiceInput.value);
+                } catch (e) {
+                    throw new Error('Invalid JSON in Voice configuration');
+                }
+            }
+
+            // Transcriber
+            const transcriberInput = form.querySelector('#transcriber');
+            if (transcriberInput) {
+                try {
+                    editable.transcriber = JSON.parse(transcriberInput.value);
+                } catch (e) {
+                    throw new Error('Invalid JSON in Transcriber configuration');
+                }
+            }
+
+            // Client Messages
+            const clientMessagesInput = form.querySelector('#clientMessages');
+            if (clientMessagesInput) {
+                try {
+                    editable.clientMessages = JSON.parse(clientMessagesInput.value);
+                } catch (e) {
+                    throw new Error('Invalid JSON in Client Messages');
+                }
+            }
+
+            // Server Messages
+            const serverMessagesInput = form.querySelector('#serverMessages');
+            if (serverMessagesInput) {
+                try {
+                    editable.serverMessages = JSON.parse(serverMessagesInput.value);
+                } catch (e) {
+                    throw new Error('Invalid JSON in Server Messages');
+                }
+            }
+
+            return editable;
+        }
+
+        function removeArrayItem(fieldName, index) {
+            const container = byId(`${fieldName}Container`);
+            if (container) {
+                const items = container.querySelectorAll('.array-item');
+                if (items[index]) {
+                    items[index].remove();
+                    // Re-index remaining items
+                    Array.from(container.querySelectorAll('.array-item')).forEach((item, idx) => {
+                        item.querySelector('input').setAttribute('data-index', idx);
+                        item.querySelector('.btn-remove').setAttribute('data-index', idx);
+                    });
+                }
+            }
+        }
+
+        function addArrayItem(fieldName) {
+            const container = byId(`${fieldName}Container`);
+            if (container) {
+                const index = container.querySelectorAll('.array-item').length;
+                const div = document.createElement('div');
+                div.className = 'array-item';
+                div.innerHTML = `<input type="text" class="input" data-index="${index}" value=""><button type="button" class="btn-remove" data-field="${fieldName}" data-index="${index}">Remove</button>`;
+                container.appendChild(div);
+            }
+        }
+
+
+        async function loadAssistant(number) {
+            const assistantId = assistantIds[number];
+            
+            if (!assistantId) {
+                showStatus(`Error: Assistant ${number} ID not configured`, 'error');
+                return;
+            }
+
+            currentAssistantNumber = number;
+            currentAssistantId = assistantId;
+            
+            setLoading(true);
+
+            try {
+                const response = await fetch(`/vapi-admin/api/assistant/${assistantId}`);
+                
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+
+                const config = await response.json();
+                
+                // Store original config (deep copy)
+                originalConfig = JSON.parse(JSON.stringify(config));
+                currentConfig = config;
+                
+                // Render form with editable fields only
+                renderForm(config);
+                
+                showStatus(`✓ Loaded Assistant ${number} configuration`, 'success');
+                setTimeout(hideStatus, 3000);
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+                formContent.innerHTML = `<div class="loading-overlay" style="color: #ef4444;">Error loading assistant: ${escapeHtml(error.message)}</div>`;
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Set up event delegation first
+        setupEventDelegation();
+
+        // Load initial assistant
+        loadAssistant('1');
+
+        // Assistant selection change
+        assistantSelect.addEventListener('change', (e) => {
+            loadAssistant(e.target.value);
+        });
+
+        // Save button
+        saveBtn.addEventListener('click', async () => {
+            try {
+                const editableData = collectFormData();
+                
+                // Only send editable fields (backend will filter read-only fields)
+                // This ensures we only update what can be updated
+                const updateData = editableData;
+                
+                saveBtn.disabled = true;
+                resetBtn.disabled = true;
+                assistantSelect.disabled = true;
+                
+                showStatus('⏳ Saving assistant configuration to VAPI...', 'info');
+
+                const response = await fetch(`/vapi-admin/api/assistant/${currentAssistantId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(updateData),
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    throw new Error(errorData.error || `HTTP ${response.status}: ${errorData.details || response.statusText}`);
+                }
+
+                const updatedConfig = await response.json();
+                
+                // Update stored configs
+                originalConfig = JSON.parse(JSON.stringify(updatedConfig));
+                currentConfig = updatedConfig;
+                
+                // Re-render form with updated data
+                renderForm(updatedConfig);
+                
+                showStatus('✓ Assistant configuration saved successfully', 'success');
+                setTimeout(hideStatus, 3000);
+            } catch (error) {
+                showStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                resetBtn.disabled = false;
+                assistantSelect.disabled = false;
+            }
+        });
+
+        // Reset button
+        resetBtn.addEventListener('click', () => {
+            if (!confirm('Reset to original configuration? All unsaved changes will be lost.')) {
+                return;
+            }
+            if (originalConfig) {
+                renderForm(originalConfig);
+                showStatus('Configuration reset to original', 'info');
+                setTimeout(hideStatus, 3000);
+            } else {
+                loadAssistant(currentAssistantNumber);
+            }
+        });
+    </script>
+</body>
+
+</html>
