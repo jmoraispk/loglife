@@ -26,8 +26,9 @@ nav:
   - Core Framework:
     - Quickstart: core/quickstart.md
     - Architecture: core/architecture.md
-    - WhatsApp Setup: core/whatsapp-setup.md
+    - WhatsApp Flow: core/whatsapp-flow.md
     - Twilio Setup: core/twilio-setup.md
+    - VAPI Conversational AI: core/vapi-conversational-ai.md
     - API Reference:
         - Core API: api/backend/core.md
   - App Implementation:
@@ -68,4 +69,5 @@ extra_css:
 
 extra_javascript:
   - https://unpkg.com/mermaid/dist/mermaid.min.js
+  - extra_js/mermaid_config.js
   - extra_js/open_github_new_tab.js

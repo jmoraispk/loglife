@@ -34,5 +34,5 @@ Understand the internal architecture of the Goal Tracking & Journaling app.
 | [**Developer Guide**](developer/overview.md) | Setup, Installation, and Tech Stack. |
 | [**Quickstart**](core/quickstart.md) | Build a bot in 5 minutes. |
 | [**Architecture**](core/architecture.md) | How the threading & queue system works. |
-| [**WhatsApp Setup**](core/whatsapp-setup.md) | Connect your code to real WhatsApp. |
+| [**WhatsApp Flow**](core/whatsapp-flow.md) | Connect your code to real WhatsApp. |
 | [**API Reference**](api/backend/core.md) | Technical docs for `loglife.core`. |

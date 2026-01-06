@@ -7,14 +7,41 @@ based on the message type.
 import logging
 from typing import Any
 
+import phonenumbers
+from phonenumbers import NumberParseException, timezone
+
 from loglife.app.db import db
 from loglife.app.logic.audio import process_audio
 from loglife.app.logic.text import process_text
-from loglife.app.logic.timezone import get_timezone_from_number, normalize_phone_number
+from loglife.app.logic.timezone import normalize_phone_number
 from loglife.app.logic.vcard import process_vcard
 from loglife.core.messaging import Message, queue_async_message
 
 logger = logging.getLogger(__name__)
+
+
+def get_timezone_from_number(number: str) -> str:
+    """Derive an IANA timezone string for a given phone number.
+
+    The function attempts to parse the phone number using `phonenumbers` and
+    returns the first timezone associated with the parsed region. If parsing
+    fails or no timezone information is available, "UTC" is returned.
+    """
+    try:
+        normalized = number if number.startswith("+") else f"+{number}"
+        parsed = phonenumbers.parse(normalized)
+    except NumberParseException:
+        return "UTC"
+
+    timezones = timezone.time_zones_for_number(parsed)
+    if not timezones:
+        return "UTC"
+
+    tz = timezones[0]
+    if tz == "Etc/Unknown":
+        return "UTC"
+
+    return tz
 
 
 def route_message(message: Message) -> None:

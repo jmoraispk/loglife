@@ -3,9 +3,9 @@
 from datetime import UTC, datetime, timedelta
 from unittest.mock import patch
 
-import loglife.app.logic.text.week as week_module
 from loglife.app.config import LOOKBACK_NO_GOALS
 from loglife.app.db.tables import Goal, Rating
+from loglife.app.logic.text.handlers import get_monday_before, look_back_summary
 
 
 def test_get_monday_before() -> None:
@@ -14,7 +14,7 @@ def test_get_monday_before() -> None:
     Verifies that the date returned is always a Monday and is in the past
     or present (never in the future relative to "now").
     """
-    monday = week_module.get_monday_before()
+    monday = get_monday_before()
     now = datetime.now(tz=UTC)
 
     assert monday.weekday() == 0
@@ -43,10 +43,10 @@ def test_monday_before_edge_cases() -> None:
         simulated_today = base_monday + timedelta(days=i)
 
         # We need to patch datetime in the module where it is used
-        with patch("loglife.app.logic.text.week.datetime") as mock_datetime:
+        with patch("loglife.app.logic.text.handlers.datetime") as mock_datetime:
             mock_datetime.now.return_value = simulated_today
 
-            monday = week_module.get_monday_before()
+            monday = get_monday_before()
 
             # Expect the result to be the base_monday (same time as simulated_today)
             # because get_monday_before subtracts the days since Monday from current time.
@@ -72,7 +72,7 @@ def test_look_back_summary() -> None:
         "loglife.app.db.tables.goals.GoalsTable.get_by_user",
         return_value=[],
     ) as mock_get_goals:
-        summary = week_module.look_back_summary(1, 7, datetime.now(UTC))
+        summary = look_back_summary(1, 7, datetime.now(UTC))
         assert summary == LOOKBACK_NO_GOALS
 
     # Test with goals and ratings
@@ -141,7 +141,7 @@ def test_look_back_summary() -> None:
             rating_day2_g2,  # Day 1, Goal 2
         ]
 
-        summary = week_module.look_back_summary(1, 2, datetime.now(UTC))
+        summary = look_back_summary(1, 2, datetime.now(UTC))
 
         # assert "🏃" in summary  # Goals listed - Header is added by handler, not this function
         # assert "📚" in summary
