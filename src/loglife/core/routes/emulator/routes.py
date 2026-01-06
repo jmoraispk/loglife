@@ -69,18 +69,17 @@ def _fetch_assistant(assistant_id: str, vapi_private_key: str) -> Response:
         )
 
         if not response.ok:
-            return jsonify({
-                "error": f"Failed to fetch assistant: {response.status_code}",
-                "details": response.text
-            }), response.status_code
+            return jsonify(
+                {
+                    "error": f"Failed to fetch assistant: {response.status_code}",
+                    "details": response.text,
+                }
+            ), response.status_code
 
         # Return raw JSON response from VAPI
         return jsonify(response.json())
     except requests.RequestException as e:
-        return jsonify({
-            "error": "Failed to fetch assistant",
-            "details": str(e)
-        }), 500
+        return jsonify({"error": "Failed to fetch assistant", "details": str(e)}), 500
 
 
 def _update_assistant(assistant_id: str, vapi_private_key: str) -> Response:
@@ -102,9 +101,7 @@ def _update_assistant(assistant_id: str, vapi_private_key: str) -> Response:
             "compliancePlan",
             "hipaaEnabled",
         ]
-        editable_data = {
-            k: v for k, v in config_data.items() if k not in read_only_fields
-        }
+        editable_data = {k: v for k, v in config_data.items() if k not in read_only_fields}
 
         response = requests.patch(
             f"https://api.vapi.ai/assistant/{assistant_id}",
@@ -118,18 +115,17 @@ def _update_assistant(assistant_id: str, vapi_private_key: str) -> Response:
         )
 
         if not response.ok:
-            return jsonify({
-                "error": f"Failed to update assistant: {response.status_code}",
-                "details": response.text
-            }), response.status_code
+            return jsonify(
+                {
+                    "error": f"Failed to update assistant: {response.status_code}",
+                    "details": response.text,
+                }
+            ), response.status_code
 
         # Return updated assistant configuration from VAPI
         return jsonify(response.json())
     except requests.RequestException as e:
-        return jsonify({
-            "error": "Failed to update assistant",
-            "details": str(e)
-        }), 500
+        return jsonify({"error": "Failed to update assistant", "details": str(e)}), 500
 
 
 @emulator_bp.route("/events")
