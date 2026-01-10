@@ -6,11 +6,14 @@ Receives POST requests with user text and returns appropriate replies.
 import logging
 import re
 
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, current_app, jsonify, request
 from flask.typing import ResponseReturnValue
 
 from loglife.app.db import db
 from loglife.app.db.tables import Goal, User
+from loglife.app.logic.text import process_text
+from loglife.core.messaging import Message
+from loglife.core.routes.webhook.routes import webhook
 from loglife.core.tokens import get_phone_from_token
 
 voice_bp = Blueprint("voice", __name__)
@@ -174,14 +177,44 @@ def voice_turn() -> ResponseReturnValue:
                     {"reply_text": "I couldn't find your account. Please try again. endCall=true"}
                 ), 200
 
-        # Handle different modes
-        if mode in ("daily_checkin", "goal_setup", "temptation_support", "onboarding"):
-            reply = _handle_daily_checkin(user, user_text)
-        else:
-            reply = "Mode not supported yet. Please try again. endCall=true"
+        # Create custom payload for webhook
+        custom_payload = {
+            "sender": phone_number,
+            "raw_msg": user_text,
+            "msg_type": "chat",
+            "client_type": "whatsapp",
+        }
 
-        logger.info("Voice turn response: reply_length=%d", len(reply))
-        return jsonify({"reply_text": reply}), 200
+        # Process message synchronously to get the reply text
+        message = Message.from_payload(custom_payload)
+        reply_text = process_text(user, message)
+
+        # If process_text returns None, it means the handler sent the message directly
+        # In that case, use a default message
+        if reply_text is None:
+            reply_text = "Message processed successfully."
+
+        # Still call webhook to queue/send the message to WhatsApp
+        with current_app.test_request_context("/webhook", method="POST", json=custom_payload):
+            webhook_response = webhook()
+            # webhook_response is a tuple of (Response, status_code)
+            response_obj, _ = webhook_response
+
+            # Extract JSON data from response
+            response_data = response_obj.get_json()
+
+            # Check if webhook processing succeeded
+            if not response_data or not response_data.get("success"):
+                error_msg = (
+                    response_data.get("message", "Error processing message")
+                    if response_data
+                    else "Error processing message"
+                )
+                logger.warning("Webhook returned error: %s", error_msg)
+                # Still return the reply_text we got from processing, but log the error
+
+        logger.info("Voice turn response: reply_length=%d", len(reply_text))
+        return jsonify({"reply_text": reply_text}), 200
     except Exception as e:
         error = f"Error processing voice turn > {e}"
         logger.exception(error)
