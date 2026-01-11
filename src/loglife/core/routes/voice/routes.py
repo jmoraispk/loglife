@@ -124,6 +124,63 @@ def _handle_daily_checkin(user: User | None, user_text: str) -> str:
     return _format_habits_response(goals, is_asking=is_asking, user_text=user_text)
 
 
+def _validate_api_key() -> ResponseReturnValue | None:
+    """Validate API key from request headers.
+
+    Returns:
+        Error response if invalid, None if valid
+    """
+    if API_KEY:
+        incoming = request.headers.get("x-api-key", "")
+        if incoming != API_KEY:
+            logger.warning("Unauthorized voice turn request: invalid API key")
+            return jsonify({"error": "Unauthorized"}), 401
+    return None
+
+
+def _get_user_by_phone(phone_number: str | None) -> User | None:
+    """Get user by phone number with fallback to @c.us suffix.
+
+    Args:
+        phone_number: Phone number to look up
+
+    Returns:
+        User object if found, None otherwise
+    """
+    if not phone_number:
+        return None
+
+    user = db.users.get_by_phone(phone_number)
+    # If not found and phone_number doesn't have @c.us, try with suffix
+    if not user and "@c.us" not in phone_number:
+        user = db.users.get_by_phone(f"{phone_number}@c.us")
+    return user
+
+
+def _process_webhook(custom_payload: dict) -> None:
+    """Process webhook to queue/send message to WhatsApp.
+
+    Args:
+        custom_payload: Payload to send to webhook
+    """
+    with current_app.test_request_context("/webhook", method="POST", json=custom_payload):
+        webhook_response = webhook()
+        # webhook_response is a tuple of (Response, status_code)
+        response_obj, _ = webhook_response
+
+        # Extract JSON data from response
+        response_data = response_obj.get_json()
+
+        # Check if webhook processing succeeded
+        if not response_data or not response_data.get("success"):
+            error_msg = (
+                response_data.get("message", "Error processing message")
+                if response_data
+                else "Error processing message"
+            )
+            logger.warning("Webhook returned error: %s", error_msg)
+
+
 @voice_bp.post("/voice-turn")
 def voice_turn() -> ResponseReturnValue:
     """Handle voice turn requests.
@@ -133,16 +190,13 @@ def voice_turn() -> ResponseReturnValue:
     """
     try:
         # Optional: basic auth using your header
-        if API_KEY:
-            incoming = request.headers.get("x-api-key", "")
-            if incoming != API_KEY:
-                logger.warning("Unauthorized voice turn request: invalid API key")
-                return jsonify({"error": "Unauthorized"}), 401
+        auth_error = _validate_api_key()
+        if auth_error:
+            return auth_error
 
         data = request.get_json(silent=True) or {}
         logger.info("Voice turn request JSON data: %s", data)
 
-        mode = data.get("mode", "daily_checkin")
         external_user_id = data.get("external_user_id")
         user_text = (data.get("user_text") or "").strip()
 
@@ -156,26 +210,19 @@ def voice_turn() -> ResponseReturnValue:
             return jsonify({"reply_text": error_msg}), 200
 
         logger.info(
-            "Voice turn request: external_user_id=%s, phone_number=%s, mode=%s, user_text=%s",
+            "Voice turn request: external_user_id=%s, phone_number=%s, user_text=%s",
             external_user_id,
             phone_number,
-            mode,
             user_text,
         )
 
         # Get user from database using phone number
-        # Try both formats: with and without @c.us suffix
-        user = None
-        if phone_number:
-            user = db.users.get_by_phone(phone_number)
-            # If not found and phone_number doesn't have @c.us, try with suffix
-            if not user and "@c.us" not in phone_number:
-                user = db.users.get_by_phone(f"{phone_number}@c.us")
-            if not user:
-                logger.warning("User not found for phone number: %s", phone_number)
-                return jsonify(
-                    {"reply_text": "I couldn't find your account. Please try again. endCall=true"}
-                ), 200
+        user = _get_user_by_phone(phone_number)
+        if not user:
+            logger.warning("User not found for phone number: %s", phone_number)
+            return jsonify(
+                {"reply_text": "I couldn't find your account. Please try again. endCall=true"}
+            ), 200
 
         # Create custom payload for webhook
         custom_payload = {
@@ -195,23 +242,7 @@ def voice_turn() -> ResponseReturnValue:
             reply_text = "Message processed successfully."
 
         # Still call webhook to queue/send the message to WhatsApp
-        with current_app.test_request_context("/webhook", method="POST", json=custom_payload):
-            webhook_response = webhook()
-            # webhook_response is a tuple of (Response, status_code)
-            response_obj, _ = webhook_response
-
-            # Extract JSON data from response
-            response_data = response_obj.get_json()
-
-            # Check if webhook processing succeeded
-            if not response_data or not response_data.get("success"):
-                error_msg = (
-                    response_data.get("message", "Error processing message")
-                    if response_data
-                    else "Error processing message"
-                )
-                logger.warning("Webhook returned error: %s", error_msg)
-                # Still return the reply_text we got from processing, but log the error
+        _process_webhook(custom_payload)
 
         logger.info("Voice turn response: reply_length=%d", len(reply_text))
         return jsonify({"reply_text": reply_text}), 200
@@ -303,13 +334,7 @@ def get_user_habits() -> ResponseReturnValue:
             return jsonify({"error": "Invalid or expired token"}), 401
 
         # Get user from database
-        user = None
-        if phone_number:
-            user = db.users.get_by_phone(phone_number)
-            # If not found and phone_number doesn't have @c.us, try with suffix
-            if not user and "@c.us" not in phone_number:
-                user = db.users.get_by_phone(f"{phone_number}@c.us")
-
+        user = _get_user_by_phone(phone_number)
         if not user:
             logger.warning("get_user_habits: User not found for phone number: %s", phone_number)
             return jsonify({"habits": ""}), 200  # Return empty string if user not found
