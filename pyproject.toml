@@ -19,6 +19,7 @@ dependencies = [
     
     # WebRTC for WhatsApp calls
     "aiortc>=1.7.0",
+    "av==15.1.0",  # Pinned to version with Linux wheels (av 16.1.0 requires source build)
 ]
 
 [project.optional-dependencies]
