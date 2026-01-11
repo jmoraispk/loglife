@@ -7,6 +7,7 @@ import logging
 import threading
 import time
 from datetime import UTC, datetime
+from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from loglife.app.config import (
     JOURNAL_REMINDER_MESSAGE,
@@ -15,13 +16,31 @@ from loglife.app.config import (
 )
 from loglife.app.db import db
 from loglife.app.db.tables import Goal, User
-from loglife.app.logic.timezone import get_timezone_safe
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
 from loglife.core.messaging import queue_async_message
 
 logger = logging.getLogger(__name__)
 
 WORKER_SLEEP_SECONDS = 60
+
+
+def get_timezone_safe(timezone_str: str) -> ZoneInfo:
+    """Get ZoneInfo, falling back to UTC if timezone is invalid or unknown.
+
+    Arguments:
+        timezone_str: Timezone string in IANA format (e.g., "Asia/Karachi",
+            "America/New_York")
+
+    Returns:
+        A ZoneInfo object for the given timezone string, or UTC if the timezone
+        is invalid or unknown.
+
+    """
+    timezone_str = timezone_str.strip()
+    try:
+        return ZoneInfo(timezone_str)
+    except (ZoneInfoNotFoundError, ValueError):
+        return ZoneInfo("UTC")
 
 
 def _is_reminder_due(goal: Goal, user: User, now_utc: datetime) -> bool:

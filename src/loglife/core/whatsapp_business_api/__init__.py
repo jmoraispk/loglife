@@ -1,19 +1,19 @@
-"""API endpoints for WhatsApp Business API."""
+"""WhatsApp Business API SDK."""
 
-from .messages import (
+from .buttons import (
     ListRow,
     ListSection,
     ReplyButton,
-    SendTextResponse,
     URLButton,
     VoiceCallButton,
 )
+from .wa_business_api import WhatsAppClient
 
 __all__ = [
     "ListRow",
     "ListSection",
     "ReplyButton",
-    "SendTextResponse",
     "URLButton",
     "VoiceCallButton",
+    "WhatsAppClient",
 ]

@@ -1,6 +1,6 @@
 """Tests for reminder time parsing helpers."""
 
-from loglife.app.logic.text import reminder_time
+from loglife.app.logic.text.handlers import parse_time_string
 
 
 def test_parse_time_string() -> None:
@@ -38,15 +38,15 @@ def test_parse_time_string() -> None:
     ]
 
     for message, expected in test_cases:
-        assert (reminder_time.parse_time_string(message) is not None) == expected
+        assert (parse_time_string(message) is not None) == expected
 
 
 def test_parse_time_string_values() -> None:
     """Test that parsed times are correct."""
     # Test 12 PM/AM specific logic
-    assert reminder_time.parse_time_string("12pm") == "12:00:00"
-    assert reminder_time.parse_time_string("12am") == "00:00:00"
-    assert reminder_time.parse_time_string("12:00 pm") == "12:00:00"
-    assert reminder_time.parse_time_string("12:00 am") == "00:00:00"
-    assert reminder_time.parse_time_string("12:30 pm") == "12:30:00"
-    assert reminder_time.parse_time_string("12:30 am") == "00:30:00"
+    assert parse_time_string("12pm") == "12:00:00"
+    assert parse_time_string("12am") == "00:00:00"
+    assert parse_time_string("12:00 pm") == "12:00:00"
+    assert parse_time_string("12:00 am") == "00:00:00"
+    assert parse_time_string("12:30 pm") == "12:30:00"
+    assert parse_time_string("12:30 am") == "00:30:00"

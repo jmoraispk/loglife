@@ -2,6 +2,7 @@
 
 import json
 from datetime import UTC, datetime
+from unittest.mock import patch
 
 import pytest
 
@@ -12,6 +13,7 @@ from loglife.app.config import (
     ERROR_INVALID_TIME_FORMAT,
     ERROR_INVALID_UPDATE_FORMAT,
     ERROR_NO_GOALS_SET,
+    HELP_MESSAGE,
     SUCCESS_GOAL_ADDED,
     SUCCESS_JOURNALING_ENABLED,
     SUCCESS_TRANSCRIPT_DISABLED,
@@ -22,11 +24,19 @@ from loglife.app.db import db
 from loglife.app.db.tables import User
 from loglife.app.logic.text.handlers import (
     AddGoalHandler,
+    CallHandler,
+    CheckinHandler,
+    CheckinNowHandler,
     DeleteGoalHandler,
+    EditTimeHandler,
     EnableJournalingHandler,
     GoalsListHandler,
+    HabitsHandler,
+    HelpHandler,
     JournalPromptsHandler,
+    ListHandler,
     LookbackHandler,
+    MenuHandler,
     RateAllHandler,
     RateSingleHandler,
     ReminderTimeHandler,
@@ -451,3 +461,164 @@ def test_lookback_huge_days(user: User) -> None:
 
     response = handler.handle(user, "lookback 1000")
     assert "1000 Days" in response
+
+
+def test_help_handler(user: User) -> None:
+    """Test HelpHandler."""
+    handler = HelpHandler()
+    assert handler.matches("help")
+    assert not handler.matches("help me")
+    assert not handler.matches("no help")
+
+    response = handler.handle(user, "help")
+    assert response == HELP_MESSAGE
+
+
+def test_list_handler(user: User) -> None:
+    """Test ListHandler."""
+    handler = ListHandler()
+    assert handler.matches("list")
+    assert not handler.matches("list goals")
+    assert not handler.matches("listing")
+
+    with patch("loglife.app.logic.text.handlers.send_whatsapp_list_message") as mock_send:
+        response = handler.handle(user, "list")
+        assert response is None
+        mock_send.assert_called_once()
+        call_args = mock_send.call_args
+        assert call_args[1]["number"] == user.phone_number
+        assert "LogLife Commands" in call_args[1]["body"]
+        assert len(call_args[1]["sections"]) == 3
+
+
+def test_menu_handler(user: User) -> None:
+    """Test MenuHandler."""
+    handler = MenuHandler()
+    assert handler.matches("menu")
+    assert not handler.matches("menu item")
+    assert not handler.matches("show menu")
+
+    with patch("loglife.app.logic.text.handlers.send_whatsapp_reply_buttons") as mock_send:
+        response = handler.handle(user, "menu")
+        assert response is None
+        mock_send.assert_called_once()
+        call_args = mock_send.call_args
+        assert call_args[1]["number"] == user.phone_number
+        assert "LogLife Menu" in call_args[1]["text"]
+        assert len(call_args[1]["buttons"]) == 3
+
+
+def test_checkin_handler(user: User) -> None:
+    """Test CheckinHandler."""
+    handler = CheckinHandler()
+    assert handler.matches("checkin")
+    assert not handler.matches("checkin now")
+    assert not handler.matches("check in")
+
+    with patch("loglife.app.logic.text.handlers.send_whatsapp_reply_buttons") as mock_send:
+        response = handler.handle(user, "checkin")
+        assert response is None
+        mock_send.assert_called_once()
+        call_args = mock_send.call_args
+        assert call_args[1]["number"] == user.phone_number
+        assert "Check in" in call_args[1]["text"]
+        assert len(call_args[1]["buttons"]) == 2
+
+
+def test_checkin_now_handler(user: User) -> None:
+    """Test CheckinNowHandler."""
+    handler = CheckinNowHandler()
+    assert handler.matches("checkin now")
+    assert not handler.matches("checkin")
+    assert not handler.matches("check in now")
+
+    with (
+        patch("loglife.app.logic.text.handlers.WHATSAPP_CLIENT_TYPE", "business_api"),
+        patch("loglife.app.logic.text.handlers.send_whatsapp_cta_url") as mock_send_cta,
+        patch("loglife.app.logic.text.handlers.generate_short_token") as mock_token,
+    ):
+        mock_token.return_value = "test_token_123"
+        response = handler.handle(user, "checkin now")
+        assert response is None
+        mock_send_cta.assert_called_once()
+        call_args = mock_send_cta.call_args
+        assert call_args[1]["number"] == user.phone_number
+        assert "Check in" in call_args[1]["body"]
+
+    with (
+        patch("loglife.app.logic.text.handlers.WHATSAPP_CLIENT_TYPE", "web"),
+        patch("loglife.app.logic.text.handlers.send_whatsapp_message") as mock_send_msg,
+        patch("loglife.app.logic.text.handlers.generate_short_token") as mock_token,
+    ):
+        mock_token.return_value = "test_token_123"
+        response = handler.handle(user, "checkin now")
+        assert response is None
+        mock_send_msg.assert_called_once()
+        call_args = mock_send_msg.call_args
+        assert call_args[0][0] == user.phone_number
+        assert "Check in" in call_args[0][1]
+
+
+def test_call_handler(user: User) -> None:
+    """Test CallHandler."""
+    handler = CallHandler()
+    assert handler.matches("call")
+    assert not handler.matches("call me")
+    assert not handler.matches("phone call")
+
+    with (
+        patch("loglife.app.logic.text.handlers.WHATSAPP_CLIENT_TYPE", "business_api"),
+        patch("loglife.app.logic.text.handlers.send_whatsapp_cta_url") as mock_send_cta,
+        patch("loglife.app.logic.text.handlers.generate_short_token") as mock_token,
+    ):
+        mock_token.return_value = "test_token_123"
+        response = handler.handle(user, "call")
+        assert response is None
+        assert mock_send_cta.call_count == 4
+        # Verify all 4 buttons were sent
+        calls = mock_send_cta.call_args_list
+        assert len(calls) == 4
+        assert all(call[1]["number"] == user.phone_number for call in calls)
+
+    with (
+        patch("loglife.app.logic.text.handlers.WHATSAPP_CLIENT_TYPE", "web"),
+        patch("loglife.app.logic.text.handlers.send_whatsapp_message") as mock_send_msg,
+        patch("loglife.app.logic.text.handlers.generate_short_token") as mock_token,
+    ):
+        mock_token.return_value = "test_token_123"
+        response = handler.handle(user, "call")
+        assert response is None
+        mock_send_msg.assert_called_once()
+        call_args = mock_send_msg.call_args
+        assert call_args[0][0] == user.phone_number
+        assert "Check in" in call_args[0][1]
+        assert "Goal Setup" in call_args[0][1]
+
+
+def test_edit_time_handler(user: User) -> None:
+    """Test EditTimeHandler."""
+    handler = EditTimeHandler()
+    assert handler.matches("edit time")
+    assert not handler.matches("edit")
+    assert not handler.matches("time")
+
+    response = handler.handle(user, "edit time")
+    assert response == "Edit Time"
+
+
+def test_habits_handler(user: User) -> None:
+    """Test HabitsHandler."""
+    handler = HabitsHandler()
+    assert handler.matches("habits")
+    assert not handler.matches("habit")
+    assert not handler.matches("my habits")
+
+    # No goals
+    response = handler.handle(user, "habits")
+    assert response == ERROR_NO_GOALS_SET
+
+    # With goals - should delegate to WeekSummaryHandler
+    db.goals.create(user.id, "🏃", "Run")
+    response = handler.handle(user, "habits")
+    assert "Week" in response
+    assert "🏃" in response

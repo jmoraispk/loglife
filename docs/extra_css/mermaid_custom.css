@@ -4,7 +4,7 @@
 
 /* Background for the Mermaid container */
 [data-md-color-scheme="slate"] .mermaid {
-    background-color: #1e2029; /* Slightly lighter than the page background */
+    background-color: #2a2d3a; /* Lighter background for better contrast */
     border-radius: 8px;
     padding: 1rem;
 }
@@ -14,30 +14,79 @@
     font-family: "Roboto", sans-serif !important;
 }
 
-/* Override text color for darker themes */
-[data-md-color-scheme="slate"] .mermaid text {
-    fill: #e0e0e0 !important;
+/* Override text color for darker themes - make all text white */
+[data-md-color-scheme="slate"] .mermaid text,
+[data-md-color-scheme="slate"] .mermaid tspan,
+[data-md-color-scheme="slate"] .mermaid .nodeLabel,
+[data-md-color-scheme="slate"] .mermaid .nodeLabel text,
+[data-md-color-scheme="slate"] .mermaid .cluster-label text,
+[data-md-color-scheme="slate"] .mermaid .label text,
+[data-md-color-scheme="slate"] .mermaid .node-label,
+[data-md-color-scheme="slate"] .mermaid g text {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+    font-weight: 500 !important;
 }
 
 [data-md-color-scheme="slate"] .mermaid .node rect,
 [data-md-color-scheme="slate"] .mermaid .node circle,
 [data-md-color-scheme="slate"] .mermaid .node polygon,
 [data-md-color-scheme="slate"] .mermaid .node path {
-    fill: #2e303e !important;
-    stroke: #7f8497 !important;
+    fill: #3e4451 !important;
+    stroke: #a0a8b8 !important;
+    stroke-width: 2px !important;
 }
 
 [data-md-color-scheme="slate"] .mermaid .edgePath .path {
-    stroke: #7f8497 !important;
+    stroke: #a0a8b8 !important;
+    stroke-width: 2px !important;
 }
 
 [data-md-color-scheme="slate"] .mermaid .flowchart-link {
-    stroke: #7f8497 !important;
+    stroke: #a0a8b8 !important;
+    stroke-width: 2px !important;
 }
 
 [data-md-color-scheme="slate"] .mermaid .marker {
-    fill: #7f8497 !important;
-    stroke: #7f8497 !important;
+    fill: #a0a8b8 !important;
+    stroke: #a0a8b8 !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid .edgeLabel {
+    background-color: #1e2029 !important;
+    color: #ffffff !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid .edgeLabel text,
+[data-md-color-scheme="slate"] .mermaid .edgeLabel tspan,
+[data-md-color-scheme="slate"] .mermaid .edgeLabel .edge-label {
+    fill: #ffffff !important;
+    color: #ffffff !important;
+}
+
+/* Force all SVG text elements within mermaid to be white */
+[data-md-color-scheme="slate"] .mermaid svg text {
+    fill: #ffffff !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid svg tspan {
+    fill: #ffffff !important;
+}
+
+/* Universal selector for ALL text in mermaid diagrams */
+[data-md-color-scheme="slate"] .mermaid * {
+    color: #ffffff !important;
+}
+
+[data-md-color-scheme="slate"] .mermaid svg * {
+    fill: inherit;
+}
+
+/* Explicitly target all text fill attributes */
+[data-md-color-scheme="slate"] .mermaid [fill],
+[data-md-color-scheme="slate"] .mermaid text[fill],
+[data-md-color-scheme="slate"] .mermaid tspan[fill] {
+    fill: #ffffff !important;
 }
 
 /* Custom class styles if needed */

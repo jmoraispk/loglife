@@ -18,8 +18,12 @@ from loglife.core.transports import (
 )
 
 if TYPE_CHECKING:
-    from loglife.core.whatsapp_api import WhatsAppClient
-    from loglife.core.whatsapp_api.endpoints import ListSection, ReplyButton, URLButton
+    from loglife.core.whatsapp_business_api import (
+        ListSection,
+        ReplyButton,
+        URLButton,
+        WhatsAppClient,
+    )
 
 logger = logging.getLogger(__name__)
 
@@ -226,7 +230,7 @@ def send_whatsapp_reply_buttons(
         try:
             client = get_whatsapp_business_client()
             formatted_number = format_phone_for_business_api(number)
-            client.messages.send_reply_buttons(
+            client.send_reply_buttons(
                 to=formatted_number,
                 text=text,
                 buttons=buttons,
@@ -269,7 +273,7 @@ def send_whatsapp_list_message(  # noqa: PLR0913
         try:
             client = get_whatsapp_business_client()
             formatted_number = format_phone_for_business_api(number)
-            client.messages.send_list(
+            client.send_list(
                 to=formatted_number,
                 button_text=button_text,
                 body=body,
@@ -309,7 +313,7 @@ def send_whatsapp_cta_url(
         try:
             client = get_whatsapp_business_client()
             formatted_number = format_phone_for_business_api(number)
-            client.messages.send_cta_url(
+            client.send_cta_url(
                 to=formatted_number,
                 body=body,
                 button=button,

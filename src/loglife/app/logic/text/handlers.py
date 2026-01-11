@@ -6,11 +6,10 @@ import re
 from abc import ABC, abstractmethod
 from datetime import UTC, datetime, timedelta
 
-from itsdangerous import URLSafeTimedSerializer
-
 from loglife.app.config import (
     DEFAULT_GOAL_EMOJI,
     LOGLIFE_DOMAIN,
+    LOOKBACK_NO_GOALS,
     SECRET_KEY,
     STYLE,
     WHATSAPP_CLIENT_TYPE,
@@ -18,16 +17,15 @@ from loglife.app.config import (
 )
 from loglife.app.db import db
 from loglife.app.db.tables import Goal, Rating, User
-from loglife.app.logic.text.reminder_time import parse_time_string
-from loglife.app.logic.text.week import get_monday_before, look_back_summary
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
 from loglife.core.messaging import (
     send_whatsapp_cta_url,
     send_whatsapp_list_message,
     send_whatsapp_reply_buttons,
 )
+from loglife.core.tokens import generate_short_token
 from loglife.core.transports import send_whatsapp_message
-from loglife.core.whatsapp_api.endpoints.messages import (
+from loglife.core.whatsapp_business_api import (
     ListRow,
     ListSection,
     ReplyButton,
@@ -35,9 +33,6 @@ from loglife.core.whatsapp_api.endpoints.messages import (
 )
 
 logger = logging.getLogger(__name__)
-
-# Cache the serializer to avoid recreating it on every call (performance optimization)
-_serializer = URLSafeTimedSerializer(SECRET_KEY)
 
 MIN_PARTS_EXPECTED = 2
 
@@ -60,6 +55,133 @@ def _extract_emoji(text: str) -> str:
     """Extract the first emoji from the given text."""
     match = re.search(_emoji_pattern, text)
     return match.group(0) if match else DEFAULT_GOAL_EMOJI
+
+
+# Internal helper functions (defined locally since only used in this module)
+_HH_MM = re.compile(r"^\d{1,2}:\d{2}$")
+_HH_MM_AM_PM = re.compile(r"^\d{1,2}:\d{2}\s?(am|pm)$", re.IGNORECASE)
+_HH_AM_PM = re.compile(r"^\d{1,2}\s?(am|pm)$", re.IGNORECASE)
+_HH_ONLY = re.compile(r"^\d{1,2}$")
+MAX_HOUR = 23
+
+
+def parse_time_string(raw: str) -> str | None:
+    """Parse user-provided time text into HH:MM:00 format.
+
+    Accept inputs like '18:00', '10:15 PM', '6 PM', '6pm', or '6'.
+    Returns None if the value cannot be parsed or is out of range.
+
+    Arguments:
+        raw: The incoming time value as typed by the user
+
+    Returns:
+        The normalized time string or None if invalid.
+
+    """
+    cleaned = raw.strip()
+    lowered = cleaned.lower()
+
+    try:
+        if _HH_MM.match(cleaned):
+            parsed = datetime.strptime(cleaned, "%H:%M").time()  # noqa: DTZ007
+            return parsed.strftime("%H:%M:00")
+
+        if _HH_MM_AM_PM.match(lowered):
+            parsed = datetime.strptime(lowered.replace(" ", ""), "%I:%M%p").time()  # noqa: DTZ007
+            return parsed.strftime("%H:%M:00")
+
+        if _HH_AM_PM.match(lowered):
+            parsed = datetime.strptime(lowered.replace(" ", ""), "%I%p").time()  # noqa: DTZ007
+            return parsed.strftime("%H:%M:00")
+
+        if _HH_ONLY.match(cleaned):
+            hour = int(cleaned)
+            if 0 <= hour <= MAX_HOUR:
+                return f"{hour:02d}:00:00"
+    except ValueError:
+        return None
+
+    return None
+
+
+def get_monday_before() -> datetime:
+    """Calculate the Monday of the current week.
+
+    Returns:
+        The datetime of the Monday of the current week.
+
+    """
+    reference_date: datetime = datetime.now(tz=UTC)
+    days_since_monday: int = reference_date.weekday()
+    return reference_date - timedelta(days=days_since_monday)
+
+
+def look_back_summary(user_id: int, days: int, start: datetime) -> str:
+    """Build a multi-day look-back summary for a user's goals.
+
+    Collect the user's goals and ratings, then compose a Markdown-style block
+    where each line represents a day and shows the status symbols for all goals.
+
+    Arguments:
+        user_id: The unique identifier of the user
+        days: Number of days to include in the summary
+        start: The starting datetime for the look-back window
+
+    Returns:
+        A formatted summary string or a predefined message if no goals exist.
+
+    """
+    summary: str = "```"
+
+    # Get user goals to determine how many goals to show
+    user_goals: list[Goal] = db.goals.get_by_user(user_id)
+
+    if not user_goals:
+        return LOOKBACK_NO_GOALS
+
+    for i in range(days):
+        current_date: datetime = start + timedelta(days=i)
+        storage_date: str = current_date.strftime("%Y-%m-%d")  # For looking up in data
+        display_date: str = current_date.strftime("%a")  # For display
+
+        # Get ratings for this date
+        ratings_data = []
+        for user_goal in user_goals:
+            user_goal_rating: Rating | None = db.ratings.get_by_goal_and_date(
+                user_goal.id,
+                storage_date,
+            )
+            if user_goal_rating:
+                ratings_data.append(
+                    {
+                        "goal_emoji": user_goal.goal_emoji,
+                        "rating": user_goal_rating.rating,
+                    },
+                )
+            else:
+                ratings_data.append(
+                    {"goal_emoji": user_goal.goal_emoji, "rating": None},
+                )
+
+        # Create status symbols for each goal
+        status_symbols: list[str] = []
+        for goal in user_goals:
+            # Find rating for this goal
+            rating: int | None = None
+            for rating_row in ratings_data:
+                if rating_row["goal_emoji"] == goal.goal_emoji:
+                    rating = rating_row["rating"]  # type: ignore[assignment]
+                    break
+
+            if rating:
+                status_symbols.append(STYLE[rating])
+            else:
+                status_symbols.append(" ")  # No rating yet
+
+        status: str = " ".join(status_symbols)
+        summary += f"{display_date} {status}\n"
+
+    return summary[:-1] + "```"
 
 
 class TextCommandHandler(ABC):
@@ -647,8 +769,8 @@ class CallHandler(TextCommandHandler):
         # Normalize phone number by removing @c.us suffix if present
         phone_number_normalized = user.phone_number.replace("@c.us", "")
 
-        # Generate token from normalized phone number (use cached serializer for performance)
-        token = _serializer.dumps(phone_number_normalized)
+        # Generate token from normalized phone number
+        token = generate_short_token(phone_number_normalized, SECRET_KEY)
 
         # Button configurations: (number, display_text, body)
         button_configs = [
@@ -710,8 +832,8 @@ class CheckinNowHandler(TextCommandHandler):
         # Normalize phone number by removing @c.us suffix if present
         phone_number_normalized = user.phone_number.replace("@c.us", "")
 
-        # Generate token from normalized phone number (use cached serializer for performance)
-        token = _serializer.dumps(phone_number_normalized)
+        # Generate token from normalized phone number
+        token = generate_short_token(phone_number_normalized, SECRET_KEY)
 
         client_type = WHATSAPP_CLIENT_TYPE.lower()
 

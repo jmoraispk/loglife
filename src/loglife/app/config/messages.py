@@ -50,7 +50,7 @@ HELP_MESSAGE = """❓ *LogLife Commands*
 
 📊 *TRACKING*
 • `rate 2 3` - Rate goal #2 with rating 3 (1=fail, 2=partial, 3=success)
-• `31232` - Rate all goals at once
+• `31232` - Rate all goals at once (one digit per goal, 1-3)
 
 📈 *VIEWING*
 • `week` - Show week summary
@@ -58,17 +58,7 @@ HELP_MESSAGE = """❓ *LogLife Commands*
 
 ⚙️ *SETTINGS*
 • `on transcript` - Get text files with audio transcripts
-• `off transcript` - Only get summary (no files)
-
-❓ *HELP*
-• `help` - Show this help message
-
-*Examples:*
-• `add goal 🏃 Exercise daily`
-• `rate 1 3` (rate first goal as success)
-• `lookback 3` (show last 3 days)
-• `delete 2` (delete goal #2)
-• `update 1 8pm` (change goal #1 reminder to 8pm)"""
+• `off transcript` - Only get summary (no files)"""
 
 # -----------------------------
 # Referral Messages
