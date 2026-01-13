@@ -84,8 +84,8 @@ def app_and_mock(real_db_path: str) -> Generator[tuple[Flask, MagicMock], None, 
         import loglife.core.messaging as messaging_module  # noqa: PLC0415
 
         # Force flags to False so threads restart
-        messaging_module._router_worker_started = False  # noqa: SLF001
-        messaging_module._sender_worker_started = False  # noqa: SLF001
+        messaging_module._worker_state["router_started"] = False  # noqa: SLF001
+        messaging_module._worker_state["sender_started"] = False  # noqa: SLF001
 
         # Start the app (this spawns real threads!)
         app = create_app()
@@ -117,7 +117,6 @@ def app_and_mock(real_db_path: str) -> Generator[tuple[Flask, MagicMock], None, 
 
 def test_real_threading_flow_success(
     app_and_mock: tuple[Flask, MagicMock],
-    real_db_path: str,  # noqa: ARG001
 ) -> None:
     """Verify successful message processing and delivery."""
     app, mock_post = app_and_mock
@@ -155,7 +154,6 @@ def test_real_threading_flow_success(
 
 def test_real_threading_api_failure(
     app_and_mock: tuple[Flask, MagicMock],
-    real_db_path: str,  # noqa: ARG001
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Verify that the worker handles API failures (500) without crashing.

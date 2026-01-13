@@ -41,8 +41,6 @@ def _make_message(
 
 def test_route_message_existing_user(
     mock_db: MagicMock,
-    mock_queue: MagicMock,  # noqa: ARG001
-    mock_timezone: MagicMock,  # noqa: ARG001
 ) -> None:
     """Existing users are retrieved and not re-created."""
     mock_user = MagicMock()
@@ -58,7 +56,6 @@ def test_route_message_existing_user(
 def test_route_message_creates_user(
     mock_db: MagicMock,
     mock_timezone: MagicMock,
-    mock_queue: MagicMock,  # noqa: ARG001
 ) -> None:
     """New users are created with detected timezone."""
     mock_db.users.get_by_phone.return_value = None

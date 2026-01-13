@@ -46,7 +46,7 @@ def test_check_reminders() -> None:
         mock_get_goals.return_value = [mock_goal]
         mock_get_all_users.return_value = [mock_user]
 
-        reminder_worker._check_reminders()  # noqa: SLF001
+        reminder_worker.check_reminders()
 
         # Assert message sent
         # Ensure we are matching the exact call format including args
@@ -67,7 +67,7 @@ def test_is_reminder_due_true() -> None:
     mock_goal = MagicMock(spec=Goal)
     mock_goal.reminder_time = "12:00:00"
 
-    assert reminder_worker._is_reminder_due(mock_goal, mock_user, now_utc)  # noqa: SLF001
+    assert reminder_worker.is_reminder_due(mock_goal, mock_user, now_utc)
 
 
 def test_is_reminder_due_false() -> None:
@@ -80,7 +80,7 @@ def test_is_reminder_due_false() -> None:
     mock_goal = MagicMock(spec=Goal)
     mock_goal.reminder_time = "12:01:00"
 
-    assert not reminder_worker._is_reminder_due(mock_goal, mock_user, now_utc)  # noqa: SLF001
+    assert not reminder_worker.is_reminder_due(mock_goal, mock_user, now_utc)
 
 
 def test_is_reminder_due_timezone_conversion() -> None:
@@ -97,7 +97,7 @@ def test_is_reminder_due_timezone_conversion() -> None:
     # In Jan (Standard Time), Paris is UTC+1. So 12:00 UTC -> 13:00 Paris.
     mock_goal.reminder_time = "13:00:00"
 
-    assert reminder_worker._is_reminder_due(  # noqa: SLF001
+    assert reminder_worker.is_reminder_due(
         mock_goal,
         mock_user,
         now_utc,
@@ -110,7 +110,7 @@ def test_build_standard_reminder_message() -> None:
     mock_goal.goal_emoji = "🏃"
     mock_goal.goal_description = "Run 5k"
 
-    msg = reminder_worker._build_standard_reminder_message(mock_goal)  # noqa: SLF001
+    msg = reminder_worker.build_standard_reminder_message(mock_goal)
 
     expected = REMINDER_MESSAGE.replace("<goal_emoji>", "🏃").replace(
         "<goal_description>",
@@ -129,7 +129,7 @@ def test_build_journal_reminder_message_with_untracked() -> None:
     ) as mock_get_goals:
         mock_get_goals.return_value = [mock_goal1]
 
-        msg = reminder_worker._build_journal_reminder_message(1)  # noqa: SLF001
+        msg = reminder_worker.build_journal_reminder_message(1)
 
         assert "Did you complete the goals?" in msg
         assert "Run 5k" in msg
@@ -142,7 +142,7 @@ def test_build_journal_reminder_message_all_tracked() -> None:
     ) as mock_get_goals:
         mock_get_goals.return_value = []
 
-        msg = reminder_worker._build_journal_reminder_message(1)  # noqa: SLF001
+        msg = reminder_worker.build_journal_reminder_message(1)
 
         assert "Did you complete the goals?" not in msg
         assert msg == JOURNAL_REMINDER_MESSAGE.replace("\n\n<goals_not_tracked_today>", "")
@@ -172,6 +172,6 @@ def test_check_reminders_not_due() -> None:
         mock_get_goals.return_value = [mock_goal]
         mock_get_all_users.return_value = [mock_user]
 
-        reminder_worker._check_reminders()  # noqa: SLF001
+        reminder_worker.check_reminders()
 
         mock_send.assert_not_called()

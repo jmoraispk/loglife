@@ -144,6 +144,7 @@ def test_url_button_exact_max_display_text() -> None:
     max_text = "a" * 20
     button = URLButton(display_text=max_text, url="https://example.com")
     assert button.display_text == max_text
+<<<<<<< HEAD
 
 
 def test_voice_call_button_valid() -> None:
@@ -193,3 +194,5 @@ def test_voice_call_button_valid_ttl() -> None:
 
     button2 = VoiceCallButton(display_text="Call", ttl_minutes=60, payload="test")
     assert button2.ttl_minutes == 60
+=======
+>>>>>>> 212337b (refactor: resolve multiple noqa warnings (DTZ, SLF, PLW, ARG, ANN) and improve type safety)

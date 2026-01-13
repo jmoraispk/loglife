@@ -4,6 +4,7 @@ Serves the emulator UI and provides an SSE stream for realtime logs.
 """
 
 import json
+import logging
 import os
 from collections.abc import Generator
 
@@ -13,6 +14,8 @@ from flask import Blueprint, Response, jsonify, render_template, request
 from loglife.app.config.paths import ASSISTANTS_JSON, DATA
 from loglife.app.config.settings import EMULATOR_SQLITE_WEB_URL
 from loglife.core.transports import log_broadcaster
+
+logger = logging.getLogger(__name__)
 
 emulator_bp = Blueprint(
     "emulator",
@@ -66,7 +69,7 @@ def _save_assistant_to_json(assistant_id: str, assistant_data: dict) -> None:
 
         # Load existing data if file exists
         if ASSISTANTS_JSON.exists():
-            with open(ASSISTANTS_JSON, "r", encoding="utf-8") as f:
+            with ASSISTANTS_JSON.open(encoding="utf-8") as f:
                 assistants = json.load(f)
         else:
             assistants = {}
@@ -75,12 +78,12 @@ def _save_assistant_to_json(assistant_id: str, assistant_data: dict) -> None:
         assistants[assistant_id] = assistant_data
 
         # Save back to file
-        with open(ASSISTANTS_JSON, "w", encoding="utf-8") as f:
+        with ASSISTANTS_JSON.open("w", encoding="utf-8") as f:
             json.dump(assistants, f, indent=2, ensure_ascii=False)
-    except Exception as e:
+    except (OSError, json.JSONDecodeError) as e:
         # Log error but don't fail the request
         # In production, you might want to use proper logging here
-        print(f"Warning: Failed to save assistant data to JSON: {e}")
+        logger.warning("Failed to save assistant data to JSON: %s", e)
 
 
 def _fetch_assistant(assistant_id: str, vapi_private_key: str) -> Response:

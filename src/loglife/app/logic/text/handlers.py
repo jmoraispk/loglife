@@ -12,24 +12,24 @@ from loglife.app.config import (
     LOOKBACK_NO_GOALS,
     SECRET_KEY,
     STYLE,
-    WHATSAPP_CLIENT_TYPE,
     messages,
 )
 from loglife.app.db import db
 from loglife.app.db.tables import Goal, Rating, User
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
 from loglife.core.messaging import (
-    send_whatsapp_cta_url,
     send_whatsapp_list_message,
     send_whatsapp_reply_buttons,
 )
+<<<<<<< HEAD
 from loglife.core.tokens import generate_short_token
 from loglife.core.transports import send_whatsapp_message
+=======
+>>>>>>> 212337b (refactor: resolve multiple noqa warnings (DTZ, SLF, PLW, ARG, ANN) and improve type safety)
 from loglife.core.whatsapp_business_api import (
     ListRow,
     ListSection,
     ReplyButton,
-    URLButton,
 )
 
 logger = logging.getLogger(__name__)
@@ -83,15 +83,17 @@ def parse_time_string(raw: str) -> str | None:
 
     try:
         if _HH_MM.match(cleaned):
-            parsed = datetime.strptime(cleaned, "%H:%M").time()  # noqa: DTZ007
+            parsed = datetime.strptime(cleaned, "%H:%M").replace(tzinfo=UTC).time()
             return parsed.strftime("%H:%M:00")
 
         if _HH_MM_AM_PM.match(lowered):
-            parsed = datetime.strptime(lowered.replace(" ", ""), "%I:%M%p").time()  # noqa: DTZ007
+            parsed = (
+                datetime.strptime(lowered.replace(" ", ""), "%I:%M%p").replace(tzinfo=UTC).time()
+            )
             return parsed.strftime("%H:%M:00")
 
         if _HH_AM_PM.match(lowered):
-            parsed = datetime.strptime(lowered.replace(" ", ""), "%I%p").time()  # noqa: DTZ007
+            parsed = datetime.strptime(lowered.replace(" ", ""), "%I%p").replace(tzinfo=UTC).time()
             return parsed.strftime("%H:%M:00")
 
         if _HH_ONLY.match(cleaned):
@@ -328,7 +330,7 @@ class ReminderTimeHandler(TextCommandHandler):
         db.users.set_state(user_id, None)
 
         # Convert 24-hour format to 12-hour AM/PM format
-        time_obj = datetime.strptime(normalized_time, "%H:%M:%S").time()  # noqa: DTZ007
+        time_obj = datetime.strptime(normalized_time, "%H:%M:%S").replace(tzinfo=UTC).time()
         display_time = time_obj.strftime("%I:%M %p")
 
         # Get the goal to display in confirmation
@@ -367,11 +369,15 @@ class GoalsListHandler(TextCommandHandler):
         for i, goal in enumerate(user_goals, 1):
             time_display = ""
             if goal.reminder_time:
-                time_obj = datetime.strptime(  # noqa: DTZ007
-                    # Ensure reminder_time is string
-                    str(goal.reminder_time),
-                    "%H:%M:%S",
-                ).time()
+                time_obj = (
+                    datetime.strptime(
+                        # Ensure reminder_time is string
+                        str(goal.reminder_time),
+                        "%H:%M:%S",
+                    )
+                    .replace(tzinfo=UTC)
+                    .time()
+                )
                 time_display = f" ⏰ {time_obj.strftime('%I:%M %p')}"
             goal_desc = goal.goal_description
             goal_emoji = goal.goal_emoji
@@ -414,7 +420,7 @@ class UpdateReminderHandler(TextCommandHandler):
 
         db.goals.update(goal.id, reminder_time=normalized_time)
 
-        time_obj = datetime.strptime(normalized_time, "%H:%M:%S").time()  # noqa: DTZ007
+        time_obj = datetime.strptime(normalized_time, "%H:%M:%S").replace(tzinfo=UTC).time()
         display_time = time_obj.strftime("%I:%M %p")
 
         goal_emoji = goal.goal_emoji

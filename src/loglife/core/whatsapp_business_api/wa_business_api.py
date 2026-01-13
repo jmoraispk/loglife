@@ -57,19 +57,26 @@ class WhatsAppRequestError(WhatsAppSDKError):
     """Network/timeout/etc."""
 
 
+@dataclass
+class HTTPConfig:
+    """Configuration for HTTP client."""
+
+    timeout: float = 15.0
+    max_retries: int = 3
+    backoff_factor: float = 0.5
+
+
 # --- HTTP Client ---
 
 
 class HttpClient:
     """HTTP client with retry logic and error handling."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         base_url: str,
         access_token: str,
-        timeout: float = 15.0,
-        max_retries: int = 3,
-        backoff_factor: float = 0.5,
+        config: HTTPConfig | None = None,
         session: requests.Session | None = None,
     ) -> None:
         """Initialize HTTP client.
@@ -77,16 +84,12 @@ class HttpClient:
         Args:
             base_url: Base URL for API requests.
             access_token: Bearer token for authentication.
-            timeout: Request timeout in seconds. Defaults to 15.0.
-            max_retries: Maximum retry attempts. Defaults to 3.
-            backoff_factor: Exponential backoff factor. Defaults to 0.5.
+            config: Optional HTTP configuration.
             session: Optional requests session. Creates new if None.
         """
         self.base_url = base_url.rstrip("/")
         self.access_token = access_token
-        self.timeout = timeout
-        self.max_retries = max_retries
-        self.backoff_factor = backoff_factor
+        self.config = config or HTTPConfig()
         self.session = session or requests.Session()
 
     def request(
@@ -118,7 +121,7 @@ class HttpClient:
             "Content-Type": "application/json",
         }
 
-        for attempt in range(self.max_retries + 1):
+        for attempt in range(self.config.max_retries + 1):
             try:
                 resp = self.session.request(
                     method=method,
@@ -126,11 +129,11 @@ class HttpClient:
                     headers=headers,
                     json=json,
                     params=params,
-                    timeout=self.timeout,
+                    timeout=self.config.timeout,
                 )
             except (requests.Timeout, requests.ConnectionError) as e:
-                if attempt < self.max_retries:
-                    time.sleep(self.backoff_factor * (2**attempt))
+                if attempt < self.config.max_retries:
+                    time.sleep(self.config.backoff_factor * (2**attempt))
                     continue
                 error_msg = f"Network error: {e}"
                 raise WhatsAppRequestError(error_msg) from e
@@ -165,15 +168,13 @@ class SendTextResponse:
 class WhatsAppClient:
     """Main client for interacting with WhatsApp Business API."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         *,
         access_token: str,
         phone_number_id: str,
         base_url: str = "https://graph.facebook.com/v24.0",
-        timeout: float = 15.0,
-        max_retries: int = 3,
-        backoff_factor: float = 0.5,
+        http_config: HTTPConfig | None = None,
     ) -> None:
         """Initialize WhatsApp client.
 
@@ -181,16 +182,12 @@ class WhatsAppClient:
             access_token: WhatsApp Business API access token.
             phone_number_id: WhatsApp Business phone number ID.
             base_url: Base URL for the API. Defaults to v24.0.
-            timeout: Request timeout in seconds. Defaults to 15.0.
-            max_retries: Maximum number of retry attempts. Defaults to 3.
-            backoff_factor: Backoff factor for retries. Defaults to 0.5.
+            http_config: Optional HTTP configuration (timeout, retries, etc.).
         """
         self._http = HttpClient(
             base_url=base_url,
             access_token=access_token,
-            timeout=timeout,
-            max_retries=max_retries,
-            backoff_factor=backoff_factor,
+            config=http_config,
         )
         self._phone_number_id = phone_number_id
 
@@ -266,15 +263,14 @@ class WhatsAppClient:
         msg_id = (data.get("messages") or [{}])[0].get("id", "")
         return SendTextResponse(message_id=msg_id)
 
-    def send_list(  # noqa: PLR0913
+    def send_list(
         self,
         *,
         to: str,
         button_text: str,
         body: str,
         sections: list[ListSection],
-        header: str | None = None,
-        footer: str | None = None,
+        options: dict[str, str] | None = None,
     ) -> SendTextResponse:
         """Send an interactive list message.
 
@@ -283,8 +279,7 @@ class WhatsAppClient:
             button_text: Text displayed on the action button (max 20 characters).
             body: Message body text (max 1024 characters).
             sections: List of sections (max 10 sections, max 10 total rows across all sections).
-            header: Optional header text (max 60 characters). Defaults to None.
-            footer: Optional footer text (max 60 characters). Defaults to None.
+            options: Optional dictionary containing 'header' and 'footer' text.
 
         Returns:
             SendTextResponse with message ID.
@@ -292,6 +287,10 @@ class WhatsAppClient:
         Raises:
             ValueError: If validation fails (sections count, rows count, or text length limits).
         """
+        options = options or {}
+        header = options.get("header")
+        footer = options.get("footer")
+
         # Validate sections count
         if len(sections) > MAX_LIST_SECTIONS:
             msg = f"Must provide at most {MAX_LIST_SECTIONS} sections"
