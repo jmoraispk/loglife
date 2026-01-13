@@ -60,6 +60,27 @@ _outbound_queue: Queue[Message] = Queue()
 
 _worker_state = {"router_started": False, "sender_started": False}
 
+
+def reset_worker_state() -> None:
+    """Reset worker state and drain queues (TESTING ONLY)."""
+    _worker_state["router_started"] = False
+    _worker_state["sender_started"] = False
+
+    # Drain inbound queue
+    while not _inbound_queue.empty():
+        try:
+            _inbound_queue.get_nowait()
+        except Empty:
+            break
+
+    # Drain outbound queue
+    while not _outbound_queue.empty():
+        try:
+            _outbound_queue.get_nowait()
+        except Empty:
+            break
+
+
 # --- Inbound / Receiver Logic ---
 
 

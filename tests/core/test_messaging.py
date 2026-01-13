@@ -14,6 +14,7 @@ from loglife.core.messaging import (
     _outbound_queue,
     enqueue_inbound_message,
     get_outbound_message,
+    reset_worker_state,
     start_message_worker,
     start_sender_worker,
 )
@@ -29,7 +30,8 @@ class TimeoutThread(threading.Thread):
     def __init__(
         self,
         target: object,
-        daemon: bool = False,  # noqa: FBT001, FBT002
+        *,
+        daemon: bool = False,
         name: str | None = None,
     ) -> None:
         """Initialize the thread."""
@@ -52,43 +54,9 @@ class TimeoutThread(threading.Thread):
 @pytest.fixture(autouse=True)
 def reset_messaging_state() -> None:
     """Ensure clean slate for messaging state."""
-    import loglife.core.messaging as messaging_module  # noqa: PLC0415
-    from loglife.core.messaging import _inbound_queue, _outbound_queue  # noqa: PLC0415
-
-    messaging_module._worker_state["router_started"] = False  # noqa: SLF001
-    messaging_module._worker_state["sender_started"] = False  # noqa: SLF001
-
-    # Drain inbound queue
-    while not _inbound_queue.empty():
-        try:
-            _inbound_queue.get_nowait()
-        except Empty:
-            break
-
-    # Drain outbound queue
-    while not _outbound_queue.empty():
-        try:
-            _outbound_queue.get_nowait()
-        except Empty:
-            break
-
+    reset_worker_state()
     yield
-
-    # Cleanup after test
-    messaging_module._worker_state["router_started"] = False  # noqa: SLF001
-    messaging_module._worker_state["sender_started"] = False  # noqa: SLF001
-
-    # Drain queues again
-    while not _inbound_queue.empty():
-        try:
-            _inbound_queue.get_nowait()
-        except Empty:
-            break
-    while not _outbound_queue.empty():
-        try:
-            _outbound_queue.get_nowait()
-        except Empty:
-            break
+    reset_worker_state()
 
 
 def test_enqueue_inbound_message() -> None:
@@ -136,9 +104,7 @@ def test_high_volume_queue_pressure() -> None:
         with lock:
             processed_count += 1
 
-    import loglife.core.messaging as messaging_module  # noqa: PLC0415
-
-    messaging_module._worker_state["router_started"] = False  # noqa: SLF001
+    reset_worker_state()
 
     with patch("loglife.core.messaging.Thread") as mock_thread_cls:
         # Just to capture the target function, but run it in a real thread

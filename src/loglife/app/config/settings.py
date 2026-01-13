@@ -2,6 +2,10 @@
 
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 FLASK_ENV = os.getenv("FLASK_ENV", "development")  # development or production
 
 OPENAI_CHAT_MODEL = "gpt-5.1"
