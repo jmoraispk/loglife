@@ -3,12 +3,14 @@
 Serves the emulator UI and provides an SSE stream for realtime logs.
 """
 
+import json
 import os
 from collections.abc import Generator
 
 import requests
 from flask import Blueprint, Response, jsonify, render_template, request
 
+from loglife.app.config.paths import ASSISTANTS_JSON, DATA
 from loglife.app.config.settings import EMULATOR_SQLITE_WEB_URL
 from loglife.core.transports import log_broadcaster
 
@@ -56,6 +58,31 @@ def vapi_assistant(assistant_id: str) -> Response:
     return jsonify({"error": "Method not allowed"}), 405
 
 
+def _save_assistant_to_json(assistant_id: str, assistant_data: dict) -> None:
+    """Save or update assistant data in JSON file for version control."""
+    try:
+        # Ensure data directory exists
+        DATA.mkdir(parents=True, exist_ok=True)
+
+        # Load existing data if file exists
+        if ASSISTANTS_JSON.exists():
+            with open(ASSISTANTS_JSON, "r", encoding="utf-8") as f:
+                assistants = json.load(f)
+        else:
+            assistants = {}
+
+        # Update or add assistant data
+        assistants[assistant_id] = assistant_data
+
+        # Save back to file
+        with open(ASSISTANTS_JSON, "w", encoding="utf-8") as f:
+            json.dump(assistants, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        # Log error but don't fail the request
+        # In production, you might want to use proper logging here
+        print(f"Warning: Failed to save assistant data to JSON: {e}")
+
+
 def _fetch_assistant(assistant_id: str, vapi_private_key: str) -> Response:
     """Fetch assistant configuration from VAPI API."""
     try:
@@ -76,8 +103,14 @@ def _fetch_assistant(assistant_id: str, vapi_private_key: str) -> Response:
                 }
             ), response.status_code
 
+        # Get assistant data from VAPI
+        assistant_data = response.json()
+
+        # Save to JSON file for version control
+        _save_assistant_to_json(assistant_id, assistant_data)
+
         # Return raw JSON response from VAPI
-        return jsonify(response.json())
+        return jsonify(assistant_data)
     except requests.RequestException as e:
         return jsonify({"error": "Failed to fetch assistant", "details": str(e)}), 500
 
@@ -122,8 +155,14 @@ def _update_assistant(assistant_id: str, vapi_private_key: str) -> Response:
                 }
             ), response.status_code
 
+        # Get updated assistant data from VAPI
+        updated_assistant_data = response.json()
+
+        # Save to JSON file for version control after successful update
+        _save_assistant_to_json(assistant_id, updated_assistant_data)
+
         # Return updated assistant configuration from VAPI
-        return jsonify(response.json())
+        return jsonify(updated_assistant_data)
     except requests.RequestException as e:
         return jsonify({"error": "Failed to update assistant", "details": str(e)}), 500
 
