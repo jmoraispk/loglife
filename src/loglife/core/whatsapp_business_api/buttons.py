@@ -79,6 +79,8 @@ class URLButton:
         if not self.url:
             msg = "URL is required"
             raise ValueError(msg)
+
+
 @dataclass(frozen=True)
 class VoiceCallButton:
     """Voice call button definition for interactive messages."""

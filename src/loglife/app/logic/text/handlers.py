@@ -12,24 +12,24 @@ from loglife.app.config import (
     LOOKBACK_NO_GOALS,
     SECRET_KEY,
     STYLE,
+    WHATSAPP_CLIENT_TYPE,
     messages,
 )
 from loglife.app.db import db
 from loglife.app.db.tables import Goal, Rating, User
 from loglife.app.services.reminder.utils import get_goals_not_tracked_today
 from loglife.core.messaging import (
+    send_whatsapp_cta_url,
     send_whatsapp_list_message,
     send_whatsapp_reply_buttons,
 )
-<<<<<<< HEAD
 from loglife.core.tokens import generate_short_token
 from loglife.core.transports import send_whatsapp_message
-=======
->>>>>>> 212337b (refactor: resolve multiple noqa warnings (DTZ, SLF, PLW, ARG, ANN) and improve type safety)
 from loglife.core.whatsapp_business_api import (
     ListRow,
     ListSection,
     ReplyButton,
+    URLButton,
 )
 
 logger = logging.getLogger(__name__)
