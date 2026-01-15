@@ -79,4 +79,3 @@ class URLButton:
         if not self.url:
             msg = "URL is required"
             raise ValueError(msg)
-

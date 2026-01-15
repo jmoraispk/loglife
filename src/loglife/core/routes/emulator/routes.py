@@ -11,7 +11,7 @@ from collections.abc import Generator
 import requests
 from flask import Blueprint, Response, jsonify, render_template, request
 
-from loglife.app.config.paths import DATA, get_assistant_file_path
+from loglife.app.config.paths import APP_DIR, DATA, get_assistant_file_path
 from loglife.app.config.settings import EMULATOR_SQLITE_WEB_URL
 from loglife.core.transports import log_broadcaster
 
@@ -47,35 +47,30 @@ def vapi_admin() -> str:
 @emulator_bp.route("/vapi-admin/api/prompts", methods=["GET", "POST"])
 def manage_prompts() -> Response:
     """Read or update the prompts.json file."""
-    # Resolve the path relative to the project root
-    # Assuming this file is in src/loglife/core/routes/emulator/routes.py
-    # We want src/loglife/app/config/prompts.json
     try:
-        # Use existing paths config or relative path
-        from loglife.app.config.paths import APP_DIR
         prompts_path = APP_DIR / "config" / "prompts.json"
-        
+
         if request.method == "GET":
             if not prompts_path.exists():
                 return jsonify([]), 200
-                
-            with open(prompts_path, "r", encoding="utf-8") as f:
+
+            with prompts_path.open(encoding="utf-8") as f:
                 data = json.load(f)
             return jsonify(data)
-            
+
         if request.method == "POST":
             new_prompts = request.get_json()
             if not isinstance(new_prompts, list):
                 return jsonify({"error": "Prompts must be a list"}), 400
-                
+
             # Validate structure (optional but recommended)
             # Expecting list of dicts with single key-value pair
-            
-            with open(prompts_path, "w", encoding="utf-8") as f:
+
+            with prompts_path.open("w", encoding="utf-8") as f:
                 json.dump(new_prompts, f, indent=2, ensure_ascii=False)
-                
+
             return jsonify({"success": True, "prompts": new_prompts})
-            
+
     except Exception as e:
         logger.exception("Error managing prompts")
         return jsonify({"error": str(e)}), 500
