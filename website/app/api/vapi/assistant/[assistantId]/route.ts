@@ -79,9 +79,9 @@ export async function GET(
           
           if (fs.existsSync(promptsPath)) {
             const fileContent = fs.readFileSync(promptsPath, 'utf-8');
-            const prompts = JSON.parse(fileContent);
+            const prompts = JSON.parse(fileContent) as Array<Record<string, string>>;
             // prompts is array of objects: [{"check_in": "..."}]
-            const promptObj = prompts.find((p: any) => p[promptKey]);
+            const promptObj = prompts.find((p: Record<string, string>) => p[promptKey]);
             
             if (promptObj) {
               currentPrompt = promptObj[promptKey];
