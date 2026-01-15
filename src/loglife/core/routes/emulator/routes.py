@@ -11,7 +11,7 @@ from collections.abc import Generator
 import requests
 from flask import Blueprint, Response, jsonify, render_template, request
 
-from loglife.app.config.paths import ASSISTANTS_JSON, DATA
+from loglife.app.config.paths import DATA, get_assistant_file_path
 from loglife.app.config.settings import EMULATOR_SQLITE_WEB_URL
 from loglife.core.transports import log_broadcaster
 
@@ -67,19 +67,12 @@ def _save_assistant_to_json(assistant_id: str, assistant_data: dict) -> None:
         # Ensure data directory exists
         DATA.mkdir(parents=True, exist_ok=True)
 
-        # Load existing data if file exists
-        if ASSISTANTS_JSON.exists():
-            with ASSISTANTS_JSON.open(encoding="utf-8") as f:
-                assistants = json.load(f)
-        else:
-            assistants = {}
+        # Get the file path for this assistant
+        assistant_file = get_assistant_file_path(assistant_id)
 
-        # Update or add assistant data
-        assistants[assistant_id] = assistant_data
-
-        # Save back to file
-        with ASSISTANTS_JSON.open("w", encoding="utf-8") as f:
-            json.dump(assistants, f, indent=2, ensure_ascii=False)
+        # Save assistant data directly to its individual file
+        with assistant_file.open("w", encoding="utf-8") as f:
+            json.dump(assistant_data, f, indent=2, ensure_ascii=False)
     except (OSError, json.JSONDecodeError) as e:
         # Log error but don't fail the request
         # In production, you might want to use proper logging here
