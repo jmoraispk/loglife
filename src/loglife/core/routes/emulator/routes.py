@@ -44,6 +44,43 @@ def vapi_admin() -> str:
     return render_template("vapi-admin.html", assistant_ids=assistant_ids)
 
 
+@emulator_bp.route("/vapi-admin/api/prompts", methods=["GET", "POST"])
+def manage_prompts() -> Response:
+    """Read or update the prompts.json file."""
+    # Resolve the path relative to the project root
+    # Assuming this file is in src/loglife/core/routes/emulator/routes.py
+    # We want src/loglife/app/config/prompts.json
+    try:
+        # Use existing paths config or relative path
+        from loglife.app.config.paths import APP_DIR
+        prompts_path = APP_DIR / "config" / "prompts.json"
+        
+        if request.method == "GET":
+            if not prompts_path.exists():
+                return jsonify([]), 200
+                
+            with open(prompts_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return jsonify(data)
+            
+        if request.method == "POST":
+            new_prompts = request.get_json()
+            if not isinstance(new_prompts, list):
+                return jsonify({"error": "Prompts must be a list"}), 400
+                
+            # Validate structure (optional but recommended)
+            # Expecting list of dicts with single key-value pair
+            
+            with open(prompts_path, "w", encoding="utf-8") as f:
+                json.dump(new_prompts, f, indent=2, ensure_ascii=False)
+                
+            return jsonify({"success": True, "prompts": new_prompts})
+            
+    except Exception as e:
+        logger.exception("Error managing prompts")
+        return jsonify({"error": str(e)}), 500
+
+
 @emulator_bp.route("/vapi-admin/api/assistant/<assistant_id>", methods=["GET", "PATCH"])
 def vapi_assistant(assistant_id: str) -> Response:
     """Fetch or update assistant configuration from VAPI API."""

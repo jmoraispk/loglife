@@ -113,6 +113,52 @@
             flex-shrink: 0;
         }
 
+        /* Prompts Section Styles */
+        .prompts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .prompt-item {
+            background: #0D0226;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: var(--radius);
+            padding: 16px;
+        }
+
+        .prompt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .prompt-key {
+            font-weight: 700;
+            color: var(--primary);
+            font-family: monospace;
+        }
+        
+        /* Layout for 2-column main content */
+        .main-content-row {
+            display: flex;
+            gap: 24px;
+            flex: 1;
+            min-height: 0;
+        }
+        
+        .main-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            background: #050421;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius);
+            min-height: 0;
+        }
+
         .card {
             background: #131313;
             border: 1px solid var(--border);
@@ -409,6 +455,57 @@
                 width: 100%;
             }
         }
+        /* Updated layout structure */
+        .container {
+            max-width: 1800px; /* Increased max-width */
+            margin: 0 auto;
+            width: 100%;
+            flex: 1;
+            display: flex;
+            gap: 24px;
+            padding: 24px 0;
+            min-height: 0;
+            overflow-y: hidden; /* Prevent container scroll, let columns scroll */
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            gap: 24px;
+            min-width: 0;
+        }
+
+        .form-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #050421;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius);
+            min-height: 0;
+            overflow: hidden; /* Contain scrolling */
+        }
+
+        .prompts-container {
+            flex: 0 0 400px; /* Fixed width for prompts column */
+            display: flex;
+            flex-direction: column;
+            background: #050421;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: var(--radius);
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                flex-direction: column;
+            }
+            .prompts-container {
+                flex: 1;
+                max-height: 500px; /* Limit height when stacked */
+            }
+        }
     </style>
 </head>
 
@@ -446,21 +543,27 @@
 
             <!-- Info Card -->
             <div class="info-card">
-                <div class="info-card-title">ℹ️ Editable Fields</div>
+                <div class="info-card-title">ℹ️ Configuration Guide</div>
+                <div style="margin-bottom: 12px;">
+                    <strong>VAPI Config (Center)</strong><br>
+                    Directly updates the assistant settings in VAPI.
+                </div>
                 <div>
-                    Only editable fields are shown. Read-only fields (id, orgId, createdAt, updatedAt) are hidden.
+                    <strong>System Prompts (Right)</strong><br>
+                    Updates the local overrides used for specific call types (Check-in, Goal Setup, etc.).
                 </div>
             </div>
         </div>
 
         <!-- Main Content -->
         <div class="main-content">
+            <!-- Center: VAPI Config -->
             <div class="form-container">
                 <div class="form-header">
-                    <div class="form-title">Assistant Configuration</div>
+                    <div class="form-title">VAPI Assistant Config</div>
                     <div class="form-actions">
                         <button class="btn btn-secondary" id="resetBtn">Reset</button>
-                        <button class="btn" id="saveBtn">Save Changes</button>
+                        <button class="btn" id="saveBtn">Save Config</button>
                     </div>
                 </div>
                 <div class="form-content" id="formContent">
@@ -468,6 +571,22 @@
                 </div>
                 <div class="status-message info" id="statusMessage" style="display: none;">
                     <span id="statusText">Ready</span>
+                </div>
+            </div>
+
+            <!-- Right: Prompts Config -->
+            <div class="prompts-container">
+                <div class="form-header">
+                    <div class="form-title">Local System Prompts</div>
+                    <div class="form-actions">
+                        <button class="btn" id="savePromptsBtn">Save Prompts</button>
+                    </div>
+                </div>
+                <div class="form-content" id="promptsContent">
+                    <div class="loading-overlay">Loading prompts...</div>
+                </div>
+                <div class="status-message info" id="promptsStatusMessage" style="display: none;">
+                    <span id="promptsStatusText">Ready</span>
                 </div>
             </div>
         </div>
@@ -482,6 +601,112 @@
         const resetBtn = byId('resetBtn');
         const statusMessage = byId('statusMessage');
         const statusText = byId('statusText');
+        
+        // Prompts elements
+        const promptsContent = byId('promptsContent');
+        const savePromptsBtn = byId('savePromptsBtn');
+        const promptsStatusMessage = byId('promptsStatusMessage');
+        const promptsStatusText = byId('promptsStatusText');
+
+        let originalPrompts = [];
+        let currentPrompts = [];
+
+        function showPromptsStatus(message, type = 'info') {
+            promptsStatusMessage.className = `status-message ${type}`;
+            promptsStatusText.textContent = message;
+            promptsStatusMessage.style.display = 'flex';
+        }
+
+        function hidePromptsStatus() {
+            promptsStatusMessage.style.display = 'none';
+        }
+
+        function renderPrompts(prompts) {
+            let html = '<div class="prompts-list">';
+            
+            if (!prompts || prompts.length === 0) {
+                html += '<div class="info-card">No local prompts found.</div>';
+            } else {
+                prompts.forEach((promptObj, index) => {
+                    const key = Object.keys(promptObj)[0];
+                    const value = promptObj[key];
+                    
+                    html += `<div class="prompt-item">
+                        <div class="prompt-header">
+                            <span class="prompt-key">${key}</span>
+                        </div>
+                        <textarea class="textarea" style="height: 300px;" data-key="${key}" data-index="${index}">${escapeHtml(value)}</textarea>
+                    </div>`;
+                });
+            }
+            
+            html += '</div>';
+            promptsContent.innerHTML = html;
+        }
+
+        async function loadPrompts() {
+            savePromptsBtn.disabled = true;
+            promptsContent.innerHTML = '<div class="loading-overlay">Loading prompts...</div>';
+            
+            try {
+                const response = await fetch('/vapi-admin/api/prompts');
+                if (!response.ok) throw new Error('Failed to load prompts');
+                
+                const prompts = await response.json();
+                currentPrompts = JSON.parse(JSON.stringify(prompts));
+                originalPrompts = JSON.parse(JSON.stringify(prompts));
+                
+                renderPrompts(prompts);
+            } catch (error) {
+                showPromptsStatus(`Error: ${error.message}`, 'error');
+                promptsContent.innerHTML = `<div class="loading-overlay error">Error loading prompts: ${error.message}</div>`;
+            } finally {
+                savePromptsBtn.disabled = false;
+            }
+        }
+
+        async function savePrompts() {
+            savePromptsBtn.disabled = true;
+            showPromptsStatus('Saving prompts...', 'info');
+            
+            try {
+                // Collect data from textareas
+                const textareas = promptsContent.querySelectorAll('textarea');
+                const newPrompts = [];
+                
+                textareas.forEach(textarea => {
+                    const key = textarea.getAttribute('data-key');
+                    const value = textarea.value;
+                    const promptObj = {};
+                    promptObj[key] = value;
+                    newPrompts.push(promptObj);
+                });
+                
+                const response = await fetch('/vapi-admin/api/prompts', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newPrompts)
+                });
+                
+                if (!response.ok) throw new Error('Failed to save prompts');
+                
+                showPromptsStatus('✓ Prompts saved successfully', 'success');
+                setTimeout(hidePromptsStatus, 3000);
+                
+                // Update local state
+                currentPrompts = newPrompts;
+                originalPrompts = JSON.parse(JSON.stringify(newPrompts));
+                
+            } catch (error) {
+                showPromptsStatus(`Error: ${error.message}`, 'error');
+            } finally {
+                savePromptsBtn.disabled = false;
+            }
+        }
+
+        // Initialize prompts
+        loadPrompts();
+        savePromptsBtn.addEventListener('click', savePrompts);
 
         // Assistant IDs from backend
         const assistantIds = {{ assistant_ids | tojson }};
