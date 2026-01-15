@@ -13,7 +13,6 @@ from .buttons import (
     ListSection,
     ReplyButton,
     URLButton,
-    VoiceCallButton,
 )
 
 # Constants
@@ -470,55 +469,6 @@ class WhatsAppClient:
                     "parameters": {
                         "display_text": button.display_text,
                         "url": button.url,
-                    },
-                },
-            },
-        }
-
-        data = self._http.request("POST", path, json=payload)
-        msg_id = (data.get("messages") or [{}])[0].get("id", "")
-        return SendTextResponse(message_id=msg_id)
-
-    def send_voice_call_button(
-        self,
-        *,
-        to: str,
-        body: str,
-        button: VoiceCallButton,
-    ) -> SendTextResponse:
-        """Send an interactive message with a WhatsApp Call Button.
-
-        Args:
-            to: Recipient phone number.
-            body: Message body text (max 1024 characters).
-            button: Voice call button with display_text, ttl_minutes, and payload.
-
-        Returns:
-            SendTextResponse with message ID.
-
-        Raises:
-            ValueError: If validation fails (text length limits).
-        """
-        # Validate body text length
-        if len(body) > MAX_LIST_BODY_TEXT_LENGTH:
-            msg = f"Body text must not exceed {MAX_LIST_BODY_TEXT_LENGTH} characters"
-            raise ValueError(msg)
-
-        path = f"/{self._phone_number_id}/messages"
-        payload: dict[str, Any] = {
-            "messaging_product": "whatsapp",
-            "recipient_type": "individual",
-            "to": to,
-            "type": "interactive",
-            "interactive": {
-                "type": "voice_call",
-                "body": {"text": body},
-                "action": {
-                    "name": "voice_call",
-                    "parameters": {
-                        "display_text": button.display_text,
-                        "ttl_minutes": button.ttl_minutes,
-                        "payload": button.payload,
                     },
                 },
             },

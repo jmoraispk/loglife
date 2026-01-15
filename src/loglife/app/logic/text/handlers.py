@@ -817,56 +817,6 @@ class CallHandler(TextCommandHandler):
         return None
 
 
-class CheckinNowHandler(TextCommandHandler):
-    """Handle 'checkin now' command - initiate WhatsApp call."""
-
-    COMMAND = "checkin now"
-
-    def matches(self, message: str) -> bool:
-        """Check if message is 'checkin now'."""
-        return message == self.COMMAND
-
-    def handle(self, user: User, _message: str) -> str | None:
-        """Process checkin now command - send CTA URL button.
-
-        Args:
-            user: The user record
-            _message: The text message (unused)
-        """
-        logger.info("Check-in call requested for user %s", user.phone_number)
-
-        # Normalize phone number by removing @c.us suffix if present
-        phone_number_normalized = user.phone_number.replace("@c.us", "")
-
-        # Generate token from normalized phone number
-        token = generate_short_token(phone_number_normalized, SECRET_KEY)
-
-        client_type = WHATSAPP_CLIENT_TYPE.lower()
-
-        # Create URL for check-in with token as path parameter
-        url = f"{LOGLIFE_DOMAIN}/call/{token}"
-
-        # For web client type, send plain text message with link
-        if client_type == "web":
-            # Format message with URL on its own line with proper spacing for detection
-            message_with_url = f"*Check in*\n\n🔗 {url}"
-            send_whatsapp_message(user.phone_number, message_with_url)
-        else:
-            # For business_api, send CTA URL button message
-            url_button = URLButton(
-                display_text="Call",
-                url=url,
-            )
-            send_whatsapp_cta_url(
-                number=user.phone_number,
-                body="*Check in*",
-                button=url_button,
-            )
-
-        # Return None since we've already sent the message
-        return None
-
-
 class EditTimeHandler(TextCommandHandler):
     """Handle 'edit time' command - echo for testing."""
 

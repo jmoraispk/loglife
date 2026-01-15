@@ -5,7 +5,6 @@ from .buttons import (
     ListSection,
     ReplyButton,
     URLButton,
-    VoiceCallButton,
 )
 from .wa_business_api import WhatsAppClient
 
@@ -14,6 +13,5 @@ __all__ = [
     "ListSection",
     "ReplyButton",
     "URLButton",
-    "VoiceCallButton",
     "WhatsAppClient",
 ]

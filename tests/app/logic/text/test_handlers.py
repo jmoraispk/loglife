@@ -26,7 +26,6 @@ from loglife.app.logic.text.handlers import (
     AddGoalHandler,
     CallHandler,
     CheckinHandler,
-    CheckinNowHandler,
     DeleteGoalHandler,
     EditTimeHandler,
     EnableJournalingHandler,
@@ -523,40 +522,6 @@ def test_checkin_handler(user: User) -> None:
         assert call_args[1]["number"] == user.phone_number
         assert "Check in" in call_args[1]["text"]
         assert len(call_args[1]["buttons"]) == 2
-
-
-def test_checkin_now_handler(user: User) -> None:
-    """Test CheckinNowHandler."""
-    handler = CheckinNowHandler()
-    assert handler.matches("checkin now")
-    assert not handler.matches("checkin")
-    assert not handler.matches("check in now")
-
-    with (
-        patch("loglife.app.logic.text.handlers.WHATSAPP_CLIENT_TYPE", "business_api"),
-        patch("loglife.app.logic.text.handlers.send_whatsapp_cta_url") as mock_send_cta,
-        patch("loglife.app.logic.text.handlers.generate_short_token") as mock_token,
-    ):
-        mock_token.return_value = "test_token_123"
-        response = handler.handle(user, "checkin now")
-        assert response is None
-        mock_send_cta.assert_called_once()
-        call_args = mock_send_cta.call_args
-        assert call_args[1]["number"] == user.phone_number
-        assert "Check in" in call_args[1]["body"]
-
-    with (
-        patch("loglife.app.logic.text.handlers.WHATSAPP_CLIENT_TYPE", "web"),
-        patch("loglife.app.logic.text.handlers.send_whatsapp_message") as mock_send_msg,
-        patch("loglife.app.logic.text.handlers.generate_short_token") as mock_token,
-    ):
-        mock_token.return_value = "test_token_123"
-        response = handler.handle(user, "checkin now")
-        assert response is None
-        mock_send_msg.assert_called_once()
-        call_args = mock_send_msg.call_args
-        assert call_args[0][0] == user.phone_number
-        assert "Check in" in call_args[0][1]
 
 
 def test_call_handler(user: User) -> None:

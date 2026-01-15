@@ -80,23 +80,3 @@ class URLButton:
             msg = "URL is required"
             raise ValueError(msg)
 
-
-@dataclass(frozen=True)
-class VoiceCallButton:
-    """Voice call button definition for interactive messages."""
-
-    display_text: str
-    ttl_minutes: int
-    payload: str
-
-    def __post_init__(self) -> None:
-        """Validate voice call button parameters."""
-        if len(self.display_text) > MAX_BUTTON_TITLE_LENGTH:
-            msg = f"Display text must not exceed {MAX_BUTTON_TITLE_LENGTH} characters"
-            raise ValueError(msg)
-        if not self.display_text:
-            msg = "Display text is required"
-            raise ValueError(msg)
-        if self.ttl_minutes <= 0:
-            msg = "TTL minutes must be greater than 0"
-            raise ValueError(msg)
