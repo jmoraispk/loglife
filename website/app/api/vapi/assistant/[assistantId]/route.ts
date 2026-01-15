@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
 
 export async function GET(
   request: NextRequest,
@@ -56,7 +58,43 @@ export async function GET(
       );
     }
 
-    const currentPrompt = systemMessage.content;
+    let currentPrompt = systemMessage.content;
+    const overwritePrompt = process.env.OVERWRITE_SYSTEM_PROMPT === 'true';
+    
+    if (overwritePrompt) {
+      try {
+        // Determine prompt key based on assistant ID
+        let promptKey = "";
+        // We use loose comparison or check environment variables
+        // Note: Make sure these env vars are available to the server-side code
+        if (assistantId === process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID_1) promptKey = "check_in";
+        else if (assistantId === process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID_2) promptKey = "goal_setup";
+        else if (assistantId === process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID_3) promptKey = "temptation_support";
+        else if (assistantId === process.env.NEXT_PUBLIC_VAPI_ASSISTANT_ID_4) promptKey = "onboarding";
+
+        if (promptKey) {
+          // Path to src/loglife/app/config/prompts.json relative to website root
+          // Assuming website is at root/website and src is at root/src
+          const promptsPath = path.join(process.cwd(), '..', 'src', 'loglife', 'app', 'config', 'prompts.json');
+          
+          if (fs.existsSync(promptsPath)) {
+            const fileContent = fs.readFileSync(promptsPath, 'utf-8');
+            const prompts = JSON.parse(fileContent);
+            // prompts is array of objects: [{"check_in": "..."}]
+            const promptObj = prompts.find((p: any) => p[promptKey]);
+            
+            if (promptObj) {
+              currentPrompt = promptObj[promptKey];
+              console.log(`Overwriting prompt for ${promptKey} from local file`);
+            }
+          } else {
+            console.warn(`Prompts file not found at ${promptsPath}`);
+          }
+        }
+      } catch (e) {
+        console.error("Error overwriting system prompt:", e);
+      }
+    }
     
     // Get user habits from backend API
     // Extract token from request (we'll pass it as a query parameter from the client)
@@ -90,8 +128,9 @@ export async function GET(
       }
     }
     
-    // Prepend habits to the start of the system prompt
-    const modifiedPrompt = habitsText ? `${habitsText}${currentPrompt}` : currentPrompt;
+    // Prepend habits to the start of the system prompt if enabled
+    const appendHabits = process.env.APPEND_HABITS === 'true';
+    const modifiedPrompt = (appendHabits && habitsText) ? `${habitsText}${currentPrompt}` : currentPrompt;
     
     // Create modified messages array with updated system prompt
     // This will be passed via assistantOverrides.model.messages (per-call only, doesn't update saved assistant)
