@@ -21,7 +21,6 @@ def create_message(raw_payload: str, user: User, client_type: str = "whatsapp") 
 
 
 def process_audio(
-    sender: str,  # noqa: ARG001
     user: User,
     audio_data: str,
     client_type: str = "whatsapp",
@@ -47,7 +46,7 @@ def test_process_audio_success(user: User) -> None:
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.return_value = "Summary text"
 
-        response = process_audio("+1234567890", user, "base64_audio")
+        response = process_audio(user, "base64_audio")
 
         if isinstance(response, tuple):
             # Unpack if user settings cause a tuple return (e.g., file enabled)
@@ -77,7 +76,7 @@ def test_process_audio_empty_transcript(user: User) -> None:
     ):
         mock_transcribe.return_value = ""
 
-        response = process_audio("+1234567890", user, "base64_audio")
+        response = process_audio(user, "base64_audio")
 
         assert isinstance(response, str)
         assert response == "Transcription was empty."
@@ -101,7 +100,7 @@ def test_process_audio_no_transcript_file(user: User) -> None:
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.return_value = "Summary text"
 
-        response = process_audio("+1234567890", user, "base64_audio")
+        response = process_audio(user, "base64_audio")
 
         # Should strictly be a string, not a tuple
         assert isinstance(response, str)
@@ -121,7 +120,7 @@ def test_process_audio_empty_summary(user: User) -> None:
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.return_value = ""
 
-        response = process_audio("+1234567890", user, "base64_audio")
+        response = process_audio(user, "base64_audio")
 
         if isinstance(response, tuple):
             _, summary = response
@@ -144,7 +143,7 @@ def test_process_audio_transcribe_failure(user: User) -> None:
     ):
         mock_transcribe.side_effect = RuntimeError("Transcription error")
 
-        response = process_audio("+1234567890", user, "base64_audio")
+        response = process_audio(user, "base64_audio")
 
         assert response == "Transcription failed!"
         mock_queue.assert_called_once_with(
@@ -164,7 +163,7 @@ def test_process_audio_summarize_failure(user: User) -> None:
         mock_transcribe.return_value = "Transcribed text"
         mock_summarize.side_effect = RuntimeError("Summarization error")
 
-        response = process_audio("+1234567890", user, "base64_audio")
+        response = process_audio(user, "base64_audio")
 
         assert response == "Summarization failed!"
         assert mock_queue.call_count == 2  # Received, Transcribed
@@ -189,7 +188,7 @@ def test_process_audio_with_transcript_file(user: User) -> None:
         mock_summarize.return_value = "Summary text"
         mock_to_b64.return_value = "base64_file_content"
 
-        response = process_audio("+1234567890", user, "base64_audio")
+        response = process_audio(user, "base64_audio")
 
         assert isinstance(response, tuple)
         # Check for the tuple order (transcript_file, summary)

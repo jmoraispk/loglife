@@ -119,7 +119,7 @@ class GoalsTable:
         if isinstance(data.get("reminder_time"), str):
             # Expected format is HH:MM:SS
             try:
-                dt = datetime.strptime(data["reminder_time"], "%H:%M:%S")  # noqa: DTZ007
+                dt = datetime.strptime(data["reminder_time"], "%H:%M:%S").replace(tzinfo=UTC)
                 data["reminder_time"] = dt.time()
             except ValueError:
                 # Fallback or handle parsing error if format is different

@@ -36,7 +36,7 @@ def error_response(
 def success_response(
     message: str | None = None,
     status_code: int = 200,
-    **kwargs: Any,  # noqa: ANN401
+    **kwargs: object,
 ) -> tuple[Response, int]:
     """Build a success response body.
 

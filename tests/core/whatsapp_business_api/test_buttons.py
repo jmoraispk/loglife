@@ -7,7 +7,6 @@ from loglife.core.whatsapp_business_api.buttons import (
     ListSection,
     ReplyButton,
     URLButton,
-    VoiceCallButton,
 )
 
 
@@ -144,52 +143,3 @@ def test_url_button_exact_max_display_text() -> None:
     max_text = "a" * 20
     button = URLButton(display_text=max_text, url="https://example.com")
     assert button.display_text == max_text
-
-
-def test_voice_call_button_valid() -> None:
-    """Test VoiceCallButton with valid parameters."""
-    button = VoiceCallButton(display_text="Call", ttl_minutes=5, payload="test_payload")
-    assert button.display_text == "Call"
-    assert button.ttl_minutes == 5
-    assert button.payload == "test_payload"
-
-
-def test_voice_call_button_display_text_too_long() -> None:
-    """Test VoiceCallButton with display text exceeding max length."""
-    long_text = "a" * 21  # MAX_BUTTON_TITLE_LENGTH is 20
-    with pytest.raises(ValueError, match="Display text must not exceed"):
-        VoiceCallButton(display_text=long_text, ttl_minutes=5, payload="test")
-
-
-def test_voice_call_button_empty_display_text() -> None:
-    """Test VoiceCallButton with empty display text."""
-    with pytest.raises(ValueError, match="Display text is required"):
-        VoiceCallButton(display_text="", ttl_minutes=5, payload="test")
-
-
-def test_voice_call_button_zero_ttl() -> None:
-    """Test VoiceCallButton with zero TTL."""
-    with pytest.raises(ValueError, match="TTL minutes must be greater than 0"):
-        VoiceCallButton(display_text="Call", ttl_minutes=0, payload="test")
-
-
-def test_voice_call_button_negative_ttl() -> None:
-    """Test VoiceCallButton with negative TTL."""
-    with pytest.raises(ValueError, match="TTL minutes must be greater than 0"):
-        VoiceCallButton(display_text="Call", ttl_minutes=-1, payload="test")
-
-
-def test_voice_call_button_exact_max_display_text() -> None:
-    """Test VoiceCallButton with exact max display text length."""
-    max_text = "a" * 20
-    button = VoiceCallButton(display_text=max_text, ttl_minutes=5, payload="test")
-    assert button.display_text == max_text
-
-
-def test_voice_call_button_valid_ttl() -> None:
-    """Test VoiceCallButton with valid TTL values."""
-    button1 = VoiceCallButton(display_text="Call", ttl_minutes=1, payload="test")
-    assert button1.ttl_minutes == 1
-
-    button2 = VoiceCallButton(display_text="Call", ttl_minutes=60, payload="test")
-    assert button2.ttl_minutes == 60

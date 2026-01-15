@@ -14,6 +14,7 @@ from loglife.core.messaging import (
     _outbound_queue,
     enqueue_inbound_message,
     get_outbound_message,
+    reset_worker_state,
     start_message_worker,
     start_sender_worker,
 )
@@ -29,7 +30,8 @@ class TimeoutThread(threading.Thread):
     def __init__(
         self,
         target: object,
-        daemon: bool = False,  # noqa: FBT001, FBT002
+        *,
+        daemon: bool = False,
         name: str | None = None,
     ) -> None:
         """Initialize the thread."""
@@ -52,43 +54,9 @@ class TimeoutThread(threading.Thread):
 @pytest.fixture(autouse=True)
 def reset_messaging_state() -> None:
     """Ensure clean slate for messaging state."""
-    import loglife.core.messaging as messaging_module  # noqa: PLC0415
-    from loglife.core.messaging import _inbound_queue, _outbound_queue  # noqa: PLC0415
-
-    messaging_module._router_worker_started = False  # noqa: SLF001
-    messaging_module._sender_worker_started = False  # noqa: SLF001
-
-    # Drain inbound queue
-    while not _inbound_queue.empty():
-        try:
-            _inbound_queue.get_nowait()
-        except Empty:
-            break
-
-    # Drain outbound queue
-    while not _outbound_queue.empty():
-        try:
-            _outbound_queue.get_nowait()
-        except Empty:
-            break
-
+    reset_worker_state()
     yield
-
-    # Cleanup after test
-    messaging_module._router_worker_started = False  # noqa: SLF001
-    messaging_module._sender_worker_started = False  # noqa: SLF001
-
-    # Drain queues again
-    while not _inbound_queue.empty():
-        try:
-            _inbound_queue.get_nowait()
-        except Empty:
-            break
-    while not _outbound_queue.empty():
-        try:
-            _outbound_queue.get_nowait()
-        except Empty:
-            break
+    reset_worker_state()
 
 
 def test_enqueue_inbound_message() -> None:
@@ -136,9 +104,7 @@ def test_high_volume_queue_pressure() -> None:
         with lock:
             processed_count += 1
 
-    import loglife.core.messaging as messaging_module  # noqa: PLC0415
-
-    messaging_module._router_worker_started = False  # noqa: SLF001
+    reset_worker_state()
 
     with patch("loglife.core.messaging.Thread") as mock_thread_cls:
         # Just to capture the target function, but run it in a real thread
@@ -201,7 +167,7 @@ def test_start_sender_worker_dispatches() -> None:
     """Sender worker should dispatch queued messages."""
     messages = [Message(sender="+1", msg_type="chat", raw_payload="hello", client_type="test")]
 
-    def fake_get_outbound_message(timeout: float | None = None) -> Message:  # noqa: ARG001
+    def fake_get_outbound_message(_timeout: float | None = None) -> Message:
         if messages:
             return messages.pop(0)
         return Message(sender="stop", msg_type="_stop", raw_payload="", client_type="")
@@ -214,7 +180,7 @@ def test_start_sender_worker_dispatches() -> None:
         patch("loglife.core.messaging.Thread") as mock_thread,
         patch("loglife.core.messaging.get_outbound_message", fake_get_outbound_message),
         patch("loglife.core.messaging._dispatch_outbound", fake_dispatch),
-        patch("loglife.core.messaging._sender_worker_started", False),  # noqa: FBT003
+        patch.dict("loglife.core.messaging._worker_state", {"sender_started": False}),
     ):
         start_sender_worker()
         worker_func = mock_thread.call_args[1]["target"]
@@ -250,7 +216,7 @@ def test_sender_worker_transport_failure(caplog: pytest.LogCaptureFixture) -> No
         patch("loglife.core.messaging.Thread") as mock_thread_cls,
         # Patch the actual transport function called by _dispatch_outbound
         patch("loglife.core.messaging.send_whatsapp_message") as mock_send,
-        patch("loglife.core.messaging._sender_worker_started", False),  # noqa: FBT003
+        patch.dict("loglife.core.messaging._worker_state", {"sender_started": False}),
     ):
         mock_send.side_effect = [
             RuntimeError("Transport Error"),  # First fails
@@ -277,7 +243,7 @@ def test_sender_worker_timeout_handling() -> None:
     with (
         patch("loglife.core.messaging.Thread") as mock_thread_cls,
         patch("loglife.core.messaging.get_outbound_message") as mock_get,
-        patch("loglife.core.messaging._sender_worker_started", False),  # noqa: FBT003
+        patch.dict("loglife.core.messaging._worker_state", {"sender_started": False}),
     ):
         # Raise Empty once, then stop
         mock_get.side_effect = [

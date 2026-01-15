@@ -156,11 +156,11 @@ function createClient() {
                     const errorData = await response.json();
                     const errorMessage = errorData?.data?.message || errorData?.message || 'Sorry, I encountered an error processing your message. Please try again.';
                     console.error(`❌ Backend error (${response.status}):`, JSON.stringify(errorData).substring(0, 500));
-                    await newClient.sendMessage(msg.from, errorMessage);
+                    await newClient.sendMessage(msg.from, errorMessage, { sendSeen: false });
                 } catch (parseErr) {
                     const errorText = await response.text();
                     console.error(`❌ Backend error (${response.status}):`, errorText.substring(0, 500));
-                    await newClient.sendMessage(msg.from, 'Sorry, I encountered an error processing your message. Please try again.');
+                    await newClient.sendMessage(msg.from, 'Sorry, I encountered an error processing your message. Please try again.', { sendSeen: false });
                 }
                 return;
             }
@@ -169,18 +169,18 @@ function createClient() {
             if (responseData.success) {
                 const messageToSend = responseData.data?.message || responseData.message;
                 if (messageToSend) {
-                    await newClient.sendMessage(msg.from, messageToSend);
+                    await newClient.sendMessage(msg.from, messageToSend, { sendSeen: false });
                 }
                 return;
             }
 
             // Fallback if success is false or structure is unexpected
             const fallbackMessage = responseData?.data?.message || responseData?.message || 'Sorry, I encountered an error processing your message. Please try again.';
-            await newClient.sendMessage(msg.from, fallbackMessage);
+            await newClient.sendMessage(msg.from, fallbackMessage, { sendSeen: false });
         } catch (err) {
             console.error('Failed to fetch from backend:', err);
             try {
-                await newClient.sendMessage(msg.from, 'Sorry, I encountered a system error. Please try again.');
+                await newClient.sendMessage(msg.from, 'Sorry, I encountered a system error. Please try again.', { sendSeen: false });
             } catch (sendErr) {
                 console.error('Failed to send error message:', sendErr);
             }
@@ -269,7 +269,7 @@ app.post('/send-message', async (req, res) => {
             if (base64TranscriptData) {
                 try {
                     const media = new MessageMedia('text/plain', base64TranscriptData, 'transcript.txt');
-                    await client.sendMessage(formattedNumber, media);
+                    await client.sendMessage(formattedNumber, media, { sendSeen: false });
                 } catch (err) {
                     console.error('Failed to send transcript file:', err);
                 }
@@ -277,7 +277,7 @@ app.post('/send-message', async (req, res) => {
         }
         
         // Send message with one guarded retry on frame detachment
-        const trySend = async () => client.sendMessage(formattedNumber, message);
+        const trySend = async () => client.sendMessage(formattedNumber, message, { sendSeen: false });
         try {
             await trySend();
         } catch (err) {

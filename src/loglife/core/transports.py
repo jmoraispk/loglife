@@ -8,6 +8,7 @@ import json
 import logging
 import os
 from collections.abc import Generator
+from functools import lru_cache
 from queue import Queue
 from threading import Lock
 from typing import Any
@@ -18,9 +19,6 @@ from loglife.app.config import WHATSAPP_API_URL, WHATSAPP_CLIENT_TYPE
 from loglife.core.whatsapp_business_api.wa_business_api import WhatsAppClient
 
 logger = logging.getLogger(__name__)
-
-# Lazy-loaded WhatsApp Business API client
-_whatsapp_business_client: WhatsAppClient | None = None
 
 # Exception messages
 _ERR_WHATSAPP_CONFIG_MISSING = (
@@ -83,21 +81,19 @@ def send_emulator_message(message: str, attachments: dict[str, Any] | None = Non
         log_broadcaster.publish(message)
 
 
+@lru_cache(maxsize=1)
 def get_whatsapp_business_client() -> WhatsAppClient:
     """Get or initialize the WhatsApp Business API client."""
-    global _whatsapp_business_client  # noqa: PLW0603
-    if _whatsapp_business_client is None:
-        access_token = os.getenv("WHATSAPP_ACCESS_TOKEN")
-        phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
+    access_token = os.getenv("WHATSAPP_ACCESS_TOKEN")
+    phone_number_id = os.getenv("WHATSAPP_PHONE_NUMBER_ID")
 
-        if not access_token or not phone_number_id:
-            raise RuntimeError(_ERR_WHATSAPP_CONFIG_MISSING)
+    if not access_token or not phone_number_id:
+        raise RuntimeError(_ERR_WHATSAPP_CONFIG_MISSING)
 
-        _whatsapp_business_client = WhatsAppClient(
-            access_token=access_token,
-            phone_number_id=phone_number_id,
-        )
-    return _whatsapp_business_client
+    return WhatsAppClient(
+        access_token=access_token,
+        phone_number_id=phone_number_id,
+    )
 
 
 def format_phone_for_business_api(number: str) -> str:

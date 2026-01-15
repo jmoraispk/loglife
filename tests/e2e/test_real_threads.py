@@ -14,6 +14,7 @@ Note regarding WhatsApp API:
 """
 
 import os
+import sqlite3
 import tempfile
 import time
 from collections.abc import Generator
@@ -26,8 +27,14 @@ import requests
 from flask import Flask
 
 from loglife.app import create_app
+from loglife.app.config import SCHEMA_FILE
 from loglife.app.db import db
-from loglife.core.messaging import Message, enqueue_inbound_message
+from loglife.core.messaging import (
+    Message,
+    enqueue_inbound_message,
+    enqueue_outbound_message,
+    reset_worker_state,
+)
 
 if TYPE_CHECKING:
     from flask.testing import FlaskClient
@@ -50,10 +57,6 @@ def app_and_mock(real_db_path: str) -> Generator[tuple[Flask, MagicMock], None, 
     """Create app WITH REAL WORKERS and REAL FILE DB."""
     # 1. Setup: Point the global DB client to our temp file
     # We need to initialize the DB schema manually since we aren't using the memory fixture
-    import sqlite3  # noqa: PLC0415
-
-    from loglife.app.config import SCHEMA_FILE  # noqa: PLC0415
-
     conn = sqlite3.connect(real_db_path, check_same_thread=False)
     with Path(SCHEMA_FILE).open(encoding="utf-8") as f:
         conn.executescript(f.read())
@@ -81,11 +84,7 @@ def app_and_mock(real_db_path: str) -> Generator[tuple[Flask, MagicMock], None, 
         mock_post.return_value.status_code = 200
 
         # We must ensure previous tests didn't leave "started" flags as True
-        import loglife.core.messaging as messaging_module  # noqa: PLC0415
-
-        # Force flags to False so threads restart
-        messaging_module._router_worker_started = False  # noqa: SLF001
-        messaging_module._sender_worker_started = False  # noqa: SLF001
+        reset_worker_state()
 
         # Start the app (this spawns real threads!)
         app = create_app()
@@ -102,9 +101,6 @@ def app_and_mock(real_db_path: str) -> Generator[tuple[Flask, MagicMock], None, 
         # For sender worker:
         # We can't easily access the sender worker from here if we don't expose its queue properly,
         # but startup.py starts it. It listens to _outbound_queue.
-        # Let's import it from core.messaging
-        from loglife.core.messaging import enqueue_outbound_message  # noqa: PLC0415
-
         enqueue_outbound_message(Message("stop", "_stop", "", "w"))
 
         # Give threads a moment to shut down cleanly
@@ -117,7 +113,6 @@ def app_and_mock(real_db_path: str) -> Generator[tuple[Flask, MagicMock], None, 
 
 def test_real_threading_flow_success(
     app_and_mock: tuple[Flask, MagicMock],
-    real_db_path: str,  # noqa: ARG001
 ) -> None:
     """Verify successful message processing and delivery."""
     app, mock_post = app_and_mock
@@ -155,7 +150,6 @@ def test_real_threading_flow_success(
 
 def test_real_threading_api_failure(
     app_and_mock: tuple[Flask, MagicMock],
-    real_db_path: str,  # noqa: ARG001
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """Verify that the worker handles API failures (500) without crashing.

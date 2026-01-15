@@ -2,15 +2,9 @@
 
 import os
 
-from dotenv import load_dotenv
-
-# Load environment variables BEFORE importing settings that depend on them
-load_dotenv()
-
-# Imports must come after load_dotenv() because settings.py uses os.getenv() at module level
-from .api import ASSEMBLYAI_BASE_URL, OPENAI_API_URL, WHATSAPP_API_URL  # noqa: E402
-from .log_setup import setup_logging  # noqa: E402
-from .messages import (  # noqa: E402
+from .api import ASSEMBLYAI_BASE_URL, OPENAI_API_URL, WHATSAPP_API_URL
+from .log_setup import setup_logging
+from .messages import (
     ERROR_ADD_GOAL_FIRST,
     ERROR_COMPLETE_REMINDER_TIME,
     ERROR_INVALID_DELETE_FORMAT,
@@ -33,9 +27,9 @@ from .messages import (  # noqa: E402
     USAGE_RATE,
     WELCOME_MESSAGE,
 )
-from .paths import ACCESS_LOG, DATABASE_FILE, ERROR_LOG, LOGS, SCHEMA_FILE  # noqa: E402
-from .prompts import OPENAI_SUMMARIZATION_SYSTEM_PROMPT  # noqa: E402
-from .settings import (  # noqa: E402
+from .paths import ACCESS_LOG, DATABASE_FILE, ERROR_LOG, LOGS, SCHEMA_FILE
+from .prompts import OPENAI_SUMMARIZATION_SYSTEM_PROMPT
+from .settings import (
     COMMAND_ALIASES,
     DATABASE_PORT,
     DEFAULT_GOAL_EMOJI,

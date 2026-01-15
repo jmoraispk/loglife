@@ -33,7 +33,7 @@ def init() -> None:
     start_sender_worker()
 
 
-def recv_msg(block: bool = True, timeout: float | None = None) -> Message:  # noqa: FBT001, FBT002
+def recv_msg(*, block: bool = True, timeout: float | None = None) -> Message:
     """Receive the next message from the inbound queue.
 
     Blocks until a message is available unless block=False.

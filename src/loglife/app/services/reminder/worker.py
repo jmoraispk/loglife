@@ -43,7 +43,7 @@ def get_timezone_safe(timezone_str: str) -> ZoneInfo:
         return ZoneInfo("UTC")
 
 
-def _is_reminder_due(goal: Goal, user: User, now_utc: datetime) -> bool:
+def is_reminder_due(goal: Goal, user: User, now_utc: datetime) -> bool:
     """Check if a reminder is due at the current time for the user's timezone."""
     if not goal.reminder_time:
         return False
@@ -67,7 +67,7 @@ def _is_reminder_due(goal: Goal, user: User, now_utc: datetime) -> bool:
     return local_now.hour == rem_hour and local_now.minute == rem_minute
 
 
-def _build_journal_reminder_message(user_id: int) -> str:
+def build_journal_reminder_message(user_id: int) -> str:
     """Construct the journaling reminder message, listing untracked goals if any."""
     goals_not_tracked = get_goals_not_tracked_today(user_id)
 
@@ -80,7 +80,7 @@ def _build_journal_reminder_message(user_id: int) -> str:
     return JOURNAL_REMINDER_MESSAGE.replace("<goals_not_tracked_today>", replacement)
 
 
-def _build_standard_reminder_message(goal: Goal) -> str:
+def build_standard_reminder_message(goal: Goal) -> str:
     """Construct a standard reminder message for a specific goal."""
     return REMINDER_MESSAGE.replace("<goal_emoji>", goal.goal_emoji).replace(
         "<goal_description>",
@@ -88,14 +88,14 @@ def _build_standard_reminder_message(goal: Goal) -> str:
     )
 
 
-def _process_due_reminder(user: User, goal: Goal) -> None:
+def process_due_reminder(user: User, goal: Goal) -> None:
     """Process a due reminder by fetching the goal and sending the notification."""
     is_journaling = goal.goal_emoji == "📓" and goal.goal_description == "journaling"
 
     if is_journaling:
-        message = _build_journal_reminder_message(user.id)
+        message = build_journal_reminder_message(user.id)
     else:
-        message = _build_standard_reminder_message(goal)
+        message = build_standard_reminder_message(goal)
 
     queue_async_message(user.phone_number, message, client_type=user.client_type)
     logger.info(
@@ -105,7 +105,7 @@ def _process_due_reminder(user: User, goal: Goal) -> None:
     )
 
 
-def _check_reminders() -> None:
+def check_reminders() -> None:
     """Check all reminders and send notifications when scheduled time matches."""
     goals_with_reminders: list[Goal] = db.goals.get_all_with_reminders()
     if not goals_with_reminders:
@@ -120,15 +120,15 @@ def _check_reminders() -> None:
         if not user:
             continue
 
-        if _is_reminder_due(goal, user, now_utc):
-            _process_due_reminder(user, goal)
+        if is_reminder_due(goal, user, now_utc):
+            process_due_reminder(user, goal)
 
 
 def _reminder_worker() -> None:
     """Run daemonized worker loop for checking and sending reminders."""
     while True:
         try:
-            _check_reminders()
+            check_reminders()
         except Exception:
             logger.exception("Unhandled error while checking reminders")
 

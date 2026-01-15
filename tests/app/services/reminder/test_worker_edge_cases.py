@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from unittest.mock import MagicMock
 
-from loglife.app.services.reminder.worker import _is_reminder_due
+from loglife.app.services.reminder.worker import is_reminder_due
 
 
 def test_missed_reminder_window() -> None:
@@ -20,8 +20,8 @@ def test_missed_reminder_window() -> None:
 
     # 1. Exact time match -> True
     now_exact = datetime(2023, 1, 1, 9, 0, 0, tzinfo=UTC)
-    assert _is_reminder_due(reminder, user, now_exact) is True
+    assert is_reminder_due(reminder, user, now_exact) is True
 
     # 2. Worker runs 1 minute late -> False (Missed!)
     now_late = datetime(2023, 1, 1, 9, 1, 0, tzinfo=UTC)
-    assert _is_reminder_due(reminder, user, now_late) is False
+    assert is_reminder_due(reminder, user, now_late) is False

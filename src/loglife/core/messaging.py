@@ -58,8 +58,28 @@ class Message:
 _inbound_queue: Queue[Message] = Queue()
 _outbound_queue: Queue[Message] = Queue()
 
-_router_worker_started = False
-_sender_worker_started = False
+_worker_state = {"router_started": False, "sender_started": False}
+
+
+def reset_worker_state() -> None:
+    """Reset worker state and drain queues (TESTING ONLY)."""
+    _worker_state["router_started"] = False
+    _worker_state["sender_started"] = False
+
+    # Drain inbound queue
+    while not _inbound_queue.empty():
+        try:
+            _inbound_queue.get_nowait()
+        except Empty:
+            break
+
+    # Drain outbound queue
+    while not _outbound_queue.empty():
+        try:
+            _outbound_queue.get_nowait()
+        except Empty:
+            break
+
 
 # --- Inbound / Receiver Logic ---
 
@@ -71,8 +91,7 @@ def enqueue_inbound_message(message: Message) -> None:
 
 def start_message_worker(handler: Callable[[Message], None]) -> None:
     """Spin up a daemon thread that consumes inbound messages."""
-    global _router_worker_started  # noqa: PLW0603
-    if _router_worker_started:
+    if _worker_state["router_started"]:
         return
 
     def _worker() -> None:
@@ -91,7 +110,7 @@ def start_message_worker(handler: Callable[[Message], None]) -> None:
                 logger.exception("Router failed to process message from %s", message.sender)
 
     Thread(target=_worker, daemon=True, name="router-worker").start()
-    _router_worker_started = True
+    _worker_state["router_started"] = True
 
 
 # --- Outbound / Sender Logic ---
@@ -128,8 +147,7 @@ def build_outbound_message(
 
 def start_sender_worker() -> None:
     """Start a daemon worker that drains the outbound queue."""
-    global _sender_worker_started  # noqa: PLW0603
-    if _sender_worker_started:
+    if _worker_state["sender_started"]:
         return
 
     def _worker() -> None:
@@ -151,7 +169,7 @@ def start_sender_worker() -> None:
                 logger.exception("Failed to deliver outbound message to %s", message.sender)
 
     Thread(target=_worker, daemon=True, name="sender-worker").start()
-    _sender_worker_started = True
+    _worker_state["sender_started"] = True
 
 
 def _dispatch_outbound(message: Message) -> None:
@@ -248,13 +266,12 @@ def send_whatsapp_reply_buttons(
         send_whatsapp_message(number, text)
 
 
-def send_whatsapp_list_message(  # noqa: PLR0913
+def send_whatsapp_list_message(
     number: str,
     button_text: str,
     body: str,
     sections: list["ListSection"],
-    header: str | None = None,
-    footer: str | None = None,
+    options: dict[str, str] | None = None,
 ) -> None:
     """Send a WhatsApp list message.
 
@@ -263,10 +280,12 @@ def send_whatsapp_list_message(  # noqa: PLR0913
         button_text: Text for the action button.
         body: Message body text.
         sections: List of ListSection objects.
-        header: Optional header text.
-        footer: Optional footer text.
+        options: Optional dictionary containing 'header' and 'footer' text.
     """
     client_type = WHATSAPP_CLIENT_TYPE.lower()
+    options = options or {}
+    header = options.get("header")
+    footer = options.get("footer")
 
     if client_type == "business_api":
         # Use WhatsApp Business API
