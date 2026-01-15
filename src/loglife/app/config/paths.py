@@ -5,6 +5,9 @@ from pathlib import Path
 
 BACKEND_ROOT = Path(__file__).resolve().parents[2]
 
+# App directory
+APP_DIR = BACKEND_ROOT / "app"
+
 # Subdirectories
 LOGS = BACKEND_ROOT / "logs"
 DATA = BACKEND_ROOT / "data"
