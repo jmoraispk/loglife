@@ -25,23 +25,27 @@ def _run_sqlite_web_thread() -> None:
     if sqlite_web is None:
         return
 
-    # Silence peewee logger to avoid verbose SQL query logs
-    logging.getLogger("peewee").setLevel(logging.WARNING)
-
-    # Silence werkzeug logger for this thread to reduce startup noise
-    logging.getLogger("werkzeug").setLevel(logging.ERROR)
-
-    # Initialize the sqlite_web application with our database file
-    # We pass str(DATABASE_FILE) because it expects a string path
-    sqlite_web.initialize_app(str(DATABASE_FILE))
-
-    # Run the Flask app for sqlite_web
-    # use_reloader=False is crucial to avoid starting a new process
-    # debug=False prevents the debugger from kicking in and potentially interfering
     try:
+        # Silence peewee logger to avoid verbose SQL query logs
+        logging.getLogger("peewee").setLevel(logging.WARNING)
+
+        # Silence werkzeug logger for this thread to reduce startup noise
+        logging.getLogger("werkzeug").setLevel(logging.ERROR)
+
+        # Initialize the sqlite_web application with our database file
+        # We pass str(DATABASE_FILE) because it expects a string path
+        sqlite_web.initialize_app(str(DATABASE_FILE))
+
+        # Run the Flask app for sqlite_web
+        # use_reloader=False is crucial to avoid starting a new process
+        # debug=False prevents the debugger from kicking in and potentially interfering
         sqlite_web.app.run(host="127.0.0.1", port=SQLITE_PORT, debug=False, use_reloader=False)
     except (OSError, SystemExit) as e:
         logger.warning("Failed to start sqlite_web server: %s", e)
+    except Exception as e:  # noqa: BLE001
+        # Catch all exceptions to prevent unhandled thread exceptions during tests
+        # or when the database file doesn't exist
+        logger.warning("sqlite_web thread error: %s", e)
 
 
 def start_sqlite_web() -> None:
