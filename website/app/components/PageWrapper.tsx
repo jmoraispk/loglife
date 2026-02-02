@@ -7,7 +7,7 @@ export default function PageWrapper({ children }: { children: React.ReactNode })
   const isCallPage = pathname?.startsWith("/call");
 
   return (
-    <div className={isCallPage ? "" : "pt-[65px]"}>
+    <div className={isCallPage ? "" : "pl-16"}>
       {children}
     </div>
   );

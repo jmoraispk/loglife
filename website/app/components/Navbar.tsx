@@ -68,36 +68,6 @@ export default function Navbar() {
             >
               Testimonials
             </Link>
-            <Link
-              href="/#guides"
-              className={`font-medium transition-colors ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400" 
-                  : "text-slate-600 hover:text-emerald-600"
-              }`}
-            >
-              Guides
-            </Link>
-            <Link
-              href="/#about"
-              className={`font-medium transition-colors ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400" 
-                  : "text-slate-600 hover:text-emerald-600"
-              }`}
-            >
-              About
-            </Link>
-            <Link
-              href="/#roadmap"
-              className={`font-medium transition-colors ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400" 
-                  : "text-slate-600 hover:text-emerald-600"
-              }`}
-            >
-              Roadmap
-            </Link>
           </nav>
 
           <div className="flex items-center space-x-2 sm:space-x-4">
@@ -227,39 +197,6 @@ export default function Navbar() {
               onClick={() => setIsMenuOpen(false)}
             >
               Testimonials
-            </Link>
-            <Link
-              href="/#guides"
-              className={`font-medium transition-colors px-4 py-2 rounded-lg ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400 hover:bg-slate-800" 
-                  : "text-slate-600 hover:text-emerald-600 hover:bg-slate-50"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Guides
-            </Link>
-            <Link
-              href="/#about"
-              className={`font-medium transition-colors px-4 py-2 rounded-lg ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400 hover:bg-slate-800" 
-                  : "text-slate-600 hover:text-emerald-600 hover:bg-slate-50"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              href="/#roadmap"
-              className={`font-medium transition-colors px-4 py-2 rounded-lg ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400 hover:bg-slate-800" 
-                  : "text-slate-600 hover:text-emerald-600 hover:bg-slate-50"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Roadmap
             </Link>
             <button
               onClick={() => {
