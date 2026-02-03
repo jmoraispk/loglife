@@ -24,6 +24,10 @@ jobs:
         if: github.ref == 'refs/heads/dev'
         run: |
           ssh -A -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            # =========== ENABLE PNPM ===========
+            corepack enable &&
+            corepack prepare pnpm@latest --activate &&
+
             # =========== PULL LATEST CODE ===========
             cd /home/ali/loglife-dev &&
             git fetch origin &&
@@ -43,6 +47,10 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           ssh -A -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
+            # =========== ENABLE PNPM ===========
+            corepack enable &&
+            corepack prepare pnpm@latest --activate &&
+
             # =========== PULL LATEST CODE ===========
             cd /home/ali/loglife-prod &&
             git pull &&
