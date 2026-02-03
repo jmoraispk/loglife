@@ -97,7 +97,7 @@ export default function BlogPage() {
 
         {/* Recent Posts Grid */}
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-          {BLOG_POSTS.slice(1).map((post, index) => (
+          {BLOG_POSTS.slice(1).map((post) => (
             <Link key={post.slug} href={`/blog/${post.slug}`} className="group flex flex-col bg-slate-900/30 backdrop-blur-sm border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-600 hover:bg-slate-800/50 transition-all duration-300">
               <div className="h-48 bg-gradient-to-br from-slate-800 to-slate-900 relative overflow-hidden">
                  <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-700 via-slate-900 to-black"></div>

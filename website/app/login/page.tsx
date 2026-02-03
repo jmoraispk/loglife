@@ -103,7 +103,7 @@ export default function LoginPage() {
 
         {/* Footer */}
         <p className="text-center text-sm text-slate-400">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/signup" className="font-semibold text-emerald-400 hover:text-emerald-300 hover:underline transition-all">
             Sign up for free
           </Link>

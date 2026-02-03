@@ -63,7 +63,7 @@ function Hero() {
               </div>
               
               <div className="absolute right-8 top-24 bg-emerald-600/90 backdrop-blur-md rounded-xl p-4 shadow-lg transform rotate-2 hover:rotate-0 transition-transform border border-emerald-500/20">
-                <p className="text-sm text-white font-medium">"Slept at 11 PM ✓"</p>
+                <p className="text-sm text-white font-medium">&quot;Slept at 11 PM ✓&quot;</p>
               </div>
               
               <div className="absolute left-12 bottom-20 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-lg">
@@ -295,7 +295,7 @@ function SocialProof() {
                     </svg>
                   ))}
                 </div>
-                <p className="text-lg leading-relaxed text-slate-300 mb-4">"{items[i].q}"</p>
+                <p className="text-lg leading-relaxed text-slate-300 mb-4">&quot;{items[i].q}&quot;</p>
                 <div className="flex items-center justify-between">
                   <div className="text-sm font-medium text-slate-400">— {items[i].a}</div>
                   <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-semibold">
@@ -344,44 +344,6 @@ function SocialProof() {
   );
 }
 
-// Final CTA Section
-function FinalCTA() {
-  return (
-    <section className="relative isolate overflow-hidden bg-emerald-900/20 backdrop-blur-sm border-t border-emerald-500/20 py-24">
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{ 
-          backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
-          backgroundSize: '50px 50px'
-        }} />
-      </div>
-      <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-white/10 blur-3xl"/>
-      <div className="absolute -left-24 -bottom-20 h-96 w-96 rounded-full bg-white/10 blur-3xl"/>
-      
-      <div className="relative mx-auto max-w-4xl px-6 text-center">
-        <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6">
-          Log Life. Live Better.
-        </h2>
-        <p className="text-xl lg:text-2xl text-emerald-100 mb-12 leading-relaxed">
-          Start a simple daily log and turn small notes into better habits
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <a 
-            href="/signup" 
-            className="inline-flex items-center justify-center px-10 py-5 bg-white text-emerald-700 text-lg font-semibold rounded-xl hover:bg-emerald-50 transition-all duration-200 transform hover:scale-105 shadow-2xl"
-          >
-            Get Started
-            <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </a>
-        </div>
-        <p className="mt-8 text-sm text-emerald-100">
-          Your data stays yours. Private by default. Export anytime.
-        </p>
-      </div>
-    </section>
-  );
-}
 
 // Main export component
 export default function LogLifeHero() {

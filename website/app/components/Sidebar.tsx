@@ -2,10 +2,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
 
 export default function Sidebar() {
-  const { openWidget } = useWhatsAppWidget();
   const pathname = usePathname();
 
   if (pathname?.startsWith("/call")) {
