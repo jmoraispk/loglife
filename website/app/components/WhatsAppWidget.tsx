@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
-import { useTheme } from "../contexts/ThemeContext";
 
 function IconWhatsApp() {
   return (
@@ -37,7 +36,6 @@ function IconQR() {
 
 export default function WhatsAppWidget() {
   const { isOpen, toggleWidget, closeWidget, isVisible } = useWhatsAppWidget();
-  const { isDarkMode } = useTheme();
   const [isAnimating, setIsAnimating] = useState(false);
   const number = "17155157761"; 
   const message = "help";
@@ -67,11 +65,7 @@ export default function WhatsAppWidget() {
     <>
       {isOpen && (
         <div 
-          className={`fixed bottom-6 right-24 z-50 flex flex-col items-center rounded-3xl p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-sm max-w-sm transition-all ease-out ${
-            isDarkMode
-              ? "bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700/50"
-              : "bg-gradient-to-br from-white to-gray-50 border border-gray-200/50"
-          } ${
+          className={`fixed bottom-6 right-24 z-50 flex flex-col items-center rounded-3xl p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-xl max-w-sm transition-all ease-out bg-slate-900/60 border border-slate-700/50 ${
             isAnimating 
               ? 'opacity-0 translate-x-12 duration-200' 
               : 'opacity-100 translate-x-0 duration-300'
@@ -85,21 +79,15 @@ export default function WhatsAppWidget() {
               </svg>
             </div>
             <div className="flex-1">
-              <h3 className={`text-lg font-bold transition-colors ${
-                isDarkMode ? "text-white" : "text-gray-900"
-              }`}>Start Logging</h3>
-              <p className={`text-sm transition-colors ${
-                isDarkMode ? "text-slate-400" : "text-gray-500"
-              }`}>Chat with LogLife on WhatsApp</p>
+              <h3 className="text-lg font-bold transition-colors text-white">Start Logging</h3>
+              <p className="text-sm transition-colors text-slate-400">Chat with LogLife on WhatsApp</p>
             </div>
           </div>
 
           {/* QR Code Section */}
           <div className="relative mb-6 group">
             <div className="absolute inset-0 bg-gradient-to-br from-brand-400 to-brand-600 rounded-2xl blur-xl opacity-20 group-hover:opacity-30 transition-opacity" />
-            <div className={`relative p-6 rounded-2xl transition-colors ${
-              isDarkMode ? "bg-slate-700" : "bg-white"
-            }`}>
+            <div className="relative p-6 rounded-2xl transition-colors bg-slate-700">
               <div className="relative w-64 h-64">
                 <Image 
                   src="/qr_code.png" 
@@ -112,32 +100,20 @@ export default function WhatsAppWidget() {
           </div>
 
           {/* Info Section */}
-          <div className={`flex items-center gap-2 mb-6 px-4 py-3 rounded-xl border transition-colors ${
-            isDarkMode
-              ? "bg-brand-900/30 border-brand-800/50"
-              : "bg-brand-50 border-brand-100"
-          }`}>
-            <div className={isDarkMode ? "text-brand-400" : "text-brand-600"}>
+          <div className="flex items-center gap-2 mb-6 px-4 py-3 rounded-xl border transition-colors bg-brand-900/30 border-brand-800/50">
+            <div className="text-brand-400">
               <IconQR />
             </div>
-            <p className={`text-sm font-medium transition-colors ${
-              isDarkMode ? "text-brand-300" : "text-brand-800"
-            }`}>
+            <p className="text-sm font-medium transition-colors text-brand-300">
               Scan QR code to start chatting
             </p>
           </div>
 
           {/* Divider */}
           <div className="w-full flex items-center gap-4 mb-6">
-            <div className={`flex-1 h-px bg-gradient-to-r from-transparent to-transparent transition-colors ${
-              isDarkMode ? "via-slate-600" : "via-gray-300"
-            }`} />
-            <span className={`text-xs font-semibold uppercase tracking-wider transition-colors ${
-              isDarkMode ? "text-slate-500" : "text-gray-400"
-            }`}>or</span>
-            <div className={`flex-1 h-px bg-gradient-to-r from-transparent to-transparent transition-colors ${
-              isDarkMode ? "via-slate-600" : "via-gray-300"
-            }`} />
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent to-transparent transition-colors via-slate-600" />
+            <span className="text-xs font-semibold uppercase tracking-wider transition-colors text-slate-500">or</span>
+            <div className="flex-1 h-px bg-gradient-to-r from-transparent to-transparent transition-colors via-slate-600" />
           </div>
 
           {/* Button */}
@@ -162,9 +138,7 @@ export default function WhatsAppWidget() {
         onClick={handleToggle}
         className={`fixed bottom-6 right-6 z-50 flex items-center justify-center rounded-full p-4 transition-all duration-300 ease-out cursor-pointer ${
           isOpen 
-            ? isDarkMode
-              ? "bg-slate-800/90 backdrop-blur-sm text-slate-200 hover:bg-slate-700 hover:scale-105 shadow-lg border border-slate-700 rotate-90"
-              : "bg-white/90 backdrop-blur-sm text-gray-700 hover:bg-white hover:scale-105 shadow-lg border border-gray-200 rotate-90"
+            ? "bg-slate-800/90 backdrop-blur-sm text-slate-200 hover:bg-slate-700 hover:scale-105 shadow-lg border border-slate-700 rotate-90"
             : "bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-2xl hover:shadow-brand-500/50 hover:scale-110 border border-brand-400 rotate-0"
         }`}
         aria-label={isOpen ? "Close WhatsApp popup" : "Open WhatsApp popup"}

@@ -1,13 +1,10 @@
 "use client";
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { useTheme } from "../contexts/ThemeContext";
 import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
 
 export default function Sidebar() {
-  const { isDarkMode, toggleTheme } = useTheme();
   const { openWidget } = useWhatsAppWidget();
   const pathname = usePathname();
 
@@ -26,15 +23,6 @@ export default function Sidebar() {
       label: "Home"
     },
     { 
-      href: "/#features", 
-      icon: (
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>
-      ),
-      label: "Features"
-    },
-    { 
       href: "/#how-it-works", 
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,47 +32,47 @@ export default function Sidebar() {
       label: "How it works"
     },
     { 
-      href: "/#testimonials", 
+      href: "/pricing", 
       icon: (
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
       ),
-      label: "Testimonials"
+      label: "Pricing"
+    },
+    { 
+      href: "/blog", 
+      icon: (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+        </svg>
+      ),
+      label: "Blog"
     },
   ];
 
   return (
-    <aside className={`fixed left-0 top-0 h-screen w-16 flex flex-col items-center py-4 transition-colors z-50 border-r ${
-      isDarkMode 
-        ? "bg-slate-900 border-slate-800" 
-        : "bg-white border-slate-200"
-    }`}>
-      {/* Logo at top */}
-      <Link href="/#hero" className="mb-8 group">
-        <div className="w-6 h-6 flex items-center justify-center group-hover:opacity-80 transition-opacity">
+    <aside className="hidden md:flex fixed left-4 top-1/2 -translate-y-1/2 w-16 flex-col items-center py-6 transition-all z-50 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+      
+      {/* Logo */}
+      <div className="mb-10 shrink-0">
+        <div className="block relative w-6 h-6 opacity-100 transition-opacity cursor-default">
           <Image
             src="/icon-small.svg"
             alt="LogLife"
-            width={24}
-            height={24}
-            className="w-full h-full"
-            priority
+            fill
+            className="object-contain"
           />
         </div>
-      </Link>
+      </div>
 
       {/* Navigation Items */}
-      <nav className="flex-1 flex flex-col items-center space-y-2 w-full">
+      <nav className="flex flex-col items-center justify-center space-y-4 w-full">
         {navItems.map((item, index) => (
           <Link
             key={index}
             href={item.href}
-            className={`w-8 h-8 flex items-center justify-center transition-colors ${
-              isDarkMode
-                ? "text-slate-400 hover:text-emerald-400"
-                : "text-slate-500 hover:text-emerald-600"
-            }`}
+            className="w-8 h-8 flex items-center justify-center transition-colors text-slate-400 hover:text-emerald-400"
             title={item.label}
           >
             {item.icon}
@@ -92,39 +80,17 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      {/* Bottom Actions */}
-      <div className="flex flex-col items-center space-y-2 w-full">
-        {/* Theme Toggle */}
-        <button
-          onClick={toggleTheme}
-          className={`w-8 h-8 flex items-center justify-center transition-colors cursor-pointer ${
-            isDarkMode
-              ? "text-slate-400 hover:text-emerald-400"
-              : "text-slate-500 hover:text-emerald-600"
-          }`}
-          title="Toggle theme"
+      {/* Login/Signup */}
+      <div className="mt-10 shrink-0">
+        <Link 
+          href="/login" 
+          className="w-8 h-8 flex items-center justify-center transition-colors text-slate-400 hover:text-emerald-400"
+          title="Sign In"
         >
-          {isDarkMode ? (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
-          ) : (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-          )}
-        </button>
-
-        {/* Start Log Button */}
-        <button
-          onClick={openWidget}
-          className="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center hover:bg-emerald-500 transition-colors cursor-pointer"
-          title="Start your log"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
-        </button>
+        </Link>
       </div>
     </aside>
   );

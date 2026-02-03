@@ -4,17 +4,14 @@ import React from "react";
 // Modern Hero Section with Dark Theme
 function Hero() {
   return (
-    <section id="hero" className="relative isolate overflow-hidden bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 pt-16 pb-24 min-h-screen flex items-center">
-      {/* Animated background gradients */}
-      <div className="absolute -right-40 -top-40 -z-10 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl animate-pulse"/>
-      <div className="absolute -left-24 -bottom-20 -z-10 h-96 w-96 rounded-full bg-emerald-600/10 blur-3xl animate-pulse" style={{ animationDelay: "1s" }}/>
+    <section id="hero" className="relative isolate overflow-hidden pt-16 pb-24 min-h-screen flex items-center">
       
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left Column - Text Content */}
           <div className="space-y-8 animate-fade-in">
             <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-white leading-tight animate-slide-up">
-              Private AI Assistants.{" "}
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Private AI Assistants.</span>{" "}
               <span className="text-emerald-400">Automatic Deployment.</span>
             </h1>
             
@@ -24,8 +21,8 @@ function Hero() {
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
               <a 
-                href="/sign-in" 
-                className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 text-white text-lg font-semibold rounded-xl hover:bg-emerald-500 transition-all duration-200 transform hover:scale-105 shadow-lg hover:shadow-emerald-500/50"
+                href="/signup" 
+                className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-base font-semibold rounded-xl hover:from-emerald-500 hover:to-emerald-400 transition-all duration-200 transform hover:scale-105 shadow-[0_0_20px_rgba(16,185,129,0.3)] border border-emerald-400/20"
               >
                 Start Your Log
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,7 +32,7 @@ function Hero() {
               
               <a 
                 href="#features" 
-                className="inline-flex items-center justify-center px-8 py-4 bg-slate-800 text-slate-200 text-lg font-semibold rounded-xl hover:bg-slate-700 transition-all duration-200 border border-slate-700"
+                className="inline-flex items-center justify-center px-6 py-3 bg-white/5 backdrop-blur-lg text-slate-200 text-base font-semibold rounded-xl hover:bg-white/10 transition-all duration-200 border border-white/10"
               >
                 Learn More
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -46,61 +43,42 @@ function Hero() {
             
             {/* Platform badges */}
             <div className="flex flex-wrap gap-3 pt-6 animate-slide-up" style={{ animationDelay: "0.3s" }}>
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-full text-sm text-slate-300 backdrop-blur-sm">
-                <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 448 512">
-                    <path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157z"/>
-                  </svg>
-                </div>
-                <span>WhatsApp</span>
-                <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 rounded text-xs font-semibold">Live</span>
-              </span>
-              
-              <span className="inline-flex items-center gap-2 px-4 py-2 bg-slate-800/50 border border-slate-700 rounded-full text-sm text-slate-300 backdrop-blur-sm">
-                <div className="w-5 h-5 rounded-full bg-slate-600 flex items-center justify-center">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 496 512">
-                    <path d="M248 8C111 8 0 119 0 256s111 248 248 248 248-111 248-248S385 8 248 8z"/>
-                  </svg>
-                </div>
-                <span>Telegram</span>
-                <span className="px-2 py-0.5 bg-slate-700 text-slate-400 rounded text-xs">Soon</span>
-              </span>
             </div>
           </div>
           
           {/* Right Column - Illustration */}
           <div className="relative animate-fade-in" style={{ animationDelay: "0.2s" }}>
-            <div className="relative aspect-square rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 p-8 shadow-2xl">
+            <div className="relative aspect-square rounded-2xl bg-gradient-to-br from-slate-900/80 to-slate-900/40 backdrop-blur-xl border border-white/10 p-8 shadow-2xl">
               {/* AI Assistant visualization */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-transparent" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-transparent opacity-50" />
               
               {/* Floating cards */}
-              <div className="absolute left-8 top-12 bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-lg transform -rotate-3 hover:rotate-0 transition-transform">
+              <div className="absolute left-8 top-12 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-lg transform -rotate-3 hover:rotate-0 transition-transform">
                 <div className="flex items-center gap-2 text-emerald-400">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
                   </svg>
-                  <span className="text-sm font-medium text-slate-300">Voice logging</span>
+                  <span className="text-sm font-medium text-slate-200">Voice logging</span>
                 </div>
               </div>
               
-              <div className="absolute right-8 top-24 bg-emerald-600/90 rounded-xl p-4 shadow-lg transform rotate-2 hover:rotate-0 transition-transform">
+              <div className="absolute right-8 top-24 bg-emerald-600/90 backdrop-blur-md rounded-xl p-4 shadow-lg transform rotate-2 hover:rotate-0 transition-transform border border-emerald-500/20">
                 <p className="text-sm text-white font-medium">"Slept at 11 PM ✓"</p>
               </div>
               
-              <div className="absolute left-12 bottom-20 bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-lg">
+              <div className="absolute left-12 bottom-20 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-lg">
                 <div className="text-xs text-slate-400 mb-1">Progress</div>
                 <div className="text-lg font-bold text-emerald-400">87%</div>
               </div>
               
-              <div className="absolute right-12 bottom-32 bg-slate-800 border border-slate-700 rounded-xl p-3 shadow-lg transform rotate-3 hover:rotate-0 transition-transform">
+              <div className="absolute right-12 bottom-32 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-lg transform rotate-3 hover:rotate-0 transition-transform">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
                     <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <span className="text-sm text-slate-300">Patterns found</span>
+                  <span className="text-sm text-slate-200">Patterns found</span>
                 </div>
               </div>
               
@@ -162,7 +140,7 @@ function Features() {
   ];
 
   return (
-    <section id="features" className="relative bg-slate-900 py-24">
+    <section id="features" className="relative py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
@@ -175,9 +153,9 @@ function Features() {
           {features.map((feature, index) => (
             <div 
               key={index}
-              className="group relative bg-slate-800/50 border border-slate-700 rounded-2xl p-8 hover:bg-slate-800 hover:border-emerald-500/50 transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/20"
+              className="group relative bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 hover:bg-slate-800/60 hover:border-emerald-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/20"
             >
-              <div className="text-emerald-400 mb-4 group-hover:scale-110 transition-transform duration-300">
+              <div className="text-emerald-400 mb-4 group-hover:scale-110 transition-transform duration-200">
                 {feature.icon}
               </div>
               <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
@@ -246,7 +224,7 @@ function HowItWorks() {
   ];
 
   return (
-    <section id="how-it-works" className="relative bg-gradient-to-b from-slate-900 to-slate-800 py-24">
+    <section id="how-it-works" className="relative py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">How it works</h2>
@@ -257,7 +235,7 @@ function HowItWorks() {
           {steps.map((step, index) => (
             <div 
               key={index}
-              className="relative bg-slate-800/50 border border-slate-700 rounded-2xl p-6 hover:bg-slate-800 hover:border-emerald-500/50 transition-all duration-300 fade-in-on-scroll"
+              className="relative bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 hover:bg-slate-800/60 hover:border-emerald-500/50 transition-all duration-300 fade-in-on-scroll"
               style={{ animationDelay: `${index * 0.1}s` }}
             >
               <div className="flex items-center justify-between mb-4">
@@ -296,17 +274,11 @@ function SocialProof() {
   const visible = [idx % n, (idx + 1) % n, (idx + 2) % n];
 
   return (
-    <section id="testimonials" className="relative bg-slate-900 py-24">
+    <section id="testimonials" className="relative py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">What people say</h2>
           <p className="text-xl text-slate-400 mb-8">Real experiences from our community</p>
-          <div className="inline-flex items-center gap-2 px-6 py-3 bg-slate-800 border border-slate-700 rounded-full">
-            <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-            </svg>
-            <span className="text-slate-300 font-semibold">100,000+ stars on GitHub</span>
-          </div>
         </div>
         
         <div className="relative">
@@ -314,7 +286,7 @@ function SocialProof() {
             {visible.map((i) => (
               <div 
                 key={i}
-                className="bg-slate-800/50 border border-slate-700 rounded-2xl p-8 hover:border-emerald-500/50 transition-all duration-300"
+                className="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 hover:border-emerald-500/50 transition-all duration-300"
               >
                 <div className="flex gap-1 mb-4">
                   {[...Array(5)].map((_, j) => (
@@ -375,7 +347,7 @@ function SocialProof() {
 // Final CTA Section
 function FinalCTA() {
   return (
-    <section className="relative isolate overflow-hidden bg-gradient-to-br from-emerald-600 to-emerald-700 py-24">
+    <section className="relative isolate overflow-hidden bg-emerald-900/20 backdrop-blur-sm border-t border-emerald-500/20 py-24">
       <div className="absolute inset-0 opacity-10">
         <div className="absolute inset-0" style={{ 
           backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
@@ -394,7 +366,7 @@ function FinalCTA() {
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <a 
-            href="/sign-in" 
+            href="/signup" 
             className="inline-flex items-center justify-center px-10 py-5 bg-white text-emerald-700 text-lg font-semibold rounded-xl hover:bg-emerald-50 transition-all duration-200 transform hover:scale-105 shadow-2xl"
           >
             Get Started
@@ -414,12 +386,11 @@ function FinalCTA() {
 // Main export component
 export default function LogLifeHero() {
   return (
-    <main className="min-h-screen bg-slate-900">
+    <main className="min-h-screen">
       <Hero />
       <Features />
       <HowItWorks />
       <SocialProof />
-      <FinalCTA />
     </main>
   );
 }
