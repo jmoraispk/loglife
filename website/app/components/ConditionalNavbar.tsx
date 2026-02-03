@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import Navbar from "./Navbar";
+import Sidebar from "./Sidebar";
 
 export default function ConditionalNavbar() {
   const pathname = usePathname();
@@ -11,6 +12,11 @@ export default function ConditionalNavbar() {
     return null;
   }
 
-  return <Navbar />;
+  return (
+    <>
+      <Navbar />
+      <Sidebar />
+    </>
+  );
 }
 

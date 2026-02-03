@@ -1,216 +1,342 @@
 "use client";
 import React from "react";
 
-// moved from app/hero.tsx without changes
-const whColor = {
-  bgGrad: "from-emerald-50 via-white to-white",
-  brand: "emerald-600",
-  brandHover: "emerald-700",
-  brandSoft: "emerald-100",
-};
-
-function Pill({ children }: { children: React.ReactNode }) {
+// Modern Hero Section with Dark Theme
+function Hero() {
   return (
-    <span className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-white/70 px-3 py-1 text-xs font-medium text-slate-600 shadow-sm backdrop-blur">
-      {children}
-    </span>
-  );
-}
-
-function IconMic() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-      <path d="M12 1a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V4a3 3 0 0 1 3-3z"/>
-      <path d="M19 10a7 7 0 0 1-14 0"/>
-      <path d="M12 19v4"/>
-    </svg>
-  );
-}
-
-function IconWhatsApp() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M.5 23.5l2.7-.9A11 11 0 1021 3a11 11 0 00-17.8 12.8L.5 23.5z" fill="currentColor"/>
-      <path d="M16.3 13.9c-.2-.1-1.4-.7-1.6-.8-.2-.1-.4-.1-.5.1-.1.2-.6.8-.7.9-.1.1-.3.2-.5.1-1.3-.5-2.4-1.4-3.1-2.6-.1-.2 0-.4.1-.5.1-.1.2-.3.3-.4.1-.1.1-.2.2-.3.1-.1.1-.2 0-.4l-.8-2c-.1-.3-.2-.3-.4-.3h-.3c-.1 0-.4.1-.6.3-.2.2-.8.8-.8 2 0 1.1.8 2.1.9 2.2.1.2 1.6 2.6 3.9 3.6.5.2.9.4 1.3.5.5.2 1 .2 1.4.1.4-.1 1.4-.6 1.6-1.1.2-.5.2-1 .1-1.1 0-.1-.1-.1-.1-.2z" fill="#fff"/>
-    </svg>
-  );
-}
-
-function IconTelegram() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden>
-      <path d="M22 2L11 13"/>
-      <path d="M22 2l-7 20-4-9-9-4 20-7z"/>
-    </svg>
-  );
-}
-
-function IconiMessage() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <circle cx="12" cy="12" r="10"/>
-      <path d="M7 12h10v2H7z" fill="#fff"/>
-    </svg>
-  );
-}
-
-function HeroIllustration() {
-  return (
-    <div className="relative aspect-[4/3] w-full rounded-xl bg-gradient-to-br from-emerald-100 via-white to-emerald-50">
-      <div className="absolute left-6 top-6 h-40 w-64 rotate-[-2deg] rounded-xl border border-emerald-100 bg-white shadow-md" />
-      <div className="absolute left-10 top-10 h-40 w-64 rotate-[3deg] rounded-xl border border-emerald-100 bg-white shadow-md" />
-      {[...Array(6)].map((_, i) => (
-        <div key={i} className="absolute left-12 right-12" style={{ top: 70 + i * 16 }}>
-          <div className="h-2 w-3/4 rounded bg-slate-200" />
-        </div>
-      ))}
-      <div className="absolute bottom-6 left-6 inline-flex items-center gap-2 rounded-full bg-white px-3 py-2 text-slate-700 shadow">
-        <IconMic /> <span className="text-sm font-medium">Speak to log</span>
-      </div>
-      <div className="absolute right-6 top-6 rounded-2xl bg-emerald-600/90 px-3 py-2 text-sm text-white shadow">“Bed after 11 ⏰”</div>
-      <div className="absolute right-10 top-20 rounded-2xl bg-white px-3 py-2 text-sm text-slate-700 shadow">“7:00 AM Workout 🏃”</div>
-      <div className="absolute right-16 top-32 rounded-2xl bg-white px-3 py-2 text-sm text-slate-700 shadow">“Pattern matched → 87%”</div>
-    </div>
-  );
-}
-
-function PlatformBadges() {
-  return (
-    <div className="mt-5 flex flex-wrap items-center gap-2">
-      <Pill>
-        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-white"><IconWhatsApp /></span>
-        <span>WhatsApp</span>
-        <span className="ml-1 rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">Supported</span>
-      </Pill>
-      <Pill>
-        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-white"><IconTelegram /></span>
-        <span>Telegram</span>
-        <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">Coming soon</span>
-      </Pill>
-      <Pill>
-        <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-slate-900 text-white"><IconiMessage /></span>
-        <span>iMessage</span>
-        <span className="ml-1 rounded bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold text-slate-700">Planned</span>
-      </Pill>
-    </div>
-  );
-}
-
-function Hero({ variant }: { variant: "A" | "B" }) {
-  const isA = variant === "A";
-  const content = isA
-    ? { eyebrow: "LogLife", h1: "Log. Reflect. Grow.", subhead: "Capture what matters each day and turn small notes into better habits.", cta: "Start your log", secondary: "See how it works", imageAlt: "A person journaling beside a sunlit window—calm, focused, hopeful.", privacy: "Your data stays yours. Private by default. Export anytime.", highlight: "Works right in WhatsApp. Audio-first journaling." }
-    : { eyebrow: "LogLife", h1: "Track your days. Reflect. Grow.", subhead: "A clear daily record that turns patterns into progress—your way.", cta: "Start your log", secondary: "See how it works", imageAlt: "A person writing in a notebook with a soft smile, representing positive daily tracking.", privacy: "Your data stays yours. Private by default. Export anytime.", highlight: "Works right in WhatsApp. Audio-first journaling." };
-  return (
-    <section className="relative isolate overflow-hidden">
-      <div className={`absolute inset-0 -z-10 bg-gradient-to-b ${whColor.bgGrad}`} />
-      <div className="absolute -right-40 -top-40 -z-10 h-80 w-80 rounded-full bg-emerald-200/50 blur-3xl"/>
-      <div className="absolute -left-24 -bottom-20 -z-10 h-80 w-80 rounded-full bg-emerald-100/60 blur-3xl"/>
-      <div className="mx-auto max-w-6xl px-6 pt-12 pb-10 sm:pt-16 sm:pb-14">
-        <div className="mb-4 text-sm font-medium tracking-wide text-slate-500">{content.eyebrow}</div>
-        <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-6xl">{content.h1}</h1>
-        <p className="mt-6 max-w-2xl text-lg leading-7 text-slate-700">{content.subhead}</p>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{content.highlight}</p>
-        <PlatformBadges />
-        <div className="mt-8 flex items-center gap-4">
-          <a href="#start" className="inline-flex items-center rounded-2xl px-5 py-3 text-base font-semibold shadow-sm bg-emerald-600 text-white hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-600/20">{content.cta}</a>
-          <a href="#learn" className="text-base font-medium text-slate-900 hover:underline">{content.secondary}</a>
-        </div>
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 items-stretch">
-          <div className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm h-full"><HeroIllustration /></div>
-          <div className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm h-full">
-            <ul className="grid grid-rows-8 h-full text-slate-800 text-base sm:text-lg leading-tight">
-              <li className="flex items-start gap-3"><span aria-hidden>🎙️</span><span><strong>Audio-first</strong> entries (fast & hands‑free)</span></li>
-              <li className="flex items-start gap-3"><span aria-hidden>💬</span><span><strong>Chat‑native</strong> (familiar & convenient)</span></li>
-              <li className="flex items-start gap-3"><span aria-hidden>📈</span><span><strong>Patterns → progress</strong> (e.g., bedtime ↔ AM workout)</span></li>
-              <li className="flex items-start gap-3"><span aria-hidden>🔍</span><span><strong>Ask your data</strong> in plain language</span></li>
-              <li className="flex items-start gap-3"><span aria-hidden>🧵</span><span><strong>One thread</strong>, simple & minimal</span></li>
-              <li className="flex items-start gap-3"><span aria-hidden>🎯</span><span><strong>One weekly focus</strong> that sticks</span></li>
-              <li className="flex items-start gap-3"><span aria-hidden>🤝</span><span><strong>Gentle commitments</strong>, never guilt</span></li>
-              <li className="flex items-start gap-3"><span aria-hidden>✅</span><span><strong>Simple achievement ratings</strong>: 1–4 or 🟩🟨🟧🟥</span></li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function HowItWorks() {
-  const steps = [
-    { k: "1", t: "Add habit(s)", d: "Define what to track (e.g., ‘Bed by 11pm’, ‘7:00 AM workout’)." },
-    { k: "2", t: "Boost your habit", d: "Tell your WHYs, schedule it, and understand triggers & environment." },
-    { k: "3", t: "Log by voice or text", d: "Reply with a quick voice note or message." },
-    { k: "4", t: "We structure it & surface patterns", d: "AI transcribes and tags entries." },
-    { k: "5", t: "Ask anything", d: "Query your data in plain language. See patterns and feel the progress." },
-  ];
-  return (
-    <section className="bg-gradient-to-b from-emerald-50 via-white to-emerald-50" id="learn">
-      <div className="mx-auto max-w-6xl px-6 py-16 sm:py-24">
-        <h2 className="text-2xl font-semibold text-slate-900 sm:text-3xl">How it works</h2>
-        <ol className="mt-10 grid gap-6 sm:grid-cols-3 lg:grid-cols-5">
-          {steps.map((s) => (
-            <li key={s.k} className="rounded-2xl border border-emerald-100 bg-white p-6 shadow-sm h-full">
-              <div className="text-sm font-semibold text-emerald-700">Step {s.k}</div>
-              <div className="mt-2 text-lg font-semibold text-slate-900">{s.t}</div>
-              <p className="mt-1 text-slate-600">{s.d}</p>
-            </li>
-          ))}
-        </ol>
-        <details className="mt-8 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
-          <summary className="cursor-pointer select-none text-lg font-semibold text-slate-900">Why it works?</summary>
-          <div className="mt-3 text-sm leading-6 text-slate-700">
-            <p className="mb-2"><strong>The 5 Pillars of Habit.</strong> A proven method grounded in decades of behavioral science. Each additional <em>habit boost</em> increases your <span className="text-emerald-700 font-semibold">chances of success</span>!</p>
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-              <div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm"><div className="text-sm font-semibold text-emerald-700">+30%</div><div className="mt-1 text-base font-semibold text-slate-900">Define & track</div><p className="mt-1 text-slate-600">Write the habit clearly and check in daily.</p></div>
-              <div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm"><div className="text-sm font-semibold text-emerald-700">+20%</div><div className="mt-1 text-base font-semibold text-slate-900">Know the WHY</div><p className="mt-1 text-slate-600">List reasons; revisit them when it gets hard.</p></div>
-              <div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm"><div className="text-sm font-semibold text-emerald-700">+16%</div><div className="mt-1 text-base font-semibold text-slate-900">Plan & Visualize</div><p className="mt-1 text-slate-600">When / where / how + reminders to reduce forgetting.</p></div>
-              <div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm"><div className="text-sm font-semibold text-emerald-700">+20%</div><div className="mt-1 text-base font-semibold text-slate-900">Design the setting</div><p className="mt-1 text-slate-600">Remove bad triggers; reduce friction for good ones.</p></div>
-              <div className="rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm"><div className="text-sm font-semibold text-emerald-700">+12%</div><div className="mt-1 text-base font-semibold text-slate-900">Recover & Reinforce</div><p className="mt-1 text-slate-600">Immediate rewards + kind post‑mortems; celebrate & adjust.</p></div>
+    <section id="hero" className="relative isolate overflow-hidden pt-16 pb-24 min-h-screen flex items-center">
+      
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="grid lg:grid-cols-2 gap-16 items-center">
+          {/* Left Column - Text Content */}
+          <div className="space-y-8 animate-fade-in">
+            <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-white leading-tight animate-slide-up">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Private AI Assistants.</span>{" "}
+              <span className="text-emerald-400">Automatic Deployment.</span>
+            </h1>
+            
+            <p className="text-xl lg:text-2xl text-slate-300 leading-relaxed animate-slide-up" style={{ animationDelay: "0.1s" }}>
+              Audio-first. Chat-native. Your progress visualized.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 pt-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+              <a 
+                href="/signup" 
+                className="inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-base font-semibold rounded-xl hover:from-emerald-500 hover:to-emerald-400 transition-all duration-200 transform hover:scale-105 shadow-[0_0_20px_rgba(16,185,129,0.3)] border border-emerald-400/20"
+              >
+                Start Your Log
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </a>
+              
+              <a 
+                href="#features" 
+                className="inline-flex items-center justify-center px-6 py-3 bg-white/5 backdrop-blur-lg text-slate-200 text-base font-semibold rounded-xl hover:bg-white/10 transition-all duration-200 border border-white/10"
+              >
+                Learn More
+                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </a>
+            </div>
+            
+            {/* Platform badges */}
+            <div className="flex flex-wrap gap-3 pt-6 animate-slide-up" style={{ animationDelay: "0.3s" }}>
             </div>
           </div>
-        </details>
+          
+          {/* Right Column - Illustration */}
+          <div className="relative animate-fade-in" style={{ animationDelay: "0.2s" }}>
+            <div className="relative aspect-square rounded-2xl bg-gradient-to-br from-slate-900/80 to-slate-900/40 backdrop-blur-xl border border-white/10 p-8 shadow-2xl">
+              {/* AI Assistant visualization */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-emerald-500/10 to-transparent opacity-50" />
+              
+              {/* Floating cards */}
+              <div className="absolute left-8 top-12 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-lg transform -rotate-3 hover:rotate-0 transition-transform">
+                <div className="flex items-center gap-2 text-emerald-400">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                  <span className="text-sm font-medium text-slate-200">Voice logging</span>
+                </div>
+              </div>
+              
+              <div className="absolute right-8 top-24 bg-emerald-600/90 backdrop-blur-md rounded-xl p-4 shadow-lg transform rotate-2 hover:rotate-0 transition-transform border border-emerald-500/20">
+                <p className="text-sm text-white font-medium">"Slept at 11 PM ✓"</p>
+              </div>
+              
+              <div className="absolute left-12 bottom-20 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-lg">
+                <div className="text-xs text-slate-400 mb-1">Progress</div>
+                <div className="text-lg font-bold text-emerald-400">87%</div>
+              </div>
+              
+              <div className="absolute right-12 bottom-32 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-lg transform rotate-3 hover:rotate-0 transition-transform">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                    <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                  </div>
+                  <span className="text-sm text-slate-200">Patterns found</span>
+                </div>
+              </div>
+              
+              {/* Central AI icon */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center shadow-2xl shadow-emerald-500/50 animate-pulse">
+                  <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
+// Features Section with Cards
+function Features() {
+  const features = [
+    {
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+        </svg>
+      ),
+      title: "Voice & Audio Logging",
+      description: "Record thoughts, track progress. Fast, hands-free entries that fit into your busy life."
+    },
+    {
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      ),
+      title: "Multi-Channel Support",
+      description: "WhatsApp, Telegram, more coming soon. Journal where you already chat."
+    },
+    {
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      ),
+      title: "AI-Powered Insights",
+      description: "Patterns → Progress. Discover connections between your habits and outcomes."
+    },
+    {
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+      ),
+      title: "Private & Secure",
+      description: "Your data stays yours. Private by default. Export anytime, delete anytime."
+    }
+  ];
+
+  return (
+    <section id="features" className="relative py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+            Everything you need to <span className="text-emerald-400">grow</span>
+          </h2>
+          <p className="text-xl text-slate-400">Simple, powerful tools for tracking and reflection</p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {features.map((feature, index) => (
+            <div 
+              key={index}
+              className="group relative bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 hover:bg-slate-800/60 hover:border-emerald-500/50 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-emerald-500/20"
+            >
+              <div className="text-emerald-400 mb-4 group-hover:scale-110 transition-transform duration-200">
+                {feature.icon}
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-3">{feature.title}</h3>
+              <p className="text-slate-400 leading-relaxed">{feature.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// How It Works Section with Visual Steps
+function HowItWorks() {
+  const steps = [
+    {
+      number: "1",
+      title: "Add habits",
+      description: "Define what to track (e.g., 'Bed by 11pm', '7:00 AM workout').",
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        </svg>
+      )
+    },
+    {
+      number: "2",
+      title: "Boost your habit",
+      description: "Tell your WHYs, schedule it, and understand triggers & environment.",
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      )
+    },
+    {
+      number: "3",
+      title: "Log by voice or text",
+      description: "Reply with a quick voice note or message.",
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+        </svg>
+      )
+    },
+    {
+      number: "4",
+      title: "We surface patterns",
+      description: "AI transcribes and tags entries, finding connections in your data.",
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      )
+    },
+    {
+      number: "5",
+      title: "Ask anything",
+      description: "Query your data in plain language. See patterns and feel the progress.",
+      icon: (
+        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+        </svg>
+      )
+    }
+  ];
+
+  return (
+    <section id="how-it-works" className="relative py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">How it works</h2>
+          <p className="text-xl text-slate-400">Simple steps to better habits</p>
+        </div>
+        
+        <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
+          {steps.map((step, index) => (
+            <div 
+              key={index}
+              className="relative bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 hover:bg-slate-800/60 hover:border-emerald-500/50 transition-all duration-300 fade-in-on-scroll"
+              style={{ animationDelay: `${index * 0.1}s` }}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-sm font-semibold text-emerald-400">Step {step.number}</span>
+                <div className="text-emerald-400">{step.icon}</div>
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">{step.title}</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">{step.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// Social Proof Section with Auto-Scrolling Testimonials
 function SocialProof() {
   const items = [
-    { q: "I finally kept a journal because it lives in WhatsApp—14 days straight! 🎉", a: "Maya G.", r: "Streaks unlocked my consistency. 🔥" },
-    { q: "The patterns view showed me that late nights killed my AM workouts (82%). 💡", a: "Devon R.", r: "Sleeping earlier = more energy + calmer mornings." },
-    { q: "Voice notes made reflection… fun. I speak for 30s and I'm done. 🎙️😊", a: "Anika P.", r: "My anxiety dropped once I started daily brain dumps. ✨" },
-    { q: "I asked: ‘How many on-time bedtimes last week?’ It answered instantly.", a: "Chris L.", r: "Asking my own data feels magical. ✨" },
-    { q: "It feels private and calm. I share more because it's in chat. 🔒", a: "Sofia M.", r: "Audio-first makes it effortless. 🎧" },
+    { q: "I finally kept a journal because it lives in WhatsApp—14 days straight!", a: "Maya G.", r: "Streaks unlocked my consistency" },
+    { q: "The patterns view showed me that late nights killed my AM workouts (82%).", a: "Devon R.", r: "Sleeping earlier = more energy" },
+    { q: "Voice notes made reflection fun. I speak for 30s and I'm done.", a: "Anika P.", r: "My anxiety dropped" },
+    { q: "I asked: 'How many on-time bedtimes last week?' It answered instantly.", a: "Chris L.", r: "Asking my own data feels magical" },
+    { q: "It feels private and calm. I share more because it's in chat.", a: "Sofia M.", r: "Audio-first makes it effortless" },
   ];
   const [idx, setIdx] = React.useState(0);
   const n = items.length;
-  React.useEffect(() => { const t = setInterval(() => setIdx((i) => (i + 1) % n), 20000); return () => clearInterval(t); }, [n]);
+  
+  React.useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % n), 5000);
+    return () => clearInterval(t);
+  }, [n]);
+
   const prev = () => setIdx((i) => (i - 1 + n) % n);
   const next = () => setIdx((i) => (i + 1) % n);
   const visible = [idx % n, (idx + 1) % n, (idx + 2) % n];
+
   return (
-    <section className="bg-emerald-50">
-      <div className="mx-auto max-w-6xl px-6 pt-6 pb-14 sm:pt-8 sm:pb-16">
-        <h2 className="text-2xl font-semibold text-slate-900 sm:text-3xl">What people say</h2>
-        <div className="mt-8 relative">
-          <div className="grid gap-6 md:grid-cols-3">
+    <section id="testimonials" className="relative py-24">
+      <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">What people say</h2>
+          <p className="text-xl text-slate-400 mb-8">Real experiences from our community</p>
+        </div>
+        
+        <div className="relative">
+          <div className="grid md:grid-cols-3 gap-8">
             {visible.map((i) => (
-              <div key={i} className="rounded-2xl border border-emerald-100 bg-white p-8 shadow-sm h-full">
-                <p className="text-lg leading-7 text-slate-900">“{items[i].q}”</p>
-                <div className="mt-4 text-sm text-slate-500">— {items[i].a}</div>
-                <div className="mt-2 inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800">{items[i].r}</div>
+              <div 
+                key={i}
+                className="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 hover:border-emerald-500/50 transition-all duration-300"
+              >
+                <div className="flex gap-1 mb-4">
+                  {[...Array(5)].map((_, j) => (
+                    <svg key={j} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+                <p className="text-lg leading-relaxed text-slate-300 mb-4">"{items[i].q}"</p>
+                <div className="flex items-center justify-between">
+                  <div className="text-sm font-medium text-slate-400">— {items[i].a}</div>
+                  <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-semibold">
+                    {items[i].r}
+                  </div>
+                </div>
               </div>
             ))}
           </div>
-          <div className="mt-6 flex items-center justify-center gap-4">
-            <button onClick={prev} aria-label="Previous" className="rounded-full border border-emerald-100 bg-white/80 px-3 py-1.5 text-lg shadow hover:bg-white">‹</button>
-            <button onClick={next} aria-label="Next" className="rounded-full border border-emerald-100 bg-white/80 px-3 py-1.5 text-lg shadow hover:bg-white">›</button>
-          </div>
-          <div className="mt-3 flex justify-center gap-2">
-            {Array.from({ length: n }).map((_, i) => (
-              <button key={i} onClick={() => setIdx(i)} aria-label={`Go to slide ${i + 1}`} className={`h-2 w-2 rounded-full ${i === idx ? 'bg-emerald-600' : 'bg-emerald-200'} transition-colors`} />
-            ))}
+          
+          <div className="flex items-center justify-center gap-4 mt-8">
+            <button 
+              onClick={prev} 
+              aria-label="Previous" 
+              className="rounded-full bg-slate-800 border border-slate-700 p-2 text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <div className="flex gap-2">
+              {Array.from({ length: n }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setIdx(i)}
+                  aria-label={`Go to slide ${i + 1}`}
+                  className={`h-2 w-2 rounded-full transition-all cursor-pointer ${
+                    i === idx ? "bg-emerald-500 w-8" : "bg-slate-700"
+                  }`}
+                />
+              ))}
+            </div>
+            <button 
+              onClick={next} 
+              aria-label="Next" 
+              className="rounded-full bg-slate-800 border border-slate-700 p-2 text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>
@@ -218,61 +344,53 @@ function SocialProof() {
   );
 }
 
+// Final CTA Section
 function FinalCTA() {
   return (
-    <section className="relative isolate overflow-hidden bg-emerald-600">
-      <div className="absolute inset-0 -z-10 opacity-20" />
-      <div className="mx-auto max-w-6xl px-6 py-16 sm:py-24">
-        <h2 className="text-3xl font-bold text-white">Log life. Live better.</h2>
-        <p className="mt-3 max-w-2xl text-emerald-50">Start a simple daily log and turn small notes into better habits.</p>
-        <div className="mt-8"><a href="#start" className="inline-flex items-center rounded-2xl px-5 py-3 text-base font-semibold shadow-sm bg-white text-emerald-700 hover:bg-emerald-50">Start your log</a></div>
-        <p className="mt-4 text-sm text-emerald-100">Your data stays yours. Private by default. Export anytime.</p>
+    <section className="relative isolate overflow-hidden bg-emerald-900/20 backdrop-blur-sm border-t border-emerald-500/20 py-24">
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0" style={{ 
+          backgroundImage: 'linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px)',
+          backgroundSize: '50px 50px'
+        }} />
+      </div>
+      <div className="absolute -right-40 -top-40 h-96 w-96 rounded-full bg-white/10 blur-3xl"/>
+      <div className="absolute -left-24 -bottom-20 h-96 w-96 rounded-full bg-white/10 blur-3xl"/>
+      
+      <div className="relative mx-auto max-w-4xl px-6 text-center">
+        <h2 className="text-4xl lg:text-6xl font-bold text-white mb-6">
+          Log Life. Live Better.
+        </h2>
+        <p className="text-xl lg:text-2xl text-emerald-100 mb-12 leading-relaxed">
+          Start a simple daily log and turn small notes into better habits
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <a 
+            href="/signup" 
+            className="inline-flex items-center justify-center px-10 py-5 bg-white text-emerald-700 text-lg font-semibold rounded-xl hover:bg-emerald-50 transition-all duration-200 transform hover:scale-105 shadow-2xl"
+          >
+            Get Started
+            <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </a>
+        </div>
+        <p className="mt-8 text-sm text-emerald-100">
+          Your data stays yours. Private by default. Export anytime.
+        </p>
       </div>
     </section>
   );
 }
 
-function SiteFooter() {
-  return (
-    <footer className="bg-emerald-700">
-      <div className="mx-auto max-w-6xl px-6 py-10 text-sm text-emerald-100">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>© {new Date().getFullYear()} LogLife</div>
-          <nav className="flex gap-4">
-            <a href="#privacy" className="text-white hover:underline">Privacy</a>
-            <a href="#terms" className="text-white hover:underline">Terms</a>
-            <a href="#contact" className="text-white hover:underline">Contact</a>
-          </nav>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-function runDevTests() {
-  if (typeof window === "undefined") return;
-  const bSub = "A clear daily record that turns patterns into progress—your way.";
-  console.assert(bSub.includes("patterns") && bSub.includes("progress"), "B subhead mentions patterns/progress");
-  const bHighlight = "Works right in WhatsApp. Audio-first journaling.";
-  console.assert(/WhatsApp/.test(bHighlight) && /Audio-first/.test(bHighlight), "B highlight mentions WhatsApp and Audio-first");
-  const bulletCount = 8; console.assert(bulletCount === 8, "Hero should show 8 bullets");
-  const bulletsContain = ["fast", "hands", "Chat‑native"]; bulletsContain.forEach((kw) => console.assert(true, `Bullet hints include: ${kw}`));
-  { const n = 5; const idx = 1; const visible = [idx % n, (idx + 1) % n, (idx + 2) % n]; console.assert(new Set(visible).size === 3, "Carousel should show 3 distinct testimonials"); }
-  const howSteps = 5; console.assert(howSteps === 5, "How it works should have 5 steps after merging 4 & 5");
-  const contrib = [30,20,16,20,12]; const sum = contrib.reduce((a,b)=>a+b,0); console.assert(sum === 98, "Pillar percentage sum should be 98 (intentional, not forced to 100)");
-}
-
+// Main export component
 export default function LogLifeHero() {
-  if (process.env.NODE_ENV !== "production") runDevTests();
   return (
-    <main className="min-h-screen bg-white">
-      <Hero variant="B" />
+    <main className="min-h-screen">
+      <Hero />
+      <Features />
       <HowItWorks />
       <SocialProof />
-      <FinalCTA />
-      <SiteFooter />
     </main>
   );
 }
-
-
