@@ -305,10 +305,176 @@ export default function PricingPage() {
           </div>
         </div>
         
-        {/* FAQ or Trust Indicators */}
-        <div className="mt-20 text-center animate-slide-up" style={{ animationDelay: "0.3s" }}>
+        {/* Billing Principles Section */}
+        <div className="mt-24 animate-slide-up" style={{ animationDelay: "0.3s" }}>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              How we <span className="text-teal-400">bill</span>
+            </h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              Transparent, fair, and designed to keep you in control.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                icon: (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                ),
+                title: "No API Markup",
+                description: "We don't resell API keys or add margin on model usage. You pay providers directly at their rates."
+              },
+              {
+                icon: (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                  </svg>
+                ),
+                title: "Itemized Usage",
+                description: "Monthly receipts show usage by provider—tokens, minutes, calls—plus our subscription fee. No surprises."
+              },
+              {
+                icon: (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                  </svg>
+                ),
+                title: "Subscription Covers",
+                description: "Web hosting, development, monitoring, alerts, audit logs, and support. All infrastructure costs included."
+              },
+              {
+                icon: (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                  </svg>
+                ),
+                title: "Keys & Data Control",
+                description: "BYO keys stay in your environment. For Hosted, keys can be yours or ours—rotate anytime."
+              },
+              {
+                icon: (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                ),
+                title: "No Content Logging",
+                description: "We don't store message content in logs by default. Opt in explicitly only if you need debugging."
+              },
+              {
+                icon: (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ),
+                title: "Clear Cancellation",
+                description: "Cancel any time. No lock-in, no hidden fees, no hoops to jump through."
+              },
+              {
+                icon: (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                  </svg>
+                ),
+                title: "Inactivity Nudges",
+                description: "No usage for a while? We'll email you to downgrade, pause, or cancel—so you don't pay for nothing."
+              },
+              {
+                icon: (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                ),
+                title: "Always Your Data",
+                description: "Host anywhere. Export or delete with one click. We can't see or change your message content."
+              },
+            ].map((item, index) => (
+              <div 
+                key={index}
+                className="bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-2xl p-6 hover:border-teal-500/30 transition-all duration-200"
+              >
+                <div className="text-teal-400 mb-4">
+                  {item.icon}
+                </div>
+                <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
+                <p className="text-sm text-slate-400 leading-relaxed">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Privacy Section */}
+        <div className="mt-24 animate-slide-up" style={{ animationDelay: "0.4s" }}>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              Your <span className="text-red-500">privacy</span>, by design
+            </h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              Different deployment options, same commitment to your privacy.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8">
+            {/* Private Deploy */}
+            <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Private Deploy</h3>
+                  <p className="text-sm text-slate-500">Self-hosted or your infrastructure</p>
+                </div>
+              </div>
+              <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5">
+                <p className="text-slate-300 leading-relaxed">
+                  We are <span className="text-white font-medium">not able to see, store, or modify</span> message content between you and your assistant. All processing happens in your environment; we only receive aggregate usage metrics.
+                </p>
+              </div>
+              <div className="mt-6 flex items-center gap-2 text-sm text-teal-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                </svg>
+                <span>Maximum privacy guarantee</span>
+              </div>
+            </div>
+
+            {/* Hosted */}
+            <div className="bg-slate-900/60 backdrop-blur-md border border-red-500/20 rounded-2xl p-8">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white">Hosted</h3>
+                  <p className="text-sm text-slate-500">Managed by AutoClaw</p>
+                </div>
+              </div>
+              <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5">
+                <p className="text-slate-300 leading-relaxed">
+                  We <span className="text-white font-medium">don't store or log message content</span> by default. Because we operate the infrastructure, you're trusting us operationally; we provide audit logs and strict access controls.
+                </p>
+              </div>
+              <div className="mt-6 flex items-center gap-2 text-sm text-red-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                </svg>
+                <span>Audit logs & access controls included</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Trust Indicators */}
+        <div className="mt-20 text-center animate-slide-up" style={{ animationDelay: "0.5s" }}>
           <p className="text-slate-500 text-sm">
-            Powered by OpenClaw · Secure · Private · Cancel Anytime
+            Powered by OpenClaw · Open Source · Your Data, Your Control
           </p>
         </div>
 
