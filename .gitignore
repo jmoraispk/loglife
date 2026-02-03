@@ -1,0 +1,45 @@
+build/*
+**/loglife.egg-info/*
+**/__pycache__/**
+whatsapp-client/.wwebjs_auth/**
+whatsapp-client/node_modules/**
+whatsapp-client/.wwebjs_cache/**
+whatsapp-client/package-lock.json
+git_token_server
+whatsapp-client/node_modules
+.wwebjs_auth/
+.wwebjs_cache/
+**/loglife.db
+**/loglife.db-journal
+.venv
+uv.lock
+src/loglife/logs/
+.ruff_cache/
+.coverage
+site/*
+
+# Node/Next anywhere in repo
+**/node_modules/
+**/.next/
+**/out/
+**/.vercel/
+**/dist/
+**/build/
+**/coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Env files (adjust policy as you prefer)
+.env
+.env.*
+!.env.example
+
+# Python caches
+**/__pycache__/
+.pytest_cache/
+.ruff_cache/
+
+# OS
+.DS_Store
