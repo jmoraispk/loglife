@@ -24,9 +24,6 @@ jobs:
         if: github.ref == 'refs/heads/dev'
         run: |
           ssh -A -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
-            # =========== ENSURE PNPM IS INSTALLED ===========
-            npm install -g pnpm &&
-
             # =========== PULL LATEST CODE ===========
             cd /home/ali/loglife-dev &&
             git fetch origin &&
@@ -34,8 +31,8 @@ jobs:
 
             # =========== BUILD & DEPLOY WEBSITE ===========
             cd /home/ali/loglife-dev/website &&
-            pnpm install --frozen-lockfile &&
-            pnpm run build &&
+            npm ci &&
+            npm run build &&
             sudo systemctl restart loglife-website.service
           "
 
@@ -46,16 +43,13 @@ jobs:
         if: github.ref == 'refs/heads/main'
         run: |
           ssh -A -o StrictHostKeyChecking=no ${{ secrets.SERVER_USER }}@${{ secrets.SERVER_HOST }} "
-            # =========== ENSURE PNPM IS INSTALLED ===========
-            npm install -g pnpm &&
-
             # =========== PULL LATEST CODE ===========
             cd /home/ali/loglife-prod &&
             git pull &&
 
             # =========== BUILD & DEPLOY WEBSITE ===========
             cd /home/ali/loglife-prod/website &&
-            pnpm install --frozen-lockfile &&
-            pnpm run build &&
+            npm ci &&
+            npm run build &&
             sudo systemctl restart loglife-website.service
           "
