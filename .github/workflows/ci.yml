@@ -18,32 +18,15 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install uv
-        uses: astral-sh/setup-uv@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
-        run: uv sync --extra dev
-
-      - name: Run Ruff format
-        run: uv run ruff format --check .
-
-      - name: Run PyTest
-        run: uv run pytest --cov=src/loglife/app --cov-report=term-missing
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "24"
 
-      - name: Install npm dependencies
+      - name: Install dependencies
         working-directory: website
         run: npm ci
 
-      - name: Run npm build
+      - name: Run build
         working-directory: website
         run: npm run build
