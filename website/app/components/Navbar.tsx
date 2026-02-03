@@ -3,12 +3,10 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
-import { useTheme } from "../contexts/ThemeContext";
 import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { isDarkMode, toggleTheme } = useTheme();
   const { openWidget } = useWhatsAppWidget();
   const pathname = usePathname();
 
@@ -17,17 +15,13 @@ export default function Navbar() {
   }
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-200 ${
-      isDarkMode 
-        ? "bg-slate-900 border-b border-slate-800" 
-        : "bg-white border-b border-slate-100"
-    }`}>
+    <header className="md:hidden fixed top-0 left-0 right-0 z-50 transition-colors duration-200 bg-slate-900/50 backdrop-blur-md border-b border-slate-800/50">
       <div className="container mx-auto px-12 py-3">
         <div className="flex items-center justify-between">
           <Link href="/#hero" className="flex items-center group">
             <div className="flex items-center overflow-visible transition-transform duration-200 group-hover:scale-[1.02] pt-2.5 py-0.5">
               <Image
-                src={isDarkMode ? "/logo_light.svg" : "/logo.svg"}
+                src="/logo_light.svg"
                 alt="LogLife"
                 width={140}
                 height={35}
@@ -39,108 +33,20 @@ export default function Navbar() {
 
           <nav className="hidden md:flex items-center space-x-8">
             <Link
-              href="/#features"
-              className={`font-medium transition-colors ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400" 
-                  : "text-slate-600 hover:text-emerald-600"
-              }`}
+              href="/pricing"
+              className="font-medium transition-colors text-slate-300 hover:text-emerald-400"
             >
-              Features
+              Pricing
             </Link>
             <Link
-              href="/#how-it-works"
-              className={`font-medium transition-colors ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400" 
-                  : "text-slate-600 hover:text-emerald-600"
-              }`}
+              href="#blog"
+              className="font-medium transition-colors text-slate-300 hover:text-emerald-400"
             >
-              How it works
-            </Link>
-            <Link
-              href="/#testimonials"
-              className={`font-medium transition-colors ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400" 
-                  : "text-slate-600 hover:text-emerald-600"
-              }`}
-            >
-              Testimonials
-            </Link>
-            <Link
-              href="/#guides"
-              className={`font-medium transition-colors ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400" 
-                  : "text-slate-600 hover:text-emerald-600"
-              }`}
-            >
-              Guides
-            </Link>
-            <Link
-              href="/#about"
-              className={`font-medium transition-colors ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400" 
-                  : "text-slate-600 hover:text-emerald-600"
-              }`}
-            >
-              About
-            </Link>
-            <Link
-              href="/#roadmap"
-              className={`font-medium transition-colors ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400" 
-                  : "text-slate-600 hover:text-emerald-600"
-              }`}
-            >
-              Roadmap
+              Blog
             </Link>
           </nav>
 
           <div className="flex items-center space-x-2 sm:space-x-4">
-
-            <button
-              className={`flex items-center justify-center w-10 h-10 transition-colors cursor-pointer rounded-lg ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400" 
-                  : "text-slate-600 hover:text-emerald-600"
-              }`}
-              aria-label="Toggle theme"
-              onClick={toggleTheme}
-            >
-              {isDarkMode ? (
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
-                  />
-                </svg>
-              )}
-            </button>
             <button
               onClick={openWidget}
               className="hidden sm:inline-flex items-center px-5 py-2 bg-emerald-600 text-white rounded-lg font-medium hover:bg-emerald-700 transition-all cursor-pointer"
@@ -155,11 +61,7 @@ export default function Navbar() {
               Start your log
             </button>
             <button 
-              className={`md:hidden p-2 rounded-lg transition-colors duration-200 ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400" 
-                  : "text-slate-600 hover:text-emerald-600"
-              }`}
+              className="md:hidden p-2 rounded-lg transition-colors duration-200 text-slate-300 hover:text-emerald-400"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <svg
@@ -190,76 +92,27 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className={`md:hidden absolute top-full left-0 right-0 p-4 flex flex-col space-y-4 shadow-lg animate-in slide-in-from-top-5 duration-200 transition-colors ${
-            isDarkMode 
-              ? "bg-slate-900 border-b border-slate-800" 
-              : "bg-white border-b border-slate-100"
-          }`}>
-            <Link
-              href="/#features"
-              className={`font-medium transition-colors px-4 py-2 rounded-lg ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400 hover:bg-slate-800" 
-                  : "text-slate-600 hover:text-emerald-600 hover:bg-slate-50"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Features
-            </Link>
+          <div className="md:hidden absolute top-full left-0 right-0 p-4 flex flex-col space-y-4 shadow-lg animate-in slide-in-from-top-5 duration-200 transition-colors bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
             <Link
               href="/#how-it-works"
-              className={`font-medium transition-colors px-4 py-2 rounded-lg ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400 hover:bg-slate-800" 
-                  : "text-slate-600 hover:text-emerald-600 hover:bg-slate-50"
-              }`}
+              className="font-medium transition-colors px-4 py-2 rounded-lg text-slate-300 hover:text-emerald-400 hover:bg-slate-800"
               onClick={() => setIsMenuOpen(false)}
             >
               How it works
             </Link>
             <Link
-              href="/#testimonials"
-              className={`font-medium transition-colors px-4 py-2 rounded-lg ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400 hover:bg-slate-800" 
-                  : "text-slate-600 hover:text-emerald-600 hover:bg-slate-50"
-              }`}
+              href="#pricing"
+              className="font-medium transition-colors px-4 py-2 rounded-lg text-slate-300 hover:text-emerald-400 hover:bg-slate-800"
               onClick={() => setIsMenuOpen(false)}
             >
-              Testimonials
+              Pricing
             </Link>
             <Link
-              href="/#guides"
-              className={`font-medium transition-colors px-4 py-2 rounded-lg ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400 hover:bg-slate-800" 
-                  : "text-slate-600 hover:text-emerald-600 hover:bg-slate-50"
-              }`}
+              href="#blog"
+              className="font-medium transition-colors px-4 py-2 rounded-lg text-slate-300 hover:text-emerald-400 hover:bg-slate-800"
               onClick={() => setIsMenuOpen(false)}
             >
-              Guides
-            </Link>
-            <Link
-              href="/#about"
-              className={`font-medium transition-colors px-4 py-2 rounded-lg ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400 hover:bg-slate-800" 
-                  : "text-slate-600 hover:text-emerald-600 hover:bg-slate-50"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              About
-            </Link>
-            <Link
-              href="/#roadmap"
-              className={`font-medium transition-colors px-4 py-2 rounded-lg ${
-                isDarkMode 
-                  ? "text-slate-300 hover:text-emerald-400 hover:bg-slate-800" 
-                  : "text-slate-600 hover:text-emerald-600 hover:bg-slate-50"
-              }`}
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Roadmap
+              Blog
             </Link>
             <button
               onClick={() => {

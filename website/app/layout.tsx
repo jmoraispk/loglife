@@ -7,9 +7,9 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { WhatsAppWidgetProvider } from "./contexts/WhatsAppWidgetContext";
 
 export const metadata: Metadata = {
-  title: "LogLife",
+  title: "LogLife — Private AI Assistants. Automatic Deployment.",
   description:
-    "Audio-first, chat-native journaling that helps you notice patterns and act.",
+    "Audio-first, chat-native journaling. Private AI assistants that track your progress, find patterns, and help you build better habits. Your data stays yours.",
 };
 
 export default function RootLayout({
