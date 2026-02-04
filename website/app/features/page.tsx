@@ -272,7 +272,7 @@ export default function FeaturesPage() {
           <div className="bg-gradient-to-br from-red-500/10 to-slate-900/50 border border-red-500/20 rounded-3xl p-8 md:p-12">
             <div className="text-center mb-10">
               <h2 className="text-3xl font-bold text-white mb-2">What AutoClaw Adds</h2>
-              <p className="text-slate-400">On top of OpenClaw's features</p>
+              <p className="text-slate-400">On top of OpenClaw&apos;s features</p>
             </div>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">

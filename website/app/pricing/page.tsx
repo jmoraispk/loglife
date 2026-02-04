@@ -458,7 +458,7 @@ export default function PricingPage() {
               </div>
               <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5">
                 <p className="text-slate-300 leading-relaxed">
-                  We <span className="text-white font-medium">don't store or log message content</span> by default. Because we operate the infrastructure, you're trusting us operationally; we provide audit logs and strict access controls.
+                  We <span className="text-white font-medium">don&apos;t store or log message content</span> by default. Because we operate the infrastructure, you&apos;re trusting us operationally; we provide audit logs and strict access controls.
                 </p>
               </div>
               <div className="mt-6 flex items-center gap-2 text-sm text-red-400">
