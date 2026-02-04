@@ -1,15 +1,13 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import ConditionalNavbar from "./components/ConditionalNavbar";
-import WhatsAppWidget from "./components/WhatsAppWidget";
 import PageWrapper from "./components/PageWrapper";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import { WhatsAppWidgetProvider } from "./contexts/WhatsAppWidgetContext";
 
 export const metadata: Metadata = {
-  title: "LogLife — Private AI Assistants. Automatic Deployment.",
+  title: "AutoClaw — Deploy OpenClaw in Minutes",
   description:
-    "Audio-first, chat-native journaling. Private AI assistants that track your progress, find patterns, and help you build better habits. Your data stays yours.",
+    "One-click deployment for OpenClaw agents. Auto deploy, monitor, and track costs across all APIs your agent uses. No SSH, no server hassles.",
 };
 
 export default function RootLayout({
@@ -21,11 +19,8 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ThemeProvider>
-          <WhatsAppWidgetProvider>
-            <ConditionalNavbar />
-            <PageWrapper>{children}</PageWrapper>
-            <WhatsAppWidget />
-          </WhatsAppWidgetProvider>
+          <ConditionalNavbar />
+          <PageWrapper>{children}</PageWrapper>
         </ThemeProvider>
       </body>
     </html>

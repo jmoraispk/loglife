@@ -13,7 +13,7 @@ export default function LoginPage() {
           <Link href="/" className="inline-block relative w-12 h-12 mb-6 hover:opacity-80 transition-opacity">
              <Image
                 src="/icon-small.svg"
-                alt="LogLife"
+                alt="AutoClaw"
                 fill
                 className="object-contain"
               />
@@ -22,7 +22,7 @@ export default function LoginPage() {
             Welcome back
           </h2>
           <p className="mt-2 text-sm text-slate-400">
-            Sign in to access your personal AI assistant
+            Sign in to access your AutoClaw dashboard
           </p>
         </div>
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
+                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
                 placeholder="name@example.com"
               />
             </div>
@@ -49,7 +49,7 @@ export default function LoginPage() {
                 <label htmlFor="password" className="block text-sm font-medium text-slate-300">
                   Password
                 </label>
-                <a href="#" className="text-sm font-medium text-emerald-400 hover:text-emerald-300">
+                <a href="#" className="text-sm font-medium text-red-400 hover:text-red-300">
                   Forgot password?
                 </a>
               </div>
@@ -59,14 +59,14 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
+                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
                 placeholder="••••••••"
               />
             </div>
 
             <button
               type="submit"
-              className="w-full flex justify-center py-3 px-4 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
+              className="w-full flex justify-center py-3 px-4 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-red-500/20 cursor-pointer"
             >
               Sign in
             </button>
@@ -104,7 +104,7 @@ export default function LoginPage() {
         {/* Footer */}
         <p className="text-center text-sm text-slate-400">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-semibold text-emerald-400 hover:text-emerald-300 hover:underline transition-all">
+          <Link href="/signup" className="font-semibold text-red-400 hover:text-red-300 hover:underline transition-all">
             Sign up for free
           </Link>
         </p>

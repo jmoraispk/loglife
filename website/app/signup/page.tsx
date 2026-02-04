@@ -13,16 +13,16 @@ export default function SignupPage() {
           <Link href="/" className="inline-block relative w-12 h-12 mb-6 hover:opacity-80 transition-opacity">
             <Image
                 src="/icon-small.svg"
-                alt="LogLife"
+                alt="AutoClaw"
                 fill
                 className="object-contain"
             />
           </Link>
           <h2 className="text-3xl font-bold tracking-tight text-white">
-            Create an account
+            Deploy your AI agent
           </h2>
           <p className="mt-2 text-sm text-slate-400">
-            Start logging your life privately today
+            Get started with AutoClaw in minutes
           </p>
         </div>
 
@@ -39,7 +39,7 @@ export default function SignupPage() {
                   name="first-name"
                   type="text"
                   required
-                  className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
+                  className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
                   placeholder="John"
                 />
               </div>
@@ -52,7 +52,7 @@ export default function SignupPage() {
                   name="last-name"
                   type="text"
                   required
-                  className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
+                  className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
                   placeholder="Doe"
                 />
               </div>
@@ -68,7 +68,7 @@ export default function SignupPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
+                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
                 placeholder="name@example.com"
               />
             </div>
@@ -83,7 +83,7 @@ export default function SignupPage() {
                 type="password"
                 autoComplete="new-password"
                 required
-                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
+                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-4 py-3 focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
                 placeholder="••••••••"
               />
               <p className="mt-2 text-xs text-slate-500">
@@ -97,19 +97,19 @@ export default function SignupPage() {
                   id="terms"
                   name="terms"
                   type="checkbox"
-                  className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-emerald-600 focus:ring-emerald-600 focus:ring-offset-slate-900"
+                  className="h-4 w-4 rounded border-slate-700 bg-slate-900 text-red-600 focus:ring-red-600 focus:ring-offset-slate-900"
                 />
               </div>
               <div className="ml-3 text-sm">
                 <label htmlFor="terms" className="text-slate-400">
-                  I agree to the <a href="#" className="font-medium text-emerald-400 hover:text-emerald-300">Terms</a> and <a href="#" className="font-medium text-emerald-400 hover:text-emerald-300">Privacy Policy</a>
+                  I agree to the <a href="#" className="font-medium text-red-400 hover:text-red-300">Terms</a> and <a href="#" className="font-medium text-red-400 hover:text-red-300">Privacy Policy</a>
                 </label>
               </div>
             </div>
 
             <button
               type="submit"
-              className="w-full flex justify-center py-3 px-4 rounded-xl text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer"
+              className="w-full flex justify-center py-3 px-4 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-red-500/20 cursor-pointer"
             >
               Create Account
             </button>
@@ -147,7 +147,7 @@ export default function SignupPage() {
         {/* Footer */}
         <p className="text-center text-sm text-slate-400">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-emerald-400 hover:text-emerald-300 hover:underline transition-all">
+          <Link href="/login" className="font-semibold text-red-400 hover:text-red-300 hover:underline transition-all">
             Sign in
           </Link>
         </p>

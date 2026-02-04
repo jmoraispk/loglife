@@ -2,43 +2,43 @@
 import React from "react";
 import Link from "next/link";
 
-// Mock Data for Blog Posts
+// Mock Data for Blog Posts - Updated for AutoClaw
 const BLOG_POSTS = [
   {
-    slug: "power-of-voice-logging",
-    title: "The Power of Voice Logging: Why Speaking is Better Than Typing",
-    excerpt: "Discover how audio-first journaling can reduce friction, capture more nuance, and help you maintain a consistent habit.",
-    date: "Oct 12, 2025",
+    slug: "why-openclaw-deployment-hard",
+    title: "Why Deploying OpenClaw Is Harder Than It Should Be",
+    excerpt: "Exploring the challenges of setting up personal AI assistants: VPS rental, SSH configuration, networking, and why we built AutoClaw.",
+    date: "Jan 28, 2026",
     readTime: "5 min read",
-    category: "Productivity",
-    image: "/blog/voice-logging.jpg" // Placeholder, we'll use a gradient fallback
+    category: "Product",
+    image: "/blog/deployment.jpg"
   },
   {
-    slug: "tracking-habits-ai",
-    title: "How AI Finds Patterns in Your Daily Habits",
-    excerpt: "We analyzed 10,000 logs to see how AI detects correlations between sleep, caffeine, and productivity levels.",
-    date: "Sep 28, 2025",
+    slug: "understanding-api-costs",
+    title: "Understanding Your AI Agent's API Costs",
+    excerpt: "A breakdown of how API costs accumulate across Anthropic, OpenAI, and other providers—and how to track them effectively.",
+    date: "Jan 15, 2026",
     readTime: "7 min read",
-    category: "Data Science",
-    image: "/blog/ai-patterns.jpg"
+    category: "Tutorial",
+    image: "/blog/costs.jpg"
   },
   {
-    slug: "whatsapp-journaling",
-    title: "Why WhatsApp is the Perfect Journaling App",
-    excerpt: "You don't need another app. Learn why meeting you where you already are is the secret to habit retention.",
-    date: "Sep 15, 2025",
+    slug: "curated-skills-philosophy",
+    title: "The Case for Curated Skills: Less Is More",
+    excerpt: "OpenClaw has 50+ skills. Most users need 5-10. Here's how we think about skill curation for new users.",
+    date: "Jan 8, 2026",
     readTime: "4 min read",
-    category: "Lifestyle",
-    image: "/blog/whatsapp.jpg"
+    category: "Philosophy",
+    image: "/blog/skills.jpg"
   },
   {
-    slug: "privacy-first-ai",
-    title: "Building a Private AI: Our Architecture",
-    excerpt: "A deep dive into how we secure your personal data while still providing powerful AI insights.",
-    date: "Aug 30, 2025",
+    slug: "tailscale-networking-explained",
+    title: "How AutoClaw Uses Tailscale for Secure Networking",
+    excerpt: "A technical deep dive into how we leverage Tailscale to provide secure, zero-config networking for your AI agent.",
+    date: "Dec 20, 2025",
     readTime: "8 min read",
     category: "Engineering",
-    image: "/blog/privacy.jpg"
+    image: "/blog/tailscale.jpg"
   }
 ];
 
@@ -50,41 +50,41 @@ export default function BlogPage() {
         {/* Header */}
         <div className="text-center mb-20 animate-slide-up">
           <h1 className="text-4xl lg:text-6xl font-bold text-white tracking-tight mb-6">
-            LogLife <span className="text-emerald-400">Blog</span>
+            AutoClaw <span className="text-red-500">Blog</span>
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Insights on habit formation, personal data, and building the future of 
-            private AI assistants.
+            Insights on AI agent deployment, OpenClaw, and building the future of 
+            personal AI assistants.
           </p>
         </div>
 
         {/* Featured Post (First one) */}
         <div className="mb-16 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-          <Link href={`/blog/${BLOG_POSTS[0].slug}`} className="group block relative bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-3xl overflow-hidden hover:border-emerald-500/50 transition-all duration-300">
+          <Link href={`/blog/${BLOG_POSTS[0].slug}`} className="group block relative bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-3xl overflow-hidden hover:border-red-500/50 transition-all duration-300">
             <div className="grid md:grid-cols-2 gap-0">
-              <div className="h-64 md:h-auto bg-gradient-to-br from-emerald-900/40 to-slate-900 relative overflow-hidden">
+              <div className="h-64 md:h-auto bg-gradient-to-br from-red-900/40 to-slate-900 relative overflow-hidden">
                 {/* Fallback pattern since we don't have real images yet */}
-                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-500 via-slate-900 to-black"></div>
-                <div className="absolute inset-0 flex items-center justify-center text-emerald-700/20">
+                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-red-500 via-slate-900 to-black"></div>
+                <div className="absolute inset-0 flex items-center justify-center text-red-700/20">
                     <svg className="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </div>
               </div>
               <div className="p-8 md:p-12 flex flex-col justify-center">
                 <div className="flex items-center gap-3 text-sm mb-4">
-                  <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-medium border border-emerald-500/20">
+                  <span className="px-3 py-1 rounded-full bg-red-500/10 text-red-400 font-medium border border-red-500/20">
                     {BLOG_POSTS[0].category}
                   </span>
                   <span className="text-slate-500">{BLOG_POSTS[0].date}</span>
                   <span className="text-slate-600">•</span>
                   <span className="text-slate-500">{BLOG_POSTS[0].readTime}</span>
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-4 group-hover:text-emerald-400 transition-colors">
+                <h2 className="text-3xl font-bold text-white mb-4 group-hover:text-red-400 transition-colors">
                   {BLOG_POSTS[0].title}
                 </h2>
                 <p className="text-slate-400 text-lg leading-relaxed mb-6">
                   {BLOG_POSTS[0].excerpt}
                 </p>
-                <div className="text-emerald-400 font-medium flex items-center group-hover:translate-x-2 transition-transform">
+                <div className="text-red-400 font-medium flex items-center group-hover:translate-x-2 transition-transform">
                   Read Article 
                   <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -111,11 +111,11 @@ export default function BlogPage() {
               
               <div className="p-6 flex flex-col flex-1">
                 <div className="flex items-center justify-between text-xs mb-3">
-                   <span className="text-emerald-400 font-medium">{post.category}</span>
+                   <span className="text-red-400 font-medium">{post.category}</span>
                    <span className="text-slate-500">{post.readTime}</span>
                 </div>
                 
-                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors line-clamp-2">
+                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors line-clamp-2">
                   {post.title}
                 </h3>
                 
@@ -125,7 +125,7 @@ export default function BlogPage() {
                 
                 <div className="pt-4 border-t border-slate-800 mt-auto flex items-center justify-between">
                    <span className="text-xs text-slate-500">{post.date}</span>
-                   <span className="text-xs font-semibold text-emerald-400/80 group-hover:text-emerald-400">Read more →</span>
+                   <span className="text-xs font-semibold text-red-400/80 group-hover:text-red-400">Read more →</span>
                 </div>
               </div>
             </Link>
@@ -133,18 +133,18 @@ export default function BlogPage() {
         </div>
 
         {/* Newsletter Signup */}
-        <div className="mt-24 p-8 md:p-12 rounded-3xl bg-emerald-900/10 border border-emerald-500/20 text-center animate-slide-up" style={{ animationDelay: "0.3s" }}>
+        <div className="mt-24 p-8 md:p-12 rounded-3xl bg-red-900/10 border border-red-500/20 text-center animate-slide-up" style={{ animationDelay: "0.3s" }}>
           <h3 className="text-2xl font-bold text-white mb-4">Subscribe to our newsletter</h3>
           <p className="text-slate-400 mb-8 max-w-xl mx-auto">
-            Get the latest updates on LogLife features and articles about personal data science directly to your inbox.
+            Get the latest updates on AutoClaw features, OpenClaw tips, and articles about AI agent deployment.
           </p>
           <form className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
             <input 
               type="email" 
               placeholder="you@example.com" 
-              className="px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 w-full"
+              className="px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 w-full"
             />
-            <button className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-colors whitespace-nowrap shadow-lg shadow-emerald-900/20 cursor-pointer">
+            <button className="px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-xl transition-colors whitespace-nowrap shadow-lg shadow-red-900/20 cursor-pointer">
               Subscribe
             </button>
           </form>
