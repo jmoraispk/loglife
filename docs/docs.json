@@ -1,0 +1,58 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "name": "AutoClaw",
+  "theme": "mint",
+  "logo": {
+    "light": "/assets/logo-light.svg",
+    "dark": "/assets/logo-dark.svg"
+  },
+  "favicon": "/assets/favicon.svg",
+  "colors": {
+    "primary": "#EF4444"
+  },
+  "topbarLinks": [
+    {
+      "name": "App",
+      "url": "https://autoclaw.io"
+    },
+    {
+      "name": "OpenClaw Docs",
+      "url": "https://docs.openclaw.io"
+    }
+  ],
+  "navigation": {
+    "groups": [
+      {
+        "group": "Getting Started",
+        "pages": [
+          "index",
+          "getting-started",
+          "how-it-works"
+        ]
+      },
+      {
+        "group": "Features",
+        "pages": [
+          "features/index",
+          "features/channels",
+          "features/skills"
+        ]
+      },
+      {
+        "group": "Platform",
+        "pages": [
+          "platform/dashboard",
+          "platform/cost-tracking",
+          "platform/security"
+        ]
+      },
+      {
+        "group": "Help",
+        "pages": [
+          "help/faq",
+          "help/support"
+        ]
+      }
+    ]
+  }
+}
