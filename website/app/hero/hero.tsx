@@ -285,12 +285,11 @@ function BeforeAfter() {
               {[
                 "Rent, configure and manage a VPS",
                 "Setup SSH, accounts, dependencies, and networking",
-                "Clone and best-effort build OpenClaw",
-                "Track API costs manually across providers",
-                "Juggle 20+ API keys across providers",
+                "Clone and hope OpenClaw builds",
+                "Manually track API keys and costs across providers",
                 "Security risks from unmanaged community skills",
-                "Brittle updates prone to data-loss",
-                "Limited memory bounded by context",
+                "Short-term memory limited by context window",
+                "Risky upgrades with potential data loss",
                 "Possibly debugging for hours"
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-slate-400">
@@ -310,15 +309,14 @@ function BeforeAfter() {
             </h3>
             <ul className="space-y-4">
               {[
-                "Managed cloud hosting with pay-as-you-go pricing",
-                "One-click deploy with optimized defaults",
-                "Stable and validated OpenClaw setup",
-                "Unified cost dashboard",
-                "BYO keys or use ours at volume pricing",
-                "Install only secure and vetted skills",
+                "Managed cloud hosting with usage-based pricing",
+                "One-click deploy with hardened defaults",
+                "Verified OpenClaw release (known-good)",
+                "Centralized API cost visibility with optional BYO keys",
+                "Curated skills catalog (vetted)",
+                "Long-term Supermemory via vector databases",
                 "Zero-surprise upgrades",
-                "Supermemory for weeks of context",
-                "Ready in minutes"
+                "Live in minutes"
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-white">
                   <svg className="w-5 h-5 text-teal-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
