@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.37.2",
     "@vapi-ai/client-sdk-react": "^0.1.1",
     "@vapi-ai/web": "^2.5.2",
     "dotenv": "^17.2.3",
