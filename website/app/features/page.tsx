@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import Image from "next/image";
 
 // Channel icons as SVG components
 const ChannelIcons = {
@@ -32,7 +33,7 @@ const ChannelIcons = {
     </svg>
   ),
   Signal: (
-    <img src="/logos/signal.png" alt="Signal" className="w-6 h-6 object-contain" />
+    <Image src="/logos/signal.png" alt="Signal" width={24} height={24} className="w-6 h-6 object-contain" />
   ),
   iMessage: (
     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="#34C759">
@@ -40,10 +41,10 @@ const ChannelIcons = {
     </svg>
   ),
   GoogleChat: (
-    <img src="/logos/google-chat.png" alt="Google Chat" className="w-6 h-6 object-contain" />
+    <Image src="/logos/google-chat.png" alt="Google Chat" width={24} height={24} className="w-6 h-6 object-contain" />
   ),
   MSTeams: (
-    <img src="/logos/ms-teams.png" alt="MS Teams" className="w-8 h-8 object-contain" />
+    <Image src="/logos/ms-teams.png" alt="MS Teams" width={32} height={32} className="w-8 h-8 object-contain" />
   ),
   Matrix: (
     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
