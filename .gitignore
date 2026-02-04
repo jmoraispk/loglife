@@ -7,6 +7,10 @@ out/
 dist/
 build/
 
+# Next.js auto-generated TypeScript declarations
+# This file changes between `next dev` and `next build`, causing noisy diffs
+next-env.d.ts
+
 # Vercel
 .vercel/
 
