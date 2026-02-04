@@ -1,46 +1,14 @@
 "use client";
 import React from "react";
 import Link from "next/link";
+import postsData from "./posts.json";
 
-// Blog Posts Data
-const BLOG_POSTS = [
-  {
-    slug: "why-openclaw-deployment-hard",
-    title: "Why Deploying OpenClaw Is Harder Than It Should Be",
-    excerpt: "Exploring the challenges of setting up personal AI assistants: VPS rental, SSH configuration, networking, and why we built AutoClaw.",
-    date: "Jan 28, 2026",
-    readTime: "5 min read",
-    category: "Product",
-    image: "/blog/deployment.jpg"
-  },
-  {
-    slug: "understanding-api-costs",
-    title: "Understanding Your AI Agent's API Costs",
-    excerpt: "A breakdown of how API costs accumulate across Anthropic, OpenAI, and other providers—and how to track them effectively.",
-    date: "Jan 15, 2026",
-    readTime: "7 min read",
-    category: "Tutorial",
-    image: "/blog/costs.jpg"
-  },
-  {
-    slug: "curated-skills-philosophy",
-    title: "The Case for Curated Skills: Less Is More",
-    excerpt: "OpenClaw has 50+ skills. Most users need 5-10. Here's how we think about skill curation for new users.",
-    date: "Jan 8, 2026",
-    readTime: "4 min read",
-    category: "Philosophy",
-    image: "/blog/skills.jpg"
-  },
-  {
-    slug: "self-hosted-vs-cloud",
-    title: "Self-Hosted vs Cloud AI: A Decision Framework",
-    excerpt: "Both approaches have trade-offs. This post offers a practical framework for evaluating which makes sense for your situation, with honest pros and cons for each.",
-    date: "Dec 5, 2025",
-    readTime: "5 min read",
-    category: "Product",
-    image: "/blog/selfhosted.jpg"
-  }
-];
+// Convert posts object to array and sort by date (newest first)
+const BLOG_POSTS = Object.values(postsData).sort((a, b) => {
+  const dateA = new Date(a.date);
+  const dateB = new Date(b.date);
+  return dateB.getTime() - dateA.getTime();
+});
 
 export default function BlogPage() {
   return (

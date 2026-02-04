@@ -1,22 +1,34 @@
 import React from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { promises as fs } from "fs";
+import path from "path";
+import Markdown from "react-markdown";
 import posts from "../posts.json";
 
-type PostData = {
+type PostMeta = {
   slug: string;
   title: string;
   excerpt: string;
   date: string;
   readTime: string;
   category: string;
-  content: string;
 };
 
-const postsData: Record<string, PostData> = posts;
+const postsData: Record<string, PostMeta> = posts;
 
 export function generateStaticParams() {
   return Object.keys(postsData).map((slug) => ({ slug }));
+}
+
+async function getPostContent(slug: string): Promise<string | null> {
+  try {
+    const filePath = path.join(process.cwd(), "content", "blog", `${slug}.md`);
+    const content = await fs.readFile(filePath, "utf-8");
+    return content;
+  } catch {
+    return null;
+  }
 }
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -24,6 +36,12 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
   const post = postsData[slug];
 
   if (!post) {
+    notFound();
+  }
+
+  const content = await getPostContent(slug);
+
+  if (!content) {
     notFound();
   }
 
@@ -61,50 +79,47 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
         {/* Article Content */}
         <article className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-headings:font-bold prose-p:text-slate-300 prose-strong:text-white prose-a:text-red-400 prose-a:no-underline hover:prose-a:underline prose-code:text-red-400 prose-code:bg-slate-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800 prose-li:text-slate-300 prose-ol:text-slate-300 prose-ul:text-slate-300">
-          {post.content.split("\n\n").map((paragraph, idx) => {
-            if (paragraph.startsWith("## ")) {
-              return (
-                <h2 key={idx} className="text-2xl font-bold text-white mt-10 mb-4">
-                  {paragraph.replace("## ", "")}
-                </h2>
-              );
-            }
-            if (paragraph.startsWith("### ")) {
-              return (
-                <h3 key={idx} className="text-xl font-bold text-white mt-8 mb-3">
-                  {paragraph.replace("### ", "")}
-                </h3>
-              );
-            }
-            if (paragraph.startsWith("```")) {
-              const lines = paragraph.split("\n");
-              const code = lines.slice(1, -1).join("\n");
-              return (
-                <pre key={idx} className="bg-slate-900 border border-slate-800 rounded-xl p-4 overflow-x-auto my-6">
-                  <code className="text-sm text-slate-300">{code}</code>
+          <Markdown
+            components={{
+              h2: ({ children }) => (
+                <h2 className="text-2xl font-bold text-white mt-10 mb-4">{children}</h2>
+              ),
+              h3: ({ children }) => (
+                <h3 className="text-xl font-bold text-white mt-8 mb-3">{children}</h3>
+              ),
+              p: ({ children }) => (
+                <p className="text-slate-300 leading-relaxed my-4">{children}</p>
+              ),
+              ul: ({ children }) => (
+                <ul className="my-4 list-disc list-inside space-y-2">{children}</ul>
+              ),
+              ol: ({ children }) => (
+                <ol className="my-4 list-decimal list-inside space-y-2">{children}</ol>
+              ),
+              li: ({ children }) => (
+                <li className="text-slate-300">{children}</li>
+              ),
+              pre: ({ children }) => (
+                <pre className="bg-slate-900 border border-slate-800 rounded-xl p-4 overflow-x-auto my-6">
+                  {children}
                 </pre>
-              );
-            }
-            if (paragraph.startsWith("1. ") || paragraph.startsWith("- ")) {
-              const items = paragraph.split("\n");
-              const isOrdered = paragraph.startsWith("1. ");
-              const ListTag = isOrdered ? "ol" : "ul";
-              return (
-                <ListTag key={idx} className={`my-4 ${isOrdered ? "list-decimal" : "list-disc"} list-inside space-y-2`}>
-                  {items.map((item, i) => (
-                    <li key={i} className="text-slate-300">
-                      {item.replace(/^(\d+\.\s|-\s)/, "")}
-                    </li>
-                  ))}
-                </ListTag>
-              );
-            }
-            return (
-              <p key={idx} className="text-slate-300 leading-relaxed my-4">
-                {paragraph}
-              </p>
-            );
-          })}
+              ),
+              code: ({ children, className }) => {
+                // Check if this is an inline code or a code block
+                const isInline = !className;
+                if (isInline) {
+                  return (
+                    <code className="text-red-400 bg-slate-800 px-1 py-0.5 rounded">
+                      {children}
+                    </code>
+                  );
+                }
+                return <code className="text-sm text-slate-300">{children}</code>;
+              },
+            }}
+          >
+            {content}
+          </Markdown>
         </article>
 
         {/* Horizontal Line */}
