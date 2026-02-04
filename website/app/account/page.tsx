@@ -17,6 +17,12 @@ export default function AccountPage() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordLoading, setPasswordLoading] = useState(false);
+  const [passwordMessage, setPasswordMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   React.useEffect(() => {
     if (user) {
@@ -70,6 +76,45 @@ export default function AccountPage() {
       setShowDeleteModal(false);
     } finally {
       setDeleting(false);
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordMessage(null);
+
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage({ type: "error", text: "Passwords do not match" });
+      return;
+    }
+
+    if (newPassword.length < 8) {
+      setPasswordMessage({ type: "error", text: "Password must be at least 8 characters" });
+      return;
+    }
+
+    setPasswordLoading(true);
+    try {
+      await user.updatePassword({
+        currentPassword: user.passwordEnabled ? currentPassword : undefined,
+        newPassword: newPassword,
+      });
+      setPasswordMessage({ type: "success", text: "Password updated successfully!" });
+      setTimeout(() => {
+        setShowPasswordModal(false);
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setPasswordMessage(null);
+      }, 1500);
+    } catch (err: unknown) {
+      const error = err as { errors?: { message?: string }[] };
+      setPasswordMessage({ 
+        type: "error", 
+        text: error.errors?.[0]?.message || "Failed to update password" 
+      });
+    } finally {
+      setPasswordLoading(false);
     }
   };
 
@@ -330,7 +375,10 @@ export default function AccountPage() {
                           {user.passwordEnabled ? "Password is set" : "No password (social login)"}
                         </span>
                       </div>
-                      <button className="text-xs font-medium text-red-400 hover:text-red-300 transition-colors cursor-pointer">
+                      <button 
+                        onClick={() => setShowPasswordModal(true)}
+                        className="text-xs font-medium text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                      >
                         {user.passwordEnabled ? "Change" : "Set password"}
                       </button>
                     </div>
@@ -430,6 +478,115 @@ export default function AccountPage() {
                 {deleting ? "Deleting..." : "Delete Account"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => {
+              setShowPasswordModal(false);
+              setCurrentPassword("");
+              setNewPassword("");
+              setConfirmPassword("");
+              setPasswordMessage(null);
+            }}
+          />
+          <div className="relative bg-slate-900 border border-slate-800 rounded-xl p-6 w-full max-w-md shadow-2xl">
+            <h3 className="text-lg font-semibold text-white mb-2">
+              {user.passwordEnabled ? "Change Password" : "Set Password"}
+            </h3>
+            <p className="text-sm text-slate-400 mb-4">
+              {user.passwordEnabled 
+                ? "Enter your current password and choose a new one." 
+                : "Create a password for your account."}
+            </p>
+
+            {passwordMessage && (
+              <div
+                className={`mb-4 px-3 py-2 rounded-lg text-xs ${
+                  passwordMessage.type === "success"
+                    ? "bg-green-500/10 text-green-400"
+                    : "bg-red-500/10 text-red-400"
+                }`}
+              >
+                {passwordMessage.text}
+              </div>
+            )}
+            
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              {user.passwordEnabled && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                    Current password
+                  </label>
+                  <input
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50 transition-all placeholder-slate-600"
+                    placeholder="Enter current password"
+                    required
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                  New password
+                </label>
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50 transition-all placeholder-slate-600"
+                  placeholder="Enter new password"
+                  required
+                  minLength={8}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">
+                  Confirm new password
+                </label>
+                <input
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50 transition-all placeholder-slate-600"
+                  placeholder="Confirm new password"
+                  required
+                  minLength={8}
+                />
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPasswordModal(false);
+                    setCurrentPassword("");
+                    setNewPassword("");
+                    setConfirmPassword("");
+                    setPasswordMessage(null);
+                  }}
+                  className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={passwordLoading}
+                  className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {passwordLoading ? "Updating..." : "Update Password"}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
