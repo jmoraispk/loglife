@@ -44,7 +44,7 @@ const ChannelIcons = {
     <Image src="/logos/google-chat.png" alt="Google Chat" width={24} height={24} className="w-6 h-6 object-contain" />
   ),
   MSTeams: (
-    <Image src="/logos/ms-teams.png" alt="MS Teams" width={32} height={32} className="w-8 h-8 object-contain" />
+    <Image src="/logos/ms-teams.png" alt="MS Teams" width={24} height={24} className="w-6 h-6 object-contain" />
   ),
   Matrix: (
     <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
