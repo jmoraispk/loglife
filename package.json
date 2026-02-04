@@ -1,0 +1,11 @@
+{
+  "name": "autoclaw",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm --filter website dev",
+    "build": "pnpm --filter website build",
+    "docs:dev": "pnpm --filter autoclaw-docs dev",
+    "docs:build": "pnpm --filter autoclaw-docs build"
+  }
+}
