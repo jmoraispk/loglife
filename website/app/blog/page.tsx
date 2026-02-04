@@ -2,7 +2,7 @@
 import React from "react";
 import Link from "next/link";
 
-// Mock Data for Blog Posts - Updated for AutoClaw
+// Blog Posts Data
 const BLOG_POSTS = [
   {
     slug: "why-openclaw-deployment-hard",
@@ -32,40 +32,13 @@ const BLOG_POSTS = [
     image: "/blog/skills.jpg"
   },
   {
-    slug: "tailscale-networking-explained",
-    title: "How AutoClaw Uses Tailscale for Secure Networking",
-    excerpt: "A technical deep dive into how we leverage Tailscale to provide secure, zero-config networking for your AI agent.",
-    date: "Dec 20, 2025",
-    readTime: "8 min read",
-    category: "Engineering",
-    image: "/blog/tailscale.jpg"
-  },
-  {
-    slug: "mcp-servers-guide",
-    title: "Getting Started with MCP Servers",
-    excerpt: "Learn how to configure and use Model Context Protocol servers to extend your AI agent's capabilities with external tools and integrations.",
-    date: "Dec 12, 2025",
-    readTime: "6 min read",
-    category: "Tutorial",
-    image: "/blog/mcp.jpg"
-  },
-  {
     slug: "self-hosted-vs-cloud",
-    title: "Self-Hosted AI: Why It Matters",
-    excerpt: "Privacy, control, and cost savings—exploring the benefits of running your own AI infrastructure instead of relying on cloud services.",
+    title: "Self-Hosted vs Cloud AI: A Decision Framework",
+    excerpt: "Both approaches have trade-offs. This post offers a practical framework for evaluating which makes sense for your situation, with honest pros and cons for each.",
     date: "Dec 5, 2025",
     readTime: "5 min read",
-    category: "Philosophy",
+    category: "Product",
     image: "/blog/selfhosted.jpg"
-  },
-  {
-    slug: "docker-compose-best-practices",
-    title: "Docker Compose Patterns for AI Workloads",
-    excerpt: "Best practices for containerizing AI agents, managing GPU resources, and orchestrating multi-service deployments with Docker Compose.",
-    date: "Nov 28, 2025",
-    readTime: "10 min read",
-    category: "Engineering",
-    image: "/blog/docker.jpg"
   }
 ];
 
