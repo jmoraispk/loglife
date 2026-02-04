@@ -50,53 +50,103 @@ export default function Sidebar() {
   ];
 
   return (
-    <aside className="group hidden md:flex fixed left-4 top-1/2 -translate-y-1/2 w-16 hover:w-40 flex-col items-center py-6 transition-all duration-300 ease-in-out z-50 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
-      
-      {/* Logo */}
-      <div className="mb-10 shrink-0 px-4 w-full flex items-center gap-3">
-        <div className="block relative w-6 h-6 shrink-0 opacity-100 transition-opacity cursor-default">
-          <Image
-            src="/icon-small.svg"
-            alt="AutoClaw"
-            fill
-            className="object-contain"
-          />
+    <>
+      {/* Top Navigation Bar - visible below lg */}
+      <nav className="lg:hidden fixed top-4 left-4 right-4 h-14 flex items-center justify-between px-4 z-50 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
+        {/* Logo */}
+        <Link href="/#hero" className="flex items-center gap-2">
+          <div className="relative w-6 h-6 shrink-0">
+            <Image
+              src="/icon-small.svg"
+              alt="AutoClaw"
+              fill
+              className="object-contain"
+            />
+          </div>
+          <span className="text-sm font-semibold text-white hidden sm:block">
+            AutoClaw
+          </span>
+        </Link>
+
+        {/* Navigation Items */}
+        <div className="flex items-center gap-1 sm:gap-2">
+          {navItems.map((item, index) => (
+            <Link
+              key={index}
+              href={item.href}
+              className="h-9 flex items-center gap-2 px-2 sm:px-3 rounded-lg transition-colors text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+            >
+              {item.icon}
+              <span className="text-sm whitespace-nowrap hidden md:block">
+                {item.label}
+              </span>
+            </Link>
+          ))}
         </div>
-        <span className="text-sm font-semibold text-white whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          AutoClaw
-        </span>
-      </div>
 
-      {/* Navigation Items */}
-      <nav className="flex flex-col items-start justify-center space-y-2 w-full px-4">
-        {navItems.map((item, index) => (
-          <Link
-            key={index}
-            href={item.href}
-            className="w-full h-9 flex items-center gap-3 px-2 rounded-lg transition-colors text-slate-400 hover:text-red-400 hover:bg-red-500/10"
-          >
-            {item.icon}
-            <span className="text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              {item.label}
-            </span>
-          </Link>
-        ))}
-      </nav>
-
-      {/* Login/Signup */}
-      <div className="mt-10 shrink-0 px-4 w-full">
+        {/* Sign In */}
         <Link 
           href="/login" 
-          className="w-full h-9 flex items-center gap-3 px-2 rounded-lg transition-colors text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+          className="h-9 flex items-center gap-2 px-2 sm:px-3 rounded-lg transition-colors text-slate-400 hover:text-red-400 hover:bg-red-500/10"
         >
           <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
-          <span className="text-sm whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="text-sm whitespace-nowrap hidden sm:block">
             Sign In
           </span>
         </Link>
-      </div>
-    </aside>
+      </nav>
+
+      {/* Side Navigation Bar - visible at lg and above */}
+      <aside className="group hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 w-16 xl:hover:w-40 flex-col items-center py-6 transition-all duration-300 ease-in-out z-50 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
+        
+        {/* Logo */}
+        <div className="mb-10 shrink-0 px-4 w-full flex items-center gap-3">
+          <div className="block relative w-6 h-6 shrink-0 opacity-100 transition-opacity cursor-default">
+            <Image
+              src="/icon-small.svg"
+              alt="AutoClaw"
+              fill
+              className="object-contain"
+            />
+          </div>
+          <span className="text-sm font-semibold text-white whitespace-nowrap opacity-0 xl:group-hover:opacity-100 transition-opacity duration-300">
+            AutoClaw
+          </span>
+        </div>
+
+        {/* Navigation Items */}
+        <div className="flex flex-col items-start justify-center space-y-2 w-full px-4">
+          {navItems.map((item, index) => (
+            <Link
+              key={index}
+              href={item.href}
+              className="w-full h-9 flex items-center gap-3 px-2 rounded-lg transition-colors text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+            >
+              {item.icon}
+              <span className="text-sm whitespace-nowrap opacity-0 xl:group-hover:opacity-100 transition-opacity duration-300">
+                {item.label}
+              </span>
+            </Link>
+          ))}
+        </div>
+
+        {/* Login/Signup */}
+        <div className="mt-10 shrink-0 px-4 w-full">
+          <Link 
+            href="/login" 
+            className="w-full h-9 flex items-center gap-3 px-2 rounded-lg transition-colors text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+          >
+            <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            <span className="text-sm whitespace-nowrap opacity-0 xl:group-hover:opacity-100 transition-opacity duration-300">
+              Sign In
+            </span>
+          </Link>
+        </div>
+      </aside>
+    </>
   );
 }
