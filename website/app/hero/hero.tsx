@@ -283,13 +283,15 @@ function BeforeAfter() {
             </h3>
             <ul className="space-y-4">
               {[
-                "Rent and configure a VPS",
-                "SSH, user accounts, dependencies",
-                "Clone and build OpenClaw",
-                "Configure Tailscale networking",
-                "Set up systemd daemon",
+                "Rent, configure and manage a VPS",
+                "Setup SSH, accounts, dependencies, and networking",
+                "Clone and best-effort build OpenClaw",
                 "Track API costs manually across providers",
-                "Security risks from unmanaged community skills"
+                "Juggle 20+ API keys across providers",
+                "Security risks from unmanaged community skills",
+                "Brittle updates prone to data-loss",
+                "Limited memory bounded by context",
+                "Possibly debugging for hours"
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-slate-400">
                   <svg className="w-5 h-5 text-slate-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -308,14 +310,15 @@ function BeforeAfter() {
             </h3>
             <ul className="space-y-4">
               {[
-                "Click 'Deploy Now'",
-                "Connect your AI provider (Anthropic/OpenAI)",
-                "Pick your skills",
-                "Start chatting",
+                "Managed cloud hosting with pay-as-you-go pricing",
+                "One-click deploy with optimized defaults",
+                "Stable and validated OpenClaw setup",
                 "Unified cost dashboard",
-                "Managed updates",
-                "Support included",
-                "Only vetted, secure skills"
+                "BYO keys or use ours at volume pricing",
+                "Install only secure and vetted skills",
+                "Zero-surprise upgrades",
+                "Supermemory for weeks of context",
+                "Ready in minutes"
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-white">
                   <svg className="w-5 h-5 text-teal-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
