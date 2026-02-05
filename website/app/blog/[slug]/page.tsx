@@ -23,7 +23,7 @@ export function generateStaticParams() {
 
 async function getPostContent(slug: string): Promise<string | null> {
   try {
-    const filePath = path.join(process.cwd(), "content", "blog", `${slug}.md`);
+    const filePath = path.join(process.cwd(), "app", "blog", "posts", `${slug}.md`);
     const content = await fs.readFile(filePath, "utf-8");
     return content;
   } catch {
