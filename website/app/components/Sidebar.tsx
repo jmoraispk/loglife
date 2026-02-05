@@ -172,9 +172,9 @@ export default function Sidebar() {
       <aside className="group hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 w-14 xl:hover:w-40 flex-col items-center py-5 transition-all duration-300 ease-in-out z-50 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
         
         {/* Logo */}
-        <div className="mb-8 shrink-0 px-3 w-full flex items-center gap-3">
-          <Link href={isSignedIn ? "/dashboard" : "/#hero"} className="flex items-center gap-3">
-            <div className="block relative w-6 h-6 shrink-0 opacity-100 transition-opacity">
+        <div className="shrink-0 px-3 w-full">
+          <Link href={isSignedIn ? "/dashboard" : "/#hero"} className="w-full h-9 flex items-center gap-3 px-2">
+            <div className="block relative w-4 h-4 shrink-0 opacity-100 transition-opacity">
               <Image
                 src="/icon-small.svg"
                 alt="AutoClaw"
@@ -189,7 +189,7 @@ export default function Sidebar() {
         </div>
 
         {/* Navigation Items */}
-        <div className="flex flex-col items-start justify-center space-y-1 w-full px-3">
+        <div className="flex flex-col items-start justify-center space-y-1 w-full px-3 mt-8">
           {navItems.map((item, index) => (
             <Link
               key={index}
