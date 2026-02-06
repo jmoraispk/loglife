@@ -8,12 +8,10 @@ const isProtectedRoute = createRouteMatcher([
   "/account(.*)",
 ]);
 
-// Define public routes that signed-in users should be redirected away from
+// Define auth-only routes that signed-in users should be redirected away from (login/signup)
 const isPublicAuthRoute = createRouteMatcher([
-  "/",
   "/login",
   "/signup",
-  "/features",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
