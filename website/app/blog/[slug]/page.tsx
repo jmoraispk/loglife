@@ -1,5 +1,6 @@
 import React from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { promises as fs } from "fs";
 import path from "path";
@@ -13,6 +14,7 @@ type PostMeta = {
   date: string;
   readTime: string;
   category: string;
+  image?: string;
 };
 
 const postsData: Record<string, PostMeta> = posts;
@@ -75,6 +77,17 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
           <p className="text-xl text-slate-400 leading-relaxed">
             {post.excerpt}
           </p>
+          {post.image && (
+            <div className="mt-8 relative h-64 md:h-80 rounded-2xl overflow-hidden border border-slate-800">
+              <Image
+                src={post.image}
+                alt={post.title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
         </header>
 
         {/* Article Content */}

@@ -5,7 +5,8 @@
     "excerpt": "Exploring the challenges of setting up personal AI assistants: VPS rental, SSH configuration, networking, and why we built AutoClaw.",
     "date": "Jan 28, 2026",
     "readTime": "5 min read",
-    "category": "Product"
+    "category": "Product",
+    "image": "/blog/why-openclaw-deployment-hard.png"
   },
   "understanding-api-costs": {
     "slug": "understanding-api-costs",
@@ -13,7 +14,8 @@
     "excerpt": "A breakdown of how API costs accumulate across Anthropic, OpenAI, and other providers—and how to track them effectively.",
     "date": "Jan 15, 2026",
     "readTime": "7 min read",
-    "category": "Tutorial"
+    "category": "Tutorial",
+    "image": "/blog/understanding-api-costs.png"
   },
   "curated-skills-philosophy": {
     "slug": "curated-skills-philosophy",
@@ -21,7 +23,8 @@
     "excerpt": "OpenClaw has 50+ skills. Most users need 5-10. Here's how we think about skill curation for new users.",
     "date": "Jan 8, 2026",
     "readTime": "4 min read",
-    "category": "Philosophy"
+    "category": "Philosophy",
+    "image": "/blog/curated-skills-philosophy.png"
   },
   "self-hosted-vs-cloud": {
     "slug": "self-hosted-vs-cloud",
@@ -29,6 +32,7 @@
     "excerpt": "Both approaches have trade-offs. This post offers a practical framework for evaluating which makes sense for your situation, with honest pros and cons for each.",
     "date": "Dec 5, 2025",
     "readTime": "5 min read",
-    "category": "Product"
+    "category": "Product",
+    "image": "/blog/self-hosted-vs-cloud.png"
   }
 }

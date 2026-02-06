@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import postsData from "./posts.json";
 
 // Convert posts object to array and sort by date (newest first)
@@ -106,12 +107,22 @@ export default function BlogPage() {
         <div className="mb-16 animate-slide-up" style={{ animationDelay: "0.1s" }}>
           <Link href={`/blog/${featuredPost.slug}`} className="group block relative bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-3xl overflow-hidden hover:border-red-500/50 transition-all duration-300">
             <div className="grid md:grid-cols-2 gap-0">
-              <div className="h-64 md:h-auto bg-gradient-to-br from-red-900/40 to-slate-900 relative overflow-hidden">
-                {/* Fallback pattern since we don't have real images yet */}
-                <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-red-500 via-slate-900 to-black"></div>
-                <div className="absolute inset-0 flex items-center justify-center text-red-700/20">
-                    <svg className="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </div>
+              <div className="h-64 md:h-80 bg-gradient-to-br from-red-900/40 to-slate-900 relative overflow-hidden">
+                {featuredPost.image ? (
+                  <Image
+                    src={featuredPost.image}
+                    alt={featuredPost.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <>
+                    <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-red-500 via-slate-900 to-black"></div>
+                    <div className="absolute inset-0 flex items-center justify-center text-red-700/20">
+                      <svg className="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                  </>
+                )}
               </div>
               <div className="p-8 md:p-12 flex flex-col justify-center">
                 <div className="flex items-center gap-3 text-sm mb-4">
@@ -146,13 +157,23 @@ export default function BlogPage() {
           {remainingPosts.map((post) => (
             <Link key={post.slug} href={`/blog/${post.slug}`} className="group flex flex-col bg-slate-900/30 backdrop-blur-sm border border-slate-800 rounded-2xl overflow-hidden hover:border-slate-600 hover:bg-slate-800/50 transition-all duration-300">
               <div className="h-48 bg-gradient-to-br from-slate-800 to-slate-900 relative overflow-hidden">
-                 <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-700 via-slate-900 to-black"></div>
-                 {/* Visual placeholder */}
-                 <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-6xl opacity-5 select-none text-white font-serif italic">
+                {post.image ? (
+                  <Image
+                    src={post.image}
+                    alt={post.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <>
+                    <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-700 via-slate-900 to-black"></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-6xl opacity-5 select-none text-white font-serif italic">
                         {post.title.charAt(0)}
-                    </span>
-                 </div>
+                      </span>
+                    </div>
+                  </>
+                )}
               </div>
               
               <div className="p-6 flex flex-col flex-1">
