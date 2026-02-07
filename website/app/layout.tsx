@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import ConditionalNavbar from "./components/ConditionalNavbar";
 import PageWrapper from "./components/PageWrapper";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { WebVitals } from "./components/WebVitals";
 
 export const metadata: Metadata = {
   title: "AutoClaw — Deploy OpenClaw in Minutes",
@@ -83,6 +84,7 @@ export default function RootLayout({
     >
       <html lang="en">
         <body>
+          <WebVitals />
           <ThemeProvider>
             <ConditionalNavbar />
             <PageWrapper>{children}</PageWrapper>
