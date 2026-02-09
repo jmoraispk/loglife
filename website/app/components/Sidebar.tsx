@@ -82,19 +82,19 @@ export default function Sidebar() {
   return (
     <>
       {/* Top Navigation Bar - visible below lg */}
-      <nav className="lg:hidden fixed top-4 left-4 right-4 h-14 flex items-center justify-between px-4 z-50 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
+      <nav className="lg:hidden fixed top-4 left-4 right-4 h-14 flex items-center justify-between px-4 z-50 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
         {/* Logo */}
         <Link href={isSignedIn ? "/dashboard" : "/#hero"} className="flex items-center gap-2">
           <div className="relative w-6 h-6 shrink-0">
             <Image
               src="/icon-small.svg"
-              alt="AutoClaw"
+              alt="LogLife"
               fill
               className="object-contain"
             />
           </div>
           <span className="text-sm font-semibold text-white hidden sm:block">
-            AutoClaw
+            LogLife
           </span>
         </Link>
 
@@ -103,14 +103,14 @@ export default function Sidebar() {
           {isSignedIn ? (
             <>
               {authNavItemsMain.map((item, index) => (
-                <Link key={index} href={item.href} className={`h-9 flex items-center gap-2 px-2 sm:px-3 rounded-lg transition-colors ${isActive(item.href) ? "text-red-400 bg-red-500/10" : "text-slate-400 hover:text-red-400 hover:bg-red-500/10"}`}>
+                <Link key={index} href={item.href} className={`h-9 flex items-center gap-2 px-2 sm:px-3 rounded-lg transition-colors ${isActive(item.href) ? "text-emerald-400 bg-emerald-500/10" : "text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"}`}>
                   {item.icon}
                   <span className="text-sm whitespace-nowrap hidden md:block">{item.label}</span>
                 </Link>
               ))}
               {dividerVertical}
               {authNavItemsUser.map((item, index) => (
-                <Link key={index} href={item.href} className={`h-9 flex items-center gap-2 px-2 sm:px-3 rounded-lg transition-colors ${isActive(item.href) ? "text-red-400 bg-red-500/10" : "text-slate-400 hover:text-red-400 hover:bg-red-500/10"}`}>
+                <Link key={index} href={item.href} className={`h-9 flex items-center gap-2 px-2 sm:px-3 rounded-lg transition-colors ${isActive(item.href) ? "text-emerald-400 bg-emerald-500/10" : "text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"}`}>
                   {item.icon}
                   <span className="text-sm whitespace-nowrap hidden md:block">{item.label}</span>
                 </Link>
@@ -118,7 +118,7 @@ export default function Sidebar() {
             </>
           ) : (
             publicNavItems.map((item, index) => (
-              <Link key={index} href={item.href} className={`h-9 flex items-center gap-2 px-2 sm:px-3 rounded-lg transition-colors ${isActive(item.href) ? "text-red-400 bg-red-500/10" : "text-slate-400 hover:text-red-400 hover:bg-red-500/10"}`}>
+              <Link key={index} href={item.href} className={`h-9 flex items-center gap-2 px-2 sm:px-3 rounded-lg transition-colors ${isActive(item.href) ? "text-emerald-400 bg-emerald-500/10" : "text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"}`}>
                 {item.icon}
                 <span className="text-sm whitespace-nowrap hidden md:block">{item.label}</span>
               </Link>
@@ -130,7 +130,7 @@ export default function Sidebar() {
         {!isSignedIn && (
           <Link 
             href="/login" 
-            className="h-9 flex items-center gap-2 px-2 sm:px-3 rounded-lg transition-colors text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+            className="h-9 flex items-center gap-2 px-2 sm:px-3 rounded-lg transition-colors text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
           >
             <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -143,7 +143,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Side Navigation Bar - visible at lg and above */}
-      <aside className="group hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 w-14 xl:hover:w-40 flex-col items-center py-5 transition-all duration-300 ease-in-out z-50 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-red-500/20 shadow-[0_0_20px_rgba(239,68,68,0.15)]">
+      <aside className="group hidden lg:flex fixed left-4 top-1/2 -translate-y-1/2 w-14 xl:hover:w-40 flex-col items-center py-5 transition-all duration-300 ease-in-out z-50 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
         
         {/* Logo */}
         <div className="shrink-0 px-3 w-full">
@@ -151,13 +151,13 @@ export default function Sidebar() {
             <div className="block relative w-4 h-4 shrink-0 opacity-100 transition-opacity">
               <Image
                 src="/icon-small.svg"
-                alt="AutoClaw"
+                alt="LogLife"
                 fill
                 className="object-contain"
               />
             </div>
             <span className="text-sm font-semibold text-white whitespace-nowrap opacity-0 xl:group-hover:opacity-100 transition-opacity duration-300">
-              AutoClaw
+              LogLife
             </span>
           </Link>
         </div>
@@ -172,8 +172,8 @@ export default function Sidebar() {
                   href={item.href}
                   className={`w-full h-9 flex items-center gap-3 px-2 rounded-lg transition-colors ${
                     isActive(item.href) 
-                      ? "text-red-400 bg-red-500/10" 
-                      : "text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                      ? "text-emerald-400 bg-emerald-500/10" 
+                      : "text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
                   }`}
                 >
                   {item.icon}
@@ -189,8 +189,8 @@ export default function Sidebar() {
                   href={item.href}
                   className={`w-full h-9 flex items-center gap-3 px-2 rounded-lg transition-colors ${
                     isActive(item.href) 
-                      ? "text-red-400 bg-red-500/10" 
-                      : "text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                      ? "text-emerald-400 bg-emerald-500/10" 
+                      : "text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
                   }`}
                 >
                   {item.icon}
@@ -207,8 +207,8 @@ export default function Sidebar() {
                 href={item.href}
                 className={`w-full h-9 flex items-center gap-3 px-2 rounded-lg transition-colors ${
                   isActive(item.href) 
-                    ? "text-red-400 bg-red-500/10" 
-                    : "text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+                    ? "text-emerald-400 bg-emerald-500/10" 
+                    : "text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
                 }`}
               >
                 {item.icon}
@@ -225,7 +225,7 @@ export default function Sidebar() {
           <div className="mt-8 shrink-0 px-3 w-full">
             <Link 
               href="/login" 
-              className="w-full h-9 flex items-center gap-3 px-2 rounded-lg transition-colors text-slate-400 hover:text-red-400 hover:bg-red-500/10"
+              className="w-full h-9 flex items-center gap-3 px-2 rounded-lg transition-colors text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10"
             >
               <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />

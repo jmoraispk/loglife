@@ -61,7 +61,7 @@ function PricingItem({
         <div className="flex items-center gap-2 mb-1">
           <span className="text-slate-200 font-medium">{title}</span>
           {isOptional && (
-            <span className="text-[10px] uppercase tracking-wider text-red-500 bg-red-500/10 px-2 py-0.5 rounded-full border border-red-500/20">
+            <span className="text-[10px] uppercase tracking-wider text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
               Optional
             </span>
           )}
@@ -98,11 +98,11 @@ export default function PricingPage() {
         {/* Header */}
         <div className="text-center mb-16 space-y-4 animate-slide-up">
           <h1 className="text-4xl lg:text-6xl font-bold text-white tracking-tight">
-            Pricing that <span className="text-red-500">adapts</span> to you
+            Pricing that <span className="text-emerald-500">adapts</span> to you
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto">
             Start with our open-source self-hosted version, 
-            or let AutoClaw handle the infrastructure for you.
+            or let LogLife handle the infrastructure for you.
           </p>
         </div>
 
@@ -125,13 +125,13 @@ export default function PricingPage() {
                   <span className="text-slate-500 font-medium">/ forever</span>
                 </div>
                 <p className="text-slate-400 text-sm mt-4 leading-relaxed">
-                  Full control. You host OpenClaw yourself. The code is open source.
+                  Full control. You host LogLife yourself. The code is open source.
                 </p>
               </div>
 
               <div className="space-y-4 mb-8 flex-1">
                 {[
-                  "OpenClaw open source",
+                  "LogLife open source",
                   "Self-hosted (Docker/Node)",
                   "Own your data 100%",
                   "Bring your own API keys",
@@ -145,12 +145,12 @@ export default function PricingPage() {
               </div>
 
               <a 
-                href="https://github.com/openclaw/openclaw" 
+                href="https://github.com/jmoraispk/loglife" 
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full inline-flex items-center justify-center px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold rounded-xl border border-slate-700 transition-colors"
               >
-                View OpenClaw on GitHub
+                View LogLife on GitHub
               </a>
             </div>
           </div>
@@ -159,14 +159,14 @@ export default function PricingPage() {
           <div className="lg:col-span-8 animate-slide-up" style={{ animationDelay: "0.2s" }}>
             <div className="relative bg-slate-900/60 backdrop-blur-xl border border-slate-700/50 rounded-3xl overflow-hidden">
               {/* Highlight Border */}
-              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-red-500 via-red-400 to-red-600" />
+              <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-600" />
               
               <div className="p-8 sm:p-10">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 pb-8 border-b border-slate-800">
                   <div>
                     <h2 className="text-2xl font-bold text-white flex items-center gap-3">
-                      AutoClaw Managed
-                      <span className="px-3 py-1 rounded-full bg-red-500/10 text-red-400 text-xs font-semibold border border-red-500/20">
+                      LogLife Managed
+                      <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20">
                         RECOMMENDED
                       </span>
                     </h2>
@@ -174,7 +174,7 @@ export default function PricingPage() {
                   </div>
                   <div className="text-right mt-4 sm:mt-0 hidden sm:block">
                     <p className="text-sm text-slate-500">Starting from</p>
-                    <p className="text-3xl font-bold text-red-400">$5<span className="text-lg text-slate-500 font-normal">/mo</span></p>
+                    <p className="text-3xl font-bold text-emerald-400">$5<span className="text-lg text-slate-500 font-normal">/mo</span></p>
                   </div>
                 </div>
 
@@ -198,7 +198,7 @@ export default function PricingPage() {
                       />
                       <PricingItem 
                         title="Cloud Hosting"
-                        description="Isolated OpenClaw instance managed by us"
+                        description="Isolated LogLife instance managed by us"
                         price="$10 / mo"
                         action={
                           <Switch 
@@ -258,7 +258,7 @@ export default function PricingPage() {
                         action={
                           <button 
                             onClick={() => setSupportEnabled(!supportEnabled)}
-                            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none cursor-pointer ${supportEnabled ? 'bg-red-600' : 'bg-slate-700'}`}
+                            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none cursor-pointer ${supportEnabled ? 'bg-emerald-600' : 'bg-slate-700'}`}
                           >
                             <div className={`w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${supportEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
                           </button>
@@ -272,7 +272,7 @@ export default function PricingPage() {
                         action={
                           <button 
                             onClick={() => setMetricsEnabled(!metricsEnabled)}
-                            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none cursor-pointer ${metricsEnabled ? 'bg-red-600' : 'bg-slate-700'}`}
+                            className={`w-12 h-6 rounded-full p-1 transition-colors duration-200 ease-in-out focus:outline-none cursor-pointer ${metricsEnabled ? 'bg-emerald-600' : 'bg-slate-700'}`}
                           >
                             <div className={`w-4 h-4 rounded-full bg-white shadow-sm transform transition-transform duration-200 ${metricsEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
                           </button>
@@ -287,11 +287,11 @@ export default function PricingPage() {
                 <div className="mt-12 pt-8 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-6">
                   <div className="text-center sm:text-left">
                     <p className="text-slate-400 text-sm">Ready to deploy your AI assistant?</p>
-                    <p className="text-red-400 text-sm">We handle the infrastructure, you focus on what matters.</p>
+                    <p className="text-emerald-400 text-sm">We handle the infrastructure, you focus on what matters.</p>
                   </div>
                   <a 
                     href="/signup"
-                    className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 transition-all transform hover:scale-105"
+                    className="w-full sm:w-auto inline-flex items-center justify-center px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105"
                   >
                     Deploy Now
                     <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -409,7 +409,7 @@ export default function PricingPage() {
         <div className="mt-24 animate-slide-up" style={{ animationDelay: "0.4s" }}>
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-              Your <span className="text-red-500">privacy</span>, by design
+              Your <span className="text-emerald-500">privacy</span>, by design
             </h2>
             <p className="text-lg text-slate-400 max-w-2xl mx-auto">
               Different deployment options, same commitment to your privacy.
@@ -444,16 +444,16 @@ export default function PricingPage() {
             </div>
 
             {/* Hosted */}
-            <div className="bg-slate-900/60 backdrop-blur-md border border-red-500/20 rounded-2xl p-8">
+            <div className="bg-slate-900/60 backdrop-blur-md border border-emerald-500/20 rounded-2xl p-8">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center justify-center">
-                  <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                  <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
                   </svg>
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-white">Hosted</h3>
-                  <p className="text-sm text-slate-500">Managed by AutoClaw</p>
+                  <p className="text-sm text-slate-500">Managed by LogLife</p>
                 </div>
               </div>
               <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5">
@@ -461,7 +461,7 @@ export default function PricingPage() {
                   We <span className="text-white font-medium">don&apos;t store or log message content</span> by default. Because we operate the infrastructure, you&apos;re trusting us operationally; we provide audit logs and strict access controls.
                 </p>
               </div>
-              <div className="mt-6 flex items-center gap-2 text-sm text-red-400">
+              <div className="mt-6 flex items-center gap-2 text-sm text-emerald-400">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
@@ -474,7 +474,7 @@ export default function PricingPage() {
         {/* Trust Indicators */}
         <div className="mt-20 text-center animate-slide-up" style={{ animationDelay: "0.5s" }}>
           <p className="text-slate-500 text-sm">
-            Powered by OpenClaw · Open Source · Your Data, Your Control
+            Powered by LogLife · Open Source · Your Data, Your Control
           </p>
         </div>
 

@@ -61,7 +61,7 @@ export default function LoginPage() {
           <Link href="/" className="inline-block relative w-14 h-14 mb-6 hover:opacity-80 transition-opacity">
              <Image
                 src="/icon-small.svg"
-                alt="AutoClaw"
+                alt="LogLife"
                 fill
                 className="object-contain"
               />
@@ -70,14 +70,14 @@ export default function LoginPage() {
             Welcome back
           </h2>
           <p className="mt-3 text-base text-slate-400">
-            Sign in to access your AutoClaw dashboard
+            Sign in to access your LogLife dashboard
           </p>
         </div>
 
         {/* Login Card */}
         <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-2xl p-10 shadow-2xl">
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
               {error}
             </div>
           )}
@@ -95,7 +95,7 @@ export default function LoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
+                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
                 placeholder="name@example.com"
               />
             </div>
@@ -105,7 +105,7 @@ export default function LoginPage() {
                 <label htmlFor="password" className="block text-sm font-medium text-slate-300">
                   Password
                 </label>
-                <Link href="/forgot-password" className="text-sm font-medium text-red-400 hover:text-red-300">
+                <Link href="/forgot-password" className="text-sm font-medium text-emerald-400 hover:text-emerald-300">
                   Forgot password?
                 </Link>
               </div>
@@ -117,7 +117,7 @@ export default function LoginPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
+                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
                 placeholder="••••••••"
               />
             </div>
@@ -125,7 +125,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-4 px-4 rounded-xl text-base font-semibold text-white bg-red-600 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-red-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex justify-center py-4 px-4 rounded-xl text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Signing in..." : "Sign in"}
             </button>
@@ -167,7 +167,7 @@ export default function LoginPage() {
         {/* Footer */}
         <p className="text-center text-base text-slate-400">
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-semibold text-red-400 hover:text-red-300 hover:underline transition-all">
+          <Link href="/signup" className="font-semibold text-emerald-400 hover:text-emerald-300 hover:underline transition-all">
             Sign up for free
           </Link>
         </p>

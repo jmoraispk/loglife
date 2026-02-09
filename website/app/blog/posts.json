@@ -1,8 +1,8 @@
 {
   "why-openclaw-deployment-hard": {
     "slug": "why-openclaw-deployment-hard",
-    "title": "Why Deploying OpenClaw Is Harder Than It Should Be",
-    "excerpt": "Exploring the challenges of setting up personal AI assistants: VPS rental, SSH configuration, networking, and why we built AutoClaw.",
+    "title": "Why Self-Hosting Your Assistant Is Harder Than It Should Be",
+    "excerpt": "Exploring the challenges of setting up personal AI assistants: VPS rental, SSH configuration, networking, and why managed hosting helps.",
     "date": "Jan 28, 2026",
     "readTime": "5 min read",
     "category": "Product",
@@ -20,7 +20,7 @@
   "curated-skills-philosophy": {
     "slug": "curated-skills-philosophy",
     "title": "The Case for Curated Skills: Less Is More",
-    "excerpt": "OpenClaw has 50+ skills. Most users need 5-10. Here's how we think about skill curation for new users.",
+    "excerpt": "Less is more. Here's how we think about curated defaults so you get value without overwhelm.",
     "date": "Jan 8, 2026",
     "readTime": "4 min read",
     "category": "Philosophy",

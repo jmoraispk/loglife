@@ -84,7 +84,7 @@ export default function SignupPage() {
         <div className="w-full max-w-lg space-y-8 animate-slide-up">
           <div className="text-center">
             <Link href="/" className="inline-block relative w-14 h-14 mb-6 hover:opacity-80 transition-opacity">
-              <Image src="/icon-small.svg" alt="AutoClaw" fill className="object-contain" />
+              <Image src="/icon-small.svg" alt="LogLife" fill className="object-contain" />
             </Link>
             <h2 className="text-4xl font-bold tracking-tight text-white">Verify your email</h2>
             <p className="mt-3 text-base text-slate-400">We sent a code to {email}</p>
@@ -92,7 +92,7 @@ export default function SignupPage() {
 
           <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-2xl p-10 shadow-2xl">
             {error && (
-              <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+              <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
                 {error}
               </div>
             )}
@@ -108,7 +108,7 @@ export default function SignupPage() {
                   required
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
+                  className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base text-center tracking-widest focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
                   placeholder="000000"
                 />
               </div>
@@ -116,7 +116,7 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full flex justify-center py-4 px-4 rounded-xl text-base font-semibold text-white bg-red-600 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-red-500/20 cursor-pointer disabled:opacity-50"
+                className="w-full flex justify-center py-4 px-4 rounded-xl text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
               >
                 {loading ? "Verifying..." : "Verify Email"}
               </button>
@@ -134,20 +134,20 @@ export default function SignupPage() {
         {/* Header */}
         <div className="text-center">
           <Link href="/" className="inline-block relative w-14 h-14 mb-6 hover:opacity-80 transition-opacity">
-            <Image src="/icon-small.svg" alt="AutoClaw" fill className="object-contain" />
+            <Image src="/icon-small.svg" alt="LogLife" fill className="object-contain" />
           </Link>
           <h2 className="text-4xl font-bold tracking-tight text-white">
             Deploy your AI agent
           </h2>
           <p className="mt-3 text-base text-slate-400">
-            Get started with AutoClaw in minutes
+            Get started with LogLife in minutes
           </p>
         </div>
 
         {/* Signup Card */}
         <div className="bg-slate-900/40 backdrop-blur-xl border border-slate-800 rounded-2xl p-10 shadow-2xl">
           {error && (
-            <div className="mb-6 p-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+            <div className="mb-6 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm">
               {error}
             </div>
           )}
@@ -164,7 +164,7 @@ export default function SignupPage() {
                   required
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
+                  className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
                   placeholder="John"
                 />
               </div>
@@ -178,7 +178,7 @@ export default function SignupPage() {
                   required
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
+                  className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
                   placeholder="Doe"
                 />
               </div>
@@ -195,7 +195,7 @@ export default function SignupPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
+                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
                 placeholder="name@example.com"
               />
             </div>
@@ -211,7 +211,7 @@ export default function SignupPage() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-red-500/50 focus:border-red-500 transition-all placeholder-slate-500"
+                className="w-full rounded-xl bg-slate-950/50 border border-slate-700 text-white px-5 py-4 text-base focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all placeholder-slate-500"
                 placeholder="••••••••"
               />
               <p className="mt-2 text-xs text-slate-500">
@@ -222,7 +222,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full flex justify-center py-4 px-4 rounded-xl text-base font-semibold text-white bg-red-600 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-red-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex justify-center py-4 px-4 rounded-xl text-base font-semibold text-white bg-emerald-600 hover:bg-emerald-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 focus:ring-offset-slate-900 transition-all shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Creating account..." : "Create Account"}
             </button>
@@ -264,7 +264,7 @@ export default function SignupPage() {
         {/* Footer */}
         <p className="text-center text-base text-slate-400">
           Already have an account?{" "}
-          <Link href="/login" className="font-semibold text-red-400 hover:text-red-300 hover:underline transition-all">
+          <Link href="/login" className="font-semibold text-emerald-400 hover:text-emerald-300 hover:underline transition-all">
             Sign in
           </Link>
         </p>

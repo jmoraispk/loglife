@@ -34,7 +34,7 @@ export default function AccountPage() {
   if (!isLoaded) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
       </main>
     );
   }
@@ -177,7 +177,7 @@ export default function AccountPage() {
                   onClick={() => setActiveTab("profile")}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left text-sm transition-all cursor-pointer ${
                     activeTab === "profile"
-                      ? "bg-red-500/10 text-red-400"
+                      ? "bg-emerald-500/10 text-emerald-400"
                       : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
                   }`}
                 >
@@ -190,7 +190,7 @@ export default function AccountPage() {
                   onClick={() => setActiveTab("security")}
                   className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-left text-sm transition-all cursor-pointer ${
                     activeTab === "security"
-                      ? "bg-red-500/10 text-red-400"
+                      ? "bg-emerald-500/10 text-emerald-400"
                       : "text-slate-400 hover:bg-slate-800/50 hover:text-white"
                   }`}
                 >
@@ -206,7 +206,7 @@ export default function AccountPage() {
               {/* Sign Out */}
               <button
                 onClick={handleSignOut}
-                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all cursor-pointer"
+                className="w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-400 transition-all cursor-pointer"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -231,7 +231,7 @@ export default function AccountPage() {
                         className={`mb-4 px-3 py-2 rounded-lg text-xs ${
                           message.type === "success"
                             ? "bg-green-500/10 text-green-400"
-                            : "bg-red-500/10 text-red-400"
+                            : "bg-emerald-500/10 text-emerald-400"
                         }`}
                       >
                         {message.text}
@@ -248,7 +248,7 @@ export default function AccountPage() {
                             type="text"
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
-                            className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50 transition-all placeholder-slate-600"
+                            className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder-slate-600"
                             placeholder="John"
                           />
                         </div>
@@ -260,7 +260,7 @@ export default function AccountPage() {
                             type="text"
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
-                            className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50 transition-all placeholder-slate-600"
+                            className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder-slate-600"
                             placeholder="Doe"
                           />
                         </div>
@@ -270,7 +270,7 @@ export default function AccountPage() {
                         <button
                           type="submit"
                           disabled={loading}
-                          className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {loading ? "Saving..." : "Save changes"}
                         </button>
@@ -377,7 +377,7 @@ export default function AccountPage() {
                       </div>
                       <button 
                         onClick={() => setShowPasswordModal(true)}
-                        className="text-xs font-medium text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+                        className="text-xs font-medium text-emerald-400 hover:text-emerald-300 transition-colors cursor-pointer"
                       >
                         {user.passwordEnabled ? "Change" : "Set password"}
                       </button>
@@ -409,9 +409,9 @@ export default function AccountPage() {
                 </div>
 
                 {/* Danger Zone */}
-                <div className="bg-slate-900/50 border border-red-900/30 rounded-xl">
-                  <div className="px-6 py-4 border-b border-red-900/30">
-                    <h2 className="text-sm font-medium text-red-400">Danger Zone</h2>
+                <div className="bg-slate-900/50 border border-emerald-900/30 rounded-xl">
+                  <div className="px-6 py-4 border-b border-emerald-900/30">
+                    <h2 className="text-sm font-medium text-emerald-400">Danger Zone</h2>
                   </div>
                   <div className="p-6">
                     <div className="flex items-center justify-between">
@@ -421,7 +421,7 @@ export default function AccountPage() {
                       </div>
                       <button 
                         onClick={() => setShowDeleteModal(true)}
-                        className="px-3 py-1.5 rounded-lg text-xs font-medium text-red-400 border border-red-500/30 hover:bg-red-500/10 transition-all cursor-pointer"
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 transition-all cursor-pointer"
                       >
                         Delete
                       </button>
@@ -449,13 +449,13 @@ export default function AccountPage() {
             
             <div className="mb-4">
               <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                Type <span className="text-red-400 font-mono">DELETE</span> to confirm
+                Type <span className="text-emerald-400 font-mono">DELETE</span> to confirm
               </label>
               <input
                 type="text"
                 value={deleteConfirm}
                 onChange={(e) => setDeleteConfirm(e.target.value)}
-                className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50 transition-all placeholder-slate-600"
+                className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder-slate-600"
                 placeholder="DELETE"
               />
             </div>
@@ -473,7 +473,7 @@ export default function AccountPage() {
               <button
                 onClick={handleDeleteAccount}
                 disabled={deleteConfirm !== "DELETE" || deleting}
-                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {deleting ? "Deleting..." : "Delete Account"}
               </button>
@@ -510,7 +510,7 @@ export default function AccountPage() {
                 className={`mb-4 px-3 py-2 rounded-lg text-xs ${
                   passwordMessage.type === "success"
                     ? "bg-green-500/10 text-green-400"
-                    : "bg-red-500/10 text-red-400"
+                    : "bg-emerald-500/10 text-emerald-400"
                 }`}
               >
                 {passwordMessage.text}
@@ -527,7 +527,7 @@ export default function AccountPage() {
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50 transition-all placeholder-slate-600"
+                    className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder-slate-600"
                     placeholder="Enter current password"
                     required
                   />
@@ -542,7 +542,7 @@ export default function AccountPage() {
                   type="password"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
-                  className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50 transition-all placeholder-slate-600"
+                  className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder-slate-600"
                   placeholder="Enter new password"
                   required
                   minLength={8}
@@ -557,7 +557,7 @@ export default function AccountPage() {
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-red-500/50 focus:border-red-500/50 transition-all placeholder-slate-600"
+                  className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder-slate-600"
                   placeholder="Confirm new password"
                   required
                   minLength={8}
@@ -581,7 +581,7 @@ export default function AccountPage() {
                 <button
                   type="submit"
                   disabled={passwordLoading}
-                  className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white bg-red-600 hover:bg-red-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {passwordLoading ? "Updating..." : "Update Password"}
                 </button>

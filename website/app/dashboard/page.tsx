@@ -25,7 +25,7 @@ export default function DashboardPage() {
   if (!isLoaded) {
     return (
       <main className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
       </main>
     );
   }
@@ -95,7 +95,7 @@ export default function DashboardPage() {
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all cursor-pointer"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm text-slate-400 hover:bg-emerald-500/10 hover:text-emerald-400 transition-all cursor-pointer"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
@@ -177,7 +177,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-2 bg-slate-900/50 border border-slate-800/50 rounded-xl">
             <div className="px-5 py-4 border-b border-slate-800/50 flex items-center justify-between">
               <h2 className="text-sm font-medium text-white">Your Agents</h2>
-              <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-red-600 hover:bg-red-500 transition-all cursor-pointer">
+              <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-500 transition-all cursor-pointer">
                 + New Agent
               </button>
             </div>
@@ -244,7 +244,7 @@ export default function DashboardPage() {
                 </div>
                 <div>
                   <p className="text-sm text-slate-300">Documentation</p>
-                  <p className="text-xs text-slate-500">Learn how to use AutoClaw</p>
+                  <p className="text-xs text-slate-500">Learn how to use LogLife</p>
                 </div>
               </button>
             </div>

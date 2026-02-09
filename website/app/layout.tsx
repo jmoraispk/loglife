@@ -7,9 +7,9 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { WebVitals } from "./components/WebVitals";
 
 export const metadata: Metadata = {
-  title: "AutoClaw — Deploy OpenClaw in Minutes",
+  title: "LogLife — Private AI Assistants. Automatic Deployment.",
   description:
-    "One-click deployment for OpenClaw agents. Auto deploy, monitor, and track costs across all APIs your agent uses. No SSH, no server hassles.",
+    "Audio-first, chat-native journaling. Private AI assistants that track your progress, find patterns, and help you build better habits. Your data stays yours.",
 };
 
 export default function RootLayout({
@@ -21,7 +21,7 @@ export default function RootLayout({
     <ClerkProvider
       appearance={{
         variables: {
-          colorPrimary: "#dc2626",
+          colorPrimary: "#128c7e",
           colorBackground: "#0f172a",
           colorInputBackground: "#020617",
           colorInputText: "#ffffff",
@@ -31,7 +31,7 @@ export default function RootLayout({
         elements: {
           // General
           card: "!bg-slate-900 !border !border-slate-800",
-          formButtonPrimary: "!bg-red-600 hover:!bg-red-500",
+          formButtonPrimary: "!bg-emerald-600 hover:!bg-emerald-500",
           
           // UserButton Popover
           userButtonPopoverCard: "!bg-slate-900 !border !border-slate-700 !shadow-xl",
@@ -62,7 +62,7 @@ export default function RootLayout({
           profileSectionTitleText: "!text-white",
           profileSectionSubtitle: "!text-slate-400",
           profileSectionContent: "!text-slate-300",
-          profileSectionPrimaryButton: "!text-red-400 hover:!text-red-300",
+          profileSectionPrimaryButton: "!text-emerald-400 hover:!text-emerald-300",
           formFieldLabel: "!text-slate-300",
           formFieldInput: "!bg-slate-950 !border-slate-700 !text-white",
           formFieldHintText: "!text-slate-500",

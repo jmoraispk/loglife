@@ -7,7 +7,7 @@ export default function Footer() {
         <div className="flex items-center gap-2">
           <Image
             src="/logo_light.svg"
-            alt="AutoClaw"
+            alt="LogLife"
             width={100}
             height={25}
             className="h-8 w-auto opacity-80"
@@ -16,10 +16,9 @@ export default function Footer() {
         </div>
         
         <div className="flex items-center gap-6 text-sm text-slate-400">
-          <a href="#" className="hover:text-red-400 transition-colors">Privacy</a>
-          <a href="#" className="hover:text-red-400 transition-colors">Terms</a>
-          <a href="https://github.com/jmoraispk/autoclaw" target="_blank" rel="noopener noreferrer" className="hover:text-red-400 transition-colors">GitHub</a>
-          <a href="https://openclaw.ai" target="_blank" rel="noopener noreferrer" className="hover:text-teal-400 transition-colors">OpenClaw</a>
+          <a href="#" className="hover:text-emerald-400 transition-colors">Privacy</a>
+          <a href="#" className="hover:text-emerald-400 transition-colors">Terms</a>
+          <a href="https://github.com/jmoraispk/loglife" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition-colors">GitHub</a>
         </div>
       </div>
     </footer>

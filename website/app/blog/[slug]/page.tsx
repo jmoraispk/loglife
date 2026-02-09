@@ -53,7 +53,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         {/* Back Link */}
         <Link
           href="/blog"
-          className="inline-flex items-center text-slate-400 hover:text-red-400 transition-colors mb-8"
+          className="inline-flex items-center text-slate-400 hover:text-emerald-400 transition-colors mb-8"
         >
           <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16l-4-4m0 0l4-4m-4 4h18" />
@@ -64,7 +64,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         {/* Article Header */}
         <header className="mb-12">
           <div className="flex items-center gap-3 text-sm mb-4">
-            <span className="px-3 py-1 rounded-full bg-red-500/10 text-red-400 font-medium border border-red-500/20">
+            <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-medium border border-emerald-500/20">
               {post.category}
             </span>
             <span className="text-slate-500">{post.date}</span>
@@ -91,7 +91,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </header>
 
         {/* Article Content */}
-        <article className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-headings:font-bold prose-p:text-slate-300 prose-strong:text-white prose-a:text-red-400 prose-a:no-underline hover:prose-a:underline prose-code:text-red-400 prose-code:bg-slate-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800 prose-li:text-slate-300 prose-ol:text-slate-300 prose-ul:text-slate-300">
+        <article className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-headings:font-bold prose-p:text-slate-300 prose-strong:text-white prose-a:text-emerald-400 prose-a:no-underline hover:prose-a:underline prose-code:text-emerald-400 prose-code:bg-slate-800 prose-code:px-1 prose-code:py-0.5 prose-code:rounded prose-pre:bg-slate-900 prose-pre:border prose-pre:border-slate-800 prose-li:text-slate-300 prose-ol:text-slate-300 prose-ul:text-slate-300">
           <Markdown
             components={{
               h2: ({ children }) => (
@@ -122,7 +122,7 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
                 const isInline = !className;
                 if (isInline) {
                   return (
-                    <code className="text-red-400 bg-slate-800 px-1 py-0.5 rounded">
+                    <code className="text-emerald-400 bg-slate-800 px-1 py-0.5 rounded">
                       {children}
                     </code>
                   );

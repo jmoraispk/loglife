@@ -140,7 +140,7 @@ const platformFeatures = [
 function ChannelBadge({ status }: { status: string }) {
   if (status === "ready") {
     return (
-      <span className="px-2 py-0.5 text-xs font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20 rounded-full">
+      <span className="px-2 py-0.5 text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">
         Ready
       </span>
     );
@@ -160,11 +160,11 @@ export default function FeaturesPage() {
         {/* Header */}
         <div className="text-center mb-20 animate-slide-up">
           <h1 className="text-4xl lg:text-6xl font-bold text-white tracking-tight mb-6">
-            Powered by <span className="text-red-500">OpenClaw</span>
+            Built for <span className="text-emerald-500">your habits</span>
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            AutoClaw deploys and manages OpenClaw—a powerful personal AI assistant with 
-            20+ channels, 50+ skills, and multi-platform support.
+            LogLife brings voice logging, multi-channel support, and AI-powered insights 
+            so you can track progress and see patterns—wherever you already chat.
           </p>
         </div>
 
@@ -177,7 +177,7 @@ export default function FeaturesPage() {
             </div>
             <div className="hidden sm:flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-teal-400"></span>
+                <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                 <span className="text-slate-400">Works out of the box</span>
               </div>
               <div className="flex items-center gap-2">
@@ -193,7 +193,7 @@ export default function FeaturesPage() {
                 key={channel.name}
                 className={`bg-slate-900/40 backdrop-blur-md border rounded-xl p-4 transition-all duration-200 hover:scale-105 ${
                   channel.status === "ready" 
-                    ? "border-teal-500/30 hover:border-teal-500/50" 
+                    ? "border-emerald-500/30 hover:border-emerald-500/50" 
                     : "border-slate-700/50 hover:border-slate-600"
                 }`}
               >
@@ -208,7 +208,7 @@ export default function FeaturesPage() {
           </div>
           
           <p className="mt-6 text-sm text-slate-500 text-center">
-            + Zalo, BlueBubbles, Nostr, Mattermost, Nextcloud Talk, and more via OpenClaw extensions
+            + more channels coming via integrations
           </p>
         </section>
 
@@ -217,7 +217,7 @@ export default function FeaturesPage() {
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
               <h2 className="text-3xl font-bold text-white">Skills</h2>
-              <span className="px-2.5 py-1 text-xs font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20 rounded-full flex items-center gap-1">
+              <span className="px-2.5 py-1 text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
@@ -231,7 +231,7 @@ export default function FeaturesPage() {
             {skills.map((skill) => (
               <div 
                 key={skill.name}
-                className="bg-slate-900/40 backdrop-blur-md border border-slate-700/50 rounded-xl p-5 hover:border-red-500/30 transition-all duration-200"
+                className="bg-slate-900/40 backdrop-blur-md border border-slate-700/50 rounded-xl p-5 hover:border-emerald-500/30 transition-all duration-200"
               >
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg font-semibold text-white">{skill.name}</h3>
@@ -251,16 +251,16 @@ export default function FeaturesPage() {
         <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.3s" }}>
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">Platform Features</h2>
-            <p className="text-slate-400">Everything OpenClaw offers, deployed by AutoClaw</p>
+            <p className="text-slate-400">Everything you need to log, reflect, and grow</p>
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {platformFeatures.map((feature, index) => (
               <div 
                 key={index}
-                className="bg-slate-900/40 backdrop-blur-md border border-slate-700/50 rounded-xl p-6 hover:border-red-500/30 transition-all duration-200"
+                className="bg-slate-900/40 backdrop-blur-md border border-slate-700/50 rounded-xl p-6 hover:border-emerald-500/30 transition-all duration-200"
               >
-                <div className="text-red-400 mb-4">{feature.icon}</div>
+                <div className="text-emerald-400 mb-4">{feature.icon}</div>
                 <h3 className="text-xl font-semibold text-white mb-2">{feature.title}</h3>
                 <p className="text-slate-400">{feature.description}</p>
               </div>
@@ -268,12 +268,12 @@ export default function FeaturesPage() {
           </div>
         </section>
 
-        {/* What AutoClaw Adds */}
+        {/* What LogLife Adds */}
         <section className="animate-slide-up" style={{ animationDelay: "0.4s" }}>
-          <div className="bg-gradient-to-br from-red-500/10 to-slate-900/50 border border-red-500/20 rounded-3xl p-8 md:p-12">
+          <div className="bg-gradient-to-br from-emerald-500/10 to-slate-900/50 border border-emerald-500/20 rounded-3xl p-8 md:p-12">
             <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-white mb-2">What AutoClaw Adds</h2>
-              <p className="text-slate-400">On top of OpenClaw&apos;s features</p>
+              <h2 className="text-3xl font-bold text-white mb-2">What LogLife Adds</h2>
+              <p className="text-slate-400">On top of your existing chat and voice</p>
             </div>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -281,12 +281,12 @@ export default function FeaturesPage() {
                 { title: "One-Click Deploy", description: "No SSH, no server setup. We handle everything.", icon: "M5 13l4 4L19 7" },
                 { title: "Vetted Skills", description: "Every skill reviewed for security. No unverified code.", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
                 { title: "Cost Dashboard", description: "Track API usage across all providers in one place.", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
-                { title: "Managed Updates", description: "We keep your OpenClaw instance up to date.", icon: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" },
+                { title: "Managed Updates", description: "We keep your LogLife instance up to date.", icon: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" },
                 { title: "Support", description: "Direct access to our team when you need help.", icon: "M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" },
               ].map((item, index) => (
                 <div key={index} className="text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-red-500/20 border border-red-500/30 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
+                    <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
                     </svg>
                   </div>
@@ -299,7 +299,7 @@ export default function FeaturesPage() {
             <div className="mt-10 text-center">
               <a 
                 href="/signup"
-                className="inline-flex items-center justify-center px-8 py-4 bg-red-600 hover:bg-red-500 text-white font-bold rounded-xl shadow-lg shadow-red-500/20 transition-all transform hover:scale-105"
+                className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105"
               >
                 Deploy Now
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

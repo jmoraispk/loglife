@@ -34,11 +34,10 @@ export default function BlogPage() {
         {/* Header */}
         <div className="text-center mb-12 animate-slide-up">
           <h1 className="text-4xl lg:text-6xl font-bold text-white tracking-tight mb-6">
-            AutoClaw <span className="text-red-500">Blog</span>
+            LogLife <span className="text-emerald-500">Blog</span>
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Insights on AI agent deployment, OpenClaw, and building the future of 
-            personal AI assistants.
+            Insights on habits, journaling, and building a better you—one log at a time.
           </p>
         </div>
 
@@ -48,7 +47,7 @@ export default function BlogPage() {
             {/* Filter Pills Container */}
             <div className="relative flex items-center p-1.5 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-slate-800/80 shadow-2xl shadow-black/20">
               {/* Animated Background Glow */}
-              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-red-500/5 via-transparent to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-emerald-500/5 via-transparent to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
               {CATEGORIES.map((category) => (
                 <button
@@ -57,14 +56,14 @@ export default function BlogPage() {
                   className={`
                     relative px-5 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ease-out cursor-pointer
                     ${activeFilter === category
-                      ? "text-white bg-gradient-to-r from-red-600 to-red-500 shadow-lg shadow-red-500/25"
+                      ? "text-white bg-gradient-to-r from-emerald-600 to-emerald-500 shadow-lg shadow-emerald-500/25"
                       : "text-slate-400 hover:text-white hover:bg-slate-800/60"
                     }
                   `}
                 >
                   {/* Active indicator glow */}
                   {activeFilter === category && (
-                    <span className="absolute inset-0 rounded-xl bg-red-500/20 blur-md -z-10" />
+                    <span className="absolute inset-0 rounded-xl bg-emerald-500/20 blur-md -z-10" />
                   )}
                   <span className="relative z-10 flex items-center gap-2">
                     {category === "All" && (
@@ -105,9 +104,9 @@ export default function BlogPage() {
         {/* Featured Post (First one) */}
         {featuredPost && (
         <div className="mb-16 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-          <Link href={`/blog/${featuredPost.slug}`} className="group block relative bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-3xl overflow-hidden hover:border-red-500/50 transition-all duration-300">
+          <Link href={`/blog/${featuredPost.slug}`} className="group block relative bg-slate-900/40 backdrop-blur-md border border-slate-800 rounded-3xl overflow-hidden hover:border-emerald-500/50 transition-all duration-300">
             <div className="grid md:grid-cols-2 gap-0">
-              <div className="h-64 md:h-80 bg-gradient-to-br from-red-900/40 to-slate-900 relative overflow-hidden">
+              <div className="h-64 md:h-80 bg-gradient-to-br from-emerald-900/40 to-slate-900 relative overflow-hidden">
                 {featuredPost.image ? (
                   <Image
                     src={featuredPost.image}
@@ -117,8 +116,8 @@ export default function BlogPage() {
                   />
                 ) : (
                   <>
-                    <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-red-500 via-slate-900 to-black"></div>
-                    <div className="absolute inset-0 flex items-center justify-center text-red-700/20">
+                    <div className="absolute inset-0 opacity-30 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-emerald-500 via-slate-900 to-black"></div>
+                    <div className="absolute inset-0 flex items-center justify-center text-emerald-700/20">
                       <svg className="w-32 h-32" fill="currentColor" viewBox="0 0 24 24"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
                   </>
@@ -126,20 +125,20 @@ export default function BlogPage() {
               </div>
               <div className="p-8 md:p-12 flex flex-col justify-center">
                 <div className="flex items-center gap-3 text-sm mb-4">
-                  <span className="px-3 py-1 rounded-full bg-red-500/10 text-red-400 font-medium border border-red-500/20">
+                  <span className="px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 font-medium border border-emerald-500/20">
                     {featuredPost.category}
                   </span>
                   <span className="text-slate-500">{featuredPost.date}</span>
                   <span className="text-slate-600">•</span>
                   <span className="text-slate-500">{featuredPost.readTime}</span>
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-4 group-hover:text-red-400 transition-colors">
+                <h2 className="text-3xl font-bold text-white mb-4 group-hover:text-emerald-400 transition-colors">
                   {featuredPost.title}
                 </h2>
                 <p className="text-slate-400 text-lg leading-relaxed mb-6">
                   {featuredPost.excerpt}
                 </p>
-                <div className="text-red-400 font-medium flex items-center group-hover:translate-x-2 transition-transform">
+                <div className="text-emerald-400 font-medium flex items-center group-hover:translate-x-2 transition-transform">
                   Read Article 
                   <svg className="w-4 h-4 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -178,11 +177,11 @@ export default function BlogPage() {
               
               <div className="p-6 flex flex-col flex-1">
                 <div className="flex items-center justify-between text-xs mb-3">
-                   <span className="text-red-400 font-medium">{post.category}</span>
+                   <span className="text-emerald-400 font-medium">{post.category}</span>
                    <span className="text-slate-500">{post.readTime}</span>
                 </div>
                 
-                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-red-400 transition-colors line-clamp-2">
+                <h3 className="text-xl font-bold text-white mb-3 group-hover:text-emerald-400 transition-colors line-clamp-2">
                   {post.title}
                 </h3>
                 
@@ -192,7 +191,7 @@ export default function BlogPage() {
                 
                 <div className="pt-4 border-t border-slate-800 mt-auto flex items-center justify-between">
                    <span className="text-xs text-slate-500">{post.date}</span>
-                   <span className="text-xs font-semibold text-red-400/80 group-hover:text-red-400">Read more →</span>
+                   <span className="text-xs font-semibold text-emerald-400/80 group-hover:text-emerald-400">Read more →</span>
                 </div>
               </div>
             </Link>
@@ -220,18 +219,18 @@ export default function BlogPage() {
         )}
 
         {/* Newsletter Signup */}
-        <div className="mt-24 p-8 md:p-12 rounded-3xl bg-red-900/10 border border-red-500/20 text-center animate-slide-up" style={{ animationDelay: "0.3s" }}>
+        <div className="mt-24 p-8 md:p-12 rounded-3xl bg-emerald-900/10 border border-emerald-500/20 text-center animate-slide-up" style={{ animationDelay: "0.3s" }}>
           <h3 className="text-2xl font-bold text-white mb-4">Subscribe to our newsletter</h3>
           <p className="text-slate-400 mb-8 max-w-xl mx-auto">
-            Get the latest updates on AutoClaw features, OpenClaw tips, and articles about AI agent deployment.
+            Get the latest updates on LogLife features, habit tips, and articles about journaling and growth.
           </p>
           <form className="flex flex-col sm:flex-row gap-3 justify-center max-w-md mx-auto" onSubmit={(e) => e.preventDefault()}>
             <input 
               type="email" 
               placeholder="you@example.com" 
-              className="px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 w-full"
+              className="px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 w-full"
             />
-            <button className="px-6 py-3 bg-red-600 hover:bg-red-500 text-white font-semibold rounded-xl transition-colors whitespace-nowrap shadow-lg shadow-red-900/20 cursor-pointer">
+            <button className="px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-colors whitespace-nowrap shadow-lg shadow-emerald-900/20 cursor-pointer">
               Subscribe
             </button>
           </form>
