@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+/* Base document styles (Tailwind v4-compatible; no @apply) */
+:root {
+  --brand: 16 185 129;
+}
+
+html, body { height: 100%; }
+
+body {
+  background-color: #ffffff; /* was bg-white */
+  color: #0f172a;            /* slate-900 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: rgba(16,185,129,.2);
+  color: #0f172a;
+}
+
+:focus-visible {
+  outline: 2px solid rgb(16 185 129);
+  outline-offset: 2px;
+}
+
+a { text-underline-offset: 2px; text-decoration-color: rgb(203 213 225); }
+a:hover { text-decoration-color: rgb(52 211 153); }
+
+details { transition: box-shadow .2s ease; }
+details[open] { box-shadow: 0 1px 2px 0 rgb(0 0 0 / .05); }
+
+summary { list-style: none; display: flex; align-items: center; gap: .5rem; cursor: pointer; user-select: none; }
+summary::-webkit-details-marker { display: none; }
+summary::before {
+  content: "";
+  width: 0.6rem; height: 0.6rem;
+  border-right: 2px solid rgb(16 185 129);
+  border-bottom: 2px solid rgb(16 185 129);
+  transform: rotate(-45deg);
+  transition: transform .2s ease;
+}
+details[open] summary::before { transform: rotate(45deg); }
+
+img, svg, video, canvas { max-width: 100%; height: auto; }
+
+@media (pointer: fine) {
+  * { scrollbar-width: thin; scrollbar-color: rgb(209 250 229) transparent; }
+  *::-webkit-scrollbar { height: 10px; width: 10px; }
+  *::-webkit-scrollbar-thumb { background: rgb(209 250 229); border-radius: 9999px; }
+  *::-webkit-scrollbar-track { background: transparent; }
+}
