@@ -41,5 +41,9 @@ yarn-error.log*
 .pytest_cache/
 .ruff_cache/
 
+# Multi-user secrets (resolved keys, not op:// refs)
+multi-user/users.json
+multi-user/generated.json
+
 # OS
 .DS_Store

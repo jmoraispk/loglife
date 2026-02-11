@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OpenClaw Multi-User Dashboard</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --bg-card: #1a1d27;
+      --bg-card-hover: #222636;
+      --text: #e4e4e7;
+      --text-muted: #8b8b9e;
+      --accent: #6366f1;
+      --accent-light: #818cf8;
+      --success: #22c55e;
+      --warning: #eab308;
+      --danger: #ef4444;
+      --border: #2a2d3a;
+      --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: "SF Mono", "Cascadia Code", "Fira Code", monospace;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .header h1 span {
+      color: var(--accent-light);
+    }
+
+    .connection-bar {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .connection-bar input,
+    .connection-bar button {
+      font-family: var(--font);
+      font-size: 0.875rem;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      color: var(--text);
+    }
+
+    .connection-bar input {
+      width: 280px;
+    }
+
+    .connection-bar button {
+      cursor: pointer;
+      background: var(--accent);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    .connection-bar button:hover {
+      background: var(--accent-light);
+    }
+
+    .connection-bar button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--text-muted);
+    }
+
+    .status-dot.connected { background: var(--success); }
+    .status-dot.error { background: var(--danger); }
+    .status-dot.connecting { background: var(--warning); }
+
+    .users-file-input {
+      margin-bottom: 1.5rem;
+    }
+
+    .users-file-input label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-right: 0.5rem;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.25rem;
+    }
+
+    .summary-card .label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-card .value {
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    .user-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 1rem;
+    }
+
+    .user-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      padding: 1.5rem;
+      transition: background 0.15s;
+    }
+
+    .user-card:hover {
+      background: var(--bg-card-hover);
+    }
+
+    .user-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+
+    .user-card-name {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .user-card-id {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .user-card-model {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.375rem;
+      color: var(--accent-light);
+    }
+
+    .user-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+    }
+
+    .user-stat {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-stat .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .user-stat .stat-value {
+      font-size: 1.15rem;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state h2 {
+      font-size: 1.2rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+    }
+
+    .empty-state p {
+      max-width: 400px;
+      margin: 0 auto;
+      line-height: 1.5;
+    }
+
+    .error-msg {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 0.5rem;
+      padding: 0.75rem 1rem;
+      margin-bottom: 1rem;
+      color: var(--danger);
+      font-size: 0.875rem;
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 1rem; }
+      .user-cards { grid-template-columns: 1fr; }
+      .connection-bar input { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1><span>OpenClaw</span> Multi-User Dashboard</h1>
+    <div class="connection-bar">
+      <input type="text" id="gateway-url" value="ws://localhost:18789" placeholder="Gateway WebSocket URL">
+      <input type="password" id="gateway-password" placeholder="Password (optional)" style="width:160px">
+      <button id="connect-btn" onclick="toggleConnection()">Connect</button>
+      <span class="status-badge">
+        <span class="status-dot" id="status-dot"></span>
+        <span id="status-text">Disconnected</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="users-file-input">
+    <label for="users-file">Load users.json:</label>
+    <input type="file" id="users-file" accept=".json" onchange="loadUsersFile(event)">
+  </div>
+
+  <div id="error-container"></div>
+  <div id="summary-container"></div>
+  <div id="users-container">
+    <div class="empty-state">
+      <h2>No Data Yet</h2>
+      <p>Load your users.json file and connect to the gateway to see per-user usage statistics.</p>
+    </div>
+  </div>
+
+  <script>
+    // ---------------------------------------------------------------------------
+    // State
+    // ---------------------------------------------------------------------------
+    let ws = null;
+    let usersConfig = null;
+    let usageData = null;
+    let connected = false;
+    let pendingRequests = new Map();
+
+    // ---------------------------------------------------------------------------
+    // WebSocket connection
+    // ---------------------------------------------------------------------------
+    function toggleConnection() {
+      if (connected) {
+        disconnect();
+      } else {
+        connect();
+      }
+    }
+
+    function connect() {
+      const url = document.getElementById('gateway-url').value;
+      const password = document.getElementById('gateway-password').value;
+
+      setStatus('connecting', 'Connecting...');
+      document.getElementById('connect-btn').textContent = 'Connecting...';
+      document.getElementById('connect-btn').disabled = true;
+
+      try {
+        ws = new WebSocket(url);
+      } catch (e) {
+        showError('Invalid WebSocket URL');
+        setStatus('error', 'Invalid URL');
+        document.getElementById('connect-btn').textContent = 'Connect';
+        document.getElementById('connect-btn').disabled = false;
+        return;
+      }
+
+      ws.onopen = () => {
+        const connectReq = {
+          type: 'req',
+          id: crypto.randomUUID(),
+          method: 'connect',
+          params: {
+            minProtocol: 3,
+            maxProtocol: 3,
+            client: {
+              id: 'multi-user-dashboard',
+              displayName: 'Multi-User Dashboard',
+              version: '0.1.0',
+              platform: 'web',
+              mode: 'control',
+            },
+            ...(password ? { auth: { password } } : {}),
+          },
+        };
+        ws.send(JSON.stringify(connectReq));
+      };
+
+      ws.onmessage = (event) => {
+        let data;
+        try { data = JSON.parse(event.data); } catch { return; }
+
+        if (data.type === 'hello-ok') {
+          connected = true;
+          setStatus('connected', 'Connected');
+          document.getElementById('connect-btn').textContent = 'Disconnect';
+          document.getElementById('connect-btn').disabled = false;
+          clearError();
+          fetchUsage();
+          return;
+        }
+
+        if (data.type === 'res' && data.id) {
+          const pending = pendingRequests.get(data.id);
+          if (pending) {
+            pendingRequests.delete(data.id);
+            if (data.ok) {
+              pending.resolve(data.payload);
+            } else {
+              pending.reject(new Error(JSON.stringify(data.error)));
+            }
+          }
+        }
+      };
+
+      ws.onerror = () => {
+        showError('WebSocket connection failed. Is the gateway running?');
+        setStatus('error', 'Connection failed');
+        document.getElementById('connect-btn').textContent = 'Connect';
+        document.getElementById('connect-btn').disabled = false;
+      };
+
+      ws.onclose = () => {
+        connected = false;
+        setStatus('error', 'Disconnected');
+        document.getElementById('connect-btn').textContent = 'Connect';
+        document.getElementById('connect-btn').disabled = false;
+        pendingRequests.forEach(p => p.reject(new Error('WebSocket closed')));
+        pendingRequests.clear();
+      };
+    }
+
+    function disconnect() {
+      if (ws) { ws.close(); ws = null; }
+      connected = false;
+      setStatus('error', 'Disconnected');
+      document.getElementById('connect-btn').textContent = 'Connect';
+    }
+
+    function request(method, params) {
+      return new Promise((resolve, reject) => {
+        if (!ws || !connected) { reject(new Error('Not connected')); return; }
+        const id = crypto.randomUUID();
+        pendingRequests.set(id, { resolve, reject });
+        ws.send(JSON.stringify({ type: 'req', id, method, params }));
+        setTimeout(() => {
+          if (pendingRequests.has(id)) {
+            pendingRequests.delete(id);
+            reject(new Error('Request timed out'));
+          }
+        }, 15000);
+      });
+    }
+
+    // ---------------------------------------------------------------------------
+    // Data fetching
+    // ---------------------------------------------------------------------------
+    async function fetchUsage() {
+      try {
+        usageData = await request('sessions.usage', {});
+        render();
+      } catch (e) {
+        showError('Failed to fetch usage: ' + e.message);
+      }
+    }
+
+    function loadUsersFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          usersConfig = JSON.parse(e.target.result);
+          clearError();
+          render();
+        } catch (err) {
+          showError('Invalid JSON in users.json: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Rendering
+    // ---------------------------------------------------------------------------
+    function render() {
+      const users = usersConfig?.users ?? [];
+      const byAgent = usageData?.byAgent ?? [];
+      const agentMap = new Map();
+      for (const entry of byAgent) {
+        agentMap.set(entry.agentId, entry);
+      }
+
+      // Summary cards
+      let totalTokens = 0, totalCost = 0, totalSessions = 0;
+      for (const entry of byAgent) {
+        if (users.find(u => u.id === entry.agentId)) {
+          totalTokens += entry.totals?.totalTokens ?? 0;
+          totalCost += entry.totals?.totalCost ?? 0;
+          totalSessions += entry.totals?.sessionCount ?? 0;
+        }
+      }
+
+      document.getElementById('summary-container').innerHTML = `
+        <div class="summary">
+          <div class="summary-card">
+            <div class="label">Users</div>
+            <div class="value">${users.length}</div>
+          </div>
+          <div class="summary-card">
+            <div class="label">Total Tokens</div>
+            <div class="value">${formatTokens(totalTokens)}</div>
+          </div>
+          <div class="summary-card">
+            <div class="label">Est. Cost</div>
+            <div class="value">$${totalCost.toFixed(2)}</div>
+          </div>
+          <div class="summary-card">
+            <div class="label">Sessions</div>
+            <div class="value">${totalSessions}</div>
+          </div>
+        </div>
+      `;
+
+      // User cards
+      if (users.length === 0) {
+        document.getElementById('users-container').innerHTML = `
+          <div class="empty-state">
+            <h2>No Users Loaded</h2>
+            <p>Load your users.json file to see per-user usage cards.</p>
+          </div>
+        `;
+        return;
+      }
+
+      const cards = users.map(user => {
+        const agentData = agentMap.get(user.id);
+        const totals = agentData?.totals ?? {};
+        const model = user.model ?? usersConfig?.defaults?.model ?? '(default)';
+
+        const inputTokens = totals.inputTokens ?? 0;
+        const outputTokens = totals.outputTokens ?? 0;
+        const cost = totals.totalCost ?? 0;
+        const sessions = totals.sessionCount ?? 0;
+
+        return `
+          <div class="user-card">
+            <div class="user-card-header">
+              <div>
+                <div class="user-card-name">${escapeHtml(user.name ?? user.id)}</div>
+                <div class="user-card-id">agent: ${escapeHtml(user.id)}</div>
+              </div>
+              <div class="user-card-model">${escapeHtml(model)}</div>
+            </div>
+            <div class="user-stats">
+              <div class="user-stat">
+                <span class="stat-label">Input Tokens</span>
+                <span class="stat-value">${formatTokens(inputTokens)}</span>
+              </div>
+              <div class="user-stat">
+                <span class="stat-label">Output Tokens</span>
+                <span class="stat-value">${formatTokens(outputTokens)}</span>
+              </div>
+              <div class="user-stat">
+                <span class="stat-label">Est. Cost</span>
+                <span class="stat-value">$${cost.toFixed(2)}</span>
+              </div>
+              <div class="user-stat">
+                <span class="stat-label">Sessions</span>
+                <span class="stat-value">${sessions}</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.getElementById('users-container').innerHTML = `<div class="user-cards">${cards}</div>`;
+    }
+
+    // ---------------------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------------------
+    function setStatus(state, text) {
+      document.getElementById('status-dot').className = 'status-dot ' + state;
+      document.getElementById('status-text').textContent = text;
+    }
+
+    function showError(msg) {
+      document.getElementById('error-container').innerHTML = `<div class="error-msg">${escapeHtml(msg)}</div>`;
+    }
+
+    function clearError() {
+      document.getElementById('error-container').innerHTML = '';
+    }
+
+    function formatTokens(n) {
+      if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
+      if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
+      return n.toString();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,36 @@
+{
+  "shared": {
+    "env": {
+      "OPENAI_API_KEY": "op://LogLife_users/global/OPENAI_API_KEY",
+      "ANTHROPIC_API_KEY": "op://LogLife_users/global/ANTHROPIC_API_KEY",
+      "ASSEMBLYAI_API_KEY": "op://LogLife_users/global/ASSEMBLYAI_API_KEY"
+    }
+  },
+  "users": [
+    {
+      "id": "alice",
+      "name": "Alice",
+      "identifiers": [
+        "+1234567890",
+        "telegram:alice_handle",
+        "discord:123456789"
+      ],
+      "env": {
+        "SUPERMEMORY_OPENCLAW_API_KEY": "op://LogLife_users/alice/SUPERMEMORY_API_KEY"
+      }
+    },
+    {
+      "id": "bob",
+      "name": "Bob",
+      "identifiers": ["+0987654321"],
+      "model": "openai/gpt-5.2",
+      "env": {
+        "SUPERMEMORY_OPENCLAW_API_KEY": "op://LogLife_users/bob/SUPERMEMORY_API_KEY"
+      }
+    }
+  ],
+  "defaults": {
+    "dmScope": "per-peer",
+    "model": "anthropic/claude-sonnet-4-5"
+  }
+}
