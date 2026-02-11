@@ -7,9 +7,9 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { WebVitals } from "./components/WebVitals";
 
 export const metadata: Metadata = {
-  title: "LogLife — Private AI Assistants. Automatic Deployment.",
+  title: "LogLife — Your Life, Captured",
   description:
-    "Audio-first, chat-native journaling. Private AI assistants that track your progress, find patterns, and help you build better habits. Your data stays yours.",
+    "The simplest way to journal your life. Talk to LogLife through WhatsApp, Telegram, or any chat app. AI turns your conversations into a timeline of highlights, patterns, and progress. Open source. Private by design.",
 };
 
 export default function RootLayout({

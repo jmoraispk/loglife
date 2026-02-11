@@ -1,12 +1,13 @@
-# AutoClaw Website
+# LogLife Website
 
-The marketing and dashboard website for AutoClaw - one-click deployment for OpenClaw agents.
+The marketing and dashboard website for LogLife — chat-native AI journaling that turns your daily conversations into a timeline of your life.
 
 ## Tech Stack
 
 - **Framework**: Next.js 16 with App Router
 - **Styling**: Tailwind CSS v4
 - **Language**: TypeScript
+- **Auth**: Clerk
 
 ## Getting Started
 
@@ -30,6 +31,8 @@ website/
 │   ├── hero/           # Homepage hero section
 │   ├── blog/           # Blog page
 │   ├── pricing/        # Pricing page
+│   ├── features/       # Features page
+│   ├── dashboard/      # User dashboard
 │   ├── login/          # Login page
 │   ├── signup/         # Signup page
 │   └── api/            # API routes
@@ -39,8 +42,6 @@ website/
 
 ## Branding
 
-- **Primary Color (Red)**: `#ef4444` - used for CTAs, accents
-- **Secondary Color (Teal)**: `#14b8a6` - used for highlights
-- **Background**: Dark slate (`#0a0a0a` / `#0f172a`)
-
-Based on OpenClaw's visual identity.
+- **Primary Color (Emerald)**: `#10b981` — used for CTAs, accents
+- **Background**: Dark slate (`#0f172a`)
+- **Theme**: Dark mode with emerald highlights

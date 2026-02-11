@@ -1,0 +1,38 @@
+{
+  "why-remembering-is-a-capture-problem": {
+    "slug": "why-remembering-is-a-capture-problem",
+    "title": "Why Remembering Your Life Is a Capture Problem, Not a Memory Problem",
+    "excerpt": "Nobody can tell you what they did last Tuesday. It's not a memory issue—it's a capture issue. Here's why the solution isn't a better brain, but a better system.",
+    "date": "Jan 28, 2026",
+    "readTime": "5 min read",
+    "category": "Philosophy",
+    "image": "/blog/why-openclaw-deployment-hard.png"
+  },
+  "understanding-ai-journaling-costs": {
+    "slug": "understanding-ai-journaling-costs",
+    "title": "Understanding Your AI Journaling Costs",
+    "excerpt": "A transparent breakdown of how AI processing works behind the scenes—transcription, analysis, highlights—and what a typical LogLife user actually pays.",
+    "date": "Jan 15, 2026",
+    "readTime": "7 min read",
+    "category": "Tutorial",
+    "image": "/blog/understanding-api-costs.png"
+  },
+  "less-is-more-capture": {
+    "slug": "less-is-more-capture",
+    "title": "The Case for Minimal Capture: Less Is More",
+    "excerpt": "Most journaling apps overwhelm with features. LogLife's philosophy: subtract to the bone. Just talk, and let AI do the rest.",
+    "date": "Jan 8, 2026",
+    "readTime": "4 min read",
+    "category": "Philosophy",
+    "image": "/blog/curated-skills-philosophy.png"
+  },
+  "self-hosted-vs-cloud": {
+    "slug": "self-hosted-vs-cloud",
+    "title": "Self-Hosted vs Cloud AI: A Decision Framework",
+    "excerpt": "Both approaches have trade-offs. This post offers a practical framework for evaluating which makes sense for your situation, with honest pros and cons for each.",
+    "date": "Dec 5, 2025",
+    "readTime": "5 min read",
+    "category": "Product",
+    "image": "/blog/self-hosted-vs-cloud.png"
+  }
+}

@@ -18,6 +18,7 @@ export default function Footer() {
         <div className="flex items-center gap-6 text-sm text-slate-400">
           <a href="#" className="hover:text-emerald-400 transition-colors">Privacy</a>
           <a href="#" className="hover:text-emerald-400 transition-colors">Terms</a>
+          <a href="https://docs.loglife.co/" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition-colors">Docs</a>
           <a href="https://github.com/jmoraispk/loglife" target="_blank" rel="noopener noreferrer" className="hover:text-emerald-400 transition-colors">GitHub</a>
         </div>
       </div>

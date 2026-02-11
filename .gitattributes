@@ -1,0 +1,12 @@
+# Default: treat files as text and store LF in the repo
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Optional: common binaries (avoid any EOL handling)
+*.png binary
+*.jpg binary
+*.zip binary
+*.pdf binary
