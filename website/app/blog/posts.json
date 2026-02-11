@@ -1,35 +1,35 @@
 {
-  "why-openclaw-deployment-hard": {
-    "slug": "why-openclaw-deployment-hard",
-    "title": "Why Self-Hosting Your Assistant Is Harder Than It Should Be",
-    "excerpt": "Exploring the challenges of setting up personal AI assistants: VPS rental, SSH configuration, networking, and why managed hosting helps.",
+  "why-remembering-is-a-capture-problem": {
+    "slug": "why-remembering-is-a-capture-problem",
+    "title": "It's Not a Memory Problem. It's a Capture Problem.",
+    "excerpt": "You have infinite technology and still can't remember last Tuesday. The problem isn't recall — it's that nothing was captured in the first place.",
     "date": "Jan 28, 2026",
     "readTime": "5 min read",
     "category": "Product",
     "image": "/blog/why-openclaw-deployment-hard.png"
   },
-  "understanding-api-costs": {
-    "slug": "understanding-api-costs",
-    "title": "Understanding Your AI Agent's API Costs",
-    "excerpt": "A breakdown of how API costs accumulate across Anthropic, OpenAI, and other providers—and how to track them effectively.",
+  "honest-pricing": {
+    "slug": "honest-pricing",
+    "title": "Why We'll Cancel Your Subscription for You",
+    "excerpt": "Most SaaS companies profit from forgotten subscriptions. We auto-cancel on inactivity. Here's why trust matters for something as personal as a journal.",
     "date": "Jan 15, 2026",
-    "readTime": "7 min read",
-    "category": "Tutorial",
+    "readTime": "5 min read",
+    "category": "Philosophy",
     "image": "/blog/understanding-api-costs.png"
   },
-  "curated-skills-philosophy": {
-    "slug": "curated-skills-philosophy",
-    "title": "The Case for Curated Skills: Less Is More",
-    "excerpt": "Less is more. Here's how we think about curated defaults so you get value without overwhelm.",
+  "less-is-more": {
+    "slug": "less-is-more",
+    "title": "Less Is More: Why LogLife Has No Buttons",
+    "excerpt": "Most journaling apps overwhelm you with mood sliders and rating scales. LogLife strips all of that away. Just talk.",
     "date": "Jan 8, 2026",
     "readTime": "4 min read",
-    "category": "Philosophy",
+    "category": "Design",
     "image": "/blog/curated-skills-philosophy.png"
   },
   "self-hosted-vs-cloud": {
     "slug": "self-hosted-vs-cloud",
     "title": "Self-Hosted vs Cloud AI: A Decision Framework",
-    "excerpt": "Both approaches have trade-offs. This post offers a practical framework for evaluating which makes sense for your situation, with honest pros and cons for each.",
+    "excerpt": "Both approaches have trade-offs. A practical framework for evaluating which makes sense for your AI journaling setup, with honest pros and cons for each.",
     "date": "Dec 5, 2025",
     "readTime": "5 min read",
     "category": "Product",

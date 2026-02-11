@@ -113,23 +113,23 @@ export default function DashboardPage() {
           <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Agents</p>
+                <p className="text-xs text-slate-500 uppercase tracking-wide">Journal Entries</p>
                 <p className="text-2xl font-semibold text-white mt-1">0</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
                 <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-2">No agents deployed</p>
+            <p className="text-xs text-slate-500 mt-2">No entries yet</p>
           </div>
 
           <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">API Calls</p>
-                <p className="text-2xl font-semibold text-white mt-1">0</p>
+                <p className="text-xs text-slate-500 uppercase tracking-wide">Current Streak</p>
+                <p className="text-2xl font-semibold text-white mt-1">0 days</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
                 <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,33 +137,33 @@ export default function DashboardPage() {
                 </svg>
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-2">This month</p>
+            <p className="text-xs text-slate-500 mt-2">Start journaling to build your streak</p>
           </div>
 
           <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Costs</p>
-                <p className="text-2xl font-semibold text-white mt-1">$0.00</p>
+                <p className="text-xs text-slate-500 uppercase tracking-wide">Highlights</p>
+                <p className="text-2xl font-semibold text-white mt-1">0</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
                 <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-2">This month</p>
+            <p className="text-xs text-slate-500 mt-2">This week</p>
           </div>
 
           <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Uptime</p>
+                <p className="text-xs text-slate-500 uppercase tracking-wide">Days Active</p>
                 <p className="text-2xl font-semibold text-white mt-1">--</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
                 <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
             </div>
@@ -173,23 +173,23 @@ export default function DashboardPage() {
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Agents Section */}
+          {/* Journal Section */}
           <div className="lg:col-span-2 bg-slate-900/50 border border-slate-800/50 rounded-xl">
             <div className="px-5 py-4 border-b border-slate-800/50 flex items-center justify-between">
-              <h2 className="text-sm font-medium text-white">Your Agents</h2>
+              <h2 className="text-sm font-medium text-white">Your Journal</h2>
               <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-500 transition-all cursor-pointer">
-                + New Agent
+                + New Entry
               </button>
             </div>
             <div className="p-5">
               <div className="text-center py-12">
                 <div className="w-12 h-12 rounded-xl bg-slate-800/50 flex items-center justify-center mx-auto mb-3">
                   <svg className="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
                 </div>
-                <p className="text-sm text-slate-400 mb-1">No agents deployed yet</p>
-                <p className="text-xs text-slate-500">Deploy your first AI agent to get started</p>
+                <p className="text-sm text-slate-400 mb-1">Your story starts here</p>
+                <p className="text-xs text-slate-500">Send a voice note or message to begin</p>
               </div>
             </div>
           </div>
@@ -207,20 +207,20 @@ export default function DashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-300">Deploy Agent</p>
-                  <p className="text-xs text-slate-500">Launch a new AI agent</p>
+                  <p className="text-sm text-slate-300">New Entry</p>
+                  <p className="text-xs text-slate-500">Record a thought or moment</p>
                 </div>
               </button>
 
               <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all cursor-pointer text-left">
                 <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
                   <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-300">API Keys</p>
-                  <p className="text-xs text-slate-500">Manage your API credentials</p>
+                  <p className="text-sm text-slate-300">Timeline</p>
+                  <p className="text-xs text-slate-500">See your highlights</p>
                 </div>
               </button>
 
@@ -231,22 +231,22 @@ export default function DashboardPage() {
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-300">View Logs</p>
-                  <p className="text-xs text-slate-500">Monitor agent activity</p>
+                  <p className="text-sm text-slate-300">Insights</p>
+                  <p className="text-xs text-slate-500">Explore patterns</p>
                 </div>
               </button>
 
-              <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all cursor-pointer text-left">
+              <a href="https://docs.loglife.co/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all cursor-pointer text-left">
                 <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center flex-shrink-0">
                   <svg className="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                   </svg>
                 </div>
                 <div>
-                  <p className="text-sm text-slate-300">Documentation</p>
-                  <p className="text-xs text-slate-500">Learn how to use LogLife</p>
+                  <p className="text-sm text-slate-300">Docs</p>
+                  <p className="text-xs text-slate-500">Learn how LogLife works</p>
                 </div>
-              </button>
+              </a>
             </div>
           </div>
         </div>

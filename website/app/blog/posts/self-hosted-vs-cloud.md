@@ -1,8 +1,8 @@
-## Evaluating Self-Hosted vs Cloud AI
+## Evaluating Self-Hosted vs Cloud AI Journaling
 
-Both self-hosted and cloud AI can be the right choice. The decision mostly comes down to five variables: privacy requirements, ops comfort, usage volume, time available, and how much customization you need.
+Both self-hosted and cloud AI journaling can be the right choice. The decision mostly comes down to five variables: privacy requirements, ops comfort, usage volume, time available, and how much customization you need.
 
-This post lays out the real upsides, the real costs, and a simple scoring framework.
+This post lays out the real upsides, the real costs, and a simple scoring framework. If you're considering LogLife, this applies directly — we offer both a fully self-hosted option and a managed hosted plan.
 
 ## What's Actually Better About Self-Hosting
 
@@ -112,4 +112,4 @@ Self-hosting is usually better when:
 
 ---
 
-*If you want the benefits of self-hosting without the ops burden, managed self-hosting exists for that middle ground.*
+*If you want the benefits of self-hosting without the ops burden, LogLife offers both paths: fully self-hosted (open source, Docker) or managed hosting where we handle everything. Your data, your choice.*

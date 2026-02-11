@@ -53,7 +53,7 @@ const ChannelIcons = {
   ),
 };
 
-// Channel data with setup requirements
+// Channel data
 const channels = [
   { name: "WebChat", icon: "WebChat", status: "ready", description: "Built-in chat interface, works immediately" },
   { name: "WhatsApp", icon: "WhatsApp", status: "setup", description: "Via Baileys, requires QR code pairing" },
@@ -67,23 +67,23 @@ const channels = [
   { name: "Matrix", icon: "Matrix", status: "setup", description: "Open protocol, requires homeserver" },
 ];
 
-// Skills data
-const skills = [
-  { name: "GitHub", category: "Development", description: "Manage repos, PRs, issues" },
-  { name: "Gmail", category: "Communication", description: "Read, send, and manage emails" },
-  { name: "Calendar", category: "Productivity", description: "Schedule and manage events" },
-  { name: "Weather", category: "Utility", description: "Get weather forecasts" },
-  { name: "Coding Agent", category: "Development", description: "Write and edit code" },
-  { name: "Browser", category: "Utility", description: "Browse the web, take screenshots" },
-  { name: "Notes", category: "Productivity", description: "Apple Notes, Obsidian, Notion" },
-  { name: "Reminders", category: "Productivity", description: "Apple Reminders, Things" },
+// Integrations data
+const integrations = [
+  { name: "Oura Ring", category: "Health", description: "Sleep, activity, readiness" },
+  { name: "Apple Health", category: "Health", description: "Steps, workouts, heart rate" },
+  { name: "Calendar", category: "Productivity", description: "Events and schedule sync" },
+  { name: "Notion", category: "Knowledge", description: "Notes and pages" },
+  { name: "Obsidian", category: "Knowledge", description: "Your knowledge graph" },
+  { name: "Reminders", category: "Productivity", description: "Nudges and check-ins" },
+  { name: "Spotify", category: "Lifestyle", description: "What you're listening to" },
+  { name: "Photos", category: "Memory", description: "Images in your journal" },
 ];
 
 // Platform features
 const platformFeatures = [
   {
     title: "Voice & Speech",
-    description: "Voice Wake, Talk Mode, and TTS for hands-free interaction",
+    description: "Voice notes, voice calls, talk mode. Journal without typing a single word.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
@@ -91,47 +91,47 @@ const platformFeatures = [
     ),
   },
   {
-    title: "Browser Control",
-    description: "Automated web browsing with screenshots and actions",
+    title: "D/W/M/Q/Y Timeline",
+    description: "Your highlights at every time scale. Daily, weekly, monthly, quarterly, yearly.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
       </svg>
     ),
   },
   {
-    title: "Cron & Automation",
-    description: "Scheduled tasks, webhooks, and Gmail triggers",
+    title: "Knowledge Graph",
+    description: "People, places, themes — all linked. Your life data, connected like your brain connects it.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
       </svg>
     ),
   },
   {
-    title: "Multi-Platform",
-    description: "macOS app, iOS node, Android node for device actions",
+    title: "Life Telemetry",
+    description: "Health wearables, calendars, and apps feed into your timeline automatically.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
       </svg>
     ),
   },
   {
-    title: "Canvas & UI",
-    description: "Live visual workspace controlled by your agent",
+    title: "Smart Reminders",
+    description: "A gentle nudge to reflect. Not a coach — just a reminder that you wanted to show up.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
       </svg>
     ),
   },
   {
-    title: "Multi-Agent",
-    description: "Route channels to different agents, coordinate work",
+    title: "AI Memory",
+    description: "The more you share, the more LogLife understands. Long-term context that grows with you.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
       </svg>
     ),
   },
@@ -160,11 +160,11 @@ export default function FeaturesPage() {
         {/* Header */}
         <div className="text-center mb-20 animate-slide-up">
           <h1 className="text-4xl lg:text-6xl font-bold text-white tracking-tight mb-6">
-            Built for <span className="text-emerald-500">your habits</span>
+            Built for <span className="text-emerald-500">your journey</span>
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            LogLife brings voice logging, multi-channel support, and AI-powered insights 
-            so you can track progress and see patterns—wherever you already chat.
+            Voice logging, multi-channel chat, AI insights, and a dashboard that turns 
+            conversations into your life&apos;s story.
           </p>
         </div>
 
@@ -172,8 +172,8 @@ export default function FeaturesPage() {
         <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.1s" }}>
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">Channels</h2>
-              <p className="text-slate-400">Chat with your agent from anywhere</p>
+              <h2 className="text-3xl font-bold text-white mb-2">Journal from anywhere</h2>
+              <p className="text-slate-400">Talk to LogLife through the platforms you already use</p>
             </div>
             <div className="hidden sm:flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
@@ -208,42 +208,42 @@ export default function FeaturesPage() {
           </div>
           
           <p className="mt-6 text-sm text-slate-500 text-center">
-            + more channels coming via integrations
+            + voice calls and phone support coming soon
           </p>
         </section>
 
-        {/* Skills Section */}
+        {/* Integrations Section */}
         <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.2s" }}>
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-3xl font-bold text-white">Skills</h2>
+              <h2 className="text-3xl font-bold text-white">Integrations</h2>
               <span className="px-2.5 py-1 text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
-                All vetted for security
+                Life telemetry
               </span>
             </div>
-            <p className="text-slate-400">Curated integrations reviewed by our team—no unverified community code</p>
+            <p className="text-slate-400">Connect the tools that already know parts of your story</p>
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {skills.map((skill) => (
+            {integrations.map((integration) => (
               <div 
-                key={skill.name}
+                key={integration.name}
                 className="bg-slate-900/40 backdrop-blur-md border border-slate-700/50 rounded-xl p-5 hover:border-emerald-500/30 transition-all duration-200"
               >
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-lg font-semibold text-white">{skill.name}</h3>
-                  <span className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">{skill.category}</span>
+                  <h3 className="text-lg font-semibold text-white">{integration.name}</h3>
+                  <span className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded">{integration.category}</span>
                 </div>
-                <p className="text-sm text-slate-400">{skill.description}</p>
+                <p className="text-sm text-slate-400">{integration.description}</p>
               </div>
             ))}
           </div>
           
           <p className="mt-6 text-sm text-slate-500 text-center">
-            50+ skills available including 1Password, Spotify, Trello, Sonos, Hue lights, and more
+            + more integrations coming soon
           </p>
         </section>
 
@@ -268,21 +268,21 @@ export default function FeaturesPage() {
           </div>
         </section>
 
-        {/* What LogLife Adds */}
+        {/* Why LogLife Exists */}
         <section className="animate-slide-up" style={{ animationDelay: "0.4s" }}>
           <div className="bg-gradient-to-br from-emerald-500/10 to-slate-900/50 border border-emerald-500/20 rounded-3xl p-8 md:p-12">
             <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-white mb-2">What LogLife Adds</h2>
-              <p className="text-slate-400">On top of your existing chat and voice</p>
+              <h2 className="text-3xl font-bold text-white mb-2">Why LogLife exists</h2>
+              <p className="text-slate-400">Built on ideas we believe in</p>
             </div>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
               {[
-                { title: "One-Click Deploy", description: "No SSH, no server setup. We handle everything.", icon: "M5 13l4 4L19 7" },
-                { title: "Vetted Skills", description: "Every skill reviewed for security. No unverified code.", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
-                { title: "Cost Dashboard", description: "Track API usage across all providers in one place.", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
-                { title: "Managed Updates", description: "We keep your LogLife instance up to date.", icon: "M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" },
-                { title: "Support", description: "Direct access to our team when you need help.", icon: "M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" },
+                { title: "No new app to learn", description: "Your chat app is the interface. Nothing to download, nothing to learn.", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
+                { title: "Highlights that matter", description: "AI picks your 3–5 most important moments. You just live your life.", icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" },
+                { title: "A dashboard for your life", description: "Charts, patterns, and a timeline. The data view of who you're becoming.", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
+                { title: "Privacy you can verify", description: "Open source. Self-hostable. We can't see your data, and you can prove it.", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
+                { title: "Honest pricing", description: "Not using LogLife? We'll cancel your subscription. We only want to charge you if you're getting value.", icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" },
               ].map((item, index) => (
                 <div key={index} className="text-center">
                   <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
@@ -301,7 +301,7 @@ export default function FeaturesPage() {
                 href="/signup"
                 className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105"
               >
-                Deploy Now
+                Start Your Log
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
