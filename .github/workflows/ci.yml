@@ -45,3 +45,5 @@ jobs:
       - name: Build
         working-directory: website
         run: pnpm run build
+        env:
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
