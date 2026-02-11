@@ -12,7 +12,7 @@ function Hero() {
           <div className="space-y-8 animate-fade-in">
             <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-white leading-tight animate-slide-up">
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Private AI Assistants.</span>{" "}
-              <span className="text-emerald-400">Automatic Deployment.</span>
+              <span className="text-emerald-500">Automatic Deployment.</span>
             </h1>
             
             <p className="text-xl lg:text-2xl text-slate-300 leading-relaxed animate-slide-up" style={{ animationDelay: "0.1s" }}>
@@ -144,7 +144,7 @@ function Features() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
-            Everything you need to <span className="text-emerald-400">grow</span>
+            Everything you need to <span className="text-emerald-500">grow</span>
           </h2>
           <p className="text-xl text-slate-400">Simple, powerful tools for tracking and reflection</p>
         </div>
@@ -252,91 +252,69 @@ function HowItWorks() {
   );
 }
 
-// Social Proof Section with Auto-Scrolling Testimonials
-function SocialProof() {
-  const items = [
-    { q: "I finally kept a journal because it lives in WhatsApp—14 days straight!", a: "Maya G.", r: "Streaks unlocked my consistency" },
-    { q: "The patterns view showed me that late nights killed my AM workouts (82%).", a: "Devon R.", r: "Sleeping earlier = more energy" },
-    { q: "Voice notes made reflection fun. I speak for 30s and I'm done.", a: "Anika P.", r: "My anxiety dropped" },
-    { q: "I asked: 'How many on-time bedtimes last week?' It answered instantly.", a: "Chris L.", r: "Asking my own data feels magical" },
-    { q: "It feels private and calm. I share more because it's in chat.", a: "Sofia M.", r: "Audio-first makes it effortless" },
-  ];
-  const [idx, setIdx] = React.useState(0);
-  const n = items.length;
-  
-  React.useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % n), 5000);
-    return () => clearInterval(t);
-  }, [n]);
-
-  const prev = () => setIdx((i) => (i - 1 + n) % n);
-  const next = () => setIdx((i) => (i + 1) % n);
-  const visible = [idx % n, (idx + 1) % n, (idx + 2) % n];
-
+// Before/After Comparison Section
+function BeforeAfter() {
   return (
-    <section id="testimonials" className="relative py-24">
+    <section id="comparison" className="relative py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">What people say</h2>
-          <p className="text-xl text-slate-400 mb-8">Real experiences from our community</p>
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+            The <span className="text-emerald-500">old way</span> vs LogLife
+          </h2>
+          <p className="text-xl text-slate-400">Scattered notes and forgotten goals—or one place that gets you</p>
         </div>
         
-        <div className="relative">
-          <div className="grid md:grid-cols-3 gap-8">
-            {visible.map((i) => (
-              <div 
-                key={i}
-                className="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 hover:border-emerald-500/50 transition-all duration-300"
-              >
-                <div className="flex gap-1 mb-4">
-                  {[...Array(5)].map((_, j) => (
-                    <svg key={j} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
-                </div>
-                <p className="text-lg leading-relaxed text-slate-300 mb-4">&quot;{items[i].q}&quot;</p>
-                <div className="flex items-center justify-between">
-                  <div className="text-sm font-medium text-slate-400">— {items[i].a}</div>
-                  <div className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-xs font-semibold">
-                    {items[i].r}
-                  </div>
-                </div>
-              </div>
-            ))}
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Before */}
+          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8">
+            <h3 className="text-2xl font-bold text-slate-400 mb-6 flex items-center gap-2">
+              <span className="text-emerald-400">✗</span> Manual Setup
+            </h3>
+            <ul className="space-y-4">
+              {[
+                "Notes in 10 different apps",
+                "New Year's resolutions forgotten by February",
+                "No link between sleep, mood, and habits",
+                "Journaling feels like homework",
+                "Hard to see if you're actually improving",
+                "Voice memos that never get transcribed",
+                "Data locked in silos",
+                "No one place to ask: “How did I do?”"
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3 text-slate-400">
+                  <svg className="w-5 h-5 text-slate-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                  <span>{item}</span>
+                </li>
+              ))}
+            </ul>
           </div>
           
-          <div className="flex items-center justify-center gap-4 mt-8">
-            <button 
-              onClick={prev} 
-              aria-label="Previous" 
-              className="rounded-full bg-slate-800 border border-slate-700 p-2 text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-            </button>
-            <div className="flex gap-2">
-              {Array.from({ length: n }).map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setIdx(i)}
-                  aria-label={`Go to slide ${i + 1}`}
-                  className={`h-2 w-2 rounded-full transition-all cursor-pointer ${
-                    i === idx ? "bg-emerald-500 w-8" : "bg-slate-700"
-                  }`}
-                />
+          {/* After */}
+          <div className="bg-slate-900/60 backdrop-blur-md border border-emerald-500/30 rounded-2xl p-8 shadow-lg shadow-emerald-500/10">
+            <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
+              <span className="text-emerald-400">✓</span> With LogLife
+            </h3>
+            <ul className="space-y-4">
+              {[
+                "One place for habits, voice notes, and chat",
+                "Streaks and reminders that keep you consistent",
+                "AI surfaces patterns: sleep → mood → workouts",
+                "Log in seconds by voice or text",
+                "Progress views and simple reports",
+                "Transcription and search built in",
+                "Your data in one place, export anytime",
+                "Ask in plain language: “How many on-time bedtimes last week?”"
+              ].map((item, i) => (
+                <li key={i} className="flex items-start gap-3 text-white">
+                  <svg className="w-5 h-5 text-emerald-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{item}</span>
+                </li>
               ))}
-            </div>
-            <button 
-              onClick={next} 
-              aria-label="Next" 
-              className="rounded-full bg-slate-800 border border-slate-700 p-2 text-slate-300 hover:bg-slate-700 hover:text-white transition-all cursor-pointer"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
+            </ul>
           </div>
         </div>
       </div>
@@ -352,7 +330,7 @@ export default function LogLifeHero() {
       <Hero />
       <Features />
       <HowItWorks />
-      <SocialProof />
+      <BeforeAfter />
     </main>
   );
 }

@@ -1,30 +1,46 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AutoClaw Website
+
+The marketing and dashboard website for AutoClaw - one-click deployment for OpenClaw agents.
+
+## Tech Stack
+
+- **Framework**: Next.js 16 with App Router
+- **Styling**: Tailwind CSS v4
+- **Language**: TypeScript
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
+# Install dependencies
+pnpm install
+
+# Run the development server
+pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to see the website.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+website/
+├── app/
+│   ├── components/     # Reusable UI components
+│   ├── contexts/       # React contexts (theme, etc.)
+│   ├── hero/           # Homepage hero section
+│   ├── blog/           # Blog page
+│   ├── pricing/        # Pricing page
+│   ├── login/          # Login page
+│   ├── signup/         # Signup page
+│   └── api/            # API routes
+├── public/             # Static assets (logos, images)
+└── ...
+```
 
-## Learn More
+## Branding
 
-To learn more about Next.js, take a look at the following resources:
+- **Primary Color (Red)**: `#ef4444` - used for CTAs, accents
+- **Secondary Color (Teal)**: `#14b8a6` - used for highlights
+- **Background**: Dark slate (`#0a0a0a` / `#0f172a`)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Based on OpenClaw's visual identity.

@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import Navbar from "./Navbar";
 import Sidebar from "./Sidebar";
 
 export default function ConditionalNavbar() {
@@ -12,11 +11,6 @@ export default function ConditionalNavbar() {
     return null;
   }
 
-  return (
-    <>
-      <Navbar />
-      <Sidebar />
-    </>
-  );
+  return <Sidebar />;
 }
 
