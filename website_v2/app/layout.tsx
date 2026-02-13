@@ -4,6 +4,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import ConditionalNavbar from "./components/ConditionalNavbar";
 import PageWrapper from "./components/PageWrapper";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { WhatsAppWidgetProvider } from "./contexts/WhatsAppWidgetContext";
+import WhatsAppWidget from "./components/WhatsAppWidget";
 import { WebVitals } from "./components/WebVitals";
 
 export const metadata: Metadata = {
@@ -86,8 +88,11 @@ export default function RootLayout({
         <body>
           <WebVitals />
           <ThemeProvider>
-            <ConditionalNavbar />
-            <PageWrapper>{children}</PageWrapper>
+            <WhatsAppWidgetProvider>
+              <ConditionalNavbar />
+              <PageWrapper>{children}</PageWrapper>
+              <WhatsAppWidget />
+            </WhatsAppWidgetProvider>
           </ThemeProvider>
         </body>
       </html>
