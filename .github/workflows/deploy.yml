@@ -28,7 +28,7 @@ jobs:
             export NVM_DIR="$HOME/.nvm"
             [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 
-            DEPLOY_DIR=/opt/loglife/preview
+            DEPLOY_DIR="$HOME/loglife-preview"
             APP_NAME=loglife-preview
             PORT=3001
             BRANCH=${{ github.head_ref }}
