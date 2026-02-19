@@ -1,0 +1,65 @@
+---
+description: Core project context for the LogLife monorepo — package manager, tech stack, structure, and deployment info.
+alwaysApply: true
+---
+
+# LogLife Project Context
+
+## Repository Structure
+
+```
+loglife/
+├── website/          # Next.js marketing site + dashboard (the main app)
+├── docs/             # Mintlify documentation site (docs.loglife.co)
+├── call_prompts/     # Voice call prompt templates
+└── multi-user/       # Multi-user infrastructure
+```
+
+## Package Manager
+
+**pnpm** (v10.29.1, declared via `packageManager` in `website/package.json`).
+
+- Always use `pnpm` instead of `npm` or `yarn`.
+- Lock file: `website/pnpm-lock.yaml`
+- Install: `pnpm install` (run from `website/`)
+- Add deps: `pnpm add <pkg>` / `pnpm add -D <pkg>`
+
+## Website Tech Stack
+
+| Layer         | Technology                       |
+|---------------|----------------------------------|
+| Framework     | Next.js 16 (App Router)          |
+| Language      | TypeScript (strict)              |
+| Styling       | Tailwind CSS v4                  |
+| Auth          | Clerk (`@clerk/nextjs`)          |
+| Voice         | Vapi (`@vapi-ai/web`)            |
+| Deployment    | Vercel                           |
+| Build         | `next build --turbopack`         |
+| Dev           | `next dev --turbopack`           |
+
+## Key Conventions
+
+- App directory: `website/app/` (Next.js App Router)
+- Path alias: `@/*` maps to `website/*`
+- Most pages are client components (`"use client"`)
+- Blog posts use server components with `fs` to read markdown from `app/blog/posts/`
+- Layout wraps everything in `ClerkProvider`
+
+## Environment Variables (Clerk)
+
+Required for runtime (must be set in Vercel project settings):
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
+- `NEXT_PUBLIC_CLERK_SIGN_IN_URL`
+- `NEXT_PUBLIC_CLERK_SIGN_UP_URL`
+- `NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL`
+- `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL`
+
+## Commands (run from `website/`)
+
+```bash
+pnpm dev          # Start dev server with Turbopack
+pnpm build        # Production build with Turbopack
+pnpm start        # Start production server
+pnpm lint         # Run ESLint
+```
