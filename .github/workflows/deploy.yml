@@ -51,27 +51,27 @@ jobs:
             pnpm install --frozen-lockfile
             pnpm run build
 
-            PNPM_PATH=$(which pnpm)
-            NODE_PATH=$(which node)
+            NODE_BIN=$(which node)
+            NEXT_BIN="$DEPLOY_DIR/website/node_modules/.bin/next"
 
             mkdir -p "$HOME/.config/systemd/user"
-            cat > "$HOME/.config/systemd/user/$APP_NAME.service" <<EOF
-            [Unit]
-            Description=LogLife Preview
-            After=network.target
-
-            [Service]
-            Type=simple
-            WorkingDirectory=$HOME/loglife-preview/website
-            Environment=PORT=$PORT
-            Environment=NODE_ENV=production
-            Environment=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
-            ExecStart=$NODE_PATH $HOME/loglife-preview/website/node_modules/.bin/next start --port $PORT
-            Restart=on-failure
-
-            [Install]
-            WantedBy=default.target
-            EOF
+            printf '%s\n' \
+              "[Unit]" \
+              "Description=LogLife Preview" \
+              "After=network.target" \
+              "" \
+              "[Service]" \
+              "Type=simple" \
+              "WorkingDirectory=$DEPLOY_DIR/website" \
+              "Environment=PORT=$PORT" \
+              "Environment=NODE_ENV=production" \
+              "Environment=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" \
+              "ExecStart=$NODE_BIN $NEXT_BIN start --port $PORT" \
+              "Restart=on-failure" \
+              "" \
+              "[Install]" \
+              "WantedBy=default.target" \
+              > "$HOME/.config/systemd/user/$APP_NAME.service"
 
             systemctl --user daemon-reload
             systemctl --user enable "$APP_NAME"
