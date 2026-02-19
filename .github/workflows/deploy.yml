@@ -1,0 +1,51 @@
+name: Deploy Website
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+
+concurrency:
+  group: deploy-preview
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+
+            DEPLOY_DIR=/opt/loglife/preview
+            APP_NAME=loglife-preview
+            PORT=3001
+            BRANCH=${{ github.head_ref }}
+
+            if [ ! -d "$DEPLOY_DIR" ]; then
+              git clone https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
+            fi
+
+            cd "$DEPLOY_DIR"
+            git fetch origin
+            git checkout "$BRANCH"
+            git reset --hard "origin/$BRANCH"
+
+            cd website
+            pnpm install --frozen-lockfile
+            pnpm run build
+
+            pm2 delete "$APP_NAME" || true
+            PORT=$PORT pm2 start pnpm --name "$APP_NAME" -- start --port $PORT
+            pm2 save
