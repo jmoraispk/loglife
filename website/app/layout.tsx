@@ -9,9 +9,9 @@ import WhatsAppWidget from "./components/WhatsAppWidget";
 import { WebVitals } from "./components/WebVitals";
 
 export const metadata: Metadata = {
-  title: "LogLife — Your Life, Captured",
+  title: "LogLife — Effortless Tracking, in Chat",
   description:
-    "Chat-native AI journaling powered by voice. Track your progress, find patterns, and build better habits through the chat apps you already use. No app to download. Open source. Your data stays yours.",
+    "Turns your chat into a life log with habit tracking and wearable integration. AI listens, remembers, and surfaces patterns — without coaching you. Open source. No app to download.",
 };
 
 export default function RootLayout({
