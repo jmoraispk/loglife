@@ -4,12 +4,14 @@ import { ClerkProvider } from "@clerk/nextjs";
 import ConditionalNavbar from "./components/ConditionalNavbar";
 import PageWrapper from "./components/PageWrapper";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { WhatsAppWidgetProvider } from "./contexts/WhatsAppWidgetContext";
+import WhatsAppWidget from "./components/WhatsAppWidget";
 import { WebVitals } from "./components/WebVitals";
 
 export const metadata: Metadata = {
   title: "LogLife — Your Life, Captured",
   description:
-    "The simplest way to journal your life. Talk to LogLife through WhatsApp, Telegram, or any chat app. AI turns your conversations into a timeline of highlights, patterns, and progress. Open source. Private by design.",
+    "Chat-native AI journaling powered by voice. Track your progress, find patterns, and build better habits through the chat apps you already use. No app to download. Open source. Your data stays yours.",
 };
 
 export default function RootLayout({
@@ -86,8 +88,11 @@ export default function RootLayout({
         <body>
           <WebVitals />
           <ThemeProvider>
-            <ConditionalNavbar />
-            <PageWrapper>{children}</PageWrapper>
+            <WhatsAppWidgetProvider>
+              <ConditionalNavbar />
+              <PageWrapper>{children}</PageWrapper>
+              <WhatsAppWidget />
+            </WhatsAppWidgetProvider>
           </ThemeProvider>
         </body>
       </html>

@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 
-// Modern Hero Section
+// Modern Hero Section with Dark Theme
 function Hero() {
   return (
     <section id="hero" className="relative isolate overflow-hidden pt-16 pb-24 min-h-screen flex items-center">
@@ -11,12 +11,12 @@ function Hero() {
           {/* Left Column - Text Content */}
           <div className="space-y-8 animate-fade-in">
             <h1 className="text-5xl lg:text-7xl font-bold tracking-tight text-white leading-tight animate-slide-up">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Your life,</span>{" "}
-              <span className="text-emerald-500">captured.</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">Your Life,</span>{" "}
+              <span className="text-emerald-500">Captured.</span>
             </h1>
             
             <p className="text-xl lg:text-2xl text-slate-300 leading-relaxed animate-slide-up" style={{ animationDelay: "0.1s" }}>
-              Most people can&apos;t tell you what they did last Tuesday. LogLife changes that. Talk about your day through any chat app, and watch your story unfold.
+              Nobody can tell you what they did last Tuesday. It&apos;s not a memory issue&mdash;it&apos;s a capture issue. LogLife turns your daily conversations into a timeline of your life.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 pt-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
@@ -40,6 +40,10 @@ function Hero() {
                 </svg>
               </a>
             </div>
+            
+            {/* Platform badges */}
+            <div className="flex flex-wrap gap-3 pt-6 animate-slide-up" style={{ animationDelay: "0.3s" }}>
+            </div>
           </div>
           
           {/* Right Column - Illustration */}
@@ -59,12 +63,12 @@ function Hero() {
               </div>
               
               <div className="absolute right-8 top-24 bg-emerald-600/90 backdrop-blur-md rounded-xl p-4 shadow-lg transform rotate-2 hover:rotate-0 transition-transform border border-emerald-500/20">
-                <p className="text-sm text-white font-medium">&quot;Just finished a 5K run&quot;</p>
+                <p className="text-sm text-white font-medium">&quot;Ran 5K this morning&quot;</p>
               </div>
               
               <div className="absolute left-12 bottom-20 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-4 shadow-lg">
-                <div className="text-xs text-slate-400 mb-1">This week</div>
-                <div className="text-lg font-bold text-emerald-400">3 highlights</div>
+                <div className="text-xs text-slate-400 mb-1">Weekly Highlights</div>
+                <div className="text-lg font-bold text-emerald-400">3 of 5</div>
               </div>
               
               <div className="absolute right-12 bottom-32 bg-white/5 backdrop-blur-md border border-white/10 rounded-xl p-3 shadow-lg transform rotate-3 hover:rotate-0 transition-transform">
@@ -164,13 +168,13 @@ function Features() {
   );
 }
 
-// How It Works Section
+// How It Works Section with Visual Steps
 function HowItWorks() {
   const steps = [
     {
       number: "1",
-      title: "Talk about your day",
-      description: "Send a voice note or quick text through your chat app. At the end of the day, reflect for a moment. That's the whole ritual.",
+      title: "Talk to LogLife",
+      description: "Send a voice note or text about your day through your favorite chat app. A short reflection at the end of the day is all you need.",
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
@@ -179,8 +183,8 @@ function HowItWorks() {
     },
     {
       number: "2",
-      title: "LogLife listens",
-      description: "AI transcribes your words, extracts what matters, and organizes it. No buttons, no forms, no mood sliders.",
+      title: "AI captures everything",
+      description: "LogLife transcribes, tags, and organizes. No buttons, no mood ratings, no structured input. Just your words.",
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -189,18 +193,18 @@ function HowItWorks() {
     },
     {
       number: "3",
-      title: "Highlights appear",
-      description: "The 3–5 things that defined your day, chosen by AI, refined by you. Same for your week, month, quarter, year.",
+      title: "Your highlights emerge",
+      description: "AI surfaces the 3\u20135 most important things from your day, week, month, quarter, and year.",
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
         </svg>
       )
     },
     {
       number: "4",
-      title: "See the big picture",
-      description: "Open your dashboard to see patterns emerge. Sleep vs. mood. Exercise vs. energy. The connections you'd never spot on your own.",
+      title: "Explore your dashboard",
+      description: "Visualize patterns, track habits, and see your progress over time. Chat is the input; the dashboard is the output.",
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -210,7 +214,7 @@ function HowItWorks() {
     {
       number: "5",
       title: "Ask anything",
-      description: "'How many times did I work out this month?' 'What were my top moments in Q1?' Your life, queryable.",
+      description: "Query your life data in plain language: \u2018How many on-time bedtimes last week?\u2019 \u2018What were my top 3 achievements this month?\u2019",
       icon: (
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
@@ -223,8 +227,8 @@ function HowItWorks() {
     <section id="how-it-works" className="relative py-24">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">Five minutes a day. That&apos;s it.</h2>
-          <p className="text-xl text-slate-400">Here&apos;s what happens when you talk to LogLife</p>
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">How it works</h2>
+          <p className="text-xl text-slate-400">Capture your life in five simple steps</p>
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
@@ -356,63 +360,6 @@ function Quotes() {
   );
 }
 
-// How We're Different Section
-function HowWereDifferent() {
-  const differentiators = [
-    {
-      title: "No app. Just chat.",
-      description: "While other journaling tools ask you to download yet another app, LogLife meets you in WhatsApp, Telegram, or wherever you already talk. E2E encryption included.",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      )
-    },
-    {
-      title: "Your data. Your rules.",
-      description: "Open source from day one. Self-host it, run it locally, or let us host it. We built it so we can't access your data — by design, not by promise.",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-      )
-    },
-    {
-      title: "A timeline, not a diary.",
-      description: "Most journaling apps give you entries. LogLife gives you a timeline — daily, weekly, monthly, quarterly, yearly highlights, a knowledge graph, and patterns you'd never see on your own.",
-      icon: (
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-      )
-    }
-  ];
-
-  return (
-    <section className="relative py-24">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="text-center mb-16">
-          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
-            What makes LogLife <span className="text-emerald-500">different</span>
-          </h2>
-        </div>
-        
-        <div className="grid md:grid-cols-3 gap-8">
-          {differentiators.map((item, index) => (
-            <div 
-              key={index}
-              className="bg-slate-800/40 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8 hover:border-emerald-500/30 transition-all duration-200"
-            >
-              <div className="text-emerald-400 mb-4">{item.icon}</div>
-              <h3 className="text-xl font-semibold text-white mb-3">{item.title}</h3>
-              <p className="text-slate-400 leading-relaxed">{item.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 // Main export component
 export default function LogLifeHero() {
@@ -423,7 +370,6 @@ export default function LogLifeHero() {
       <HowItWorks />
       <BeforeAfter />
       <Quotes />
-      <HowWereDifferent />
     </main>
   );
 }

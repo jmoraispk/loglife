@@ -1,49 +1,68 @@
-## What Did You Do Last Tuesday?
+## The Tuesday Problem
 
-Take a moment. Really try. What did you do last Tuesday?
+Here's a question that sounds simple: What did you do last Tuesday?
 
-If you're like most people, the answer is a blur. Maybe you remember a meeting, or that you went to the gym. But the details — what you talked about at lunch, the idea you had on your walk home, the thing your kid said that made you laugh — they're gone.
+Most people can't answer it. Not because their memory is bad—because nothing captured it. We live in an era of infinite data, infinite tools, infinite apps—and yet nobody can reconstruct their own week.
 
-This isn't a memory problem. Your brain is working exactly as designed. It keeps what seems important *at the time* and quietly discards the rest. The problem is that "the rest" often turns out to be the stuff that mattered most.
+This isn't a memory problem. It's a **capture problem**.
 
-## We Have Infinite Technology and Zero Memory
+## Memory Is Lossy by Design
 
-Think about what's different now versus twenty years ago. You carry a supercomputer in your pocket. You have cloud storage, note-taking apps, voice assistants, and AI that can write essays. You have more tools for capturing information than any human in history.
+Our brains weren't built to be recording devices. They evolved to spot patterns, detect threats, and make quick decisions. The details of your Tuesday—the conversation you had, the small win at work, the walk you took—fade within hours unless something makes them stick.
 
-And yet — you still can't tell someone what you did last Tuesday.
+Journaling apps have tried to solve this. But most of them treat it like homework: open the app, stare at a blank page, try to remember, type something, feel guilty about not writing enough, close the app. Repeat (or more likely, don't).
 
-The tools exist. The habit doesn't.
+The problem isn't discipline. The problem is friction.
 
-## It's a Capture Problem
+## What's Missing in Today's World
 
-Memory is downstream of capture. You can't recall what was never recorded.
+Think about where your life data currently lives:
 
-Traditional journaling tries to solve this, and for the people who stick with it, it works beautifully. But most people don't stick with it. The blank page is intimidating. The structured templates feel like homework. And by the time you sit down to write, half the day's details have already faded.
+- **Notes** scattered across 10 different apps
+- **Voice memos** that never get transcribed
+- **New Year's resolutions** forgotten by February
+- **No link** between your sleep, mood, and productivity
+- **No one place** to ask: "How am I actually doing?"
 
-The problem isn't that people don't want to remember their lives. It's that the existing tools make capture too hard.
+We have all this technology, all this data, all this everything—and we can't tell someone what we did two days ago. What are we doing?
 
-## What If Capture Was Effortless?
+## Capture, Don't Recall
 
-Imagine this: at the end of your day, you send a voice note to a chat app you already use. You talk for two or three minutes about your day. No structure, no prompts, no mood sliders. Just talking.
+The solution isn't a better memory. It's a better **system**.
 
-And then something interesting happens. AI listens. It picks out the important moments. It tags them, organizes them, and places them on a timeline. At the end of the week, you get your top highlights. At the end of the month, the bigger themes emerge. At the end of the year, you have a story.
+LogLife treats your life as a capture problem. Instead of asking you to recall and write, it meets you where you already are—your chat apps—and lets you talk.
 
-That's what LogLife does. It turns the thing you already do — talking about your day — into the thing you always wanted: a record of your life.
+A voice note at the end of your day. A quick text when something happens. That's it.
 
-## The Gap Between Living and Knowing
+The AI handles the rest:
+- **Transcribes** your voice into text
+- **Tags and organizes** without you pressing buttons
+- **Surfaces highlights**—the 3–5 most important things from your day, week, month, quarter, and year
 
-There's a strange gap between *living* your life and *knowing* your life. You can be incredibly busy, productive, happy even — and still have no idea where the time went.
+No mood ratings. No structured input. No buttons. Just your words.
 
-This matters because self-knowledge isn't just nostalgia. It's how you notice patterns. It's how you see that you always feel drained after certain meetings, or that your best ideas come on walks, or that you've been neglecting the things you say matter most.
+## The D/W/M/Q/Y Timeline
 
-Without capture, these insights stay invisible.
+Imagine being able to look back and see:
 
-## A Different Approach
+- Your **daily** highlights—what actually mattered today
+- Your **weekly** summary—patterns emerging
+- Your **monthly** themes—what you've been focused on
+- Your **quarterly** progress—are you moving toward your goals?
+- Your **yearly** story—the narrative of your life, captured
 
-LogLife doesn't ask you to change your behavior. It doesn't ask you to download a new app, learn a new interface, or build a new habit from scratch. It meets you where you already are — in a chat app — and turns a two-minute conversation into something lasting.
+This is what LogLife builds for you, automatically. The AI chooses the highlights (prioritizing what you emphasize and your stated goals), and you can always refine.
 
-The most important step in journaling was always the hardest one: starting. LogLife makes starting as easy as sending a text.
+## From Scattered to Storyboard
+
+The vision is simple: **the 80-20 simplest way to get your life on a storyboard**.
+
+Not a productivity system. Not a habit tracker with 47 features. Not a therapy chatbot.
+
+A capture system. Because remembering your life shouldn't depend on your memory—it should be reconstruction from captured data.
 
 ---
 
-*Your life is worth remembering. The question is whether you're capturing it.*
+*"You do not rise to the level of your goals, you fall to the level of your systems." — James Clear*
+
+*LogLife is the system.*

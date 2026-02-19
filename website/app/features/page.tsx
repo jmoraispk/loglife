@@ -67,23 +67,23 @@ const channels = [
   { name: "Matrix", icon: "Matrix", status: "setup", description: "Open protocol, requires homeserver" },
 ];
 
-// Integrations data
+// Integrations data (replaces Skills)
 const integrations = [
-  { name: "Oura Ring", category: "Health", description: "Sleep, activity, readiness" },
+  { name: "Oura Ring", category: "Health", description: "Sleep, activity, readiness scores" },
   { name: "Apple Health", category: "Health", description: "Steps, workouts, heart rate" },
-  { name: "Calendar", category: "Productivity", description: "Events and schedule sync" },
-  { name: "Notion", category: "Knowledge", description: "Notes and pages" },
-  { name: "Obsidian", category: "Knowledge", description: "Your knowledge graph" },
-  { name: "Reminders", category: "Productivity", description: "Nudges and check-ins" },
-  { name: "Spotify", category: "Lifestyle", description: "What you're listening to" },
-  { name: "Photos", category: "Memory", description: "Images in your journal" },
+  { name: "Calendar", category: "Productivity", description: "Events and schedule" },
+  { name: "Notion", category: "Knowledge", description: "Sync notes and pages" },
+  { name: "Obsidian", category: "Knowledge", description: "Connect your knowledge graph" },
+  { name: "Reminders", category: "Productivity", description: "Habit nudges and check-ins" },
+  { name: "Spotify", category: "Lifestyle", description: "Track what you listen to" },
+  { name: "Photos", category: "Memory", description: "Attach images to journal entries" },
 ];
 
 // Platform features
 const platformFeatures = [
   {
     title: "Voice & Speech",
-    description: "Voice notes, voice calls, talk mode. Journal without typing a single word.",
+    description: "Voice notes, voice calls, talk mode. Hands-free journaling for your busy life.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
@@ -92,7 +92,7 @@ const platformFeatures = [
   },
   {
     title: "D/W/M/Q/Y Timeline",
-    description: "Your highlights at every time scale. Daily, weekly, monthly, quarterly, yearly.",
+    description: "See your 3\u20135 highlights at every time scale. Daily, weekly, monthly, quarterly, yearly.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -101,7 +101,7 @@ const platformFeatures = [
   },
   {
     title: "Knowledge Graph",
-    description: "People, places, themes — all linked. Your life data, connected like your brain connects it.",
+    description: "Entities, links, and patterns from your life data. Like Notion meets Obsidian, built from your words.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -110,16 +110,16 @@ const platformFeatures = [
   },
   {
     title: "Life Telemetry",
-    description: "Health wearables, calendars, and apps feed into your timeline automatically.",
+    description: "Integrate health wearables and productivity tools. Measuring, by itself, helps improving.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
       </svg>
     ),
   },
   {
     title: "Smart Reminders",
-    description: "A gentle nudge to reflect. Not a coach — just a reminder that you wanted to show up.",
+    description: "Gentle nudges to journal, review, and reflect. Not prescriptive\u2014only captures unless you ask for advice.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -128,7 +128,7 @@ const platformFeatures = [
   },
   {
     title: "AI Memory",
-    description: "The more you share, the more LogLife understands. Long-term context that grows with you.",
+    description: "Long-term context that grows with you. Agentic supermemory with BYO keys.",
     icon: (
       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -136,6 +136,46 @@ const platformFeatures = [
     ),
   },
 ];
+
+// Competitor comparison data
+const comparisonRows = [
+  { dimension: "Chat-native as primary UI (no app!)", loglife: "check", dayone: "x", reflection: "x", rosebud: "x", mindsera: "x" },
+  { dimension: "No button input / no mood ratings by design", loglife: "check", dayone: "partial", reflection: "x", rosebud: "x", mindsera: "x" },
+  { dimension: "Dashboard as primary output (plots/stats)", loglife: "check", dayone: "x", reflection: "x", rosebud: "x", mindsera: "x" },
+  { dimension: "Mandatory D/W/M/Q/Y highlights (3\u20135)", loglife: "check", dayone: "x", reflection: "partial", rosebud: "partial", mindsera: "partial" },
+  { dimension: "PKM & Knowledge graph", loglife: "check", dayone: "x", reflection: "x", rosebud: "x", mindsera: "x" },
+  { dimension: "Integrations for life telemetry (Oura)", loglife: "check", dayone: "partial", reflection: "x", rosebud: "x", mindsera: "x" },
+  { dimension: "Non-prescriptive capture system", loglife: "check", dayone: "check", reflection: "x", rosebud: "x", mindsera: "x" },
+  { dimension: "Not therapy-like", loglife: "check", dayone: "check", reflection: "partial", rosebud: "x", mindsera: "partial" },
+  { dimension: "Encryption / privacy-first", loglife: "check", dayone: "check", reflection: "partial", rosebud: "partial", mindsera: "partial" },
+  { dimension: "Open-source + self-host-first", loglife: "check", dayone: "x", reflection: "x", rosebud: "x", mindsera: "x" },
+  { dimension: "Auto subscription cancellation on inactivity", loglife: "check", dayone: "x", reflection: "x", rosebud: "x", mindsera: "x" },
+  { dimension: "Agentic supermemory (BYO keys)", loglife: "check", dayone: "x", reflection: "x", rosebud: "x", mindsera: "x" },
+  { dimension: "Call support (phone, no internet needed)", loglife: "check", dayone: "x", reflection: "x", rosebud: "x", mindsera: "x" },
+  { dimension: "Reminders", loglife: "check", dayone: "x", reflection: "x", rosebud: "x", mindsera: "x" },
+];
+
+function ComparisonIcon({ status }: { status: string }) {
+  if (status === "check") {
+    return (
+      <svg className="w-5 h-5 text-emerald-400 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+      </svg>
+    );
+  }
+  if (status === "partial") {
+    return (
+      <div className="w-5 h-5 mx-auto flex items-center justify-center">
+        <div className="w-3 h-3 rounded-full bg-slate-500/50 border border-slate-500" />
+      </div>
+    );
+  }
+  return (
+    <svg className="w-5 h-5 text-slate-600 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+    </svg>
+  );
+}
 
 function ChannelBadge({ status }: { status: string }) {
   if (status === "ready") {
@@ -160,11 +200,11 @@ export default function FeaturesPage() {
         {/* Header */}
         <div className="text-center mb-20 animate-slide-up">
           <h1 className="text-4xl lg:text-6xl font-bold text-white tracking-tight mb-6">
-            Built for <span className="text-emerald-500">your journey</span>
+            Built for <span className="text-emerald-500">capturing your journey</span>
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Voice logging, multi-channel chat, AI insights, and a dashboard that turns 
-            conversations into your life&apos;s story.
+            Voice logging, multi-channel chat, AI-powered insights, and a dashboard that turns 
+            your daily conversations into a visual story of your life.
           </p>
         </div>
 
@@ -172,8 +212,8 @@ export default function FeaturesPage() {
         <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.1s" }}>
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">Journal from anywhere</h2>
-              <p className="text-slate-400">Talk to LogLife through the platforms you already use</p>
+              <h2 className="text-3xl font-bold text-white mb-2">Channels</h2>
+              <p className="text-slate-400">Journal from anywhere</p>
             </div>
             <div className="hidden sm:flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
@@ -208,23 +248,23 @@ export default function FeaturesPage() {
           </div>
           
           <p className="mt-6 text-sm text-slate-500 text-center">
-            + voice calls and phone support coming soon
+            + Voice calls and phone support coming soon
           </p>
         </section>
 
-        {/* Integrations Section */}
+        {/* Integrations Section (replaces Skills) */}
         <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.2s" }}>
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-2">
               <h2 className="text-3xl font-bold text-white">Integrations</h2>
               <span className="px-2.5 py-1 text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center gap-1">
                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
                 Life telemetry
               </span>
             </div>
-            <p className="text-slate-400">Connect the tools that already know parts of your story</p>
+            <p className="text-slate-400">Transparently collect the info you want documented on your journey</p>
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -243,7 +283,7 @@ export default function FeaturesPage() {
           </div>
           
           <p className="mt-6 text-sm text-slate-500 text-center">
-            + more integrations coming soon
+            + more integrations coming including Fitbit, Garmin, Strava, and more
           </p>
         </section>
 
@@ -251,7 +291,7 @@ export default function FeaturesPage() {
         <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.3s" }}>
           <div className="mb-8">
             <h2 className="text-3xl font-bold text-white mb-2">Platform Features</h2>
-            <p className="text-slate-400">Everything you need to log, reflect, and grow</p>
+            <p className="text-slate-400">Everything you need to capture, reflect, and grow</p>
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -268,21 +308,21 @@ export default function FeaturesPage() {
           </div>
         </section>
 
-        {/* Why LogLife Exists */}
-        <section className="animate-slide-up" style={{ animationDelay: "0.4s" }}>
+        {/* What LogLife Adds */}
+        <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.4s" }}>
           <div className="bg-gradient-to-br from-emerald-500/10 to-slate-900/50 border border-emerald-500/20 rounded-3xl p-8 md:p-12">
             <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-white mb-2">Why LogLife exists</h2>
-              <p className="text-slate-400">Built on ideas we believe in</p>
+              <h2 className="text-3xl font-bold text-white mb-2">What LogLife Adds</h2>
+              <p className="text-slate-400">On top of your existing chat and voice</p>
             </div>
             
             <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
               {[
-                { title: "No new app to learn", description: "Your chat app is the interface. Nothing to download, nothing to learn.", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
-                { title: "Highlights that matter", description: "AI picks your 3–5 most important moments. You just live your life.", icon: "M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" },
-                { title: "A dashboard for your life", description: "Charts, patterns, and a timeline. The data view of who you're becoming.", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
-                { title: "Privacy you can verify", description: "Open source. Self-hostable. We can't see your data, and you can prove it.", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
-                { title: "Honest pricing", description: "Not using LogLife? We'll cancel your subscription. We only want to charge you if you're getting value.", icon: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" },
+                { title: "No App Needed", description: "Primary interface is chat-native. E2E encryption built-in. No app to download.", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
+                { title: "Privacy by Design", description: "Open-source + self-host/local-first by default. No access by design.", icon: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" },
+                { title: "Deep Analytics", description: "D/W/M/Q/Y timeline + dashboard + memory graph as the product.", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
+                { title: "Non-Prescriptive", description: "A capture system, not a coach. Advice only when you ask.", icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" },
+                { title: "Auto-Cancel on Inactivity", description: "Not using it? We\u2019ll cancel your subscription. We only want you paying if you\u2019re getting value.", icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" },
               ].map((item, index) => (
                 <div key={index} className="text-center">
                   <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
@@ -306,6 +346,67 @@ export default function FeaturesPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </a>
+            </div>
+          </div>
+        </section>
+
+        {/* Competitor Comparison Table */}
+        <section className="animate-slide-up" style={{ animationDelay: "0.5s" }}>
+          <div className="text-center mb-12">
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+              How LogLife <span className="text-emerald-500">compares</span>
+            </h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              See how LogLife stacks up against the leading AI journaling apps.
+            </p>
+          </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-slate-700/50">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-800/60">
+                  <th className="text-left p-4 text-slate-300 font-semibold min-w-[240px]">Dimension</th>
+                  <th className="p-4 text-emerald-400 font-bold text-center min-w-[90px]">LogLife</th>
+                  <th className="p-4 text-slate-400 font-medium text-center min-w-[90px]">Day One</th>
+                  <th className="p-4 text-slate-400 font-medium text-center min-w-[90px]">Reflection</th>
+                  <th className="p-4 text-slate-400 font-medium text-center min-w-[90px]">Rosebud</th>
+                  <th className="p-4 text-slate-400 font-medium text-center min-w-[90px]">Mindsera</th>
+                </tr>
+              </thead>
+              <tbody>
+                {comparisonRows.map((row, index) => (
+                  <tr 
+                    key={index} 
+                    className={`border-t border-slate-700/30 ${index % 2 === 0 ? "bg-slate-900/30" : "bg-slate-900/10"} hover:bg-slate-800/40 transition-colors`}
+                  >
+                    <td className="p-4 text-slate-300">{row.dimension}</td>
+                    <td className="p-4"><ComparisonIcon status={row.loglife} /></td>
+                    <td className="p-4"><ComparisonIcon status={row.dayone} /></td>
+                    <td className="p-4"><ComparisonIcon status={row.reflection} /></td>
+                    <td className="p-4"><ComparisonIcon status={row.rosebud} /></td>
+                    <td className="p-4"><ComparisonIcon status={row.mindsera} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          
+          <div className="mt-6 flex items-center justify-center gap-8 text-sm text-slate-500">
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              <span>Full support</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-slate-500/50 border border-slate-500" />
+              <span>Partial</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <span>Not supported</span>
             </div>
           </div>
         </section>
