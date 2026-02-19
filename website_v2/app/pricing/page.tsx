@@ -25,8 +25,8 @@ export default function PricingPage() {
           </p>
         </div>
 
-        {/* 3-Column Pricing Grid */}
-        <div className="grid lg:grid-cols-3 gap-6 items-start animate-slide-up" style={{ animationDelay: "0.1s" }}>
+        {/* 2-Column Pricing Grid */}
+        <div className="grid lg:grid-cols-2 gap-6 items-start max-w-4xl mx-auto animate-slide-up" style={{ animationDelay: "0.1s" }}>
 
           {/* Column 1: Self-Hosted (Free) */}
           <div className="relative bg-slate-950/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 flex flex-col hover:border-slate-700 transition-all duration-300 group">
@@ -130,50 +130,6 @@ export default function PricingPage() {
             </div>
           </div>
 
-          {/* Column 3: Unlimited ($49/mo) */}
-          <div className="relative bg-slate-950/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 flex flex-col hover:border-slate-700 transition-all duration-300 group">
-            <div className="absolute inset-0 bg-gradient-to-b from-slate-800/10 to-transparent rounded-3xl pointer-events-none" />
-            
-            <div className="mb-8">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 mb-6 group-hover:scale-110 transition-transform duration-300">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-white mb-1">Unlimited</h2>
-              <p className="text-sm text-slate-500 mb-4">For power users</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold text-white">$49</span>
-                <span className="text-slate-500 font-medium">/ mo</span>
-              </div>
-            </div>
-
-            <div className="space-y-4 mb-8 flex-1">
-              {[
-                "Everything in Hosted, plus:",
-                "Unlimited API usage",
-                "Priority support",
-                "Advanced analytics",
-                "Custom integrations",
-                "Agentic supermemory",
-              ].map((item, index) => (
-                <div key={item} className="flex items-start gap-3 text-slate-300">
-                  <CheckIcon className={`w-5 h-5 mt-0.5 shrink-0 ${index === 0 ? "text-purple-400" : "text-slate-500"}`} />
-                  <span className={`text-sm ${index === 0 ? "font-medium text-purple-400" : ""}`}>{item}</span>
-                </div>
-              ))}
-            </div>
-
-            <a 
-              href="/signup"
-              className="w-full inline-flex items-center justify-center px-4 py-3 bg-slate-800 hover:bg-slate-700 text-white text-sm font-semibold rounded-xl border border-slate-700 transition-colors"
-            >
-              Start Your Log
-              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-              </svg>
-            </a>
-          </div>
         </div>
         
         {/* Billing Principles Section */}

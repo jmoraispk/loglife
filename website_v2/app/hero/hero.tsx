@@ -107,8 +107,8 @@ function Features() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
       ),
-      title: "Chat-Native",
-      description: "No app to download. Works in WhatsApp, Telegram, or any chat platform. The only app phones were made for."
+      title: "No app to download",
+      description: "LogLife lives where you already chat. WhatsApp, Telegram, or plain SMS. No new app, no new habit to build."
     },
     {
       icon: (
@@ -116,26 +116,26 @@ function Features() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
         </svg>
       ),
-      title: "Voice & Audio First",
-      description: "Just talk. Voice is low friction, high throughput. AI transcribes, tags, and organizes. Written word is optional."
+      title: "Just talk",
+      description: "Send a voice note about your day. Or type a few words. AI handles the rest — transcription, tagging, organizing. Zero friction."
     },
     {
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
         </svg>
       ),
-      title: "AI-Powered Highlights",
-      description: "Your 3\u20135 most important moments\u2014surfaced daily, weekly, monthly, quarterly, and yearly. The AI chooses, you refine."
+      title: "Your highlights, every week",
+      description: "Every day, week, month, quarter, and year, LogLife surfaces your 3–5 most important moments. A timeline of what actually mattered."
     },
     {
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
         </svg>
       ),
-      title: "Private by Design",
-      description: "Open source. Self-hostable. We design it so we don\u2019t have access by design. Export, delete, or reset anytime."
+      title: "Private by default",
+      description: "Open source. Self-hostable. We designed it so we can't see your data. Export everything, delete anytime, no questions asked."
     }
   ];
 
@@ -144,9 +144,9 @@ function Features() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
-            A capture system for <span className="text-emerald-500">your life</span>
+            A simpler way to <span className="text-emerald-500">know yourself</span>
           </h2>
-          <p className="text-xl text-slate-400">The simplest way to get your life on a storyboard</p>
+          <p className="text-xl text-slate-400">Four ideas that make LogLife different</p>
         </div>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -259,26 +259,25 @@ function BeforeAfter() {
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
-            The <span className="text-emerald-500">old way</span> vs LogLife
+            The <span className="text-emerald-500">old way</span> vs. LogLife
           </h2>
-          <p className="text-xl text-slate-400">Scattered notes and forgotten goals&mdash;or one place that gets you</p>
+          <p className="text-xl text-slate-400">Scattered notes and forgotten goals — or one place that actually gets you</p>
         </div>
         
         <div className="grid md:grid-cols-2 gap-8">
           {/* Before */}
           <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8">
             <h3 className="text-2xl font-bold text-slate-400 mb-6 flex items-center gap-2">
-              <span className="text-emerald-400">&times;</span> The old way
+              <span className="text-emerald-400">✗</span> Without LogLife
             </h3>
             <ul className="space-y-4">
               {[
-                "Can\u2019t remember what you did last Tuesday",
-                "New Year\u2019s resolutions forgotten by February",
-                "Notes scattered across 10 different apps",
-                "No link between sleep, mood, and productivity",
-                "Journaling feels like homework",
-                "Voice memos that never get transcribed",
-                "No one place to ask: \u2018How am I actually doing?\u2019"
+                "Can't remember what you did last Tuesday",
+                "Resolutions that don't survive January",
+                "Thoughts in 10 different apps, none connected",
+                "Voice memos you never listen to again",
+                "No idea if you're actually improving",
+                "Journaling that feels like homework"
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-slate-400">
                   <svg className="w-5 h-5 text-slate-600 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -293,17 +292,16 @@ function BeforeAfter() {
           {/* After */}
           <div className="bg-slate-900/60 backdrop-blur-md border border-emerald-500/30 rounded-2xl p-8 shadow-lg shadow-emerald-500/10">
             <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-              <span className="text-emerald-400">&check;</span> With LogLife
+              <span className="text-emerald-400">✓</span> With LogLife
             </h3>
             <ul className="space-y-4">
               {[
-                "One conversation captures your whole day",
-                "D/W/M/Q/Y highlights keep you on track",
-                "AI surfaces patterns: sleep \u2192 mood \u2192 workouts",
-                "Log in seconds by voice or text\u2014no buttons, no ratings",
-                "Dashboard visualizes your progress over time",
-                "Transcription and search built in",
-                "Ask in plain language: \u2018How was my week?\u2019"
+                "Your whole week, reconstructed from one conversation",
+                "Weekly highlights that keep your goals alive",
+                "Everything in one place, linked by AI",
+                "Voice notes transcribed, tagged, searchable",
+                "Charts and patterns that show real progress",
+                "Just talk. That's the whole journal."
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3 text-white">
                   <svg className="w-5 h-5 text-emerald-400 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -320,24 +318,42 @@ function BeforeAfter() {
   );
 }
 
-// Inspirational Quote Section
-function QuoteSection() {
+// Quotes Section
+function Quotes() {
+  const quotes = [
+    {
+      text: "You do not rise to the level of your goals. You fall to the level of your systems.",
+      author: "James Clear",
+      tagline: "LogLife is the system."
+    },
+    {
+      text: "The unexamined life is not worth living.",
+      author: "Socrates",
+      tagline: "We think he'd have liked voice notes."
+    },
+    {
+      text: "Every action you take is a vote for the type of person you wish to become.",
+      author: "James Clear",
+      tagline: "LogLife helps you count the votes."
+    }
+  ];
+
   return (
-    <section className="relative py-20">
-      <div className="mx-auto max-w-4xl px-6 lg:px-8 text-center">
-        <div className="bg-slate-800/30 backdrop-blur-md border border-slate-700/50 rounded-3xl p-12">
-          <svg className="w-10 h-10 text-emerald-500/40 mx-auto mb-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-          </svg>
-          <blockquote className="text-2xl lg:text-3xl font-medium text-white leading-relaxed mb-6">
-            You do not rise to the level of your goals, you fall to the level of your systems.
-          </blockquote>
-          <div className="flex items-center justify-center gap-3">
-            <div className="h-px w-8 bg-emerald-500/40" />
-            <p className="text-slate-400">James Clear</p>
-            <div className="h-px w-8 bg-emerald-500/40" />
-          </div>
-          <p className="mt-4 text-emerald-400 text-lg font-medium">LogLife is the system.</p>
+    <section className="relative py-24">
+      <div className="mx-auto max-w-5xl px-6 lg:px-8">
+        <div className="space-y-12">
+          {quotes.map((quote, index) => (
+            <div 
+              key={index} 
+              className="relative pl-8 border-l-2 border-emerald-500/40"
+            >
+              <p className="text-2xl lg:text-3xl font-light text-white/90 italic leading-relaxed mb-4">
+                &ldquo;{quote.text}&rdquo;
+              </p>
+              <p className="text-sm text-slate-500 mb-2">— {quote.author}</p>
+              <p className="text-sm text-slate-400 font-medium">{quote.tagline}</p>
+            </div>
+          ))}
         </div>
       </div>
     </section>
@@ -353,7 +369,7 @@ export default function LogLifeHero() {
       <Features />
       <HowItWorks />
       <BeforeAfter />
-      <QuoteSection />
+      <Quotes />
     </main>
   );
 }
