@@ -51,6 +51,28 @@ jobs:
             pnpm install --frozen-lockfile
             pnpm run build
 
-            pm2 delete "$APP_NAME" || true
-            PORT=$PORT pm2 start pnpm --name "$APP_NAME" -- start --port $PORT
-            pm2 save
+            PNPM_PATH=$(which pnpm)
+            NODE_PATH=$(which node)
+
+            mkdir -p "$HOME/.config/systemd/user"
+            cat > "$HOME/.config/systemd/user/$APP_NAME.service" <<EOF
+            [Unit]
+            Description=LogLife Preview
+            After=network.target
+
+            [Service]
+            Type=simple
+            WorkingDirectory=$HOME/loglife-preview/website
+            Environment=PORT=$PORT
+            Environment=NODE_ENV=production
+            Environment=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+            ExecStart=$NODE_PATH $HOME/loglife-preview/website/node_modules/.bin/next start --port $PORT
+            Restart=on-failure
+
+            [Install]
+            WantedBy=default.target
+            EOF
+
+            systemctl --user daemon-reload
+            systemctl --user enable "$APP_NAME"
+            systemctl --user restart "$APP_NAME"
