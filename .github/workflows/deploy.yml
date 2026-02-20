@@ -44,6 +44,8 @@ jobs:
 
             cd "$DEPLOY_DIR"
             git fetch origin
+            git checkout -- .
+            git clean -fd
             git checkout "$BRANCH"
             git reset --hard "origin/$BRANCH"
 

@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
 
 // Channel icons as SVG components
 const ChannelIcons = {
@@ -193,18 +194,19 @@ function ChannelBadge({ status }: { status: string }) {
 }
 
 export default function FeaturesPage() {
+  const { openWidget } = useWhatsAppWidget();
+
   return (
     <main className="min-h-screen pt-32 pb-24 px-6 lg:px-8">
       <div className="relative z-10 mx-auto max-w-6xl">
         
         {/* Header */}
         <div className="text-center mb-20 animate-slide-up">
-          <h1 className="text-4xl lg:text-6xl font-bold text-white tracking-tight mb-6">
-            Built for <span className="text-emerald-500">capturing your journey</span>
+          <h1 className="text-4xl lg:text-6xl font-bold text-white tracking-tighter mb-6">
+            Everything under the hood.
           </h1>
           <p className="text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
-            Voice logging, multi-channel chat, AI-powered insights, and a dashboard that turns 
-            your daily conversations into a visual story of your life.
+            Channels, integrations, and features that make LogLife work. No app needed.
           </p>
         </div>
 
@@ -212,8 +214,8 @@ export default function FeaturesPage() {
         <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.1s" }}>
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-bold text-white mb-2">Channels</h2>
-              <p className="text-slate-400">Journal from anywhere</p>
+              <span className="text-emerald-400 tracking-widest text-sm font-semibold uppercase">Channels</span>
+              <h2 className="text-3xl font-bold text-white mt-1 mb-2">Journal from anywhere</h2>
             </div>
             <div className="hidden sm:flex items-center gap-4 text-sm">
               <div className="flex items-center gap-2">
@@ -255,15 +257,8 @@ export default function FeaturesPage() {
         {/* Integrations Section (replaces Skills) */}
         <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.2s" }}>
           <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <h2 className="text-3xl font-bold text-white">Integrations</h2>
-              <span className="px-2.5 py-1 text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full flex items-center gap-1">
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-                Life telemetry
-              </span>
-            </div>
+            <span className="text-emerald-400 tracking-widest text-sm font-semibold uppercase">Integrations</span>
+            <h2 className="text-3xl font-bold text-white mt-1 mb-2">Life telemetry</h2>
             <p className="text-slate-400">Transparently collect the info you want documented on your journey</p>
           </div>
           
@@ -290,8 +285,8 @@ export default function FeaturesPage() {
         {/* Platform Features */}
         <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.3s" }}>
           <div className="mb-8">
-            <h2 className="text-3xl font-bold text-white mb-2">Platform Features</h2>
-            <p className="text-slate-400">Everything you need to capture, reflect, and grow</p>
+            <span className="text-emerald-400 tracking-widest text-sm font-semibold uppercase">Platform</span>
+            <h2 className="text-3xl font-bold text-white mt-1 mb-2">Everything you need to capture, reflect, and grow</h2>
           </div>
           
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -308,57 +303,59 @@ export default function FeaturesPage() {
           </div>
         </section>
 
-        {/* What LogLife Adds */}
+        {/* Category Comparison Table */}
         <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.4s" }}>
-          <div className="bg-gradient-to-br from-emerald-500/10 to-slate-900/50 border border-emerald-500/20 rounded-3xl p-8 md:p-12">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold text-white mb-2">What LogLife Adds</h2>
-              <p className="text-slate-400">On top of your existing chat and voice</p>
-            </div>
-            
-            <div className="grid sm:grid-cols-2 lg:grid-cols-5 gap-6">
-              {[
-                { title: "No App Needed", description: "Primary interface is chat-native. E2E encryption built-in. No app to download.", icon: "M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" },
-                { title: "Privacy by Design", description: "Open-source + self-host/local-first by default. No access by design.", icon: "M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" },
-                { title: "Deep Analytics", description: "D/W/M/Q/Y timeline + dashboard + memory graph as the product.", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
-                { title: "Non-Prescriptive", description: "A capture system, not a coach. Advice only when you ask.", icon: "M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" },
-                { title: "Auto-Cancel on Inactivity", description: "Not using it? We\u2019ll cancel your subscription. We only want you paying if you\u2019re getting value.", icon: "M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" },
-              ].map((item, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center">
-                    <svg className="w-6 h-6 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
-                    </svg>
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{item.title}</h3>
-                  <p className="text-sm text-slate-400">{item.description}</p>
-                </div>
-              ))}
-            </div>
-            
-            <div className="mt-10 text-center">
-              <a 
-                href="/signup"
-                className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all transform hover:scale-105"
-              >
-                Start Your Log
-                <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </a>
-            </div>
+          <div className="text-center mb-12">
+            <span className="text-emerald-400 tracking-widest text-sm font-semibold uppercase">Where LogLife Fits</span>
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mt-3 mb-4">
+              One tool to replace four.
+            </h2>
+          </div>
+
+          <div className="overflow-x-auto rounded-2xl border border-slate-700/50 max-w-3xl mx-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-800/60">
+                  <th className="text-left p-4 text-slate-300 font-semibold min-w-[180px]">Category</th>
+                  <th className="p-4 text-slate-400 font-medium text-center min-w-[100px]">Life context</th>
+                  <th className="p-4 text-slate-400 font-medium text-center min-w-[120px]">Action-oriented</th>
+                  <th className="p-4 text-slate-400 font-medium text-center min-w-[100px]">Habit record</th>
+                </tr>
+              </thead>
+              <tbody>
+                {[
+                  { name: "Habit trackers", context: "x", action: "partial", habit: "check", highlight: false },
+                  { name: "Health wearables", context: "x", action: "partial", habit: "partial", highlight: false },
+                  { name: "Digital journaling", context: "check", action: "partial", habit: "partial", highlight: false },
+                  { name: "AI coaching", context: "check", action: "check", habit: "x", highlight: false },
+                  { name: "LogLife", context: "check", action: "check", habit: "check", highlight: true },
+                ].map((row, index) => (
+                  <tr
+                    key={index}
+                    className={`border-t border-slate-700/30 transition-colors ${
+                      row.highlight
+                        ? "bg-emerald-500/10 border-emerald-500/30"
+                        : index % 2 === 0 ? "bg-slate-900/30" : "bg-slate-900/10"
+                    }`}
+                  >
+                    <td className={`p-4 ${row.highlight ? "text-emerald-400 font-bold" : "text-slate-300"}`}>{row.name}</td>
+                    <td className="p-4"><ComparisonIcon status={row.context} /></td>
+                    <td className="p-4"><ComparisonIcon status={row.action} /></td>
+                    <td className="p-4"><ComparisonIcon status={row.habit} /></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </section>
 
         {/* Competitor Comparison Table */}
         <section className="animate-slide-up" style={{ animationDelay: "0.5s" }}>
           <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
-              How LogLife <span className="text-emerald-500">compares</span>
+            <span className="text-emerald-400 tracking-widest text-sm font-semibold uppercase">How We Compare</span>
+            <h2 className="text-3xl lg:text-4xl font-bold text-white mt-3 mb-4">
+              LogLife vs. the leading AI journaling apps
             </h2>
-            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
-              See how LogLife stacks up against the leading AI journaling apps.
-            </p>
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-slate-700/50">
@@ -408,6 +405,23 @@ export default function FeaturesPage() {
               </svg>
               <span>Not supported</span>
             </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="mt-24 text-center animate-slide-up" style={{ animationDelay: "0.6s" }}>
+          <div className="bg-gradient-to-br from-emerald-500/10 to-slate-900/50 border border-emerald-500/20 rounded-3xl p-12">
+            <h3 className="text-3xl font-bold tracking-tighter text-white mb-4">Ready to try it?</h3>
+            <p className="text-lg text-slate-400 mb-8">No card needed.</p>
+            <button
+              onClick={openWidget}
+              className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-[0_0_24px_rgba(16,185,129,0.3)] transition-all transform hover:scale-105 cursor-pointer"
+            >
+              Free Early Access
+              <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
           </div>
         </section>
 

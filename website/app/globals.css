@@ -44,14 +44,16 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-/* Animation keyframes for hero section */
+/* Dot-grid background overlay */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* Animation keyframes */
 @keyframes fade-in {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @keyframes slide-up {
@@ -88,4 +90,16 @@ body {
 .fade-in-on-scroll {
   animation: fade-in-on-scroll 0.6s ease-out;
   animation-fill-mode: both;
+}
+
+/* Scroll-triggered reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
