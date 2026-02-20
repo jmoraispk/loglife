@@ -113,11 +113,8 @@ function Hero() {
                 <div className="flex justify-start">
                   <div className="max-w-[85%] bg-slate-800/80 border border-slate-700/50 rounded-2xl rounded-tl-md px-4 py-3">
                     <p className="text-sm text-slate-200 leading-relaxed">
-                      Let&apos;s slow down. You slept less last night, ate 4&nbsp;hours
-                      ago, and you&apos;re tired. <span className="text-emerald-400 font-medium">The pattern:</span> when
-                      you&apos;re off-schedule, the impulse is snacks + work that can
-                      wait. If you get the chips and finish the slides&mdash;how
-                      will you feel tomorrow morning?
+                      I hear you. Let&apos;s slow it down. <span className="text-emerald-400 font-medium">The facts</span>: less sleep last night, you're hungry and tired.
+                      If you get the chips&mdash;how will you feel after? <span className="italic text-emerald-400/80">Whatever you decide, log so we learn from it!</span>
                     </p>
                   </div>
                 </div>
