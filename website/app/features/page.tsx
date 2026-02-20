@@ -412,12 +412,12 @@ export default function FeaturesPage() {
         <section className="mt-24 text-center animate-slide-up" style={{ animationDelay: "0.6s" }}>
           <div className="bg-gradient-to-br from-emerald-500/10 to-slate-900/50 border border-emerald-500/20 rounded-3xl p-12">
             <h3 className="text-3xl font-bold tracking-tighter text-white mb-4">Ready to try it?</h3>
-            <p className="text-lg text-slate-400 mb-8">Early access is free. No card needed.</p>
+            <p className="text-lg text-slate-400 mb-8">No card needed.</p>
             <button
               onClick={openWidget}
               className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-[0_0_24px_rgba(16,185,129,0.3)] transition-all transform hover:scale-105 cursor-pointer"
             >
-              Get Early Access
+              Free Early Access
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>

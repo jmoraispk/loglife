@@ -239,10 +239,8 @@ export default function PricingPage() {
               {[
                 "Open source",
                 "BYO API keys",
-                "Self-hosted (Docker)",
                 "Own your data 100%",
                 "Community support",
-                "Clone from LogLife repo",
               ].map((item) => (
                 <div key={item} className="flex items-start gap-3 text-slate-300">
                   <CheckIcon className="w-5 h-5 text-slate-500 mt-0.5 shrink-0" />
@@ -289,15 +287,12 @@ export default function PricingPage() {
                 {[
                   "Everything below, plus we handle the infrastructure:",
                   "Hosted private instance",
-                  "No content logging",
                   "API usage included (up to limit)",
                   "Dashboard access",
                   "Health telemetry integrations",
                   "Smart reminders",
                   "AI highlights (D/W/M/Q/Y)",
-                  "Access controls & audit logs",
                   "Email support",
-                  "Auto-cancel on inactivity",
                 ].map((item, index) => (
                   <div key={item} className="flex items-start gap-3 text-slate-300">
                     <CheckIcon className={`w-5 h-5 mt-0.5 shrink-0 ${index === 0 ? "text-emerald-400" : "text-emerald-500/70"}`} />
@@ -310,12 +305,12 @@ export default function PricingPage() {
                 onClick={openWidget}
                 className="w-full inline-flex items-center justify-center px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.25)] transition-all transform hover:scale-105 cursor-pointer"
               >
-                Get Early Access
+                Free Early Access
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </button>
-              <p className="text-xs text-slate-500 text-center mt-2">Free. No card needed.</p>
+              <p className="text-xs text-slate-500 text-center mt-2">No card needed.</p>
             </div>
           </div>
         </div>
@@ -438,7 +433,7 @@ export default function PricingPage() {
                 </div>
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5">
                   <p className="text-slate-300 leading-relaxed">
-                    Users have <span className="text-white font-medium">full control over their data</span>. Export/delete/reset anytime. Automatic deletion 30 days after a subscription is canceled.
+                    Users can <span className="text-white font-medium">export/delete/reset data anytime</span>. Automatic deletion 30 days after a subscription is canceled.
                   </p>
                 </div>
               </div>
@@ -456,12 +451,12 @@ export default function PricingPage() {
         <div className="text-center animate-slide-up" style={{ animationDelay: "0.5s" }}>
           <div className="bg-gradient-to-br from-emerald-500/10 to-slate-900/50 border border-emerald-500/20 rounded-3xl p-12">
             <h3 className="text-3xl font-bold tracking-tighter text-white mb-4">Ready to try it?</h3>
-            <p className="text-lg text-slate-400 mb-8">Early access is free. No card needed.</p>
+            <p className="text-lg text-slate-400 mb-8">No card needed.</p>
             <button
               onClick={openWidget}
               className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-[0_0_24px_rgba(16,185,129,0.3)] transition-all transform hover:scale-105 cursor-pointer"
             >
-              Get Early Access
+              Free Early Access
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
