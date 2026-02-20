@@ -432,32 +432,6 @@ function WhatYouGet() {
   );
 }
 
-function StatsBar() {
-  const { ref, visible } = useInView();
-
-  const stats = [
-    { value: "10+", label: "Chat channels supported" },
-    { value: "100%", label: "Open source" },
-    { value: "0", label: "Unsolicited advice" },
-    { value: "Early access", label: "Free, no card needed" },
-  ];
-
-  return (
-    <section ref={ref} className={`relative py-16 reveal ${visible ? "visible" : ""}`}>
-      <div className="mx-auto max-w-5xl px-6 lg:px-8">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-          {stats.map((stat, i) => (
-            <div key={i} className="text-center">
-              <div className="text-3xl lg:text-4xl font-bold text-emerald-400 mb-1">{stat.value}</div>
-              <div className="text-sm text-slate-500">{stat.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function FinalCTA() {
   const { ref, visible } = useInView();
   const { openWidget } = useWhatsAppWidget();
@@ -534,7 +508,6 @@ export default function LogLifeHero() {
       <TheDifference />
       <HowItWorks />
       <WhatYouGet />
-      <StatsBar />
       <FinalCTA />
     </main>
   );
