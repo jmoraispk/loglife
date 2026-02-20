@@ -404,10 +404,10 @@ function WhatYouGet() {
         <div className="text-center mb-6">
           <SectionLabel>What You Get</SectionLabel>
           <h2 className="text-4xl lg:text-5xl font-bold tracking-tighter text-white mt-3 mb-4">
-            We don&apos;t coach you. We make you more self-aware.
+            No friction or advice. Just awareness.
           </h2>
           <p className="text-xl text-slate-400 max-w-3xl mx-auto">
-            This is not a therapy app. This is not a productivity coach. This is a listener that remembers everything.
+            This is not a therapy app or a productivity coach. This is a listener that remembers everything.
           </p>
         </div>
 
