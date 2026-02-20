@@ -428,12 +428,12 @@ export default function PricingPage() {
               <div className="space-y-4">
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5">
                   <p className="text-slate-300 leading-relaxed">
-                    We don&apos;t sell data and we <span className="text-white font-medium">don&apos;t train models on your data</span>. We design for minimal access&mdash;but since we operate the server, theoretical access exists. For zero-access guarantees, self-host.
+                    We don&apos;t sell or <span className="text-white font-medium">train models on your data</span>. We do not access private data&mdash;but since we operate the server, theoretical access exists. For zero-access guarantees, self-host.
                   </p>
                 </div>
                 <div className="bg-slate-800/50 border border-slate-700/50 rounded-xl p-5">
                   <p className="text-slate-300 leading-relaxed">
-                    Users can <span className="text-white font-medium">export/delete/reset data anytime</span>. Automatic deletion 30 days after a subscription is canceled.
+                    Users can <span className="text-white font-medium">export/delete/reset data anytime</span>. All data is deleted 30 days after a subscription is canceled.
                   </p>
                 </div>
               </div>
