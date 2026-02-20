@@ -5,12 +5,72 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 
+interface WhatsAppSession {
+  sessionKey: string;
+  sessionId: string;
+  updatedAt: number;
+  abortedLastRun: boolean;
+  chatType: string;
+  lastChannel: string;
+  origin: { label: string; from: string; to: string };
+  deliveryContext: { channel: string; to: string };
+  compactionCount: number;
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  model: string;
+}
+
+function formatRelativeTime(timestamp: number): string {
+  const now = Date.now();
+  const diff = now - timestamp;
+  const seconds = Math.floor(diff / 1000);
+  if (seconds < 0) return "just now";
+  if (seconds < 60) return `${seconds}s ago`;
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
+
+function formatTokens(count: number): string {
+  if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
+  return count.toString();
+}
+
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [session, setSession] = useState<WhatsAppSession | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+
+  const whatsappSessionId = (user?.unsafeMetadata as Record<string, string> | undefined)?.whatsappSessionId || "";
+
+  const fetchSession = (isRefresh = false) => {
+    if (!whatsappSessionId) {
+      setSession(null);
+      setSessionLoading(false);
+      return;
+    }
+
+    if (isRefresh) setRefreshing(true);
+    else setSessionLoading(true);
+
+    fetch(`/api/sessions?sessionId=${encodeURIComponent(whatsappSessionId)}`)
+      .then((res) => res.json())
+      .then((data) => { if (!data.error) setSession(data); else setSession(null); })
+      .catch(() => { setSession(null); })
+      .finally(() => { setSessionLoading(false); setRefreshing(false); });
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchSession(); }, [whatsappSessionId]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -45,11 +105,23 @@ export default function DashboardPage() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-            <p className="text-sm text-slate-400 mt-1">
-              Welcome back, {user.firstName || user.emailAddresses[0]?.emailAddress}
-            </p>
+          <div className="flex items-center gap-3">
+            <div>
+              <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
+              <p className="text-sm text-slate-400 mt-1">
+                Welcome back, {user.firstName || user.emailAddresses[0]?.emailAddress}
+              </p>
+            </div>
+            <button
+              onClick={() => fetchSession(true)}
+              disabled={refreshing || sessionLoading}
+              title="Refresh session data"
+              className="ml-1 mt-0.5 p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800/50 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
           </div>
           
           {/* User Menu */}
@@ -108,89 +180,202 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {sessionLoading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
+          </div>
+        ) : !session ? (
+          <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-8 text-center">
+            <div className="w-12 h-12 rounded-xl bg-slate-800/50 flex items-center justify-center mx-auto mb-3">
+              <svg className="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <p className="text-sm text-slate-400 mb-1">No WhatsApp session found</p>
+            <p className="text-xs text-slate-500">Connect your WhatsApp account in <Link href="/account" className="text-emerald-400 hover:underline">Account Settings</Link> to see session data here.</p>
+          </div>
+        ) : (
+        <>
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Journal Entries</p>
-                <p className="text-2xl font-semibold text-white mt-1">0</p>
+                <p className="text-xs text-slate-500 uppercase tracking-wide">Active Sessions</p>
+                <p className="text-2xl font-semibold text-white mt-1">1</p>
+              </div>
+              <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
+                <svg className="w-5 h-5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+              </div>
+            </div>
+            <p className="text-xs text-slate-500 mt-2">WhatsApp connected</p>
+          </div>
+
+          <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500 uppercase tracking-wide">Total Tokens</p>
+                <p className="text-2xl font-semibold text-white mt-1">{formatTokens(session.totalTokens)}</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
                 <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                 </svg>
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-2">No entries yet</p>
+            <div className="flex items-center gap-3 mt-2">
+              <span className="text-xs text-slate-500">{formatTokens(session.inputTokens)} in</span>
+              <span className="text-xs text-slate-600">/</span>
+              <span className="text-xs text-slate-500">{formatTokens(session.outputTokens)} out</span>
+            </div>
           </div>
 
           <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Current Streak</p>
-                <p className="text-2xl font-semibold text-white mt-1">0 days</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-xs text-slate-500 mt-2">Start journaling to build your streak</p>
-          </div>
-
-          <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Highlights</p>
-                <p className="text-2xl font-semibold text-white mt-1">0</p>
-              </div>
-              <div className="w-10 h-10 rounded-lg bg-yellow-500/10 flex items-center justify-center">
-                <svg className="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                </svg>
-              </div>
-            </div>
-            <p className="text-xs text-slate-500 mt-2">This week</p>
-          </div>
-
-          <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-xs text-slate-500 uppercase tracking-wide">Days Active</p>
-                <p className="text-2xl font-semibold text-white mt-1">--</p>
+                <p className="text-xs text-slate-500 uppercase tracking-wide">Model</p>
+                <p className="text-2xl font-semibold text-white mt-1 text-lg">{session.model}</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
                 <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-2">No data yet</p>
+            <p className="text-xs text-slate-500 mt-2">OpenAI</p>
+          </div>
+
+          <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
+                <p className="text-2xl font-semibold mt-1">
+                  {session.abortedLastRun ? (
+                    <span className="text-red-400">Error</span>
+                  ) : (
+                    <span className="text-green-400">Active</span>
+                  )}
+                </p>
+              </div>
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${session.abortedLastRun ? "bg-red-500/10" : "bg-green-500/10"}`}>
+                {session.abortedLastRun ? (
+                  <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                )}
+              </div>
+            </div>
+            <p className="text-xs text-slate-500 mt-2">Last active {formatRelativeTime(session.updatedAt)}</p>
           </div>
         </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Journal Section */}
+          {/* WhatsApp Session Detail */}
           <div className="lg:col-span-2 bg-slate-900/50 border border-slate-800/50 rounded-xl">
             <div className="px-5 py-4 border-b border-slate-800/50 flex items-center justify-between">
-              <h2 className="text-sm font-medium text-white">Your Journal</h2>
-              <button className="px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-emerald-600 hover:bg-emerald-500 transition-all cursor-pointer">
-                + New Entry
-              </button>
+              <div className="flex items-center gap-2.5">
+                <svg className="w-4 h-4 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+                <h2 className="text-sm font-medium text-white">WhatsApp Session</h2>
+              </div>
+              <span className={`px-2 py-0.5 rounded text-xs font-medium ${session.abortedLastRun ? "bg-red-500/10 text-red-400" : "bg-green-500/10 text-green-400"}`}>
+                {session.abortedLastRun ? "Error" : "Active"}
+              </span>
             </div>
-            <div className="p-5">
-              <div className="text-center py-12">
-                <div className="w-12 h-12 rounded-xl bg-slate-800/50 flex items-center justify-center mx-auto mb-3">
-                  <svg className="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            <div className="p-5 space-y-4">
+              {/* User & Channel */}
+              <div className="flex items-center gap-4 p-4 rounded-lg bg-slate-950/30 border border-slate-800/30">
+                <div className="w-11 h-11 rounded-full bg-[#25D366]/10 flex items-center justify-center flex-shrink-0">
+                  <svg className="w-5 h-5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
                   </svg>
                 </div>
-                <p className="text-sm text-slate-400 mb-1">Start your first journal entry</p>
-                <p className="text-xs text-slate-500">Send a voice note or text to begin capturing your day</p>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-white">{session.origin.label}</p>
+                  <p className="text-xs text-slate-500 mt-0.5">WhatsApp Direct Message</p>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <p className="text-xs text-slate-400">{formatRelativeTime(session.updatedAt)}</p>
+                  <p className="text-xs text-slate-600 mt-0.5">last active</p>
+                </div>
+              </div>
+
+              {/* Session Details Grid */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="p-3 rounded-lg bg-slate-950/30 border border-slate-800/30">
+                  <p className="text-xs text-slate-500 mb-1">Session ID</p>
+                  <p className="text-xs text-slate-300 font-mono truncate">{session.sessionId}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-slate-950/30 border border-slate-800/30">
+                  <p className="text-xs text-slate-500 mb-1">Channel</p>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-[#25D366]"></span>
+                    <p className="text-xs text-slate-300 capitalize">{session.lastChannel}</p>
+                  </div>
+                </div>
+                <div className="p-3 rounded-lg bg-slate-950/30 border border-slate-800/30">
+                  <p className="text-xs text-slate-500 mb-1">Chat Type</p>
+                  <p className="text-xs text-slate-300 capitalize">{session.chatType}</p>
+                </div>
+                <div className="p-3 rounded-lg bg-slate-950/30 border border-slate-800/30">
+                  <p className="text-xs text-slate-500 mb-1">Compactions</p>
+                  <p className="text-xs text-slate-300">{session.compactionCount}</p>
+                </div>
+              </div>
+
+              {/* Token Usage Bar */}
+              <div className="p-4 rounded-lg bg-slate-950/30 border border-slate-800/30">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-medium text-slate-400">Token Usage</p>
+                  <p className="text-xs text-slate-500">{formatTokens(session.totalTokens)} total</p>
+                </div>
+                <div className="w-full h-2 rounded-full bg-slate-800/50 overflow-hidden">
+                  <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-blue-500" style={{ width: `${Math.min((session.totalTokens / 128000) * 100, 100)}%` }} />
+                </div>
+                <div className="flex items-center justify-between mt-2">
+                  <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+                      <span className="text-xs text-slate-500">Input: {formatTokens(session.inputTokens)}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+                      <span className="text-xs text-slate-500">Output: {formatTokens(session.outputTokens)}</span>
+                    </div>
+                  </div>
+                  <span className="text-xs text-slate-600">of 128k context</span>
+                </div>
+              </div>
+
+              {/* Origin Details */}
+              <div className="p-4 rounded-lg bg-slate-950/30 border border-slate-800/30">
+                <p className="text-xs font-medium text-slate-400 mb-3">Delivery Context</p>
+                <div className="grid grid-cols-2 gap-y-2.5 gap-x-4">
+                  <div>
+                    <p className="text-xs text-slate-600">From</p>
+                    <p className="text-xs text-slate-300 font-mono">{session.origin.from}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-600">To</p>
+                    <p className="text-xs text-slate-300 font-mono">{session.deliveryContext.to}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-600">Channel</p>
+                    <p className="text-xs text-slate-300 capitalize">{session.deliveryContext.channel}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-600">Model</p>
+                    <p className="text-xs text-slate-300">{session.model}</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -257,12 +442,42 @@ export default function DashboardPage() {
           <div className="px-5 py-4 border-b border-slate-800/50">
             <h2 className="text-sm font-medium text-white">Recent Activity</h2>
           </div>
-          <div className="p-5">
-            <div className="text-center py-8">
-              <p className="text-sm text-slate-500">No recent activity</p>
+          <div className="p-5 space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-[#25D366]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-3.5 h-3.5 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-slate-300">WhatsApp session active with <span className="text-white font-mono text-xs">{session.origin.label}</span></p>
+                <p className="text-xs text-slate-500 mt-0.5">{formatRelativeTime(session.updatedAt)} &middot; {formatTokens(session.totalTokens)} tokens used &middot; {session.model}</p>
+              </div>
+              <span className="flex-shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-green-500/10 text-green-400">
+                Active
+              </span>
+            </div>
+
+            <div className="h-px bg-slate-800/30"></div>
+
+            <div className="flex items-start gap-3">
+              <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                </svg>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-slate-300">WhatsApp account <span className="text-white font-mono text-xs">{session.origin.label}</span> linked</p>
+                <p className="text-xs text-slate-500 mt-0.5">Account connected via linking code</p>
+              </div>
+              <span className="flex-shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-slate-800/50 text-slate-400">
+                Connected
+              </span>
             </div>
           </div>
         </div>
+        </>
+        )}
       </div>
     </main>
   );

@@ -24,11 +24,12 @@ export default function AccountPage() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
-  const [whatsAppCode, setWhatsAppCode] = useState("");
-  const [whatsAppConnected, setWhatsAppConnected] = useState(false);
+  const [whatsAppSessionId, setWhatsAppSessionId] = useState("");
   const [whatsAppLinking, setWhatsAppLinking] = useState(false);
-  const [whatsAppPhone, setWhatsAppPhone] = useState("");
   const [whatsAppMessage, setWhatsAppMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const storedSessionId = (user?.unsafeMetadata as Record<string, string> | undefined)?.whatsappSessionId || "";
+  const whatsAppConnected = !!storedSessionId;
 
   React.useEffect(() => {
     if (user) {
@@ -126,32 +127,43 @@ export default function AccountPage() {
 
   const handleWhatsAppLink = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!whatsAppCode.trim()) return;
+    const sid = whatsAppSessionId.trim();
+    if (!sid) return;
+
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    if (!uuidRegex.test(sid)) {
+      setWhatsAppMessage({ type: "error", text: "Invalid session ID format. Expected a UUID like xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" });
+      return;
+    }
 
     setWhatsAppLinking(true);
     setWhatsAppMessage(null);
 
-    // Static simulation — pretend to verify the code
-    setTimeout(() => {
-      if (whatsAppCode.trim().length >= 4 && whatsAppCode.trim() !== "000000") {
-        setWhatsAppConnected(true);
-        setWhatsAppPhone("+92 3XX XXXXXXX");
-        setWhatsAppMessage({ type: "success", text: "WhatsApp account linked successfully!" });
-        setTimeout(() => {
-          setShowWhatsAppModal(false);
-          setWhatsAppCode("");
-          setWhatsAppMessage(null);
-        }, 1500);
-      } else {
-        setWhatsAppMessage({ type: "error", text: "Invalid or expired code. Please try again." });
-      }
+    try {
+      await user!.update({
+        unsafeMetadata: { ...user!.unsafeMetadata, whatsappSessionId: sid },
+      });
+      setWhatsAppMessage({ type: "success", text: "WhatsApp session linked successfully!" });
+      setTimeout(() => {
+        setShowWhatsAppModal(false);
+        setWhatsAppSessionId("");
+        setWhatsAppMessage(null);
+      }, 1500);
+    } catch {
+      setWhatsAppMessage({ type: "error", text: "Failed to save session ID. Please try again." });
+    } finally {
       setWhatsAppLinking(false);
-    }, 1500);
+    }
   };
 
-  const handleWhatsAppDisconnect = () => {
-    setWhatsAppConnected(false);
-    setWhatsAppPhone("");
+  const handleWhatsAppDisconnect = async () => {
+    try {
+      await user!.update({
+        unsafeMetadata: { ...user!.unsafeMetadata, whatsappSessionId: undefined },
+      });
+    } catch {
+      // silently fail
+    }
   };
 
   const primaryEmail = user.emailAddresses.find(
@@ -387,7 +399,7 @@ export default function AccountPage() {
                         <div>
                           <span className="text-sm text-slate-300">WhatsApp</span>
                           {whatsAppConnected && (
-                            <span className="text-xs text-slate-500 ml-2">{whatsAppPhone}</span>
+                            <span className="text-xs text-slate-500 ml-2 font-mono">{storedSessionId.slice(0, 8)}...</span>
                           )}
                         </div>
                       </div>
@@ -558,7 +570,7 @@ export default function AccountPage() {
             className="absolute inset-0 bg-black/60 backdrop-blur-sm"
             onClick={() => {
               setShowWhatsAppModal(false);
-              setWhatsAppCode("");
+              setWhatsAppSessionId("");
               setWhatsAppMessage(null);
             }}
           />
@@ -571,7 +583,7 @@ export default function AccountPage() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-white">Connect WhatsApp</h3>
-                <p className="text-xs text-slate-500">Link your WhatsApp number to Loglife</p>
+                <p className="text-xs text-slate-500">Link your WhatsApp session to Loglife</p>
               </div>
             </div>
 
@@ -581,19 +593,15 @@ export default function AccountPage() {
               <div className="space-y-2.5">
                 <div className="flex items-start gap-2.5">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium flex items-center justify-center mt-0.5">1</span>
-                  <p className="text-xs text-slate-400">Open a chat with the Loglife WhatsApp bot</p>
+                  <p className="text-xs text-slate-400">Start a conversation with the Loglife WhatsApp bot</p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium flex items-center justify-center mt-0.5">2</span>
-                  <p className="text-xs text-slate-400">Send <span className="font-mono text-emerald-400/80 bg-emerald-500/5 px-1 py-0.5 rounded">link account</span> to the bot</p>
+                  <p className="text-xs text-slate-400">Get your session ID from the bot or your admin</p>
                 </div>
                 <div className="flex items-start gap-2.5">
                   <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium flex items-center justify-center mt-0.5">3</span>
-                  <p className="text-xs text-slate-400">You&apos;ll receive a 6-digit linking code (valid for 5 min)</p>
-                </div>
-                <div className="flex items-start gap-2.5">
-                  <span className="flex-shrink-0 w-5 h-5 rounded-full bg-emerald-500/10 text-emerald-400 text-xs font-medium flex items-center justify-center mt-0.5">4</span>
-                  <p className="text-xs text-slate-400">Enter the code below to link your account</p>
+                  <p className="text-xs text-slate-400">Paste the session ID below to link your account</p>
                 </div>
               </div>
             </div>
@@ -613,18 +621,17 @@ export default function AccountPage() {
             <form onSubmit={handleWhatsAppLink}>
               <div className="mb-4">
                 <label className="block text-xs font-medium text-slate-400 mb-1.5">
-                  Linking code
+                  Session ID
                 </label>
                 <input
                   type="text"
-                  value={whatsAppCode}
-                  onChange={(e) => setWhatsAppCode(e.target.value.replace(/[^0-9]/g, "").slice(0, 6))}
-                  className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder-slate-600 font-mono tracking-[0.3em] text-center text-lg"
-                  placeholder="------"
-                  maxLength={6}
+                  value={whatsAppSessionId}
+                  onChange={(e) => setWhatsAppSessionId(e.target.value.trim())}
+                  className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder-slate-600 font-mono"
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
                   autoFocus
                 />
-                <p className="text-xs text-slate-500 mt-1.5">Enter the 6-digit code from WhatsApp</p>
+                <p className="text-xs text-slate-500 mt-1.5">Paste the session UUID from your WhatsApp bot</p>
               </div>
 
               <div className="flex gap-3">
@@ -632,7 +639,7 @@ export default function AccountPage() {
                   type="button"
                   onClick={() => {
                     setShowWhatsAppModal(false);
-                    setWhatsAppCode("");
+                    setWhatsAppSessionId("");
                     setWhatsAppMessage(null);
                   }}
                   className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-slate-300 bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer"
@@ -641,7 +648,7 @@ export default function AccountPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={whatsAppCode.length < 4 || whatsAppLinking}
+                  disabled={!whatsAppSessionId.trim() || whatsAppLinking}
                   className="flex-1 px-4 py-2 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {whatsAppLinking ? (
@@ -650,10 +657,10 @@ export default function AccountPage() {
                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
                       </svg>
-                      Verifying...
+                      Linking...
                     </span>
                   ) : (
-                    "Link Account"
+                    "Link Session"
                   )}
                 </button>
               </div>
