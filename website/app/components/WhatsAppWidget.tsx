@@ -72,19 +72,21 @@ export default function WhatsAppWidget() {
   const link = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 
   useEffect(() => {
-    if (isOpen) {
-      setIsAnimating(false);
-    }
+    if (!isOpen) return;
+    const id = requestAnimationFrame(() => setIsAnimating(false));
+    return () => cancelAnimationFrame(id);
   }, [isOpen]);
 
   // Enter: after panel mounts, trigger transition from opacity-0 to opacity-100
   useEffect(() => {
     if (!isChatPanelOpen || isPanelClosing) return;
-    setIsPanelEntered(false);
     const id = requestAnimationFrame(() => {
       requestAnimationFrame(() => setIsPanelEntered(true));
     });
-    return () => cancelAnimationFrame(id);
+    return () => {
+      cancelAnimationFrame(id);
+      setIsPanelEntered(false);
+    };
   }, [isChatPanelOpen, isPanelClosing]);
 
   // Close: run exit animation then unmount
@@ -101,7 +103,7 @@ export default function WhatsAppWidget() {
     return () => {
       if (closeTimeoutRef.current) clearTimeout(closeTimeoutRef.current);
     };
-  }, [isPanelClosing]);
+  }, [isPanelClosing, closeWidget]);
 
   const handleToggle = () => {
     if (isOpen) {
