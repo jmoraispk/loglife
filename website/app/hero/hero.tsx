@@ -211,7 +211,7 @@ function TheDifference() {
       },
       right: {
         title: "LogLife",
-        text: "Log habits naturally in chat. AI spots what leads to consistency vs drop-off\u2014no streak pressure. Easy and guilt-free.",
+        text: "Log habits naturally in chat. AI spots what leads to consistency vs drop-off\u2014no streak pressure. Easy & guilt-free.",
       },
     },
     {
