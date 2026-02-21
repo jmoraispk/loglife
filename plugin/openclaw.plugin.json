@@ -1,0 +1,21 @@
+{
+  "id": "loglife",
+  "name": "LogLife",
+  "description": "Exposes session data over HTTP for the LogLife dashboard",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["apiKey"],
+    "properties": {
+      "apiKey": {
+        "type": "string",
+        "description": "Shared secret for authenticating requests from the LogLife dashboard"
+      },
+      "agentId": {
+        "type": "string",
+        "default": "main",
+        "description": "Which agent's sessions to serve (defaults to 'main')"
+      }
+    }
+  }
+}

@@ -1,16 +1,14 @@
-name: Deploy Website
+name: Deploy Plugin
 
 on:
-  pull_request:
+  push:
     branches:
       - main
-    types:
-      - opened
-      - synchronize
-      - reopened
+    paths:
+      - 'plugin/**'
 
 concurrency:
-  group: deploy-preview-${{ github.event.pull_request.number }}
+  group: deploy-production
   cancel-in-progress: true
 
 jobs:
@@ -18,63 +16,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to server
+      - name: Update plugin on server
         uses: appleboy/ssh-action@v1
-        env:
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
           script: |
             set -e
 
-            export NVM_DIR="$HOME/.nvm"
-            [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
-
-            DEPLOY_DIR="$HOME/loglife-preview"
-            APP_NAME=loglife-preview
-            PORT=3001
-            BRANCH=${{ github.head_ref }}
-
-            if [ ! -d "$DEPLOY_DIR" ]; then
-              git clone https://github.com/${{ github.repository }}.git "$DEPLOY_DIR"
-            fi
-
-            cd "$DEPLOY_DIR"
+            cd ~/loglife
             git fetch origin
-            git checkout -- .
-            git clean -fd
-            git checkout "$BRANCH"
-            git reset --hard "origin/$BRANCH"
+            git checkout main
+            git reset --hard origin/main
 
-            cd website
-            pnpm install --frozen-lockfile
-            pnpm run build
-
-            NODE_BIN=$(which node)
-            NEXT_BIN="$DEPLOY_DIR/website/node_modules/.bin/next"
-
-            mkdir -p "$HOME/.config/systemd/user"
-            printf '%s\n' \
-              "[Unit]" \
-              "Description=LogLife Preview" \
-              "After=network.target" \
-              "" \
-              "[Service]" \
-              "Type=simple" \
-              "WorkingDirectory=$DEPLOY_DIR/website" \
-              "Environment=PORT=$PORT" \
-              "Environment=NODE_ENV=production" \
-              "Environment=NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=$NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY" \
-              "ExecStart=$NODE_BIN $NEXT_BIN start --port $PORT" \
-              "Restart=on-failure" \
-              "" \
-              "[Install]" \
-              "WantedBy=default.target" \
-              > "$HOME/.config/systemd/user/$APP_NAME.service"
-
-            systemctl --user daemon-reload
-            systemctl --user enable "$APP_NAME"
-            systemctl --user restart "$APP_NAME"
+            # Uncomment to auto-restart the gateway after deploying plugin changes:
+            # openclaw gateway restart
