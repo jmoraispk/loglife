@@ -40,25 +40,25 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       sessionKey: matchedKey,
-      sessionId: session.sessionId,
-      updatedAt: session.updatedAt,
-      abortedLastRun: session.abortedLastRun,
-      chatType: session.chatType,
-      lastChannel: session.lastChannel,
+      sessionId: session.sessionId ?? "",
+      updatedAt: session.updatedAt ?? 0,
+      abortedLastRun: session.abortedLastRun ?? false,
+      chatType: session.chatType ?? origin?.chatType ?? "unknown",
+      lastChannel: session.lastChannel ?? delivery?.channel ?? "unknown",
       origin: {
-        label: origin?.label,
-        from: origin?.from,
-        to: origin?.to,
+        label: origin?.label ?? "Unknown",
+        from: origin?.from ?? "",
+        to: origin?.to ?? "",
       },
       deliveryContext: {
-        channel: delivery?.channel,
-        to: delivery?.to,
+        channel: delivery?.channel ?? "unknown",
+        to: delivery?.to ?? "",
       },
-      compactionCount: session.compactionCount,
-      inputTokens: session.inputTokens,
-      outputTokens: session.outputTokens,
-      totalTokens: session.totalTokens,
-      model: session.model,
+      compactionCount: session.compactionCount ?? 0,
+      inputTokens: session.inputTokens ?? 0,
+      outputTokens: session.outputTokens ?? 0,
+      totalTokens: session.totalTokens ?? 0,
+      model: session.model ?? "unknown",
     });
   } catch {
     return NextResponse.json({ error: "Failed to read sessions" }, { status: 500 });

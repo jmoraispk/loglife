@@ -6,22 +6,23 @@ import Link from "next/link";
 import { useState, useRef, useEffect } from "react";
 
 interface WhatsAppSession {
-  sessionKey: string;
-  sessionId: string;
-  updatedAt: number;
-  abortedLastRun: boolean;
-  chatType: string;
-  lastChannel: string;
-  origin: { label: string; from: string; to: string };
-  deliveryContext: { channel: string; to: string };
-  compactionCount: number;
-  inputTokens: number;
-  outputTokens: number;
-  totalTokens: number;
-  model: string;
+  sessionKey?: string;
+  sessionId?: string;
+  updatedAt?: number;
+  abortedLastRun?: boolean;
+  chatType?: string;
+  lastChannel?: string;
+  origin?: { label?: string; from?: string; to?: string };
+  deliveryContext?: { channel?: string; to?: string };
+  compactionCount?: number;
+  inputTokens?: number;
+  outputTokens?: number;
+  totalTokens?: number;
+  model?: string;
 }
 
-function formatRelativeTime(timestamp: number): string {
+function formatRelativeTime(timestamp: number | undefined | null): string {
+  if (timestamp == null || timestamp === 0) return "never";
   const now = Date.now();
   const diff = now - timestamp;
   const seconds = Math.floor(diff / 1000);
@@ -35,7 +36,8 @@ function formatRelativeTime(timestamp: number): string {
   return `${days}d ago`;
 }
 
-function formatTokens(count: number): string {
+function formatTokens(count: number | undefined | null): string {
+  if (count == null) return "0";
   if (count >= 1000) return `${(count / 1000).toFixed(1)}k`;
   return count.toString();
 }
@@ -217,7 +219,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-500 uppercase tracking-wide">Total Tokens</p>
-                <p className="text-2xl font-semibold text-white mt-1">{formatTokens(session.totalTokens)}</p>
+                <p className="text-2xl font-semibold text-white mt-1">{formatTokens(session?.totalTokens)}</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
                 <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -226,9 +228,9 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="flex items-center gap-3 mt-2">
-              <span className="text-xs text-slate-500">{formatTokens(session.inputTokens)} in</span>
+              <span className="text-xs text-slate-500">{formatTokens(session?.inputTokens)} in</span>
               <span className="text-xs text-slate-600">/</span>
-              <span className="text-xs text-slate-500">{formatTokens(session.outputTokens)} out</span>
+              <span className="text-xs text-slate-500">{formatTokens(session?.outputTokens)} out</span>
             </div>
           </div>
 
@@ -236,7 +238,7 @@ export default function DashboardPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs text-slate-500 uppercase tracking-wide">Model</p>
-                <p className="text-2xl font-semibold text-white mt-1 text-lg">{session.model}</p>
+                <p className="text-2xl font-semibold text-white mt-1 text-lg">{session?.model || "N/A"}</p>
               </div>
               <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
                 <svg className="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -252,15 +254,15 @@ export default function DashboardPage() {
               <div>
                 <p className="text-xs text-slate-500 uppercase tracking-wide">Status</p>
                 <p className="text-2xl font-semibold mt-1">
-                  {session.abortedLastRun ? (
+                  {session?.abortedLastRun ? (
                     <span className="text-red-400">Error</span>
                   ) : (
                     <span className="text-green-400">Active</span>
                   )}
                 </p>
               </div>
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${session.abortedLastRun ? "bg-red-500/10" : "bg-green-500/10"}`}>
-                {session.abortedLastRun ? (
+              <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${session?.abortedLastRun ? "bg-red-500/10" : "bg-green-500/10"}`}>
+                {session?.abortedLastRun ? (
                   <svg className="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                   </svg>
@@ -271,7 +273,7 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-            <p className="text-xs text-slate-500 mt-2">Last active {formatRelativeTime(session.updatedAt)}</p>
+            <p className="text-xs text-slate-500 mt-2">Last active {formatRelativeTime(session?.updatedAt)}</p>
           </div>
         </div>
 
@@ -286,8 +288,8 @@ export default function DashboardPage() {
                 </svg>
                 <h2 className="text-sm font-medium text-white">WhatsApp Session</h2>
               </div>
-              <span className={`px-2 py-0.5 rounded text-xs font-medium ${session.abortedLastRun ? "bg-red-500/10 text-red-400" : "bg-green-500/10 text-green-400"}`}>
-                {session.abortedLastRun ? "Error" : "Active"}
+              <span className={`px-2 py-0.5 rounded text-xs font-medium ${session?.abortedLastRun ? "bg-red-500/10 text-red-400" : "bg-green-500/10 text-green-400"}`}>
+                {session?.abortedLastRun ? "Error" : "Active"}
               </span>
             </div>
             <div className="p-5 space-y-4">
@@ -299,11 +301,11 @@ export default function DashboardPage() {
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white">{session.origin.label}</p>
+                  <p className="text-sm font-medium text-white">{session?.origin?.label || "Unknown"}</p>
                   <p className="text-xs text-slate-500 mt-0.5">WhatsApp Direct Message</p>
                 </div>
                 <div className="text-right flex-shrink-0">
-                  <p className="text-xs text-slate-400">{formatRelativeTime(session.updatedAt)}</p>
+                  <p className="text-xs text-slate-400">{formatRelativeTime(session?.updatedAt)}</p>
                   <p className="text-xs text-slate-600 mt-0.5">last active</p>
                 </div>
               </div>
@@ -312,22 +314,22 @@ export default function DashboardPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div className="p-3 rounded-lg bg-slate-950/30 border border-slate-800/30">
                   <p className="text-xs text-slate-500 mb-1">Session ID</p>
-                  <p className="text-xs text-slate-300 font-mono truncate">{session.sessionId}</p>
+                  <p className="text-xs text-slate-300 font-mono truncate">{session?.sessionId || "N/A"}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-950/30 border border-slate-800/30">
                   <p className="text-xs text-slate-500 mb-1">Channel</p>
                   <div className="flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-[#25D366]"></span>
-                    <p className="text-xs text-slate-300 capitalize">{session.lastChannel}</p>
+                    <p className="text-xs text-slate-300 capitalize">{session?.lastChannel || "N/A"}</p>
                   </div>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-950/30 border border-slate-800/30">
                   <p className="text-xs text-slate-500 mb-1">Chat Type</p>
-                  <p className="text-xs text-slate-300 capitalize">{session.chatType}</p>
+                  <p className="text-xs text-slate-300 capitalize">{session?.chatType || "N/A"}</p>
                 </div>
                 <div className="p-3 rounded-lg bg-slate-950/30 border border-slate-800/30">
                   <p className="text-xs text-slate-500 mb-1">Compactions</p>
-                  <p className="text-xs text-slate-300">{session.compactionCount}</p>
+                  <p className="text-xs text-slate-300">{session?.compactionCount ?? 0}</p>
                 </div>
               </div>
 
@@ -335,20 +337,20 @@ export default function DashboardPage() {
               <div className="p-4 rounded-lg bg-slate-950/30 border border-slate-800/30">
                 <div className="flex items-center justify-between mb-3">
                   <p className="text-xs font-medium text-slate-400">Token Usage</p>
-                  <p className="text-xs text-slate-500">{formatTokens(session.totalTokens)} total</p>
+                  <p className="text-xs text-slate-500">{formatTokens(session?.totalTokens)} total</p>
                 </div>
                 <div className="w-full h-2 rounded-full bg-slate-800/50 overflow-hidden">
-                  <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-blue-500" style={{ width: `${Math.min((session.totalTokens / 128000) * 100, 100)}%` }} />
+                  <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-blue-500" style={{ width: `${Math.min(((session?.totalTokens ?? 0) / 128000) * 100, 100)}%` }} />
                 </div>
                 <div className="flex items-center justify-between mt-2">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-                      <span className="text-xs text-slate-500">Input: {formatTokens(session.inputTokens)}</span>
+                      <span className="text-xs text-slate-500">Input: {formatTokens(session?.inputTokens)}</span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-                      <span className="text-xs text-slate-500">Output: {formatTokens(session.outputTokens)}</span>
+                      <span className="text-xs text-slate-500">Output: {formatTokens(session?.outputTokens)}</span>
                     </div>
                   </div>
                   <span className="text-xs text-slate-600">of 128k context</span>
@@ -361,19 +363,19 @@ export default function DashboardPage() {
                 <div className="grid grid-cols-2 gap-y-2.5 gap-x-4">
                   <div>
                     <p className="text-xs text-slate-600">From</p>
-                    <p className="text-xs text-slate-300 font-mono">{session.origin.from}</p>
+                    <p className="text-xs text-slate-300 font-mono">{session?.origin?.from || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-600">To</p>
-                    <p className="text-xs text-slate-300 font-mono">{session.deliveryContext.to}</p>
+                    <p className="text-xs text-slate-300 font-mono">{session?.deliveryContext?.to || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-600">Channel</p>
-                    <p className="text-xs text-slate-300 capitalize">{session.deliveryContext.channel}</p>
+                    <p className="text-xs text-slate-300 capitalize">{session?.deliveryContext?.channel || "N/A"}</p>
                   </div>
                   <div>
                     <p className="text-xs text-slate-600">Model</p>
-                    <p className="text-xs text-slate-300">{session.model}</p>
+                    <p className="text-xs text-slate-300">{session?.model || "N/A"}</p>
                   </div>
                 </div>
               </div>
@@ -450,8 +452,8 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-slate-300">WhatsApp session active with <span className="text-white font-mono text-xs">{session.origin.label}</span></p>
-                <p className="text-xs text-slate-500 mt-0.5">{formatRelativeTime(session.updatedAt)} &middot; {formatTokens(session.totalTokens)} tokens used &middot; {session.model}</p>
+                <p className="text-sm text-slate-300">WhatsApp session active with <span className="text-white font-mono text-xs">{session?.origin?.label || "Unknown"}</span></p>
+                <p className="text-xs text-slate-500 mt-0.5">{formatRelativeTime(session?.updatedAt)} &middot; {formatTokens(session?.totalTokens)} tokens used &middot; {session?.model || "N/A"}</p>
               </div>
               <span className="flex-shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-green-500/10 text-green-400">
                 Active
@@ -467,7 +469,7 @@ export default function DashboardPage() {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm text-slate-300">WhatsApp account <span className="text-white font-mono text-xs">{session.origin.label}</span> linked</p>
+                <p className="text-sm text-slate-300">WhatsApp account <span className="text-white font-mono text-xs">{session?.origin?.label || "Unknown"}</span> linked</p>
                 <p className="text-xs text-slate-500 mt-0.5">Account connected via linking code</p>
               </div>
               <span className="flex-shrink-0 px-2 py-0.5 rounded text-xs font-medium bg-slate-800/50 text-slate-400">
