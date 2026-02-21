@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
 
 function useInView(threshold = 0.15) {
@@ -48,15 +49,15 @@ function Hero() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 pt-2 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-              <button
-                onClick={openWidget}
+              <Link
+                href="/signup"
                 className="inline-flex items-center justify-center px-7 py-3.5 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white text-base font-semibold rounded-xl hover:from-emerald-500 hover:to-emerald-400 transition-all duration-200 transform hover:scale-105 shadow-[0_0_24px_rgba(16,185,129,0.35)] border border-emerald-400/20 cursor-pointer"
               >
                 Free Early Access
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
-              </button>
+              </Link>
 
               <a
                 href="#how-it-works"
@@ -466,15 +467,15 @@ function FinalCTA() {
             </button>
           </div>
 
-          <button
-            onClick={openWidget}
+          <Link
+            href="/signup"
             className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-[0_0_24px_rgba(16,185,129,0.3)] transition-all transform hover:scale-105 cursor-pointer"
           >
             Free Early Access
             <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
             </svg>
-          </button>
+          </Link>
           <p className="text-sm text-slate-500 mt-3">No card needed.</p>
 
           <div className="mt-6">

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
+import Link from "next/link";
 
 function CheckIcon({ className = "w-5 h-5" }: { className?: string }) {
   return (
@@ -198,7 +198,7 @@ function AnimatedComparison() {
 }
 
 export default function PricingPage() {
-  const { openWidget } = useWhatsAppWidget();
+
 
   return (
     <main className="min-h-screen pt-32 pb-24 px-6 lg:px-8">
@@ -301,15 +301,15 @@ export default function PricingPage() {
                 ))}
               </div>
 
-              <button
-                onClick={openWidget}
+              <Link
+                href="/signup"
                 className="w-full inline-flex items-center justify-center px-4 py-3 bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-bold rounded-xl shadow-[0_0_20px_rgba(16,185,129,0.25)] transition-all transform hover:scale-105 cursor-pointer"
               >
                 Free Early Access
                 <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
-              </button>
+              </Link>
               <p className="text-xs text-slate-500 text-center mt-2">No card needed.</p>
             </div>
           </div>
@@ -452,15 +452,15 @@ export default function PricingPage() {
           <div className="bg-gradient-to-br from-emerald-500/10 to-slate-900/50 border border-emerald-500/20 rounded-3xl p-12">
             <h3 className="text-3xl font-bold tracking-tighter text-white mb-4">Ready to try it?</h3>
             <p className="text-lg text-slate-400 mb-8">No card needed.</p>
-            <button
-              onClick={openWidget}
+            <Link
+              href="/signup"
               className="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl shadow-[0_0_24px_rgba(16,185,129,0.3)] transition-all transform hover:scale-105 cursor-pointer"
             >
               Free Early Access
               <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
               </svg>
-            </button>
+            </Link>
           </div>
         </div>
 
