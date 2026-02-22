@@ -1,0 +1,113 @@
+---
+title: "OpenClaw tricks"
+sidebarTitle: "OpenClaw tricks"
+description: "Useful tips for managing your OpenClaw instance"
+---
+
+## Password-protect the OpenClaw web UI with Nginx
+
+By default the OpenClaw gateway web UI (port 18789) has no authentication. You can put it behind an Nginx reverse proxy with HTTP Basic Auth so only authorized users can access it.
+
+### Prerequisites
+
+- A running OpenClaw gateway (see [Self-hosting](/self-hosting))
+- Nginx installed on the same server
+- Root / sudo access
+
+### Setup
+
+<Steps>
+
+<Step title="Install htpasswd">
+
+```bash
+sudo apt install apache2-utils
+```
+
+</Step>
+
+<Step title="Create a password file">
+
+```bash
+sudo htpasswd -c /etc/nginx/.openclaw_htpasswd admin
+```
+
+You'll be prompted to enter and confirm a password. This creates the file with a user called `admin`.
+
+</Step>
+
+<Step title="Configure the Nginx site">
+
+Create (or edit) the Nginx config for OpenClaw:
+
+```bash
+sudo nano /etc/nginx/sites-available/loglife-openclaw-admin
+```
+
+Set the `location /` block to:
+
+```nginx
+location / {
+    auth_basic "OpenClaw Admin";
+    auth_basic_user_file /etc/nginx/.openclaw_htpasswd;
+
+    proxy_pass http://127.0.0.1:18789/;
+    proxy_http_version 1.1;
+
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "Upgrade";
+
+    proxy_read_timeout 3600;
+    proxy_send_timeout 3600;
+}
+```
+
+Enable the site and reload Nginx:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/loglife-openclaw-admin /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+```
+
+</Step>
+
+</Steps>
+
+### Managing users
+
+<CardGroup cols={1}>
+
+<Card title="Change a password">
+
+```bash
+sudo htpasswd /etc/nginx/.openclaw_htpasswd admin
+```
+
+</Card>
+
+<Card title="Add a new user">
+
+```bash
+sudo htpasswd /etc/nginx/.openclaw_htpasswd newuser
+```
+
+</Card>
+
+<Card title="Delete a user">
+
+```bash
+sudo htpasswd -D /etc/nginx/.openclaw_htpasswd olduser
+```
+
+</Card>
+
+</CardGroup>
+
+<Note>
+  The `-c` flag creates a **new** file (overwriting any existing one). Only use it the first time. For subsequent users, omit `-c`.
+</Note>
