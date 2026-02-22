@@ -136,7 +136,7 @@ export default function Sidebar() {
       {/* Top Navigation Bar - visible below lg */}
       <nav className="lg:hidden fixed top-4 left-4 right-4 h-14 flex items-center justify-between px-4 z-50 rounded-2xl bg-slate-900/60 backdrop-blur-xl border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
         {/* Logo */}
-        <Link href={isSignedIn ? "/dashboard" : "/#hero"} className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <div className="relative w-6 h-6 shrink-0">
             <Image
               src="/icon-small.svg"
@@ -190,7 +190,7 @@ export default function Sidebar() {
         
         {/* Logo */}
         <div className="shrink-0 px-3 w-full">
-          <Link href={isSignedIn ? "/dashboard" : "/#hero"} className="w-full h-9 flex items-center gap-3 px-2">
+          <Link href="/" className="w-full h-9 flex items-center gap-3 px-2">
             <div className="block relative w-4 h-4 shrink-0 opacity-100 transition-opacity">
               <Image
                 src="/icon-small.svg"
