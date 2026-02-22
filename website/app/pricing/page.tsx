@@ -125,13 +125,20 @@ function AnimatedComparison() {
     dispatch({ type: "RESET" });
 
     const start = setTimeout(() => {
-      let oldSec = 0;
+      const CHAR_SPEED = 35;
+      const STEP_PAUSE = 600;
+      const totalTypingMs = oldSteps.reduce(
+        (sum, s, i) => sum + s.length * CHAR_SPEED + (i < oldSteps.length - 1 ? STEP_PAUSE : 0), 0
+      );
+      const OLD_TARGET = 16200;
+
+      const clockStart = Date.now();
       const oldClock = setInterval(() => {
-        oldSec += 47;
-        if (oldSec > 16200) oldSec = 16200;
-        dispatch({ type: "OLD_TIME", value: formatOldTime(oldSec) });
-        if (oldSec >= 16200) clearInterval(oldClock);
-      }, 50);
+        const elapsed = Date.now() - clockStart;
+        const progress = Math.min(elapsed / totalTypingMs, 1);
+        dispatch({ type: "OLD_TIME", value: formatOldTime(Math.floor(progress * OLD_TARGET)) });
+        if (progress >= 1) clearInterval(oldClock);
+      }, 30);
       addTimer(oldClock);
 
       function typeOldStep(idx: number) {
@@ -146,9 +153,11 @@ function AnimatedComparison() {
           } else {
             clearInterval(iv);
             dispatch({ type: "OLD_DONE", idx });
-            addTimer(setTimeout(() => typeOldStep(idx + 1), 600));
+            if (idx < oldSteps.length - 1) {
+              addTimer(setTimeout(() => typeOldStep(idx + 1), STEP_PAUSE));
+            }
           }
-        }, 35);
+        }, CHAR_SPEED);
         addTimer(iv);
       }
       typeOldStep(0);
@@ -303,6 +312,9 @@ function AnimatedComparison() {
         </span>
         <span className="block text-lg text-slate-400 mt-1">
           faster. Same product. Same features.
+        </span>
+        <span className="block text-sm text-slate-500 mt-2">
+          We handle the infrastructure, the API costs, and the updates.
         </span>
       </div>
     </div>
