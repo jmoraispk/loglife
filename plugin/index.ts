@@ -4,7 +4,6 @@ import { join } from "node:path";
 import { timingSafeEqual, randomInt } from "node:crypto";
 import { URL } from "node:url";
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { WebSocket } from "ws";
 
 type LogLifeConfig = {
   apiKey: string;
@@ -70,60 +69,24 @@ export async function readBody(req: IncomingMessage): Promise<Record<string, unk
   });
 }
 
-function sendViaGateway(
-  port: number,
-  authToken: string | undefined,
+type SendWhatsApp = (
+  to: string,
+  body: string,
+  options: { verbose: boolean },
+) => Promise<{ messageId: string; toJid: string }>;
+
+async function sendWhatsAppMessage(
+  sendFn: SendWhatsApp,
   to: string,
   message: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  return new Promise((resolve) => {
-    const url = `ws://127.0.0.1:${port}`;
-    const ws = new WebSocket(url);
-    const reqId = crypto.randomUUID();
-    const timeout = setTimeout(() => {
-      ws.close();
-      resolve({ ok: false, error: "Gateway timeout" });
-    }, 10_000);
-
-    ws.on("open", () => {
-      if (authToken) {
-        ws.send(JSON.stringify({
-          type: "req",
-          id: crypto.randomUUID(),
-          method: "auth",
-          params: { token: authToken },
-        }));
-      }
-
-      ws.send(JSON.stringify({
-        type: "req",
-        id: reqId,
-        method: "send",
-        params: {
-          to,
-          message,
-          channel: "whatsapp",
-          idempotencyKey: crypto.randomUUID(),
-        },
-      }));
-    });
-
-    ws.on("message", (data: Buffer) => {
-      try {
-        const msg = JSON.parse(data.toString());
-        if (msg.id === reqId && msg.type === "res") {
-          clearTimeout(timeout);
-          ws.close();
-          resolve({ ok: !!msg.ok, error: msg.error?.message });
-        }
-      } catch { /* ignore non-JSON frames */ }
-    });
-
-    ws.on("error", () => {
-      clearTimeout(timeout);
-      resolve({ ok: false, error: "Gateway connection failed" });
-    });
-  });
+  try {
+    await sendFn(to, message, { verbose: false });
+    return { ok: true };
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    return { ok: false, error: errMsg };
+  }
 }
 
 const plugin = {
@@ -152,13 +115,7 @@ const plugin = {
       ?? join(process.env.HOME ?? "/root", ".openclaw");
     const sessionsPath = join(stateDir, "agents", agentId, "sessions", "sessions.json");
 
-    const gatewayPort = (api.config as Record<string, unknown>)?.gateway
-      ? ((api.config as Record<string, Record<string, unknown>>).gateway.port as number) ?? 18789
-      : 18789;
-    const gatewayAuth = (api.config as Record<string, unknown>)?.gateway
-      ? ((api.config as Record<string, Record<string, unknown>>).gateway.auth as Record<string, unknown>)
-      : undefined;
-    const gatewayToken = gatewayAuth?.token as string | undefined;
+    const sendWA = api.runtime.channel.whatsapp.sendMessageWhatsApp as SendWhatsApp;
 
     // --- GET /loglife/sessions ---
 
@@ -301,7 +258,7 @@ const plugin = {
         });
 
         const message = `Your LogLife verification code is: ${code}`;
-        const result = await sendViaGateway(gatewayPort, gatewayToken, phone, message);
+        const result = await sendWhatsAppMessage(sendWA, phone, message);
 
         if (!result.ok) {
           verificationCodes.delete(phone);
@@ -365,12 +322,11 @@ const plugin = {
         verificationCodes.delete(phone);
         jsonResponse(res, 200, { verified: true });
 
-        sendViaGateway(
-          gatewayPort,
-          gatewayToken,
+        sendWhatsAppMessage(
+          sendWA,
           phone,
           "Welcome to LogLife! Your dashboard is now connected. Send me a message anytime to start journaling.",
-        ).catch(() => { /* best-effort — don't fail verification if welcome message fails */ });
+        ).catch(() => { /* best-effort */ });
       },
     });
   },

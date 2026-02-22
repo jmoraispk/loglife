@@ -140,9 +140,8 @@ export default function DashboardPage() {
       });
       const data = await res.json();
       if (res.ok && data.verified) {
-        setVerifyFeedback({ type: "success", text: "Verified! Loading your dashboard..." });
+        setVerifyFeedback({ type: "success", text: "Verified! Your WhatsApp is connected." });
         await user.reload();
-        fetchSession();
       } else {
         setVerifyFeedback({ type: "error", text: data.error || "Invalid or expired code" });
       }
@@ -236,6 +235,44 @@ export default function DashboardPage() {
         {sessionLoading ? (
           <div className="flex items-center justify-center py-20">
             <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-emerald-500"></div>
+          </div>
+        ) : whatsappPhone && !session ? (
+          <div className="space-y-8">
+            <div className="text-center max-w-xl mx-auto">
+              <h2 className="text-3xl font-bold text-white tracking-tight">You&apos;re connected!</h2>
+              <p className="text-sm text-slate-400 mt-2">
+                Your WhatsApp number <span className="text-white font-mono">{whatsappPhone}</span> is verified. Send your first message on WhatsApp to start journaling, then refresh to see your session here.
+              </p>
+            </div>
+
+            <div className="max-w-md mx-auto">
+              <div className="bg-slate-900/50 border border-emerald-500/40 rounded-xl p-6 shadow-[0_0_25px_rgba(16,185,129,0.08)] text-center space-y-4">
+                <div className="w-14 h-14 rounded-full bg-green-500/10 flex items-center justify-center mx-auto">
+                  <svg className="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-white">WhatsApp verified</p>
+                  <p className="text-xs text-slate-500 mt-1">Send a message on WhatsApp to start your first session</p>
+                </div>
+                <button
+                  onClick={() => fetchSession(true)}
+                  disabled={refreshing}
+                  className="px-5 py-2.5 rounded-lg text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-500 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {refreshing ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Checking...
+                    </span>
+                  ) : "Check for sessions"}
+                </button>
+              </div>
+            </div>
           </div>
         ) : !session ? (
           <div className="space-y-8">

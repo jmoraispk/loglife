@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 
 const OPENCLAW_API_URL = process.env.OPENCLAW_API_URL;
 const OPENCLAW_API_KEY = process.env.OPENCLAW_API_KEY;
 
 export async function GET(req: NextRequest) {
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   if (!OPENCLAW_API_URL || !OPENCLAW_API_KEY) {
     return NextResponse.json(
       { error: "Server not configured: missing OPENCLAW_API_URL or OPENCLAW_API_KEY" },

@@ -75,11 +75,20 @@ type RouteHandler = (req: IncomingMessage, res: ServerResponse) => Promise<void>
 
 function createMockApi(config?: { apiKey?: string; agentId?: string }) {
   const routes = new Map<string, RouteHandler>();
+  const mockSendWhatsApp = vi.fn().mockResolvedValue({ messageId: "mock-id", toJid: "mock-jid" });
   return {
     routes,
+    mockSendWhatsApp,
     api: {
       pluginConfig: config ?? {},
-      config: { gateway: { port: 18789 } },
+      config: {},
+      runtime: {
+        channel: {
+          whatsapp: {
+            sendMessageWhatsApp: mockSendWhatsApp,
+          },
+        },
+      },
       logger: { warn: vi.fn(), info: vi.fn(), error: vi.fn() },
       registerHttpRoute: ({ path, handler }: { path: string; handler: RouteHandler }) => {
         routes.set(path, handler);
@@ -326,27 +335,15 @@ describe("POST /loglife/verify/check handler", () => {
   const API_KEY = "verify-test-key";
 
   let checkHandler: RouteHandler;
-  const wsSent: string[] = [];
+  let mockSendWA: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
     vi.resetModules();
-    wsSent.length = 0;
-    vi.doMock("ws", () => ({
-      WebSocket: function MockWebSocket() {
-        const handlers: Record<string, (...args: unknown[]) => void> = {};
-        const ws = {
-          on(event: string, fn: (...args: unknown[]) => void) { handlers[event] = fn; return ws; },
-          send(data: string) { wsSent.push(data); },
-          close() {},
-        };
-        setTimeout(() => handlers.open?.(), 0);
-        return ws;
-      },
-    }));
     const mod = await import("./index.js");
-    const { routes, api } = createMockApi({ apiKey: API_KEY });
-    mod.default.register(api as never);
-    checkHandler = routes.get("/loglife/verify/check")!;
+    const mock = createMockApi({ apiKey: API_KEY });
+    mockSendWA = mock.mockSendWhatsApp;
+    mod.default.register(mock.api as never);
+    checkHandler = mock.routes.get("/loglife/verify/check")!;
   });
 
   afterEach(() => {
@@ -413,13 +410,11 @@ describe("POST /loglife/verify/check handler", () => {
     expect((res.json() as Record<string, unknown>).verified).toBe(true);
 
     await new Promise((r) => setTimeout(r, 50));
-    const welcomePayload = wsSent.find((m) => {
-      try {
-        const p = JSON.parse(m);
-        return p.method === "send" && p.params?.message?.includes("Welcome");
-      } catch { return false; }
-    });
-    expect(welcomePayload).toBeDefined();
+    expect(mockSendWA).toHaveBeenCalledWith(
+      phone,
+      expect.stringContaining("Welcome to LogLife"),
+      { verbose: false },
+    );
   });
 
   it("returns verified:false for code that was never sent", async () => {
