@@ -132,17 +132,18 @@ function AnimatedComparison() {
     dispatch({ type: "RESET" });
 
     const start = setTimeout(() => {
-      const CHAR_SPEED = 35;
-      const STEP_PAUSE = 600;
+      const CHAR_SPEED = 45;
+      const STEP_PAUSE = 1000;
       const totalTypingMs = oldSteps.reduce(
         (sum, s, i) => sum + s.length * CHAR_SPEED + (i < oldSteps.length - 1 ? STEP_PAUSE : 0), 0
       );
       const OLD_TARGET = 16200;
+      const oldClockDuration = totalTypingMs + 400;
 
       const clockStart = Date.now();
       const oldClock = setInterval(() => {
         const elapsed = Date.now() - clockStart;
-        const progress = Math.min(elapsed / totalTypingMs, 1);
+        const progress = Math.min(elapsed / oldClockDuration, 1);
         dispatch({ type: "OLD_TIME", value: formatOldTime(Math.floor(progress * OLD_TARGET)) });
         if (progress >= 1) clearInterval(oldClock);
       }, 30);
@@ -171,13 +172,17 @@ function AnimatedComparison() {
 
       addTimer(
         setTimeout(() => {
-          let newSec = 0;
+          const NEW_STEP_DELAY = 350;
+          const NEW_TARGET = 90;
+          const newTotalMs = newSteps.length * NEW_STEP_DELAY + 200;
+
+          const newClockStart = Date.now();
           const newClock = setInterval(() => {
-            newSec += 1;
-            if (newSec > 90) newSec = 90;
-            dispatch({ type: "NEW_TIME", value: formatNewTime(newSec) });
-            if (newSec >= 90) clearInterval(newClock);
-          }, 40);
+            const elapsed = Date.now() - newClockStart;
+            const progress = Math.min(elapsed / newTotalMs, 1);
+            dispatch({ type: "NEW_TIME", value: formatNewTime(Math.floor(progress * NEW_TARGET)) });
+            if (progress >= 1) clearInterval(newClock);
+          }, 30);
           addTimer(newClock);
 
           function showNewStep(idx: number) {
@@ -192,7 +197,7 @@ function AnimatedComparison() {
               return;
             }
             dispatch({ type: "NEW_ACTIVATE", idx });
-            addTimer(setTimeout(() => showNewStep(idx + 1), 350));
+            addTimer(setTimeout(() => showNewStep(idx + 1), NEW_STEP_DELAY));
           }
           showNewStep(0);
         }, 2000)
@@ -318,7 +323,7 @@ function AnimatedComparison() {
           180x
         </span>
         <span className="block text-lg text-slate-400 mt-1">
-          faster setup. Same features. Always stable &amp; up-to-date.
+          faster setup. Always stable &amp; up-to-date.
         </span>
         <span className="block text-sm text-slate-500 mt-2">
           We handle infrastructure, APIs, and updates. You focus on logging.
