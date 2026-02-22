@@ -60,7 +60,16 @@ type ComparisonAction =
 function comparisonReducer(state: ComparisonState, action: ComparisonAction): ComparisonState {
   switch (action.type) {
     case "RESET":
-      return { ...INITIAL_STATE, oldTexts: oldSteps.map(() => ""), newTexts: newSteps.map(() => "") };
+      return {
+        oldActive: [],
+        oldDone: [],
+        oldTexts: oldSteps.map(() => ""),
+        newActive: [],
+        newTexts: newSteps.map(() => ""),
+        oldTime: "0h 00m",
+        newTime: "0m 00s",
+        showSummary: false,
+      };
     case "OLD_ACTIVATE":
       return { ...state, oldActive: [...state.oldActive, action.idx] };
     case "OLD_TYPE": {
@@ -89,9 +98,7 @@ function comparisonReducer(state: ComparisonState, action: ComparisonAction): Co
 function formatOldTime(s: number) {
   const h = Math.floor(s / 3600);
   const m = Math.floor((s % 3600) / 60);
-  if (h > 0) return `${h}h ${m < 10 ? "0" : ""}${m}m`;
-  const sec = s % 60;
-  return `${m}m ${sec < 10 ? "0" : ""}${sec}s`;
+  return `${h}h ${m < 10 ? "0" : ""}${m}m`;
 }
 
 function formatNewTime(s: number) {
@@ -311,10 +318,10 @@ function AnimatedComparison() {
           180x
         </span>
         <span className="block text-lg text-slate-400 mt-1">
-          faster. Same product. Same features.
+          faster setup. Same features. Always stable &amp; up-to-date.
         </span>
         <span className="block text-sm text-slate-500 mt-2">
-          We handle the infrastructure, the API costs, and the updates.
+          We handle infrastructure, APIs, and updates. You focus on logging.
         </span>
       </div>
     </div>
