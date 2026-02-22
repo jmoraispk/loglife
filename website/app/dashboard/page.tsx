@@ -278,6 +278,7 @@ export default function DashboardPage() {
                               setPhoneNumber(e.target.value.replace(/[^0-9]/g, ""));
                               setVerifyFeedback(null);
                             }}
+                            onKeyDown={(e) => { if (e.key === "Enter" && phoneNumber.trim()) handleSendCode(); }}
                             className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder-slate-600"
                             placeholder="1 555 123 4567"
                             autoFocus
@@ -309,6 +310,7 @@ export default function DashboardPage() {
                           setVerifyCode(e.target.value.replace(/[^0-9]/g, ""));
                           setVerifyFeedback(null);
                         }}
+                        onKeyDown={(e) => { if (e.key === "Enter" && verifyCode.length === 6) handleVerifyCode(); }}
                         className="w-full rounded-lg bg-slate-950/50 border border-slate-700/50 text-white text-sm px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all placeholder-slate-600 font-mono text-center text-lg tracking-[0.5em]"
                         placeholder="000000"
                         autoFocus
