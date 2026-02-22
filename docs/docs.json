@@ -18,6 +18,7 @@
             "pages": [
               "index",
               "quickstart",
+              "self-hosting",
               "development"
             ]
           },
