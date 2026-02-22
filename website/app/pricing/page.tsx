@@ -132,13 +132,11 @@ function AnimatedComparison() {
     dispatch({ type: "RESET" });
 
     const start = setTimeout(() => {
-      const CHAR_SPEED = 45;
-      const STEP_PAUSE = 1000;
-      const totalTypingMs = oldSteps.reduce(
-        (sum, s, i) => sum + s.length * CHAR_SPEED + (i < oldSteps.length - 1 ? STEP_PAUSE : 0), 0
-      );
+      // --- Phase 1: Self-Hosted (left side types out fully, ~8s) ---
+      const CHAR_SPEED = 30;
+      const STEP_PAUSE = 800;
       const OLD_TARGET = 16200;
-      const oldClockDuration = totalTypingMs + 400;
+      const oldClockDuration = 8000;
 
       const clockStart = Date.now();
       const oldClock = setInterval(() => {
@@ -150,7 +148,11 @@ function AnimatedComparison() {
       addTimer(oldClock);
 
       function typeOldStep(idx: number) {
-        if (idx >= oldSteps.length) return;
+        if (idx >= oldSteps.length) {
+          // Phase 1 done → pause → start Phase 2
+          addTimer(setTimeout(startHosted, 500));
+          return;
+        }
         dispatch({ type: "OLD_ACTIVATE", idx });
         const text = oldSteps[idx];
         let ci = 0;
@@ -161,47 +163,45 @@ function AnimatedComparison() {
           } else {
             clearInterval(iv);
             dispatch({ type: "OLD_DONE", idx });
-            if (idx < oldSteps.length - 1) {
-              addTimer(setTimeout(() => typeOldStep(idx + 1), STEP_PAUSE));
-            }
+            addTimer(setTimeout(() => typeOldStep(idx + 1), STEP_PAUSE));
           }
         }, CHAR_SPEED);
         addTimer(iv);
       }
       typeOldStep(0);
 
-      addTimer(
-        setTimeout(() => {
-          const NEW_STEP_DELAY = 350;
-          const NEW_TARGET = 90;
-          const newTotalMs = newSteps.length * NEW_STEP_DELAY + 200;
+      // --- Phase 2: Hosted (right side, starts after left finishes) ---
+      function startHosted() {
+        const NEW_STEP_DELAY = 800;
+        const NEW_TARGET = 90;
+        const newTotalMs = 2500;
 
-          const newClockStart = Date.now();
-          const newClock = setInterval(() => {
-            const elapsed = Date.now() - newClockStart;
-            const progress = Math.min(elapsed / newTotalMs, 1);
-            dispatch({ type: "NEW_TIME", value: formatNewTime(Math.floor(progress * NEW_TARGET)) });
-            if (progress >= 1) clearInterval(newClock);
-          }, 30);
-          addTimer(newClock);
+        const newClockStart = Date.now();
+        const newClock = setInterval(() => {
+          const elapsed = Date.now() - newClockStart;
+          const progress = Math.min(elapsed / newTotalMs, 1);
+          dispatch({ type: "NEW_TIME", value: formatNewTime(Math.floor(progress * NEW_TARGET)) });
+          if (progress >= 1) clearInterval(newClock);
+        }, 30);
+        addTimer(newClock);
 
-          function showNewStep(idx: number) {
-            if (idx >= newSteps.length) {
-              addTimer(setTimeout(() => dispatch({ type: "SHOW_SUMMARY" }), 600));
-              addTimer(
-                setTimeout(() => {
-                  runningRef.current = false;
-                  run();
-                }, 8000)
-              );
-              return;
-            }
-            dispatch({ type: "NEW_ACTIVATE", idx });
-            addTimer(setTimeout(() => showNewStep(idx + 1), NEW_STEP_DELAY));
+        function showNewStep(idx: number) {
+          if (idx >= newSteps.length) {
+            // Phase 2 done → pause → show punchline
+            addTimer(setTimeout(() => dispatch({ type: "SHOW_SUMMARY" }), 500));
+            addTimer(
+              setTimeout(() => {
+                runningRef.current = false;
+                run();
+              }, 8000)
+            );
+            return;
           }
-          showNewStep(0);
-        }, 2000)
-      );
+          dispatch({ type: "NEW_ACTIVATE", idx });
+          addTimer(setTimeout(() => showNewStep(idx + 1), NEW_STEP_DELAY));
+        }
+        showNewStep(0);
+      }
     }, 50);
     addTimer(start);
   }, [addTimer]);
