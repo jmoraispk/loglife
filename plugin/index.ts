@@ -22,12 +22,12 @@ const VERIFY_COOLDOWN_MS = 60 * 1000;
 
 const verificationCodes = new Map<string, VerificationEntry>();
 
-function normalizePhone(raw: string): string {
+export function normalizePhone(raw: string): string {
   const digits = raw.replace(/[^0-9]/g, "");
   return "+" + digits;
 }
 
-function verifyApiKey(req: IncomingMessage, expectedKey: string): boolean {
+export function verifyApiKey(req: IncomingMessage, expectedKey: string): boolean {
   const auth = req.headers.authorization ?? "";
   const prefix = "Bearer ";
   if (!auth.startsWith(prefix)) return false;
@@ -40,7 +40,7 @@ function verifyApiKey(req: IncomingMessage, expectedKey: string): boolean {
   }
 }
 
-function safeCompare(a: string, b: string): boolean {
+export function safeCompare(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   try {
     return timingSafeEqual(Buffer.from(a), Buffer.from(b));
@@ -49,13 +49,13 @@ function safeCompare(a: string, b: string): boolean {
   }
 }
 
-function jsonResponse(res: ServerResponse, status: number, body: unknown): void {
+export function jsonResponse(res: ServerResponse, status: number, body: unknown): void {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json");
   res.end(JSON.stringify(body));
 }
 
-async function readBody(req: IncomingMessage): Promise<Record<string, unknown>> {
+export async function readBody(req: IncomingMessage): Promise<Record<string, unknown>> {
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     req.on("data", (chunk: Buffer) => chunks.push(chunk));

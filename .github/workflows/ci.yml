@@ -47,3 +47,25 @@ jobs:
         run: pnpm run build
         env:
           NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+
+  plugin:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        working-directory: plugin
+        run: npm ci
+
+      - name: Typecheck
+        working-directory: plugin
+        run: npm run typecheck
+
+      - name: Run tests
+        working-directory: plugin
+        run: npm test
