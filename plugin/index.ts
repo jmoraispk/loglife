@@ -36,7 +36,6 @@ const plugin = {
   configSchema: {
     type: "object" as const,
     additionalProperties: false,
-    required: ["apiKey"],
     properties: {
       apiKey: { type: "string" as const },
       agentId: { type: "string" as const, default: "main" },

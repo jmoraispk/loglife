@@ -1,5 +1,5 @@
 {
-  "name": "loglife-plugin",
+  "name": "loglife",
   "version": "0.1.0",
   "description": "LogLife dashboard API plugin for OpenClaw",
   "type": "module",

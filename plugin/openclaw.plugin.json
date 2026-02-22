@@ -5,7 +5,6 @@
   "configSchema": {
     "type": "object",
     "additionalProperties": false,
-    "required": ["apiKey"],
     "properties": {
       "apiKey": {
         "type": "string",
