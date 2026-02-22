@@ -44,9 +44,46 @@ When you change `plugin/index.ts`, restart the local gateway to pick up the chan
 </Step>
 </Steps>
 
-## Plugin deployment
+## CI/CD
 
-When plugin changes are pushed to `main`, the GitHub Actions workflow:
+LogLife uses two CI/CD pipelines: GitHub Actions for testing and plugin deployment, and Vercel for the website.
+
+### GitHub Actions secrets
+
+If you fork this repository, you need to add the following secrets in **Settings > Secrets and variables > Actions**:
+
+| Secret | Used by | Description |
+|--------|---------|-------------|
+| `SERVER_HOST` | `deploy.yml` | Public IP or hostname of the production server |
+| `SERVER_USER` | `deploy.yml` | SSH username on the production server |
+| `SSH_PRIVATE_KEY` | `deploy.yml` | Private SSH key authorized on the server (see below) |
+| `LOGLIFE_API_KEY` | `deploy.yml` | LogLife plugin API key — used for post-deploy health checks |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `ci.yml` | Clerk publishable key — needed for the website build step |
+
+<Tip>
+  Generate a dedicated deploy key instead of using your personal SSH key:
+
+  ```bash
+  ssh-keygen -t ed25519 -f ~/.ssh/loglife_deploy -N "" -C "loglife-deploy"
+  cat ~/.ssh/loglife_deploy.pub >> ~/.ssh/authorized_keys
+  cat ~/.ssh/loglife_deploy  # paste this as SSH_PRIVATE_KEY
+  ```
+</Tip>
+
+### Vercel environment variables
+
+Set these in your [Vercel project settings](https://vercel.com/docs/environment-variables):
+
+| Variable | Description |
+|----------|-------------|
+| `OPENCLAW_API_URL` | Production API URL (e.g. `https://api.loglife.co`) |
+| `OPENCLAW_API_KEY` | Same key as `LOGLIFE_API_KEY` above |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key |
+| `CLERK_SECRET_KEY` | Clerk secret key (server-side only) |
+
+### Plugin deployment
+
+When plugin changes are pushed to `main`, the deploy workflow (`.github/workflows/deploy.yml`):
 
 1. SSHes into the production server
 2. Pulls the latest code

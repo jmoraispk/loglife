@@ -98,7 +98,7 @@ sequenceDiagram
     W->>C: Verify session
     C-->>W: Valid user
     W->>P: POST /loglife/verify/send (Bearer token)
-    P->>G: Send code via WebSocket
+    P->>G: Send code via runtime API
     G->>WA: WhatsApp message with code
     WA-->>U: Code on phone
     U->>W: POST /api/verify (check)
@@ -113,6 +113,8 @@ sequenceDiagram
 ## Infrastructure security
 
 - **No secrets in code**: API keys, Clerk keys, and SSH keys are stored in GitHub Actions secrets and Vercel environment variables. Never committed to the repository.
+- **HTTPS everywhere**: A Caddy reverse proxy terminates SSL in front of the gateway. The gateway port (18789) is closed to the public — only Caddy reaches it locally. See the [Networking guide](/networking) for setup.
+- **Layered auth on Control UI**: The OpenClaw Control UI is protected by HTTP basic auth (Caddy) in addition to the gateway's own authentication token. The API domain is open but protected by the Bearer token.
 - **SSH deployment**: Plugin deployment uses SSH key authentication. No passwords are transmitted.
 - **Health checks**: Every deployment verifies the plugin is responding correctly before marking the deploy as successful.
 - **Sessions persisted to disk**: Session data survives gateway restarts. No data loss during deployments.

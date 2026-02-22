@@ -137,7 +137,21 @@ Open `http://localhost:3000`. The dashboard will now fetch session data through 
 
 </Steps>
 
+## Automated setup
+
+If you prefer a single script instead of manual steps, the plugin includes a production setup script that handles steps 3–5 automatically:
+
+```bash
+bash ~/loglife/plugin/setup.sh
+```
+
+The script installs the plugin, generates an API key (if not already set), restarts the gateway, and runs a health check. It prints the API key and next steps at the end.
+
 ## Production deployment
+
+### Networking
+
+In production, you should put a reverse proxy (Caddy) in front of the gateway for HTTPS and access control. See the [Networking guide](/networking) for full setup instructions including DNS, SSL, and basic auth for the Control UI.
 
 ### Website (Vercel)
 
@@ -145,21 +159,12 @@ The website deploys to Vercel automatically on every push to `main`. Set these e
 
 | Variable | Value |
 |---|---|
-| `OPENCLAW_API_URL` | Your server's public address (e.g. `https://your-server.com:18789`) |
+| `OPENCLAW_API_URL` | `https://api.yourdomain.com` (see [Networking](/networking)) |
 | `OPENCLAW_API_KEY` | The key from step 4 above |
-
-<Warning>
-  Make sure your server's port 18789 is reachable from Vercel's servers. If you're behind a firewall, consider using a reverse proxy (Nginx, Caddy) or a tunnel (Tailscale Funnel, Cloudflare Tunnel).
-</Warning>
 
 ### Plugin (server)
 
-A GitHub Actions workflow triggers on pushes to `main` that change files in `plugin/**`. The workflow SSHes into your server and runs `git pull` to update the plugin code.
-
-After the pull, restart the gateway to load the changes:
-
-- Send `/restart` from WhatsApp (or any connected channel)
-- Or run `openclaw gateway restart` via SSH
+A GitHub Actions workflow triggers on pushes to `main` that change files in `plugin/**`. The workflow SSHes into your server and runs `git pull` to update the plugin code. You need to configure GitHub Actions secrets and Vercel environment variables — see the [CI/CD section](/development#ci-cd) for the full list of required secrets.
 
 ## Plugin configuration
 
