@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 
 function CheckIcon({ className = "w-5 h-5" }: { className?: string }) {
@@ -10,189 +10,301 @@ function CheckIcon({ className = "w-5 h-5" }: { className?: string }) {
   );
 }
 
-const SETUP_STEPS = [
-  "Configure API keys",
-  "Provision server",
-  "Set up storage",
-  "Deploy application",
-  "Verify & monitor",
+const oldSteps = [
+  "Rent a Private Server",
+  "Create 5 API keys",
+  "Clone and install OpenClaw",
+  "Configure OpenClaw",
+  "Clone LogLife and install Plug-in",
+  "Launch web dashboard",
 ];
 
+const newSteps = [
+  "Sign up",
+  "Start Messaging AI",
+  "See Habits in Dashboard",
+];
+
+interface ComparisonState {
+  oldActive: number[];
+  oldDone: number[];
+  oldTexts: string[];
+  newActive: number[];
+  newTexts: string[];
+  oldTime: string;
+  newTime: string;
+  showSummary: boolean;
+}
+
+const INITIAL_STATE: ComparisonState = {
+  oldActive: [],
+  oldDone: [],
+  oldTexts: oldSteps.map(() => ""),
+  newActive: [],
+  newTexts: newSteps.map(() => ""),
+  oldTime: "0h 00m",
+  newTime: "0m 00s",
+  showSummary: false,
+};
+
+type ComparisonAction =
+  | { type: "RESET" }
+  | { type: "OLD_ACTIVATE"; idx: number }
+  | { type: "OLD_TYPE"; idx: number; text: string }
+  | { type: "OLD_DONE"; idx: number }
+  | { type: "OLD_TIME"; value: string }
+  | { type: "NEW_ACTIVATE"; idx: number }
+  | { type: "NEW_TIME"; value: string }
+  | { type: "SHOW_SUMMARY" };
+
+function comparisonReducer(state: ComparisonState, action: ComparisonAction): ComparisonState {
+  switch (action.type) {
+    case "RESET":
+      return { ...INITIAL_STATE, oldTexts: oldSteps.map(() => ""), newTexts: newSteps.map(() => "") };
+    case "OLD_ACTIVATE":
+      return { ...state, oldActive: [...state.oldActive, action.idx] };
+    case "OLD_TYPE": {
+      const texts = [...state.oldTexts];
+      texts[action.idx] = action.text;
+      return { ...state, oldTexts: texts };
+    }
+    case "OLD_DONE":
+      return { ...state, oldDone: [...state.oldDone, action.idx] };
+    case "OLD_TIME":
+      return { ...state, oldTime: action.value };
+    case "NEW_ACTIVATE": {
+      const texts = [...state.newTexts];
+      texts[action.idx] = newSteps[action.idx];
+      return { ...state, newActive: [...state.newActive, action.idx], newTexts: texts };
+    }
+    case "NEW_TIME":
+      return { ...state, newTime: action.value };
+    case "SHOW_SUMMARY":
+      return { ...state, showSummary: true };
+    default:
+      return state;
+  }
+}
+
+function formatOldTime(s: number) {
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  if (h > 0) return `${h}h ${m < 10 ? "0" : ""}${m}m`;
+  const sec = s % 60;
+  return `${m}m ${sec < 10 ? "0" : ""}${sec}s`;
+}
+
+function formatNewTime(s: number) {
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}m ${sec < 10 ? "0" : ""}${sec}s`;
+}
+
 function AnimatedComparison() {
-  const ref = useRef<HTMLDivElement>(null);
-  const [started, setStarted] = useState(false);
-  const [selfHostedCompleted, setSelfHostedCompleted] = useState<boolean[]>(new Array(SETUP_STEPS.length).fill(false));
-  const [hostedCompleted, setHostedCompleted] = useState<boolean[]>(new Array(SETUP_STEPS.length).fill(false));
-  const [selfHostedTime, setSelfHostedTime] = useState(0);
-  const [hostedTime, setHostedTime] = useState(0);
-  const [selfHostedDone, setSelfHostedDone] = useState(false);
-  const [hostedDone, setHostedDone] = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
+  const [state, dispatch] = React.useReducer(comparisonReducer, INITIAL_STATE);
+  const runningRef = useRef(false);
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const clearTimers = useCallback(() => {
+    timersRef.current.forEach((id) => { clearInterval(id); clearTimeout(id); });
+    timersRef.current = [];
+  }, []);
+
+  const addTimer = useCallback((id: ReturnType<typeof setTimeout>) => { timersRef.current.push(id); }, []);
+
+  const reset = useCallback(() => {
+    clearTimers();
+    runningRef.current = false;
+    dispatch({ type: "RESET" });
+  }, [clearTimers]);
+
+  const run = useCallback(() => {
+    if (runningRef.current) return;
+    runningRef.current = true;
+    dispatch({ type: "RESET" });
+
+    const start = setTimeout(() => {
+      let oldSec = 0;
+      const oldClock = setInterval(() => {
+        oldSec += 47;
+        if (oldSec > 16200) oldSec = 16200;
+        dispatch({ type: "OLD_TIME", value: formatOldTime(oldSec) });
+        if (oldSec >= 16200) clearInterval(oldClock);
+      }, 50);
+      addTimer(oldClock);
+
+      function typeOldStep(idx: number) {
+        if (idx >= oldSteps.length) return;
+        dispatch({ type: "OLD_ACTIVATE", idx });
+        const text = oldSteps[idx];
+        let ci = 0;
+        const iv = setInterval(() => {
+          if (ci < text.length) {
+            ci++;
+            dispatch({ type: "OLD_TYPE", idx, text: text.slice(0, ci) });
+          } else {
+            clearInterval(iv);
+            dispatch({ type: "OLD_DONE", idx });
+            addTimer(setTimeout(() => typeOldStep(idx + 1), 600));
+          }
+        }, 35);
+        addTimer(iv);
+      }
+      typeOldStep(0);
+
+      addTimer(
+        setTimeout(() => {
+          let newSec = 0;
+          const newClock = setInterval(() => {
+            newSec += 1;
+            if (newSec > 90) newSec = 90;
+            dispatch({ type: "NEW_TIME", value: formatNewTime(newSec) });
+            if (newSec >= 90) clearInterval(newClock);
+          }, 40);
+          addTimer(newClock);
+
+          function showNewStep(idx: number) {
+            if (idx >= newSteps.length) {
+              addTimer(setTimeout(() => dispatch({ type: "SHOW_SUMMARY" }), 600));
+              addTimer(
+                setTimeout(() => {
+                  runningRef.current = false;
+                  run();
+                }, 8000)
+              );
+              return;
+            }
+            dispatch({ type: "NEW_ACTIVATE", idx });
+            addTimer(setTimeout(() => showNewStep(idx + 1), 350));
+          }
+          showNewStep(0);
+        }, 2000)
+      );
+    }, 50);
+    addTimer(start);
+  }, [addTimer]);
 
   useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setStarted(true); obs.unobserve(el); } },
+    const grid = gridRef.current;
+    if (!grid) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !runningRef.current) run();
+          else if (!entry.isIntersecting && runningRef.current) reset();
+        });
+      },
       { threshold: 0.3 }
     );
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
 
-  const selfHostedTarget = 9000;
-  const hostedTarget = 300;
-
-  const formatTime = useCallback((ms: number, isSelfHosted: boolean) => {
-    if (isSelfHosted) {
-      const totalMinutes = Math.floor((ms / selfHostedTarget) * 150);
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
-      return `${hours}h ${String(minutes).padStart(2, "0")}m`;
-    }
-    const totalSeconds = Math.floor((ms / hostedTarget) * 300);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}m ${String(seconds).padStart(2, "0")}s`;
-  }, []);
-
-  useEffect(() => {
-    if (!started) return;
-
-    const stepDelay = selfHostedTarget / SETUP_STEPS.length;
-    const timers: ReturnType<typeof setTimeout>[] = [];
-
-    SETUP_STEPS.forEach((_, i) => {
-      timers.push(setTimeout(() => {
-        setSelfHostedCompleted(prev => { const next = [...prev]; next[i] = true; return next; });
-      }, stepDelay * (i + 1)));
-    });
-
-    timers.push(setTimeout(() => setSelfHostedDone(true), selfHostedTarget));
-
-    return () => timers.forEach(clearTimeout);
-  }, [started, selfHostedTarget]);
-
-  useEffect(() => {
-    if (!started) return;
-
-    const timers: ReturnType<typeof setTimeout>[] = [];
-    SETUP_STEPS.forEach((_, i) => {
-      timers.push(setTimeout(() => {
-        setHostedCompleted(prev => { const next = [...prev]; next[i] = true; return next; });
-      }, 80 * (i + 1)));
-    });
-
-    timers.push(setTimeout(() => setHostedDone(true), hostedTarget));
-
-    return () => timers.forEach(clearTimeout);
-  }, [started, hostedTarget]);
-
-  useEffect(() => {
-    if (!started || selfHostedDone) return;
-    const interval = setInterval(() => {
-      setSelfHostedTime(prev => {
-        if (prev >= selfHostedTarget) { clearInterval(interval); return selfHostedTarget; }
-        return prev + 50;
-      });
-    }, 50);
-    return () => clearInterval(interval);
-  }, [started, selfHostedDone, selfHostedTarget]);
-
-  useEffect(() => {
-    if (!started || hostedDone) return;
-    const interval = setInterval(() => {
-      setHostedTime(prev => {
-        if (prev >= hostedTarget) { clearInterval(interval); return hostedTarget; }
-        return prev + 50;
-      });
-    }, 50);
-    return () => clearInterval(interval);
-  }, [started, hostedDone, hostedTarget]);
+    observer.observe(grid);
+    return () => { observer.unobserve(grid); clearTimers(); };
+  }, [run, reset, clearTimers]);
 
   return (
-    <div ref={ref} className="mb-24 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+    <div className="mb-24 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+      <style>{`
+        @keyframes blink-cursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+        .cursor-blink { animation: blink-cursor 0.8s step-end infinite; }
+        .cursor-done { animation: none; opacity: 0.3; }
+      `}</style>
+
       <div className="text-center mb-12">
         <span className="text-emerald-400 tracking-widest text-sm font-semibold uppercase">The Difference</span>
         <h2 className="text-3xl lg:text-4xl font-bold text-white mt-3 mb-4">
           Same product. Two paths.
         </h2>
+        <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+          See what changes when we handle the infrastructure.
+        </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        {/* Self-Hosted panel */}
-        <div className="bg-slate-900/60 backdrop-blur-md border border-slate-700/50 rounded-2xl p-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-slate-800 border border-slate-700 flex items-center justify-center">
-              <svg className="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-white">Self-Hosted</h3>
-            </div>
+      <div ref={gridRef} className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+
+        {/* Self-Hosted (slow) */}
+        <div className="rounded-2xl border border-red-500/15 overflow-hidden bg-[rgba(15,22,41,0.8)]">
+          <div className="px-5 py-4 flex items-center gap-3 font-semibold text-[#fca5a5] bg-[rgba(239,68,68,0.08)] border-b border-red-500/15">
+            <span>&#9888;</span> Self-Hosted
           </div>
 
-          <div className="text-center my-6">
-            <span className={`text-3xl font-mono font-bold transition-colors duration-300 ${selfHostedDone ? "text-slate-300" : "text-slate-500"}`}>
-              {started ? formatTime(selfHostedTime, true) : "0h 00m"}
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            {SETUP_STEPS.map((step, i) => (
-              <div key={step} className={`flex items-center gap-3 transition-all duration-500 ${selfHostedCompleted[i] ? "opacity-100" : "opacity-30"}`}>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${selfHostedCompleted[i] ? "bg-slate-600" : "border border-slate-700"}`}>
-                  {selfHostedCompleted[i] && (
-                    <svg className="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
+          <div className="mx-4 my-4 rounded-[10px] overflow-hidden bg-[#0d1117] border border-white/[0.06]">
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-[#161b22] border-b border-white/[0.06]">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#ff5f56" }} />
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#ffbd2e" }} />
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#27c93f" }} />
+              <span className="ml-3 px-2.5 py-0.5 rounded-t-md text-[0.7rem] text-[#fca5a5] bg-[rgba(239,68,68,0.12)]">Terminal</span>
+            </div>
+            <div className="p-4 min-h-[240px] text-[0.82rem] leading-[1.7] text-[#8b949e] flex flex-col gap-2">
+              {oldSteps.map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-2 transition-all duration-300"
+                  style={{ opacity: state.oldActive.includes(i) ? 1 : 0, transform: state.oldActive.includes(i) ? "translateY(0)" : "translateY(4px)" }}
+                >
+                  <span className={`text-red-500 shrink-0 ${state.oldDone.includes(i) ? "cursor-done" : "cursor-blink"}`}>&#9646;</span>
+                  <span className="text-[#c9d1d9]">{state.oldTexts[i]}</span>
                 </div>
-                <span className="text-sm text-slate-400">{step}</span>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          <div className="px-5 py-3 flex items-center gap-2 text-[0.85rem] bg-[rgba(239,68,68,0.05)] border-t border-red-500/10">
+            <span className="text-[#8b949e]">Time elapsed:</span>
+            <span className="font-semibold text-[#fca5a5]">{state.oldTime}</span>
           </div>
         </div>
 
-        {/* Hosted panel */}
-        <div className="bg-slate-900/60 backdrop-blur-md border-2 border-emerald-500/40 rounded-2xl p-8 shadow-lg shadow-emerald-500/10">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-              <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-white">Hosted</h3>
-            </div>
+        {/* Hosted (fast) */}
+        <div className="rounded-2xl border border-emerald-500/25 overflow-hidden bg-[rgba(15,22,41,0.8)] shadow-lg shadow-emerald-500/5">
+          <div className="px-5 py-4 flex items-center gap-3 font-semibold text-emerald-400 bg-emerald-500/[0.08] border-b border-emerald-500/15">
+            <span>&#9889;</span> Hosted by LogLife
           </div>
 
-          <div className="text-center my-6">
-            <span className={`text-3xl font-mono font-bold transition-colors duration-300 ${hostedDone ? "text-emerald-400" : "text-emerald-600"}`}>
-              {started ? formatTime(hostedTime, false) : "0m 00s"}
-            </span>
-          </div>
-
-          <div className="space-y-3">
-            {SETUP_STEPS.map((step, i) => (
-              <div key={step} className={`flex items-center gap-3 transition-all duration-300 ${hostedCompleted[i] ? "opacity-100" : "opacity-30"}`}>
-                <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 transition-all duration-300 ${hostedCompleted[i] ? "bg-emerald-500/30" : "border border-emerald-500/20"}`}>
-                  {hostedCompleted[i] && (
-                    <svg className="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                    </svg>
-                  )}
+          <div className="mx-4 my-4 rounded-[10px] overflow-hidden bg-[#0d1117] border border-white/[0.06]">
+            <div className="flex items-center gap-1.5 px-3 py-2 bg-[#161b22] border-b border-white/[0.06]">
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#ff5f56" }} />
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#ffbd2e" }} />
+              <span className="w-2.5 h-2.5 rounded-full" style={{ background: "#27c93f" }} />
+              <span className="ml-3 px-2.5 py-0.5 rounded-t-md text-[0.7rem] text-emerald-400 bg-emerald-500/[0.12]">LogLife</span>
+            </div>
+            <div className="p-4 min-h-[240px] text-[0.82rem] leading-[1.7] text-[#8b949e] flex flex-col gap-2">
+              {newSteps.map((_, i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-2 transition-all duration-300"
+                  style={{ opacity: state.newActive.includes(i) ? 1 : 0, transform: state.newActive.includes(i) ? "translateY(0)" : "translateY(4px)" }}
+                >
+                  <span
+                    className="text-green-500 font-bold shrink-0 transition-all duration-200"
+                    style={{ opacity: state.newActive.includes(i) ? 1 : 0, transform: state.newActive.includes(i) ? "scale(1)" : "scale(0.5)" }}
+                  >&#10003;</span>
+                  <span className="text-[#c9d1d9]">{state.newTexts[i]}</span>
                 </div>
-                <span className="text-sm text-slate-200">{step}</span>
-              </div>
-            ))}
+              ))}
+            </div>
+          </div>
+
+          <div className="px-5 py-3 flex items-center gap-2 text-[0.85rem] bg-emerald-500/[0.05] border-t border-emerald-500/10">
+            <span className="text-[#8b949e]">Time elapsed:</span>
+            <span className="font-semibold text-emerald-400">{state.newTime}</span>
           </div>
         </div>
+
       </div>
 
-      <p className="text-center text-slate-500 text-sm mt-8">
-        Same product. Same features. Different setup time.
-      </p>
+      <div
+        className="text-center mt-10 transition-all duration-600"
+        style={{ opacity: state.showSummary ? 1 : 0, transform: state.showSummary ? "translateY(0)" : "translateY(10px)" }}
+      >
+        <span className="block text-5xl font-extrabold bg-gradient-to-r from-emerald-400 to-purple-500 bg-clip-text text-transparent">
+          180x
+        </span>
+        <span className="block text-lg text-slate-400 mt-1">
+          faster. Same product. Same features.
+        </span>
+      </div>
     </div>
   );
 }
@@ -247,6 +359,12 @@ export default function PricingPage() {
                   <span className="text-sm">{item}</span>
                 </div>
               ))}
+              <div className="flex items-start gap-3 text-slate-400">
+                <svg className="w-5 h-5 text-red-400/70 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                <span className="text-sm">Manual updates</span>
+              </div>
             </div>
 
             <a
@@ -284,19 +402,21 @@ export default function PricingPage() {
               </div>
 
               <div className="space-y-4 mb-8 flex-1">
+                <div className="flex items-start gap-3 text-slate-300">
+                  <CheckIcon className="w-5 h-5 mt-0.5 shrink-0 text-emerald-400" />
+                  <span className="text-sm font-medium text-emerald-400">Hosted private instance</span>
+                </div>
                 {[
-                  "Everything below, plus we handle the infrastructure:",
-                  "Hosted private instance",
-                  "API usage included (up to limit)",
+                  "Included API usage",
                   "Dashboard access",
                   "Health telemetry integrations",
-                  "Smart reminders",
-                  "AI highlights (D/W/M/Q/Y)",
-                  "Email support",
-                ].map((item, index) => (
+                  "No Maintenance, Always on",
+                  "Automatic Updates of Latest Features",
+                  "Priority Email Support",
+                ].map((item) => (
                   <div key={item} className="flex items-start gap-3 text-slate-300">
-                    <CheckIcon className={`w-5 h-5 mt-0.5 shrink-0 ${index === 0 ? "text-emerald-400" : "text-emerald-500/70"}`} />
-                    <span className={`text-sm ${index === 0 ? "font-medium text-emerald-400" : ""}`}>{item}</span>
+                    <CheckIcon className="w-5 h-5 mt-0.5 shrink-0 text-emerald-500/70" />
+                    <span className="text-sm">{item}</span>
                   </div>
                 ))}
               </div>
