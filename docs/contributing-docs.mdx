@@ -1,0 +1,44 @@
+---
+title: "Contributing to docs"
+description: "How to update, preview, and deploy the LogLife documentation site."
+---
+
+## Overview
+
+The docs live in the `docs/` directory of the LogLife monorepo and are built with [Mintlify](https://mintlify.com). They are deployed automatically to [docs.loglife.co](https://docs.loglife.co) whenever changes are merged into `main`.
+
+## How to update
+
+All pages are `.mdx` files in `docs/`. The full Mintlify syntax reference is stored in `.cursor/rules.md` at the repo root, so if you're using an AI editor you can just ask it to make changes and it will follow the correct syntax.
+
+To add or edit a page manually:
+
+1. Create or edit an `.mdx` file in `docs/`.
+2. Add [frontmatter](https://mintlify.com/docs/page) at the top of the file (`title`, `description`).
+3. If you're adding a new page, register it in `docs/docs.json` under the appropriate navigation group.
+
+## How to preview locally
+
+```bash
+cd loglife/docs
+mintlify dev
+```
+
+This starts a local server (usually at `http://localhost:3000`) with hot reload. Changes to `.mdx` files are reflected immediately.
+
+<Note>
+  You need the Mintlify CLI installed globally: `npm i -g mintlify`.
+</Note>
+
+## Where it shows up
+
+| Environment | URL | Trigger |
+|---|---|---|
+| Local preview | `localhost:3000` | `mintlify dev` |
+| Production | [docs.loglife.co](https://docs.loglife.co) | Merge to `main` |
+
+Once your changes are merged into the `main` branch, Mintlify automatically rebuilds and deploys the site. No manual deploy step is needed.
+
+## How to improve the docs
+
+Get [inspiration](https://www.mintlify.com/customers) from other teams using Mintlify.
