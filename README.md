@@ -39,33 +39,87 @@ It combines a minimalist interface with powerful AI processing to help you **Cap
 ## 🏁 Getting Started
 
 ### Prerequisites
-*   Node.js 24+
-*   pnpm
 
-### Running the Website
+- Node.js 24+
+- pnpm 10+
+- [OpenClaw](https://github.com/openclaw/openclaw) (for the dashboard)
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/jmoraispk/loglife.git
-    cd loglife/website
-    ```
+### Full development setup
 
-2.  **Install dependencies:**
-    ```bash
-    pnpm install
-    ```
+#### 1. Clone the repos
 
-3.  **Run the development server:**
-    ```bash
-    pnpm dev
-    ```
-    *The site will be available at `http://localhost:3000`.*
+```bash
+git clone https://github.com/jmoraispk/loglife.git
+git clone https://github.com/openclaw/openclaw.git ~/openclaw
+```
 
-4.  **Build for production:**
-    ```bash
-    pnpm build
-    pnpm start
-    ```
+#### 2. Build OpenClaw and install the plugin
+
+```bash
+cd ~/openclaw
+pnpm install
+pnpm build
+./openclaw.mjs plugins install /path/to/loglife/plugin --link
+./openclaw.mjs config set plugins.entries.loglife.config.apiKey "$(openssl rand -hex 32)"
+```
+
+#### 3. Start the OpenClaw gateway
+
+```bash
+cd ~/openclaw
+./openclaw.mjs gateway --allow-unconfigured
+```
+
+#### 4. Set up and run the website
+
+```bash
+cd loglife/website
+pnpm install
+```
+
+Copy `.env` and add your OpenClaw connection:
+
+```
+OPENCLAW_API_URL=http://localhost:18789
+OPENCLAW_API_KEY=<your key from step 2>
+```
+
+```bash
+pnpm dev
+```
+
+The site will be available at `http://localhost:3000`. The dashboard connects to the OpenClaw gateway to display session data.
+
+### Website only (no dashboard)
+
+If you only need the marketing site without the dashboard:
+
+```bash
+cd loglife/website
+pnpm install
+pnpm dev
+```
+
+### Production build
+
+```bash
+cd loglife/website
+pnpm build
+pnpm start
+```
+
+### Architecture
+
+```
+loglife/
+├── website/     → Next.js app (Vercel) — marketing site + dashboard
+├── plugin/      → OpenClaw plugin — serves session data over HTTP
+├── docs/        → Mintlify documentation (docs.loglife.co)
+├── multi-user/  → Multi-user infrastructure for OpenClaw
+└── call_prompts/→ Voice call prompt templates
+```
+
+The website is hosted on Vercel. The plugin runs inside the OpenClaw gateway on your server. The dashboard proxies requests through Vercel to the plugin, keeping the server URL and API key private. See [`plugin/README.md`](plugin/README.md) for detailed setup and CI/CD instructions.
 
 ---
 

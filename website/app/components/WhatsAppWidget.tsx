@@ -68,7 +68,7 @@ export default function WhatsAppWidget() {
   const [isPanelEntered, setIsPanelEntered] = useState(false);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const number = "17155157761";
-  const message = "help";
+  const message = "START";
   const link = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
 
   useEffect(() => {

@@ -1,0 +1,19 @@
+{
+  "name": "loglife",
+  "version": "0.1.0",
+  "description": "LogLife dashboard API plugin for OpenClaw",
+  "type": "module",
+  "openclaw": {
+    "extensions": ["."]
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "vitest": "^4.0.0",
+    "typescript": "^5.8.0",
+    "@types/node": "^22.0.0"
+  }
+}

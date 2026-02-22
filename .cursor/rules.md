@@ -1,27 +1,3 @@
----
-title: "Cursor setup"
-description: "Configure Cursor for your documentation workflow"
-icon: "arrow-pointer"
----
-
-Use Cursor to help write and maintain your documentation. This guide shows how to configure Cursor for better results on technical writing tasks and using Mintlify components.
-
-## Prerequisites
-
-- Cursor editor installed
-- Access to your documentation repository
-
-## Project rules
-
-Create project rules that all team members can use. In your documentation repository root:
-
-```bash
-mkdir -p .cursor
-```
-
-Create `.cursor/rules.md`:
-
-````markdown
 # Mintlify technical writing rule
 
 You are an AI writing assistant specialized in creating exceptional technical documentation using Mintlify components and following industry-leading technical writing practices.
@@ -417,4 +393,3 @@ description: "Concise description explaining page purpose and value"
 - Use **RequestExample/ResponseExample** specifically for API endpoint documentation
 - Use **ParamField** for API parameters, **ResponseField** for API responses
 - Use **Expandable** for nested object properties or hierarchical information
-````

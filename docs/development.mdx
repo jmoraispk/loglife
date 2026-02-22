@@ -1,94 +1,118 @@
 ---
 title: 'Development'
-description: 'Preview changes locally to update your docs'
+description: 'Local development workflow for the LogLife website and plugin'
 ---
+
+## Local setup
+
+<Warning>
+  LogLife is developed and tested on **Linux**. If you are on Windows, use **WSL**. macOS may work but is not fully tested — proceed at your own risk.
+</Warning>
 
 <Info>
   **Prerequisites**:
-  - Node.js version 19 or higher
-  - A docs repository with a `docs.json` file
+  - Node.js 19+, pnpm
+  - OpenClaw installed (see [Self-hosting](/self-hosting))
+  - **Two phone numbers**: one for the OpenClaw bot (its WhatsApp account) and one to message from (your personal phone). You cannot send messages to yourself on WhatsApp.
 </Info>
 
-Follow these steps to install and run Mintlify on your operating system.
-
 <Steps>
-<Step title="Install the Mintlify CLI">
+<Step title="Start the OpenClaw gateway">
 
 ```bash
-npm i -g mint
+cd ~/openclaw
+./openclaw.mjs gateway --allow-unconfigured
 ```
+
+The gateway runs on port 18789 by default. The LogLife plugin is loaded automatically if installed (see [Self-hosting](/self-hosting) for plugin installation).
 </Step>
 
-<Step title="Preview locally">
-
-Navigate to your docs directory where your `docs.json` file is located, and run the following command:
+<Step title="Start the website">
 
 ```bash
-mint dev
+cd loglife/website
+pnpm install
+pnpm dev
 ```
 
-A local preview of your documentation will be available at `http://localhost:3000`.
+The dashboard is at `http://localhost:3000/dashboard`.
+</Step>
 
+<Step title="Edit, restart, test">
+
+When you change `plugin/index.ts`, restart the local gateway to pick up the changes. The website hot-reloads automatically.
 </Step>
 </Steps>
 
-## Custom ports
+## CI/CD
 
-By default, Mintlify uses port 3000. You can customize the port Mintlify runs on by using the `--port` flag. For example, to run Mintlify on port 3333, use this command:
+LogLife uses two CI/CD pipelines: GitHub Actions for testing and plugin deployment, and Vercel for the website.
+
+### GitHub Actions secrets
+
+If you fork this repository, you need to add the following secrets in **Settings > Secrets and variables > Actions**:
+
+| Secret | Used by | Description |
+|--------|---------|-------------|
+| `SERVER_HOST` | `deploy.yml` | Public IP or hostname of the production server |
+| `SERVER_USER` | `deploy.yml` | SSH username on the production server |
+| `SSH_PRIVATE_KEY` | `deploy.yml` | Private SSH key authorized on the server (see below) |
+| `LOGLIFE_API_KEY` | `deploy.yml` | LogLife plugin API key — used for post-deploy health checks |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | `ci.yml` | Clerk publishable key — needed for the website build step |
+
+<Tip>
+  Generate a dedicated deploy key instead of using your personal SSH key:
+
+  ```bash
+  ssh-keygen -t ed25519 -f ~/.ssh/loglife_deploy -N "" -C "loglife-deploy"
+  cat ~/.ssh/loglife_deploy.pub >> ~/.ssh/authorized_keys
+  cat ~/.ssh/loglife_deploy  # paste this as SSH_PRIVATE_KEY
+  ```
+</Tip>
+
+### Vercel environment variables
+
+Set these in your [Vercel project settings](https://vercel.com/docs/environment-variables):
+
+| Variable | Description |
+|----------|-------------|
+| `OPENCLAW_API_URL` | Production API URL (e.g. `https://api.loglife.co`) |
+| `OPENCLAW_API_KEY` | Same key as `LOGLIFE_API_KEY` above |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key |
+| `CLERK_SECRET_KEY` | Clerk secret key (server-side only) |
+
+### Plugin deployment
+
+When plugin changes are pushed to `main`, the deploy workflow (`.github/workflows/deploy.yml`):
+
+1. SSHes into the production server
+2. Pulls the latest code
+3. Restarts the OpenClaw gateway (graceful — waits for in-flight replies to drain)
+4. Runs a health check against the plugin endpoints
+
+**Sessions are not lost on restart** — they are persisted to disk in `sessions.json`. In-memory verification codes are cleared, but that's expected (5-minute TTL, users simply re-request).
+
+### Health checks
+
+The deploy workflow verifies two things after each restart:
+
+- `GET /loglife/sessions?phone=healthcheck` returns 404 (plugin loaded, searched, found nothing)
+- `POST /loglife/verify/check` with dummy data returns 200 (verify endpoint loaded)
+
+If either check fails, the deploy is marked as failed in GitHub Actions.
+
+### Website deployment
+
+The website deploys to Vercel automatically on push to `main`. No gateway restart needed — the website is a separate deployment that connects to the plugin via `OPENCLAW_API_URL`.
+
+## Docs preview
+
+To preview documentation changes locally:
 
 ```bash
-mint dev --port 3333
+npm i -g mint
+cd docs
+mint dev
 ```
 
-If you attempt to run Mintlify on a port that's already in use, it will use the next available port:
-
-```md
-Port 3000 is already in use. Trying 3001 instead.
-```
-
-## Mintlify versions
-
-Please note that each CLI release is associated with a specific version of Mintlify. If your local preview does not align with the production version, please update the CLI:
-
-```bash
-npm mint update
-```
-
-## Validating links
-
-The CLI can assist with validating links in your documentation. To identify any broken links, use the following command:
-
-```bash
-mint broken-links
-```
-
-## Deployment
-
-If the deployment is successful, you should see the following:
-
-<Frame>
-  <img src="/images/checks-passed.png" alt="Screenshot of a deployment confirmation message that says All checks have passed." style={{ borderRadius: '0.5rem' }} />
-</Frame>
-
-## Code formatting
-
-We suggest using extensions on your IDE to recognize and format MDX. If you're a VSCode user, consider the [MDX VSCode extension](https://marketplace.visualstudio.com/items?itemName=unifiedjs.vscode-mdx) for syntax highlighting, and [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode) for code formatting.
-
-## Troubleshooting
-
-<AccordionGroup>
-  <Accordion title='Error: Could not load the "sharp" module using the darwin-arm64 runtime'>
-
-    This may be due to an outdated version of node. Try the following:
-    1. Remove the currently-installed version of the CLI: `npm remove -g mint`
-    2. Upgrade to Node v19 or higher.
-    3. Reinstall the CLI: `npm i -g mint`
-  </Accordion>
-
-  <Accordion title="Issue: Encountering an unknown error">
-  
-    Solution: Go to the root of your device and delete the `~/.mintlify` folder. Then run `mint dev` again.
-  </Accordion>
-</AccordionGroup>
-
-Curious about what changed in the latest CLI version? Check out the [CLI changelog](https://www.npmjs.com/package/mintlify?activeTab=versions).
+A local preview will be available at `http://localhost:3000`.
