@@ -122,11 +122,10 @@ export default function AccountPage() {
 
   const handleWhatsAppDisconnect = async () => {
     try {
-      await user!.update({
-        unsafeMetadata: { ...user!.unsafeMetadata, whatsappPhone: undefined },
-      });
+      const { whatsappPhone, ...rest } = (user!.unsafeMetadata ?? {}) as Record<string, unknown>;
+      await user!.update({ unsafeMetadata: rest });
     } catch {
-      // silently fail
+      alert("Failed to disconnect WhatsApp. Please try again.");
     }
   };
 
