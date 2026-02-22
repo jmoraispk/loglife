@@ -11,7 +11,7 @@ type LogLifeConfig = {
   agentId?: string;
 };
 
-type VerificationEntry = {
+export type VerificationEntry = {
   code: string;
   expiresAt: number;
   sentAt: number;
@@ -20,7 +20,7 @@ type VerificationEntry = {
 const VERIFY_TTL_MS = 5 * 60 * 1000;
 const VERIFY_COOLDOWN_MS = 60 * 1000;
 
-const verificationCodes = new Map<string, VerificationEntry>();
+export const verificationCodes = new Map<string, VerificationEntry>();
 
 export function normalizePhone(raw: string): string {
   const digits = raw.replace(/[^0-9]/g, "");
@@ -364,6 +364,13 @@ const plugin = {
 
         verificationCodes.delete(phone);
         jsonResponse(res, 200, { verified: true });
+
+        sendViaGateway(
+          gatewayPort,
+          gatewayToken,
+          phone,
+          "Welcome to LogLife! Your dashboard is now connected. Send me a message anytime to start journaling.",
+        ).catch(() => { /* best-effort — don't fail verification if welcome message fails */ });
       },
     });
   },

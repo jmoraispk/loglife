@@ -326,18 +326,27 @@ describe("POST /loglife/verify/check handler", () => {
   const API_KEY = "verify-test-key";
 
   let checkHandler: RouteHandler;
-  let sendHandler: RouteHandler;
+  const wsSent: string[] = [];
 
   beforeEach(async () => {
     vi.resetModules();
+    wsSent.length = 0;
     vi.doMock("ws", () => ({
-      WebSocket: vi.fn(),
+      WebSocket: function MockWebSocket() {
+        const handlers: Record<string, (...args: unknown[]) => void> = {};
+        const ws = {
+          on(event: string, fn: (...args: unknown[]) => void) { handlers[event] = fn; return ws; },
+          send(data: string) { wsSent.push(data); },
+          close() {},
+        };
+        setTimeout(() => handlers.open?.(), 0);
+        return ws;
+      },
     }));
     const mod = await import("./index.js");
     const { routes, api } = createMockApi({ apiKey: API_KEY });
     mod.default.register(api as never);
     checkHandler = routes.get("/loglife/verify/check")!;
-    sendHandler = routes.get("/loglife/verify/send")!;
   });
 
   afterEach(() => {
@@ -380,6 +389,37 @@ describe("POST /loglife/verify/check handler", () => {
     await checkHandler(req, res);
     expect(res._status).toBe(400);
     expect(res.json()).toEqual({ error: "Missing required field: code" });
+  });
+
+  it("returns verified:true and triggers welcome message for valid code", async () => {
+    const { verificationCodes } = await import("./index.js");
+    const phone = "+15559999999";
+    verificationCodes.set(phone, {
+      code: "123456",
+      expiresAt: Date.now() + 300_000,
+      sentAt: Date.now() - 10_000,
+    });
+
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/verify/check",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: { phone, code: "123456" },
+    });
+    const res = mockRes();
+    await checkHandler(req, res);
+
+    expect(res._status).toBe(200);
+    expect((res.json() as Record<string, unknown>).verified).toBe(true);
+
+    await new Promise((r) => setTimeout(r, 50));
+    const welcomePayload = wsSent.find((m) => {
+      try {
+        const p = JSON.parse(m);
+        return p.method === "send" && p.params?.message?.includes("Welcome");
+      } catch { return false; }
+    });
+    expect(welcomePayload).toBeDefined();
   });
 
   it("returns verified:false for code that was never sent", async () => {
