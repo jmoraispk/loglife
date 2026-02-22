@@ -89,6 +89,29 @@ admin.loglife.co {
 
 Replace `admin` with your chosen username and paste the hash from the previous step.
 
+### Gateway token
+
+The Control UI has its own authentication layer (separate from Caddy's basic auth). After passing basic auth, the Control UI will prompt for the **gateway token**. The gateway auto-generates this token on first startup and saves it to `~/.openclaw/openclaw.json`. Read it with:
+
+```bash
+./openclaw.mjs config get gateway.auth.token
+```
+
+If you need to regenerate it (e.g. after a suspected leak):
+
+```bash
+./openclaw.mjs config set gateway.auth.token "$(openssl rand -hex 24)"
+./openclaw.mjs gateway restart
+```
+
+<Info>
+  The gateway token, the Caddy basic auth password, and the LogLife API key are three separate credentials:
+
+  - **Gateway token** (`gateway.auth.token`) — authenticates the Control UI and CLI connections to the gateway
+  - **Caddy basic auth** — protects `admin.loglife.co` from public access
+  - **LogLife API key** (`plugins.entries.loglife.config.apiKey`) — authenticates Vercel's requests to the plugin endpoints
+</Info>
+
 ### Start Caddy
 
 ```bash
