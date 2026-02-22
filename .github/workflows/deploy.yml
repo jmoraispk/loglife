@@ -18,20 +18,35 @@ jobs:
     steps:
       - name: Deploy plugin and restart gateway
         uses: appleboy/ssh-action@v1
+        env:
+          LOGLIFE_API_KEY: ${{ secrets.LOGLIFE_API_KEY }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: LOGLIFE_API_KEY
           script: |
             set -e
+
+            export PATH="$HOME/.local/bin:$HOME/openclaw/node_modules/.bin:$HOME/.nvm/versions/node/$(ls $HOME/.nvm/versions/node 2>/dev/null | tail -1)/bin:/usr/local/bin:$PATH"
 
             cd ~/loglife
             git fetch origin
             git checkout main
             git reset --hard origin/main
 
+            # Resolve the openclaw binary
+            if command -v openclaw &>/dev/null; then
+              OPENCLAW=openclaw
+            elif [ -x "$HOME/openclaw/openclaw.mjs" ]; then
+              OPENCLAW="$HOME/openclaw/openclaw.mjs"
+            else
+              echo "ERROR: openclaw not found. Check installation."
+              exit 1
+            fi
+
             # Restart the gateway so it loads the updated plugin code
-            openclaw gateway restart
+            $OPENCLAW gateway restart
 
             # Wait for gateway to come back up
             sleep 5
