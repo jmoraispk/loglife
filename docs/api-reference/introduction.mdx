@@ -1,33 +1,46 @@
 ---
-title: 'Introduction'
-description: 'Example section for showcasing API endpoints'
+title: "Introduction"
+description: "The LogLife plugin exposes an HTTP API inside the OpenClaw gateway for session data and phone verification."
 ---
 
-<Note>
-  If you're not looking to build API reference documentation, you can delete
-  this section by removing the api-reference folder.
-</Note>
+## Overview
 
-## Welcome
+The LogLife plugin registers three HTTP routes on the OpenClaw gateway:
 
-There are two ways to build API documentation: [OpenAPI](https://mintlify.com/docs/api-playground/openapi/setup) and [MDX components](https://mintlify.com/docs/api-playground/mdx/configuration). For the starter kit, we are using the following OpenAPI specification.
-
-<Card
-  title="Plant Store Endpoints"
-  icon="leaf"
-  href="https://github.com/mintlify/starter/blob/main/api-reference/openapi.json"
->
-  View the OpenAPI specification file
-</Card>
+| Endpoint | Method | Purpose |
+|---|---|---|
+| `/loglife/sessions` | GET | Look up session data by phone, session ID, or key |
+| `/loglife/verify/send` | POST | Send a 6-digit verification code via WhatsApp |
+| `/loglife/verify/check` | POST | Validate a verification code |
 
 ## Authentication
 
-All API endpoints are authenticated using Bearer tokens and picked up from the specification file.
+All endpoints require a **Bearer token** in the `Authorization` header:
 
-```json
-"security": [
-  {
-    "bearerAuth": []
-  }
-]
 ```
+Authorization: Bearer <your-api-key>
+```
+
+The API key is configured in `~/.openclaw/openclaw.json` under `plugins.entries.loglife.config.apiKey`. Generate one with:
+
+```bash
+openssl rand -hex 32
+```
+
+## Architecture
+
+The API runs inside the OpenClaw gateway process — there is no separate service. The LogLife dashboard (hosted on Vercel) calls these endpoints through its own Next.js API routes, which add the Bearer token server-side. End users never interact with the plugin API directly.
+
+```
+Browser → Next.js API route → LogLife Plugin (OpenClaw gateway)
+```
+
+## Security model
+
+- **Bearer token auth** on every request (timing-safe comparison)
+- **Clerk auth** on the Next.js proxy layer (only logged-in users)
+- **Rate limiting** on verification code sends (1 per phone per 60s)
+- **Single-use codes** deleted immediately after successful verification
+- **5-minute TTL** on verification codes
+
+Documenting these endpoints publicly is safe because knowing the URL structure and parameters is useless without the API key, which is only stored server-side.

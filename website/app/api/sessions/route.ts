@@ -13,14 +13,16 @@ export async function GET(req: NextRequest) {
 
   const sessionId = req.nextUrl.searchParams.get("sessionId");
   const key = req.nextUrl.searchParams.get("key");
+  const phone = req.nextUrl.searchParams.get("phone");
 
-  if (!sessionId && !key) {
-    return NextResponse.json({ error: "Provide ?sessionId= or ?key=" }, { status: 400 });
+  if (!sessionId && !key && !phone) {
+    return NextResponse.json({ error: "Provide ?sessionId=, ?key=, or ?phone=" }, { status: 400 });
   }
 
   const params = new URLSearchParams();
   if (sessionId) params.set("sessionId", sessionId);
   if (key) params.set("key", key);
+  if (phone) params.set("phone", phone);
 
   try {
     const response = await fetch(`${OPENCLAW_API_URL}/loglife/sessions?${params}`, {

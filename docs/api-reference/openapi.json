@@ -1,16 +1,14 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
-    "version": "1.0.0"
+    "title": "LogLife Plugin API",
+    "version": "0.1.0",
+    "description": "HTTP API exposed by the LogLife plugin running inside the OpenClaw gateway. All endpoints require Bearer token authentication."
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
+      "url": "http://localhost:18789",
+      "description": "Local development"
     }
   ],
   "security": [
@@ -18,199 +16,214 @@
       "bearerAuth": []
     }
   ],
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "The API key configured in openclaw.json under plugins.entries.loglife.config.apiKey"
+      }
+    },
+    "schemas": {
+      "Session": {
+        "type": "object",
+        "properties": {
+          "sessionKey": { "type": "string" },
+          "sessionId": { "type": "string" },
+          "updatedAt": { "type": "number", "description": "Unix timestamp (ms)" },
+          "abortedLastRun": { "type": "boolean" },
+          "chatType": { "type": "string" },
+          "lastChannel": { "type": "string" },
+          "origin": {
+            "type": "object",
+            "properties": {
+              "label": { "type": "string" },
+              "from": { "type": "string" },
+              "to": { "type": "string" }
+            }
+          },
+          "deliveryContext": {
+            "type": "object",
+            "properties": {
+              "channel": { "type": "string" },
+              "to": { "type": "string" }
+            }
+          },
+          "compactionCount": { "type": "integer" },
+          "inputTokens": { "type": "integer" },
+          "outputTokens": { "type": "integer" },
+          "totalTokens": { "type": "integer" },
+          "model": { "type": "string" }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        },
+        "required": ["error"]
+      }
+    }
+  },
   "paths": {
-    "/plants": {
+    "/loglife/sessions": {
       "get": {
-        "description": "Returns all plants from the system that the user has access to",
+        "operationId": "getSessions",
+        "summary": "Get session data",
+        "description": "Look up a single session by phone number, session ID, or session key. At least one query parameter is required.",
         "parameters": [
           {
-            "name": "limit",
+            "name": "phone",
             "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
+            "schema": { "type": "string" },
+            "description": "Phone number (e.g. +15551234567). Matches against origin.from in sessions.json.",
+            "example": "+15551234567"
+          },
+          {
+            "name": "sessionId",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Session UUID"
+          },
+          {
+            "name": "key",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Session key (the top-level key in sessions.json)"
           }
         ],
         "responses": {
           "200": {
-            "description": "Plant response",
+            "description": "Session found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Session" }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing query parameter",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized — missing or invalid API key"
+          },
+          "404": {
+            "description": "Session not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Error" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/loglife/verify/send": {
+      "post": {
+        "operationId": "verifySend",
+        "summary": "Send verification code",
+        "description": "Generates a 6-digit verification code and sends it to the specified phone number via WhatsApp. Rate limited to one code per phone number per 60 seconds. Codes expire after 5 minutes.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["phone"],
+                "properties": {
+                  "phone": {
+                    "type": "string",
+                    "description": "Phone number to send the code to",
+                    "example": "+15551234567"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Code sent successfully",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+                  "type": "object",
+                  "properties": {
+                    "sent": { "type": "boolean", "example": true }
                   }
                 }
               }
             }
           },
           "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
+            "description": "Missing or invalid phone number"
           },
-          "required": true
-        },
-        "responses": {
-          "200": {
-            "description": "plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
+          "401": {
+            "description": "Unauthorized"
           },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
+          "429": {
+            "description": "Rate limited — code already sent within 60 seconds"
+          },
+          "502": {
+            "description": "Failed to send message via gateway"
           }
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  },
-  "webhooks": {
-    "/plant/webhook": {
+    "/loglife/verify/check": {
       "post": {
-        "description": "Information about a new plant added to the store",
+        "operationId": "verifyCheck",
+        "summary": "Validate verification code",
+        "description": "Checks whether the provided code matches the one sent to the given phone number. Uses timing-safe comparison. Codes are single-use — deleted after successful verification.",
         "requestBody": {
-          "description": "Plant added to the store",
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/NewPlant"
+                "type": "object",
+                "required": ["phone", "code"],
+                "properties": {
+                  "phone": {
+                    "type": "string",
+                    "example": "+15551234567"
+                  },
+                  "code": {
+                    "type": "string",
+                    "description": "6-digit verification code",
+                    "example": "482910"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Return a 200 status to indicate that the data was received successfully"
-          }
-        }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
+            "description": "Verification result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "verified": { "type": "boolean" },
+                    "error": { "type": "string", "description": "Present when verified is false" }
+                  }
+                }
               }
             }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
           },
-          "message": {
-            "type": "string"
+          "400": {
+            "description": "Missing required fields"
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
-      }
-    },
-    "securitySchemes": {
-      "bearerAuth": {
-        "type": "http",
-        "scheme": "bearer"
       }
     }
   }

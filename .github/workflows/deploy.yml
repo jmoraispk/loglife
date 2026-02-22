@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Update plugin on server
+      - name: Deploy plugin and restart gateway
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.SERVER_HOST }}
@@ -30,5 +30,36 @@ jobs:
             git checkout main
             git reset --hard origin/main
 
-            # Uncomment to auto-restart the gateway after deploying plugin changes:
-            # openclaw gateway restart
+            # Restart the gateway so it loads the updated plugin code
+            openclaw gateway restart
+
+            # Wait for gateway to come back up
+            sleep 5
+
+            # Health check: verify the LogLife plugin is loaded and responding
+            SESSIONS_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+              -H "Authorization: Bearer $LOGLIFE_API_KEY" \
+              "http://localhost:18789/loglife/sessions?phone=healthcheck" || echo "000")
+
+            VERIFY_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
+              -X POST -H "Authorization: Bearer $LOGLIFE_API_KEY" \
+              -H "Content-Type: application/json" \
+              -d '{"phone":"0","code":"000000"}' \
+              "http://localhost:18789/loglife/verify/check" || echo "000")
+
+            echo "Plugin health check: sessions=$SESSIONS_STATUS verify=$VERIFY_STATUS"
+
+            # 404 = plugin loaded, searched, found nothing (expected)
+            # 200 = plugin loaded, returned data (also fine)
+            if [ "$SESSIONS_STATUS" != "404" ] && [ "$SESSIONS_STATUS" != "200" ]; then
+              echo "ERROR: Sessions endpoint returned unexpected status $SESSIONS_STATUS"
+              exit 1
+            fi
+
+            # 200 = plugin loaded, returned {verified:false} (expected)
+            if [ "$VERIFY_STATUS" != "200" ]; then
+              echo "ERROR: Verify endpoint returned unexpected status $VERIFY_STATUS"
+              exit 1
+            fi
+
+            echo "All health checks passed."
