@@ -18,12 +18,25 @@
             "pages": [
               "index",
               "quickstart",
+              "contributing-docs"
+            ]
+          },
+          {
+            "group": "Self-host",
+            "pages": [
               "self-hosting",
-              "openclaw-tricks",
+              "plugin-installation",
+              "configuration",
+              "networking",
               "development",
               "security",
-              "networking",
-              "contributing-docs"
+              "openclaw-tricks"
+            ]
+          },
+          {
+            "group": "Dashboard",
+            "pages": [
+              "dashboard"
             ]
           }
         ]
