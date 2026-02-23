@@ -1,0 +1,67 @@
+#!/usr/bin/env node
+
+// OpenClaw CLI audio transcription script for AssemblyAI Universal-2.
+// Usage: assemblyai-transcribe <audio-file-path>
+// Requires: ASSEMBLYAI_API_KEY environment variable.
+
+import { readFile } from "node:fs/promises";
+
+const audioPath = process.argv[2];
+if (!audioPath) {
+  process.stderr.write("Usage: assemblyai-transcribe <audio-file-path>\n");
+  process.exit(1);
+}
+
+const apiKey = process.env.ASSEMBLYAI_API_KEY;
+if (!apiKey) {
+  process.stderr.write("ASSEMBLYAI_API_KEY environment variable is required\n");
+  process.exit(1);
+}
+
+const BASE = "https://api.assemblyai.com/v2";
+const audioBuffer = await readFile(audioPath);
+
+const uploadRes = await fetch(`${BASE}/upload`, {
+  method: "POST",
+  headers: { Authorization: apiKey, "Content-Type": "application/octet-stream" },
+  body: audioBuffer,
+});
+if (!uploadRes.ok) {
+  process.stderr.write(`Upload failed: ${uploadRes.status} ${await uploadRes.text()}\n`);
+  process.exit(1);
+}
+const { upload_url } = await uploadRes.json();
+
+const submitRes = await fetch(`${BASE}/transcript`, {
+  method: "POST",
+  headers: { Authorization: apiKey, "Content-Type": "application/json" },
+  body: JSON.stringify({ audio_url: upload_url, speech_model: "universal-2" }),
+});
+if (!submitRes.ok) {
+  process.stderr.write(`Submit failed: ${submitRes.status} ${await submitRes.text()}\n`);
+  process.exit(1);
+}
+const { id } = await submitRes.json();
+
+for (let i = 0; i < 240; i++) {
+  await new Promise((r) => setTimeout(r, 500));
+  const pollRes = await fetch(`${BASE}/transcript/${id}`, {
+    headers: { Authorization: apiKey },
+  });
+  if (!pollRes.ok) {
+    process.stderr.write(`Poll failed: ${pollRes.status} ${await pollRes.text()}\n`);
+    process.exit(1);
+  }
+  const data = await pollRes.json();
+  if (data.status === "completed") {
+    process.stdout.write(data.text);
+    process.exit(0);
+  }
+  if (data.status === "error") {
+    process.stderr.write(`Transcription error: ${data.error}\n`);
+    process.exit(1);
+  }
+}
+
+process.stderr.write("Transcription timed out after 120s\n");
+process.exit(1);

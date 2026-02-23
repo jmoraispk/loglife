@@ -1,0 +1,92 @@
+---
+title: "Audio Provider"
+description: "Speech-to-text provider selection and benchmarks for voice message transcription."
+---
+
+## Overview
+
+LogLife uses OpenClaw's media understanding system to transcribe voice messages. OpenClaw supports multiple STT providers (OpenAI, Deepgram, Groq, Google) and also allows **CLI-based providers** configured in `openclaw.json`.
+
+We ship an AssemblyAI CLI script in the plugin for users who want better accuracy and lower cost.
+
+## Benchmark Results
+
+Tested on the same audio files, 10 runs per provider, from a European server.
+
+Models: **OpenAI gpt-4o-mini-transcribe** vs **AssemblyAI Universal-2**.
+
+Short = 30-second audio (58 KB). Long = 15-minute audio (850 KB).
+
+| | OpenAI (short) | AssemblyAI (short) | OpenAI (long) | AssemblyAI (long) |
+|---|---|---|---|---|
+| Min | 832ms | 1,581ms | 7,604ms | **5,595ms** |
+| Avg | 1,225ms | 2,242ms | 10,087ms | **6,254ms** |
+| Max | 2,233ms | 2,977ms | 15,096ms | **6,971ms** |
+
+### Decision
+
+| | OpenAI | AssemblyAI |
+|---|---|---|
+| Short audio | Faster | Slightly slower |
+| Long audio | Slower | **Significantly faster** |
+| Cost | $0.003/min ($0.18/hr) | **$0.0025/min ($0.15/hr)** |
+| Languages | ~57 | 99 |
+| Free tier | No | ~185 hrs/month |
+
+**AssemblyAI Universal-2** is the default audio provider for LogLife -- better accuracy, lower cost, and faster on longer audio.
+
+## Setup
+
+### 1. Set your API key
+
+```bash
+export ASSEMBLYAI_API_KEY="your-key-here"
+```
+
+Add this to your shell profile or to the OpenClaw systemd service environment.
+
+### 2. Configure OpenClaw
+
+Add the following to your `openclaw.json` (usually `~/.openclaw/openclaw.json`):
+
+```json
+{
+  "tools": {
+    "media": {
+      "audio": {
+        "models": [
+          {
+            "type": "cli",
+            "command": "/path/to/loglife/plugin/assemblyai-transcribe",
+            "args": ["{{MediaPath}}"]
+          }
+        ]
+      }
+    }
+  }
+}
+```
+
+Replace `/path/to/loglife` with the actual path to your LogLife installation.
+
+### 3. Restart the gateway
+
+```bash
+openclaw gateway restart
+```
+
+Voice messages will now be transcribed via AssemblyAI.
+
+## Running Your Own Benchmark
+
+The benchmark script is included in the plugin directory:
+
+```bash
+node plugin/benchmark-stt.mjs \
+  --audio /path/to/audio.ogg \
+  --openai-key sk-... \
+  --assemblyai-key ... \
+  --runs 10
+```
+
+Pass only the keys you want to test. Omit a key to skip that provider.

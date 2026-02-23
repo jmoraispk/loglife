@@ -23,6 +23,7 @@
               "development",
               "security",
               "networking",
+              "audio-provider",
               "contributing-docs"
             ]
           }
