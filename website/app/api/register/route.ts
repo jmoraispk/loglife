@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({ phone, name }),
     });
 
-    const data = await response.json();
+    const data = response.ok ? await response.json() : { error: await response.text() };
     return NextResponse.json(data, { status: response.status });
   } catch {
     return NextResponse.json({ error: "Failed to reach OpenClaw server" }, { status: 502 });
