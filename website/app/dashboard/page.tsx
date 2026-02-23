@@ -3,6 +3,7 @@ import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import AIPipeline from "@/app/components/dashboard/AIPipeline";
 import TodayOverview from "@/app/components/dashboard/TodayOverview";
 import HabitHeatmap from "@/app/components/dashboard/HabitHeatmap";
 import GoalsSection from "@/app/components/dashboard/GoalsSection";
@@ -491,6 +492,9 @@ export default function DashboardPage() {
             <p className="text-xs text-slate-500 mt-2">Last active {formatRelativeTime(session?.updatedAt)}</p>
           </div>
         </div>
+
+        {/* AI Processing Pipeline */}
+        <AIPipeline />
 
         {/* Today Overview */}
         <TodayOverview />
