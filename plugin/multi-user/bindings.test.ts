@@ -14,8 +14,7 @@
  * 3. If no peer match, fall through to channel/account/default matches
  */
 
-import { describe, it } from "node:test";
-import assert from "node:assert/strict";
+import { describe, it, expect } from "vitest";
 import { generateConfig } from "./generate.ts";
 import type { UsersConfig } from "./types.ts";
 
@@ -93,86 +92,81 @@ describe("binding resolution", () => {
 
   it("routes Alice's WhatsApp message to alice agent", () => {
     const result = resolveBinding(bindings, "whatsapp", { kind: "dm", id: "+1234567890" });
-    assert.strictEqual(result, "alice");
+    expect(result).toBe("alice");
   });
 
   it("routes Bob's WhatsApp message to bob agent", () => {
     const result = resolveBinding(bindings, "whatsapp", { kind: "dm", id: "+0987654321" });
-    assert.strictEqual(result, "bob");
+    expect(result).toBe("bob");
   });
 
   it("routes Alice's Signal message to alice agent", () => {
     const result = resolveBinding(bindings, "signal", { kind: "dm", id: "+1234567890" });
-    assert.strictEqual(result, "alice");
+    expect(result).toBe("alice");
   });
 
   it("routes Bob's Signal message to bob agent", () => {
     const result = resolveBinding(bindings, "signal", { kind: "dm", id: "+0987654321" });
-    assert.strictEqual(result, "bob");
+    expect(result).toBe("bob");
   });
 
   it("routes Alice's Telegram message to alice agent", () => {
     const result = resolveBinding(bindings, "telegram", { kind: "dm", id: "alice_tg" });
-    assert.strictEqual(result, "alice");
+    expect(result).toBe("alice");
   });
 
   it("routes Bob's Telegram message to bob agent", () => {
     const result = resolveBinding(bindings, "telegram", { kind: "dm", id: "bob_tg" });
-    assert.strictEqual(result, "bob");
+    expect(result).toBe("bob");
   });
 
   it("routes Alice's Discord message to alice agent", () => {
     const result = resolveBinding(bindings, "discord", { kind: "dm", id: "111222333" });
-    assert.strictEqual(result, "alice");
+    expect(result).toBe("alice");
   });
 
   it("returns null for unknown senders", () => {
     const result = resolveBinding(bindings, "whatsapp", { kind: "dm", id: "+9999999999" });
-    assert.strictEqual(result, null);
+    expect(result).toBeNull();
   });
 
   it("does not cross-route between users", () => {
-    // Alice's phone should NOT route to bob
     const aliceToWA = resolveBinding(bindings, "whatsapp", { kind: "dm", id: "+1234567890" });
-    assert.notStrictEqual(aliceToWA, "bob");
+    expect(aliceToWA).not.toBe("bob");
 
-    // Bob's phone should NOT route to alice
     const bobToWA = resolveBinding(bindings, "whatsapp", { kind: "dm", id: "+0987654321" });
-    assert.notStrictEqual(bobToWA, "alice");
+    expect(bobToWA).not.toBe("alice");
   });
 
   it("generates correct agent definitions", () => {
     const agents = generated.agents.list;
-    assert.strictEqual(agents.length, 2);
+    expect(agents).toHaveLength(2);
 
     const alice = agents.find((a) => a.id === "alice");
-    assert.ok(alice);
-    assert.strictEqual(alice.name, "Alice");
-    assert.strictEqual(alice.model, "anthropic/claude-sonnet-4-20250514");
+    expect(alice).toBeDefined();
+    expect(alice!.name).toBe("Alice");
+    expect(alice!.model).toBe("anthropic/claude-sonnet-4-20250514");
 
     const bob = agents.find((a) => a.id === "bob");
-    assert.ok(bob);
-    assert.strictEqual(bob.name, "Bob");
-    assert.strictEqual(bob.model, "openai/gpt-4o");
+    expect(bob).toBeDefined();
+    expect(bob!.name).toBe("Bob");
+    expect(bob!.model).toBe("openai/gpt-4o");
   });
 
   it("generates correct allow-lists", () => {
-    // WhatsApp should include both users
     const wa = generated.channels.whatsapp as Record<string, unknown>;
     const waAllow = wa.allowFrom as string[];
-    assert.ok(waAllow.includes("+1234567890"));
-    assert.ok(waAllow.includes("+0987654321"));
+    expect(waAllow).toContain("+1234567890");
+    expect(waAllow).toContain("+0987654321");
 
-    // Telegram should include both users
     const tg = generated.channels.telegram as Record<string, unknown>;
     const tgAllow = tg.allowFrom as string[];
-    assert.ok(tgAllow.includes("alice_tg"));
-    assert.ok(tgAllow.includes("bob_tg"));
+    expect(tgAllow).toContain("alice_tg");
+    expect(tgAllow).toContain("bob_tg");
 
-    // Discord should only include Alice
     const discord = generated.channels.discord as Record<string, Record<string, unknown>>;
     const discordAllow = discord.dm.allowFrom as string[];
-    assert.ok(discordAllow.includes("111222333"));
-    assert.strictEqual(discordAllow.length, 1);
+    expect(discordAllow).toContain("111222333");
+    expect(discordAllow).toHaveLength(1);
   });
 });

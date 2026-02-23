@@ -1,6 +1,6 @@
 import type { OpenClawPluginApi } from "openclaw/plugin-sdk";
 import { readFile } from "node:fs/promises";
-import { readFileSync, writeFileSync, existsSync, utimesSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, utimesSync } from "node:fs";
 import { join } from "node:path";
 import { timingSafeEqual, randomInt, createHash } from "node:crypto";
 import { URL } from "node:url";
@@ -440,6 +440,7 @@ const plugin = {
 
           usersConfig.users.push(newUser);
 
+          mkdirSync(multiUserDir, { recursive: true });
           writeFileSync(usersJsonPath, JSON.stringify(usersConfig, null, 2) + "\n");
 
           const generated = generateConfig(usersConfig);

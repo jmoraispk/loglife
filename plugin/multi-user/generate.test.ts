@@ -1,5 +1,4 @@
-import { describe, it } from "node:test";
-import assert from "node:assert/strict";
+import { describe, it, expect } from "vitest";
 import { generateConfig } from "./generate.ts";
 import type { UsersConfig } from "./types.ts";
 import { DEFAULT_MODEL } from "./types.ts";
@@ -22,35 +21,31 @@ describe("generateConfig", () => {
 
     const result = generateConfig(config);
 
-    // Agents
-    assert.strictEqual(result.agents.list.length, 1);
-    assert.deepStrictEqual(result.agents.list[0], {
+    expect(result.agents.list).toHaveLength(1);
+    expect(result.agents.list[0]).toEqual({
       id: "alice",
       name: "Alice",
       model: "anthropic/claude-sonnet-4-20250514",
       skills: ["web-search"],
     });
 
-    // Bindings: phone produces WhatsApp + Signal
-    assert.strictEqual(result.bindings.length, 2);
-    assert.deepStrictEqual(result.bindings[0], {
+    expect(result.bindings).toHaveLength(2);
+    expect(result.bindings[0]).toEqual({
       agentId: "alice",
       match: { channel: "whatsapp", peer: { kind: "dm", id: "+1234567890" } },
     });
-    assert.deepStrictEqual(result.bindings[1], {
+    expect(result.bindings[1]).toEqual({
       agentId: "alice",
       match: { channel: "signal", peer: { kind: "dm", id: "+1234567890" } },
     });
 
-    // Allow-lists
-    assert.ok("whatsapp" in result.channels);
-    assert.ok("signal" in result.channels);
+    expect(result.channels).toHaveProperty("whatsapp");
+    expect(result.channels).toHaveProperty("signal");
     const wa = result.channels.whatsapp as Record<string, unknown>;
-    assert.deepStrictEqual(wa.allowFrom, ["+1234567890"]);
-    assert.strictEqual(wa.dmPolicy, "open");
+    expect(wa.allowFrom).toEqual(["+1234567890"]);
+    expect(wa.dmPolicy).toBe("open");
 
-    // Session
-    assert.strictEqual(result.session.dmScope, "per-peer");
+    expect(result.session.dmScope).toBe("per-peer");
   });
 
   it("generates config for two users with multiple channels", () => {
@@ -72,34 +67,27 @@ describe("generateConfig", () => {
 
     const result = generateConfig(config);
 
-    // Agents
-    assert.strictEqual(result.agents.list.length, 2);
-    assert.strictEqual(result.agents.list[0].id, "alice");
-    assert.strictEqual(result.agents.list[1].id, "bob");
+    expect(result.agents.list).toHaveLength(2);
+    expect(result.agents.list[0].id).toBe("alice");
+    expect(result.agents.list[1].id).toBe("bob");
 
-    // Alice: 2 (phone) + 1 (telegram) + 1 (discord) = 4 bindings
-    // Bob: 2 (phone) = 2 bindings
-    assert.strictEqual(result.bindings.length, 6);
+    expect(result.bindings).toHaveLength(6);
 
-    // Check specific bindings exist
-    assert.ok(result.bindings.find((b) => b.agentId === "alice" && b.match.channel === "whatsapp"));
-    assert.ok(result.bindings.find((b) => b.agentId === "alice" && b.match.channel === "telegram"));
-    assert.ok(result.bindings.find((b) => b.agentId === "alice" && b.match.channel === "discord"));
-    assert.ok(result.bindings.find((b) => b.agentId === "bob" && b.match.channel === "whatsapp"));
+    expect(result.bindings.find((b) => b.agentId === "alice" && b.match.channel === "whatsapp")).toBeTruthy();
+    expect(result.bindings.find((b) => b.agentId === "alice" && b.match.channel === "telegram")).toBeTruthy();
+    expect(result.bindings.find((b) => b.agentId === "alice" && b.match.channel === "discord")).toBeTruthy();
+    expect(result.bindings.find((b) => b.agentId === "bob" && b.match.channel === "whatsapp")).toBeTruthy();
 
-    // WhatsApp allow-list should include both users' phone numbers (sorted)
     const wa = result.channels.whatsapp as Record<string, unknown>;
-    assert.deepStrictEqual(wa.allowFrom, ["+0987654321", "+1234567890"]);
+    expect(wa.allowFrom).toEqual(["+0987654321", "+1234567890"]);
 
-    // Discord uses dm.allowFrom (nested)
     const discord = result.channels.discord as Record<string, Record<string, unknown>>;
-    assert.deepStrictEqual(discord.dm.allowFrom, ["111"]);
-    assert.strictEqual(discord.dm.policy, "open");
+    expect(discord.dm.allowFrom).toEqual(["111"]);
+    expect(discord.dm.policy).toBe("open");
 
-    // Telegram uses top-level allowFrom
     const tg = result.channels.telegram as Record<string, unknown>;
-    assert.deepStrictEqual(tg.allowFrom, ["alice_tg"]);
-    assert.strictEqual(tg.dmPolicy, "open");
+    expect(tg.allowFrom).toEqual(["alice_tg"]);
+    expect(tg.dmPolicy).toBe("open");
   });
 
   it("uses default model when user has no model", () => {
@@ -114,7 +102,7 @@ describe("generateConfig", () => {
     };
 
     const result = generateConfig(config);
-    assert.strictEqual(result.agents.list[0].model, "anthropic/claude-sonnet-4-20250514");
+    expect(result.agents.list[0].model).toBe("anthropic/claude-sonnet-4-20250514");
   });
 
   it("falls back to DEFAULT_MODEL when neither user nor defaults specify one", () => {
@@ -128,7 +116,7 @@ describe("generateConfig", () => {
     };
 
     const result = generateConfig(config);
-    assert.strictEqual(result.agents.list[0].model, DEFAULT_MODEL);
+    expect(result.agents.list[0].model).toBe(DEFAULT_MODEL);
   });
 
   it("omits skills when not specified", () => {
@@ -142,7 +130,7 @@ describe("generateConfig", () => {
     };
 
     const result = generateConfig(config);
-    assert.ok(!("skills" in result.agents.list[0]));
+    expect(result.agents.list[0]).not.toHaveProperty("skills");
   });
 
   it("defaults dmScope to main when not specified", () => {
@@ -156,7 +144,7 @@ describe("generateConfig", () => {
     };
 
     const result = generateConfig(config);
-    assert.strictEqual(result.session.dmScope, "main");
+    expect(result.session.dmScope).toBe("main");
   });
 
   it("generates Slack allow-lists with dm.allowFrom", () => {
@@ -171,8 +159,8 @@ describe("generateConfig", () => {
 
     const result = generateConfig(config);
     const slack = result.channels.slack as Record<string, Record<string, unknown>>;
-    assert.deepStrictEqual(slack.dm.allowFrom, ["U012345"]);
-    assert.strictEqual(slack.dm.policy, "open");
+    expect(slack.dm.allowFrom).toEqual(["U012345"]);
+    expect(slack.dm.policy).toBe("open");
   });
 
   it("includes shared.env in generated output", () => {
@@ -192,7 +180,7 @@ describe("generateConfig", () => {
     };
 
     const result = generateConfig(config);
-    assert.deepStrictEqual(result.env, {
+    expect(result.env).toEqual({
       OPENAI_API_KEY: "sk-test-shared",
       ASSEMBLYAI_API_KEY: "asm-test-shared",
     });
@@ -209,6 +197,6 @@ describe("generateConfig", () => {
     };
 
     const result = generateConfig(config);
-    assert.strictEqual(result.env, undefined);
+    expect(result.env).toBeUndefined();
   });
 });

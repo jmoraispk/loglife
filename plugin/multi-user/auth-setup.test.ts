@@ -1,5 +1,4 @@
-import { describe, it, beforeEach, afterEach } from "node:test";
-import assert from "node:assert/strict";
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
@@ -18,13 +17,13 @@ describe("buildAuthProfiles", () => {
     };
 
     const store = buildAuthProfiles(user);
-    assert.strictEqual(store.version, 1);
-    assert.deepStrictEqual(store.profiles["anthropic:default"], {
+    expect(store.version).toBe(1);
+    expect(store.profiles["anthropic:default"]).toEqual({
       type: "api_key",
       provider: "anthropic",
       key: "sk-ant-test",
     });
-    assert.deepStrictEqual(store.profiles["openai:default"], {
+    expect(store.profiles["openai:default"]).toEqual({
       type: "api_key",
       provider: "openai",
       key: "sk-openai-test",
@@ -41,7 +40,7 @@ describe("buildAuthProfiles", () => {
     };
 
     const store = buildAuthProfiles(user);
-    assert.deepStrictEqual(store.profiles["custom-provider:default"], {
+    expect(store.profiles["custom-provider:default"]).toEqual({
       type: "api_key",
       provider: "custom-provider",
       key: "sk-custom",
@@ -64,7 +63,7 @@ describe("buildAuthProfiles", () => {
     };
 
     const store = buildAuthProfiles(user);
-    assert.deepStrictEqual(store.profiles["openai-codex:default"], {
+    expect(store.profiles["openai-codex:default"]).toEqual({
       type: "oauth",
       provider: "openai-codex",
       access: "access-token",
@@ -88,7 +87,7 @@ describe("buildAuthProfiles", () => {
     };
 
     const store = buildAuthProfiles(user);
-    assert.deepStrictEqual(store.profiles["github:default"], {
+    expect(store.profiles["github:default"]).toEqual({
       type: "token",
       provider: "github",
       token: "ghp_test123",
@@ -103,7 +102,7 @@ describe("buildAuthProfiles", () => {
     };
 
     const store = buildAuthProfiles(user);
-    assert.deepStrictEqual(store.profiles, {});
+    expect(store.profiles).toEqual({});
   });
 
   it("combines env and auth entries", () => {
@@ -123,9 +122,9 @@ describe("buildAuthProfiles", () => {
     };
 
     const store = buildAuthProfiles(user);
-    assert.strictEqual(Object.keys(store.profiles).length, 2);
-    assert.ok(store.profiles["anthropic:default"]);
-    assert.ok(store.profiles["openai-codex:default"]);
+    expect(Object.keys(store.profiles)).toHaveLength(2);
+    expect(store.profiles["anthropic:default"]).toBeDefined();
+    expect(store.profiles["openai-codex:default"]).toBeDefined();
   });
 });
 
@@ -149,14 +148,13 @@ describe("writeAuthProfiles", () => {
 
     const result = writeAuthProfiles(tmpDir, user);
 
-    assert.strictEqual(result.profileCount, 1);
-    assert.strictEqual(result.path, path.join(tmpDir, "agents", "alice", "agent", "auth-profiles.json"));
-    assert.strictEqual(result.merged, false);
+    expect(result.profileCount).toBe(1);
+    expect(result.path).toBe(path.join(tmpDir, "agents", "alice", "agent", "auth-profiles.json"));
+    expect(result.merged).toBe(false);
 
-    // Verify the file was actually written
     const written = JSON.parse(fs.readFileSync(result.path, "utf-8"));
-    assert.strictEqual(written.version, 1);
-    assert.strictEqual(written.profiles["anthropic:default"].key, "sk-ant-test");
+    expect(written.version).toBe(1);
+    expect(written.profiles["anthropic:default"].key).toBe("sk-ant-test");
   });
 
   it("merges with existing profiles", () => {
@@ -166,7 +164,6 @@ describe("writeAuthProfiles", () => {
       env: { OPENAI_API_KEY: "sk-new" },
     };
 
-    // Create an existing auth profile
     const authDir = path.join(tmpDir, "agents", "bob", "agent");
     fs.mkdirSync(authDir, { recursive: true });
     const existingStore = {
@@ -186,12 +183,12 @@ describe("writeAuthProfiles", () => {
 
     const result = writeAuthProfiles(tmpDir, user);
 
-    assert.strictEqual(result.merged, true);
-    assert.strictEqual(result.profileCount, 2); // existing + new
+    expect(result.merged).toBe(true);
+    expect(result.profileCount).toBe(2);
 
     const written = JSON.parse(fs.readFileSync(result.path, "utf-8"));
-    assert.strictEqual(written.profiles["anthropic:default"].key, "sk-existing");
-    assert.strictEqual(written.profiles["openai:default"].key, "sk-new");
+    expect(written.profiles["anthropic:default"].key).toBe("sk-existing");
+    expect(written.profiles["openai:default"].key).toBe("sk-new");
   });
 
   it("overwrites existing profiles for the same provider", () => {
@@ -201,7 +198,6 @@ describe("writeAuthProfiles", () => {
       env: { ANTHROPIC_API_KEY: "sk-updated" },
     };
 
-    // Create an existing auth profile with the same provider
     const authDir = path.join(tmpDir, "agents", "bob", "agent");
     fs.mkdirSync(authDir, { recursive: true });
     const existingStore = {
@@ -222,7 +218,7 @@ describe("writeAuthProfiles", () => {
     const result = writeAuthProfiles(tmpDir, user);
 
     const written = JSON.parse(fs.readFileSync(result.path, "utf-8"));
-    assert.strictEqual(written.profiles["anthropic:default"].key, "sk-updated");
+    expect(written.profiles["anthropic:default"].key).toBe("sk-updated");
   });
 
   it("skips users with no auth entries", () => {
@@ -232,8 +228,8 @@ describe("writeAuthProfiles", () => {
     };
 
     const result = writeAuthProfiles(tmpDir, user);
-    assert.strictEqual(result.profileCount, 0);
-    assert.strictEqual(result.path, "");
+    expect(result.profileCount).toBe(0);
+    expect(result.path).toBe("");
   });
 
   it("supports dry-run mode", () => {
@@ -244,9 +240,8 @@ describe("writeAuthProfiles", () => {
     };
 
     const result = writeAuthProfiles(tmpDir, user, { dryRun: true });
-    assert.strictEqual(result.profileCount, 1);
+    expect(result.profileCount).toBe(1);
 
-    // File should NOT exist in dry-run mode
-    assert.strictEqual(fs.existsSync(result.path), false);
+    expect(fs.existsSync(result.path)).toBe(false);
   });
 });
