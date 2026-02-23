@@ -513,3 +513,155 @@ describe("POST /loglife/verify/send handler", () => {
     expect(res._status).toBe(405);
   });
 });
+
+// ---------------------------------------------------------------------------
+// Handler tests: POST /loglife/register
+// ---------------------------------------------------------------------------
+
+describe("POST /loglife/register handler", () => {
+  const API_KEY = "register-test-key";
+
+  let registerHandler: RouteHandler;
+  let mockWriteFileSync: ReturnType<typeof vi.fn>;
+  let mockUtimesSync: ReturnType<typeof vi.fn>;
+  let usersJsonContent: string;
+
+  beforeEach(async () => {
+    vi.resetModules();
+
+    usersJsonContent = JSON.stringify({
+      users: [],
+      defaults: { dmScope: "main" },
+    });
+
+    mockWriteFileSync = vi.fn();
+    mockUtimesSync = vi.fn();
+
+    vi.doMock("node:fs", () => ({
+      readFileSync: vi.fn().mockImplementation(() => usersJsonContent),
+      writeFileSync: mockWriteFileSync,
+      existsSync: vi.fn().mockReturnValue(true),
+      utimesSync: mockUtimesSync,
+    }));
+
+    vi.doMock("node:fs/promises", () => ({
+      readFile: vi.fn().mockResolvedValue("{}"),
+      writeFile: vi.fn().mockResolvedValue(undefined),
+    }));
+
+    const mod = await import("./index.js");
+    const { routes, api } = createMockApi({ apiKey: API_KEY });
+    mod.default.register(api as never);
+    registerHandler = routes.get("/loglife/register")!;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.resetModules();
+  });
+
+  it("returns 401 without auth", async () => {
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/register",
+      body: { phone: "+15551234567" },
+    });
+    const res = mockRes();
+    await registerHandler(req, res);
+    expect(res._status).toBe(401);
+  });
+
+  it("returns 405 for GET method", async () => {
+    const req = mockReq({
+      method: "GET",
+      url: "/loglife/register",
+      headers: { authorization: `Bearer ${API_KEY}` },
+    });
+    const res = mockRes();
+    await registerHandler(req, res);
+    expect(res._status).toBe(405);
+  });
+
+  it("returns 400 when phone is missing", async () => {
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/register",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: {},
+    });
+    const res = mockRes();
+    await registerHandler(req, res);
+    expect(res._status).toBe(400);
+    expect(res.json()).toEqual({ error: "Missing required field: phone" });
+  });
+
+  it("returns 400 for invalid (too short) phone number", async () => {
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/register",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: { phone: "12" },
+    });
+    const res = mockRes();
+    await registerHandler(req, res);
+    expect(res._status).toBe(400);
+    expect(res.json()).toEqual({ error: "Invalid phone number" });
+  });
+
+  it("registers a new user and writes config", async () => {
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/register",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: { phone: "+15551234567", name: "Alice" },
+    });
+    const res = mockRes();
+    await registerHandler(req, res);
+    expect(res._status).toBe(200);
+    const body = res.json() as Record<string, unknown>;
+    expect(body.registered).toBe(true);
+    expect(body.userId).toBeDefined();
+
+    // Verify users.json and generated.json were written
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(2);
+    // Verify openclaw.json was touched for hot-reload
+    expect(mockUtimesSync).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses name to derive user ID", async () => {
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/register",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: { phone: "+15551234567", name: "Alice Smith" },
+    });
+    const res = mockRes();
+    await registerHandler(req, res);
+    expect(res._status).toBe(200);
+    const body = res.json() as Record<string, unknown>;
+    expect(body.userId).toBe("alice-smith");
+  });
+
+  it("returns existing:true for duplicate phone", async () => {
+    usersJsonContent = JSON.stringify({
+      users: [{ id: "alice", identifiers: ["+15551234567"] }],
+      defaults: { dmScope: "main" },
+    });
+
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/register",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: { phone: "+15551234567" },
+    });
+    const res = mockRes();
+    await registerHandler(req, res);
+    expect(res._status).toBe(200);
+    const body = res.json() as Record<string, unknown>;
+    expect(body.registered).toBe(true);
+    expect(body.existing).toBe(true);
+
+    // Should NOT write files for existing user
+    expect(mockWriteFileSync).not.toHaveBeenCalled();
+  });
+});

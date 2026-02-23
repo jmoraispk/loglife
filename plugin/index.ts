@@ -1,13 +1,18 @@
 import type { OpenClawPluginApi } from "openclaw/plugin-sdk";
 import { readFile } from "node:fs/promises";
+import { readFileSync, writeFileSync, existsSync, utimesSync } from "node:fs";
 import { join } from "node:path";
-import { timingSafeEqual, randomInt } from "node:crypto";
+import { timingSafeEqual, randomInt, createHash } from "node:crypto";
 import { URL } from "node:url";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { generateConfig, validateUsersConfig } from "./multi-user/generate.js";
+import type { UsersConfig, UserProfile } from "./multi-user/types.js";
+import { parseAllIdentifiers } from "./multi-user/identifiers.js";
 
 type LogLifeConfig = {
   apiKey: string;
   agentId?: string;
+  multiUserDir?: string;
 };
 
 export type VerificationEntry = {
@@ -89,6 +94,35 @@ async function sendWhatsAppMessage(
   }
 }
 
+function loadUsersJson(usersJsonPath: string): UsersConfig {
+  if (!existsSync(usersJsonPath)) {
+    return { users: [], defaults: { dmScope: "main" } };
+  }
+  const raw = JSON.parse(readFileSync(usersJsonPath, "utf-8"));
+  return validateUsersConfig(raw);
+}
+
+function deriveUserId(phone: string, name: string | undefined, config: UsersConfig): string {
+  const existingIds = new Set(config.users.map((u) => u.id));
+
+  if (name) {
+    const base = name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 30);
+    if (base && !existingIds.has(base)) return base;
+    // Append short hash if name collides
+    const hash = createHash("sha256").update(phone).digest("hex").slice(0, 6);
+    const candidate = `${base}-${hash}`;
+    if (!existingIds.has(candidate)) return candidate;
+  }
+
+  // Fall back to phone-based hash
+  const hash = createHash("sha256").update(phone).digest("hex").slice(0, 12);
+  return `user-${hash}`;
+}
+
 const plugin = {
   id: "loglife",
   name: "LogLife",
@@ -99,6 +133,7 @@ const plugin = {
     properties: {
       apiKey: { type: "string" as const },
       agentId: { type: "string" as const, default: "main" },
+      multiUserDir: { type: "string" as const },
     },
   },
 
@@ -114,6 +149,10 @@ const plugin = {
     const stateDir = process.env.OPENCLAW_STATE_DIR
       ?? join(process.env.HOME ?? "/root", ".openclaw");
     const sessionsPath = join(stateDir, "agents", agentId, "sessions", "sessions.json");
+    const multiUserDir = cfg.multiUserDir ?? join(stateDir, "multi-user");
+    const usersJsonPath = join(multiUserDir, "users.json");
+    const generatedJsonPath = join(multiUserDir, "generated.json");
+    const openclawJsonPath = join(stateDir, "openclaw.json");
 
     const sendWA = api.runtime.channel.whatsapp.sendMessageWhatsApp as SendWhatsApp;
 
@@ -327,6 +366,97 @@ const plugin = {
           phone,
           "Welcome to LogLife! Your dashboard is now connected. Send me a message anytime to start journaling.",
         ).catch(() => { /* best-effort */ });
+      },
+    });
+
+    // --- POST /loglife/register ---
+
+    api.registerHttpRoute({
+      path: "/loglife/register",
+      handler: async (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method !== "POST") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
+        let body: Record<string, unknown>;
+        try {
+          body = await readBody(req);
+        } catch {
+          jsonResponse(res, 400, { error: "Invalid JSON body" });
+          return;
+        }
+
+        const phoneRaw = body.phone as string | undefined;
+        if (!phoneRaw || typeof phoneRaw !== "string") {
+          jsonResponse(res, 400, { error: "Missing required field: phone" });
+          return;
+        }
+
+        const phone = normalizePhone(phoneRaw);
+        if (phone.length < 8) {
+          jsonResponse(res, 400, { error: "Invalid phone number" });
+          return;
+        }
+
+        const name = (body.name as string | undefined)?.trim() || undefined;
+        const model = (body.model as string | undefined)?.trim() || undefined;
+
+        try {
+          const usersConfig = loadUsersJson(usersJsonPath);
+
+          // Idempotent: check if phone is already registered
+          const phoneIdentifiers = parseAllIdentifiers([phone]);
+          const alreadyRegistered = usersConfig.users.some((u) =>
+            u.identifiers.some((id) => {
+              try {
+                const parsed = parseAllIdentifiers([id]);
+                return parsed.some((p) =>
+                  phoneIdentifiers.some((pi) => pi.channel === p.channel && pi.peerId === p.peerId),
+                );
+              } catch {
+                return false;
+              }
+            }),
+          );
+
+          if (alreadyRegistered) {
+            jsonResponse(res, 200, { registered: true, existing: true });
+            return;
+          }
+
+          const userId = deriveUserId(phone, name, usersConfig);
+          const newUser: UserProfile = {
+            id: userId,
+            identifiers: [phone],
+          };
+          if (name) newUser.name = name;
+          if (model) newUser.model = model;
+
+          usersConfig.users.push(newUser);
+
+          writeFileSync(usersJsonPath, JSON.stringify(usersConfig, null, 2) + "\n");
+
+          const generated = generateConfig(usersConfig);
+          writeFileSync(generatedJsonPath, JSON.stringify(generated, null, 2) + "\n");
+
+          if (existsSync(openclawJsonPath)) {
+            const now = new Date();
+            utimesSync(openclawJsonPath, now, now);
+          }
+
+          api.logger.info(`Registered user "${userId}" (${phone})`);
+          jsonResponse(res, 200, { registered: true, userId });
+        } catch (err) {
+          const errMsg = err instanceof Error ? err.message : String(err);
+          api.logger.error(`Registration failed for ${phone}: ${errMsg}`);
+          jsonResponse(res, 500, { error: "Registration failed" });
+        }
       },
     });
   },

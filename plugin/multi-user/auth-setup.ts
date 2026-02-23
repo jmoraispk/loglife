@@ -1,22 +1,18 @@
 /**
  * Auth profile setup.
  *
- * Reads `users.json` and writes per-user API keys to each agent's
- * `auth-profiles.json` file at `~/.openclaw/agents/<agentId>/agent/auth-profiles.json`.
+ * Writes per-user API keys to each agent's `auth-profiles.json` file at
+ * `~/.openclaw/agents/<agentId>/agent/auth-profiles.json`.
  *
  * This is the correct mechanism for per-user API key isolation because
  * auth profiles are resolved per-agent at runtime (unlike env vars which
  * are global to the process).
- *
- * Usage:
- *   bun multi-user/src/auth-setup.ts [--users multi-user/users.json] [--state-dir ~/.openclaw]
  */
 
 import fs from "node:fs";
 import path from "node:path";
-import os from "node:os";
 import { execFileSync } from "node:child_process";
-import type { UsersConfig, UserProfile, AuthEntry } from "./types.ts";
+import type { UserProfile, AuthEntry } from "./types.ts";
 import { ENV_TO_PROVIDER } from "./types.ts";
 
 // ---------------------------------------------------------------------------
@@ -122,32 +118,6 @@ export function hasOpReferences(user: UserProfile): boolean {
     }
   }
   return false;
-}
-
-// ---------------------------------------------------------------------------
-// CLI args
-// ---------------------------------------------------------------------------
-
-function parseArgs(): { usersPath: string; stateDir: string } {
-  const args = process.argv.slice(2);
-  const scriptDir = path.dirname(new URL(import.meta.url).pathname);
-  const defaultDir = path.resolve(scriptDir, "..");
-
-  let usersPath = path.join(defaultDir, "users.json");
-  let stateDir =
-    process.env.OPENCLAW_STATE_DIR?.trim() ||
-    process.env.CLAWDBOT_STATE_DIR?.trim() ||
-    path.join(os.homedir(), ".openclaw");
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--users" && args[i + 1]) {
-      usersPath = path.resolve(args[++i]);
-    } else if (args[i] === "--state-dir" && args[i + 1]) {
-      stateDir = path.resolve(args[++i]);
-    }
-  }
-
-  return { usersPath, stateDir };
 }
 
 // ---------------------------------------------------------------------------
@@ -306,47 +276,4 @@ export function writeAuthProfiles(
   fs.renameSync(tmpPath, authPath);
 
   return { path: authPath, profileCount: Object.keys(finalStore.profiles).length, merged };
-}
-
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
-
-function main() {
-  const { usersPath, stateDir } = parseArgs();
-
-  console.log(`Reading users from: ${usersPath}`);
-  console.log(`State directory: ${stateDir}`);
-
-  if (!fs.existsSync(usersPath)) {
-    console.error(`Error: ${usersPath} does not exist.`);
-    process.exit(1);
-  }
-
-  const raw = JSON.parse(fs.readFileSync(usersPath, "utf-8"));
-  const config = raw as UsersConfig;
-
-  let totalProfiles = 0;
-  for (const user of config.users) {
-    const hasAuth = (user.env && Object.keys(user.env).length > 0) ||
-                    (user.auth && Object.keys(user.auth).length > 0);
-    if (!hasAuth) {
-      console.log(`  ${user.id}: no auth entries, skipping`);
-      continue;
-    }
-
-    const result = writeAuthProfiles(stateDir, user);
-    if (result.profileCount > 0) {
-      const mergeNote = result.merged ? " (merged with existing)" : "";
-      console.log(`  ${user.id}: wrote ${result.profileCount} profile(s) to ${result.path}${mergeNote}`);
-      totalProfiles += result.profileCount;
-    }
-  }
-
-  console.log(`\nDone. Set up ${totalProfiles} auth profile(s) for ${config.users.length} user(s).`);
-}
-
-// Allow importing without running main
-if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith("auth-setup.ts")) {
-  main();
 }

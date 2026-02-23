@@ -145,7 +145,7 @@ describe("generateConfig", () => {
     assert.ok(!("skills" in result.agents.list[0]));
   });
 
-  it("defaults dmScope to per-peer when not specified", () => {
+  it("defaults dmScope to main when not specified", () => {
     const config: UsersConfig = {
       users: [
         {
@@ -156,7 +156,7 @@ describe("generateConfig", () => {
     };
 
     const result = generateConfig(config);
-    assert.strictEqual(result.session.dmScope, "per-peer");
+    assert.strictEqual(result.session.dmScope, "main");
   });
 
   it("generates Slack allow-lists with dm.allowFrom", () => {

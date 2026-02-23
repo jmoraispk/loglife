@@ -1,50 +1,21 @@
 /**
  * Config generator.
  *
- * Reads `users.json` and produces `generated.json` — a valid OpenClaw config
- * fragment containing agents, bindings, allow-lists, and session settings.
+ * Takes a UsersConfig and produces a valid OpenClaw config fragment containing
+ * agents, bindings, allow-lists, and session settings.
  *
- * The generated file is included via `$include` in the user's `openclaw.json`.
- * No OpenClaw source code is modified.
- *
- * Usage:
- *   bun multi-user/src/generate.ts [--users multi-user/users.json] [--output multi-user/generated.json]
+ * The generated output is included via `$include` in the user's `openclaw.json`.
  */
 
-import fs from "node:fs";
-import path from "node:path";
 import { parseAllIdentifiers } from "./identifiers.ts";
-import type { UsersConfig, UserProfile, ParsedIdentifier } from "./types.ts";
+import type { UsersConfig } from "./types.ts";
 import { DEFAULT_MODEL } from "./types.ts";
-
-// ---------------------------------------------------------------------------
-// CLI args
-// ---------------------------------------------------------------------------
-
-function parseArgs(): { usersPath: string; outputPath: string } {
-  const args = process.argv.slice(2);
-  const scriptDir = path.dirname(new URL(import.meta.url).pathname);
-  const defaultDir = path.resolve(scriptDir, "..");
-
-  let usersPath = path.join(defaultDir, "users.json");
-  let outputPath = path.join(defaultDir, "generated.json");
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--users" && args[i + 1]) {
-      usersPath = path.resolve(args[++i]);
-    } else if (args[i] === "--output" && args[i + 1]) {
-      outputPath = path.resolve(args[++i]);
-    }
-  }
-
-  return { usersPath, outputPath };
-}
 
 // ---------------------------------------------------------------------------
 // Validation
 // ---------------------------------------------------------------------------
 
-function validateUsersConfig(raw: unknown): UsersConfig {
+export function validateUsersConfig(raw: unknown): UsersConfig {
   if (!raw || typeof raw !== "object") {
     throw new Error("users.json must be a JSON object");
   }
@@ -166,7 +137,7 @@ export function generateConfig(config: UsersConfig): GeneratedConfig {
   const agents: GeneratedConfig["agents"]["list"] = [];
   const bindings: GeneratedConfig["bindings"] = [];
   const channelPeers = new Map<string, Set<string>>();
-  const dmScope = config.defaults?.dmScope ?? "per-peer";
+  const dmScope = config.defaults?.dmScope ?? "main";
   const defaultModel = config.defaults?.model ?? DEFAULT_MODEL;
 
   for (const user of config.users) {
@@ -211,40 +182,4 @@ export function generateConfig(config: UsersConfig): GeneratedConfig {
   }
 
   return result;
-}
-
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
-
-function main() {
-  const { usersPath, outputPath } = parseArgs();
-
-  console.log(`Reading users from: ${usersPath}`);
-  if (!fs.existsSync(usersPath)) {
-    console.error(`Error: ${usersPath} does not exist.`);
-    console.error("Copy users.example.json to users.json and fill in your users.");
-    process.exit(1);
-  }
-
-  const raw = JSON.parse(fs.readFileSync(usersPath, "utf-8"));
-  const config = validateUsersConfig(raw);
-
-  console.log(`Found ${config.users.length} user(s)`);
-
-  const generated = generateConfig(config);
-
-  // Write with a header comment (as pure JSON, no comments unfortunately)
-  const output = JSON.stringify(generated, null, 2);
-  fs.writeFileSync(outputPath, output + "\n");
-
-  console.log(`Generated config written to: ${outputPath}`);
-  console.log(`  Agents: ${generated.agents.list.length}`);
-  console.log(`  Bindings: ${generated.bindings.length}`);
-  console.log(`  Channels with allow-lists: ${Object.keys(generated.channels).length}`);
-}
-
-// Allow importing generateConfig without running main
-if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith("generate.ts")) {
-  main();
 }

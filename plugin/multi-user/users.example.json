@@ -30,7 +30,7 @@
     }
   ],
   "defaults": {
-    "dmScope": "per-peer",
+    "dmScope": "main",
     "model": "anthropic/claude-sonnet-4-5"
   }
 }
