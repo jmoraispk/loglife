@@ -39,11 +39,41 @@ Short = 30-second audio (58 KB). Long = 15-minute audio (850 KB).
 
 ### 1. Set your API key
 
+The `assemblyai-transcribe` script reads `ASSEMBLYAI_API_KEY` from the environment. Where you set it depends on how you run OpenClaw:
+
+**Local development** — export it in your shell before starting the gateway:
+
 ```bash
 export ASSEMBLYAI_API_KEY="your-key-here"
+openclaw gateway --allow-unconfigured
 ```
 
-Add this to your shell profile or to the OpenClaw systemd service environment.
+**Production (systemd)** — add it to the systemd service override:
+
+```bash
+sudo systemctl edit openclaw-gateway
+```
+
+Add under `[Service]`:
+
+```ini
+[Service]
+Environment="ASSEMBLYAI_API_KEY=your-key-here"
+```
+
+Then reload and restart:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart openclaw-gateway
+```
+
+**Alternative** — add it to `~/.bashrc` or `~/.profile` if the gateway is started manually:
+
+```bash
+echo 'export ASSEMBLYAI_API_KEY="your-key-here"' >> ~/.bashrc
+source ~/.bashrc
+```
 
 ### 2. Configure OpenClaw
 
@@ -75,7 +105,9 @@ Replace `/path/to/loglife` with the actual path to your LogLife installation.
 openclaw gateway restart
 ```
 
-Voice messages will now be transcribed via AssemblyAI.
+### 4. Test it
+
+Send a voice note via WhatsApp to your bot. The gateway logs will show `Media understanding audio.transcription: success via cli/assemblyai-transcribe` if it worked.
 
 ## Running Your Own Benchmark
 
