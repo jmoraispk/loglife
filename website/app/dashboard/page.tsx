@@ -3,6 +3,10 @@ import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import TodayOverview from "@/app/components/dashboard/TodayOverview";
+import HabitHeatmap from "@/app/components/dashboard/HabitHeatmap";
+import GoalsSection from "@/app/components/dashboard/GoalsSection";
+import ActivityLogsSection from "@/app/components/dashboard/ActivityLogsSection";
 import { useState, useRef, useEffect, useCallback } from "react";
 
 interface WhatsAppSession {
@@ -487,6 +491,18 @@ export default function DashboardPage() {
             <p className="text-xs text-slate-500 mt-2">Last active {formatRelativeTime(session?.updatedAt)}</p>
           </div>
         </div>
+
+        {/* Today Overview */}
+        <TodayOverview />
+
+        {/* Monthly Habit Heatmap */}
+        <HabitHeatmap />
+
+        {/* Goals & Progress */}
+        <GoalsSection />
+
+        {/* Activity Logs & Classification */}
+        <ActivityLogsSection />
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
