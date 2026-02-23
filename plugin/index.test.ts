@@ -540,6 +540,7 @@ describe("POST /loglife/register handler", () => {
     vi.doMock("node:fs", () => ({
       readFileSync: vi.fn().mockImplementation(() => usersJsonContent),
       writeFileSync: mockWriteFileSync,
+      mkdirSync: vi.fn(),
       existsSync: vi.fn().mockReturnValue(true),
       utimesSync: mockUtimesSync,
     }));
