@@ -27,6 +27,7 @@
               "self-hosting",
               "plugin-installation",
               "configuration",
+              "multi-user",
               "networking",
               "development",
               "security"
@@ -54,7 +55,8 @@
             "pages": [
               "api-reference/endpoint/get-sessions",
               "api-reference/endpoint/verify-send",
-              "api-reference/endpoint/verify-check"
+              "api-reference/endpoint/verify-check",
+              "api-reference/endpoint/register"
             ]
           }
         ]

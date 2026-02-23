@@ -1,17 +1,18 @@
 ---
 title: "Introduction"
-description: "The LogLife plugin exposes an HTTP API inside the OpenClaw gateway for session data and phone verification."
+description: "The LogLife plugin exposes an HTTP API inside the OpenClaw gateway for session data, phone verification, and user registration."
 ---
 
 ## Overview
 
-The LogLife plugin registers three HTTP routes on the OpenClaw gateway:
+The LogLife plugin registers four HTTP routes on the OpenClaw gateway:
 
 | Endpoint | Method | Purpose |
 |---|---|---|
 | `/loglife/sessions` | GET | Look up session data by phone, session ID, or key |
 | `/loglife/verify/send` | POST | Send a 6-digit verification code via WhatsApp |
 | `/loglife/verify/check` | POST | Validate a verification code |
+| `/loglife/register` | POST | Register a new user in the multi-user configuration |
 
 ## Authentication
 
@@ -35,6 +36,20 @@ The API runs inside the OpenClaw gateway process — there is no separate servic
 Browser → Next.js API route → LogLife Plugin (OpenClaw gateway)
 ```
 
+## User registration flow
+
+When a new user signs up on the dashboard, the verification and registration endpoints work together:
+
+1. Dashboard calls `/loglife/verify/send` with the user's phone number
+2. Plugin sends a 6-digit code via WhatsApp
+3. User enters the code on the dashboard
+4. Dashboard calls `/loglife/verify/check` to validate the code
+5. On success, dashboard calls `/loglife/register` with the phone and user's name
+6. Plugin adds the user to the multi-user config and triggers a gateway hot-reload
+7. The user can now send messages to the bot via WhatsApp
+
+No gateway restart is required — the hot-reload picks up the new configuration immediately.
+
 ## Security model
 
 - **Bearer token auth** on every request (timing-safe comparison)
@@ -42,5 +57,6 @@ Browser → Next.js API route → LogLife Plugin (OpenClaw gateway)
 - **Rate limiting** on verification code sends (1 per phone per 60s)
 - **Single-use codes** deleted immediately after successful verification
 - **5-minute TTL** on verification codes
+- **Idempotent registration** — registering an already-registered phone returns success without duplicating
 
 Documenting these endpoints publicly is safe because knowing the URL structure and parameters is useless without the API key, which is only stored server-side.

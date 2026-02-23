@@ -5,12 +5,13 @@ description: "Plugin settings, environment variables, and production deployment 
 
 ## Plugin configuration
 
-The plugin accepts two config values in `openclaw.json` under `plugins.entries.loglife.config`:
+The plugin accepts three config values in `openclaw.json` under `plugins.entries.loglife.config`:
 
 | Key | Required | Default | Description |
 |---|---|---|---|
 | `apiKey` | Yes | — | Shared secret for authenticating dashboard requests |
 | `agentId` | No | `"main"` | Which agent's sessions to serve |
+| `multiUserDir` | No | `~/.openclaw/multi-user/` | Directory containing `users.json` and `generated.json` for [multi-user setup](/multi-user) |
 
 Set values with the OpenClaw CLI:
 
