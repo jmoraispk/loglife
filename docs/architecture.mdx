@@ -1,11 +1,15 @@
 ---
-title: "Multi-user architecture"
-description: "How LogLife supports multiple users with isolated agents, sessions, and API keys"
+title: "Architecture"
+description: "How the LogLife plugin, multi-user layer, and OpenClaw gateway fit together"
 ---
 
-LogLife supports multiple users on a single OpenClaw instance. Each user gets their own **agent**, which means fully isolated conversation history, long-term memory, API keys, model selection, and usage tracking.
+This page covers the internal architecture of the LogLife plugin — how users are isolated, how configuration is generated, and how the system scales.
 
-## How it works
+## Multi-user
+
+LogLife supports multiple users on a single OpenClaw instance. Each user gets their own **agent**, which means fully isolated conversation history, long-term memory, API keys, model selection, and usage tracking. All of this is achieved through configuration — no OpenClaw source modifications are needed.
+
+### How it works
 
 The multi-user system maps each user to their own OpenClaw agent. When a message arrives, the gateway uses **bindings** to route it to the correct agent based on the sender's channel and peer ID. **Allow-lists** control who can message the bot on each channel.
 
@@ -19,9 +23,7 @@ flowchart LR
     gw -->|"binding match"| agentB["Agent: bob\nmodel, memory, keys"]
 ```
 
-All of this is achieved through configuration — no OpenClaw source modifications are needed.
-
-## What each user gets
+### What each user gets
 
 | Capability | Description |
 |---|---|
@@ -33,7 +35,7 @@ All of this is achieved through configuration — no OpenClaw source modificatio
 | Usage tracking | The gateway's `byAgent` API gives per-user breakdowns |
 | Cross-channel identity | Multiple identifiers (WhatsApp, Telegram) route to the same agent |
 
-## Generated configuration
+### Generated configuration
 
 The multi-user system produces a `generated.json` file that is included in `openclaw.json` via the `$include` directive. This file contains:
 
@@ -43,7 +45,7 @@ The multi-user system produces a `generated.json` file that is included in `open
 - **`session`** — session scoping settings
 - **`env`** — shared environment variables (API keys used by all users)
 
-## Session scoping
+### Session scoping
 
 The default session scope is `main`, which gives each agent one continuous conversation regardless of which channel the user messages from. This is the correct setting for journaling — your journal is your journal, whether you write from WhatsApp or Telegram.
 
@@ -57,7 +59,7 @@ Other OpenClaw session scopes are available but less useful with the multi-user 
 
 Since each agent only has one user, the agent boundary already provides complete isolation between users. The `dmScope` setting only affects behavior within each agent.
 
-## Runtime user registration
+### Runtime user registration
 
 New users are added at runtime through the [`/loglife/register`](/api-reference/endpoint/register) endpoint. The registration flow:
 
@@ -73,7 +75,7 @@ The gateway picks up the new agent, binding, and allow-list entry immediately �
   The full rebuild approach regenerates `generated.json` from scratch on every registration. This is fast enough for the foreseeable scale — under 50ms at 1,000 users, about 1-2 seconds at 100,000 users.
 </Info>
 
-## Memory isolation
+### Memory isolation
 
 OpenClaw has six layers of persistent state. Five of them are fully isolated per agent (and therefore per user):
 
@@ -88,13 +90,13 @@ OpenClaw has six layers of persistent state. Five of them are fully isolated per
 
 The only shared layer is debug logs, which are operational data that no agent reads to inform its responses. For anything that affects what the bot says, remembers, or knows, the isolation is complete.
 
-## Per-user API keys
+### Per-user API keys
 
 By default, all users share API keys configured in `shared.env` within `users.json`. When a user needs their own keys (for separate billing, rate limits, or scoped services), their `env` field in `users.json` is populated and `writeAuthProfiles()` writes per-agent credentials to `~/.openclaw/agents/<agentId>/agent/auth-profiles.json`.
 
 API keys can be stored as [1Password](https://1password.com/) references (`op://` URIs) instead of raw values. These are resolved at config generation time via the `op read` CLI.
 
-## File structure
+### File structure
 
 The multi-user code lives inside the plugin at `plugin/multi-user/`:
 
