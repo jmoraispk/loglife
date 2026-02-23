@@ -18,12 +18,25 @@
             "pages": [
               "index",
               "quickstart",
-              "self-hosting",
-              "openclaw-tricks",
-              "development",
-              "security",
-              "networking",
               "contributing-docs"
+            ]
+          },
+          {
+            "group": "Self-host",
+            "pages": [
+              "self-hosting",
+              "plugin-installation",
+              "configuration",
+              "networking",
+              "architecture",
+              "development",
+              "security"
+            ]
+          },
+          {
+            "group": "Dashboard",
+            "pages": [
+              "dashboard"
             ]
           }
         ]
@@ -42,7 +55,8 @@
             "pages": [
               "api-reference/endpoint/get-sessions",
               "api-reference/endpoint/verify-send",
-              "api-reference/endpoint/verify-check"
+              "api-reference/endpoint/verify-check",
+              "api-reference/endpoint/register"
             ]
           }
         ]

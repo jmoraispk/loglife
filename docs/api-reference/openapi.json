@@ -225,6 +225,67 @@
           }
         }
       }
+    },
+    "/loglife/register": {
+      "post": {
+        "operationId": "registerUser",
+        "summary": "Register a new user",
+        "description": "Adds a new user to the multi-user configuration. Creates an OpenClaw agent, binding, and allow-list entry for the given phone number, then triggers a gateway hot-reload so the user can start messaging immediately. Idempotent — if the phone is already registered, returns success without duplicating.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["phone"],
+                "properties": {
+                  "phone": {
+                    "type": "string",
+                    "description": "Phone number in E.164 format",
+                    "example": "+15551234567"
+                  },
+                  "name": {
+                    "type": "string",
+                    "description": "Display name (used to derive the user/agent ID)",
+                    "example": "Alice Smith"
+                  },
+                  "model": {
+                    "type": "string",
+                    "description": "LLM model override for this user (defaults to the global default)",
+                    "example": "anthropic/claude-sonnet-4-5"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User registered (or already exists)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "registered": { "type": "boolean", "example": true },
+                    "userId": { "type": "string", "description": "The generated user/agent ID", "example": "alice-smith" },
+                    "existing": { "type": "boolean", "description": "True if the phone was already registered" }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing or invalid phone number"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Registration failed (config write or generation error)"
+          }
+        }
+      }
     }
   }
 }

@@ -86,7 +86,7 @@ export type UsersConfig = {
     env?: Record<string, string>;
   };
   defaults?: {
-    /** Session isolation level. Default: "per-peer". */
+    /** Session isolation level. Default: "main" (one session per agent). */
     dmScope?: string;
     /** Default model if a user doesn't specify one. */
     model?: string;

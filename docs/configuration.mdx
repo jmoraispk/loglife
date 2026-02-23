@@ -1,0 +1,56 @@
+---
+title: "Configuration"
+description: "Plugin settings, environment variables, and production deployment config"
+---
+
+## Plugin configuration
+
+The plugin accepts three config values in `openclaw.json` under `plugins.entries.loglife.config`:
+
+| Key | Required | Default | Description |
+|---|---|---|---|
+| `apiKey` | Yes | — | Shared secret for authenticating dashboard requests |
+| `agentId` | No | `"main"` | Which agent's sessions to serve |
+| `multiUserDir` | No | `~/.openclaw/multi-user/` | Directory containing `users.json` and `generated.json` for [multi-user setup](/architecture#multi-user) |
+
+Set values with the OpenClaw CLI:
+
+```bash
+cd ~/openclaw
+./openclaw.mjs config set plugins.entries.loglife.config.apiKey "your-key"
+./openclaw.mjs config set plugins.entries.loglife.config.agentId "main"
+```
+
+## Website environment variables {#website-env}
+
+The Next.js website needs two environment variables to connect to the plugin. Create a `.env` file in `loglife/website/`:
+
+```bash .env
+OPENCLAW_API_URL=http://localhost:18789
+OPENCLAW_API_KEY=<your key from plugin installation>
+```
+
+Start the dev server:
+
+```bash
+cd loglife/website
+pnpm install
+pnpm dev
+```
+
+Open `http://localhost:3000`. The dashboard will now fetch session data through the plugin.
+
+## Production deployment (Vercel)
+
+The website deploys to Vercel automatically on every push to `main`. Set these environment variables in your [Vercel project settings](https://vercel.com/docs/environment-variables):
+
+| Variable | Value |
+|---|---|
+| `OPENCLAW_API_URL` | `https://api.yourdomain.com` (see [Networking](/networking)) |
+| `OPENCLAW_API_KEY` | The key from [plugin installation](/plugin-installation) |
+| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key |
+| `CLERK_SECRET_KEY` | Clerk secret key (server-side only) |
+
+<Info>
+  In production, the `OPENCLAW_API_URL` should point to your HTTPS domain, not `localhost`. See the [Networking guide](/networking) for how to set up Caddy as a reverse proxy with SSL.
+</Info>

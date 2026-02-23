@@ -1,5 +1,4 @@
-import { describe, it } from "node:test";
-import assert from "node:assert/strict";
+import { describe, it, expect } from "vitest";
 import { mapUsageToUsers, aggregateUserUsage } from "./usage.ts";
 import type { UsersConfig } from "./types.ts";
 import type { UsageApiResponse } from "./usage.ts";
@@ -50,18 +49,18 @@ describe("mapUsageToUsers", () => {
 
     const result = mapUsageToUsers(config, usage);
 
-    assert.strictEqual(result.length, 2);
+    expect(result).toHaveLength(2);
 
-    assert.strictEqual(result[0].userId, "alice");
-    assert.strictEqual(result[0].name, "Alice");
-    assert.strictEqual(result[0].model, "anthropic/claude-sonnet-4-20250514");
-    assert.strictEqual(result[0].inputTokens, 12000);
-    assert.strictEqual(result[0].outputTokens, 8000);
-    assert.strictEqual(result[0].totalCost, 0.31);
-    assert.strictEqual(result[0].sessionCount, 5);
+    expect(result[0].userId).toBe("alice");
+    expect(result[0].name).toBe("Alice");
+    expect(result[0].model).toBe("anthropic/claude-sonnet-4-20250514");
+    expect(result[0].inputTokens).toBe(12000);
+    expect(result[0].outputTokens).toBe(8000);
+    expect(result[0].totalCost).toBe(0.31);
+    expect(result[0].sessionCount).toBe(5);
 
-    assert.strictEqual(result[1].userId, "bob");
-    assert.strictEqual(result[1].totalCost, 0.08);
+    expect(result[1].userId).toBe("bob");
+    expect(result[1].totalCost).toBe(0.08);
   });
 
   it("returns zeros for users with no usage data", () => {
@@ -76,19 +75,18 @@ describe("mapUsageToUsers", () => {
 
     const result = mapUsageToUsers(config, usage);
 
-    // Bob has no usage data
-    assert.strictEqual(result[1].userId, "bob");
-    assert.strictEqual(result[1].totalTokens, 0);
-    assert.strictEqual(result[1].totalCost, 0);
-    assert.strictEqual(result[1].sessionCount, 0);
+    expect(result[1].userId).toBe("bob");
+    expect(result[1].totalTokens).toBe(0);
+    expect(result[1].totalCost).toBe(0);
+    expect(result[1].sessionCount).toBe(0);
   });
 
   it("handles empty usage response", () => {
     const result = mapUsageToUsers(config, {});
 
-    assert.strictEqual(result.length, 2);
-    assert.strictEqual(result[0].totalTokens, 0);
-    assert.strictEqual(result[1].totalTokens, 0);
+    expect(result).toHaveLength(2);
+    expect(result[0].totalTokens).toBe(0);
+    expect(result[1].totalTokens).toBe(0);
   });
 
   it("uses default model when user has no model", () => {
@@ -100,7 +98,7 @@ describe("mapUsageToUsers", () => {
     };
 
     const result = mapUsageToUsers(configWithDefaults, {});
-    assert.strictEqual(result[0].model, "anthropic/claude-haiku");
+    expect(result[0].model).toBe("anthropic/claude-haiku");
   });
 
   it("uses user ID as name when name is not provided", () => {
@@ -111,7 +109,7 @@ describe("mapUsageToUsers", () => {
     };
 
     const result = mapUsageToUsers(configNoName, {});
-    assert.strictEqual(result[0].name, "charlie");
+    expect(result[0].name).toBe("charlie");
   });
 
   it("ignores usage data for non-configured agents", () => {
@@ -130,9 +128,8 @@ describe("mapUsageToUsers", () => {
 
     const result = mapUsageToUsers(config, usage);
 
-    // Only Alice and Bob should be in the result
-    assert.strictEqual(result.length, 2);
-    assert.ok(!result.find((u) => u.userId === "unknown-agent"));
+    expect(result).toHaveLength(2);
+    expect(result.find((u) => u.userId === "unknown-agent")).toBeUndefined();
   });
 });
 
@@ -145,18 +142,18 @@ describe("aggregateUserUsage", () => {
 
     const result = aggregateUserUsage(userUsages);
 
-    assert.strictEqual(result.totalUsers, 2);
-    assert.strictEqual(result.totalTokens, 25000);
-    assert.strictEqual(result.totalCost, 0.39);
-    assert.strictEqual(result.totalSessions, 7);
+    expect(result.totalUsers).toBe(2);
+    expect(result.totalTokens).toBe(25000);
+    expect(result.totalCost).toBe(0.39);
+    expect(result.totalSessions).toBe(7);
   });
 
   it("handles empty array", () => {
     const result = aggregateUserUsage([]);
 
-    assert.strictEqual(result.totalUsers, 0);
-    assert.strictEqual(result.totalTokens, 0);
-    assert.strictEqual(result.totalCost, 0);
-    assert.strictEqual(result.totalSessions, 0);
+    expect(result.totalUsers).toBe(0);
+    expect(result.totalTokens).toBe(0);
+    expect(result.totalCost).toBe(0);
+    expect(result.totalSessions).toBe(0);
   });
 });

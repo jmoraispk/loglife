@@ -140,6 +140,16 @@ export default function DashboardPage() {
       });
       const data = await res.json();
       if (res.ok && data.verified) {
+        // Register the user in OpenClaw so they can message back
+        try {
+          await fetch("/api/register", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ phone: phoneNumber }),
+          });
+        } catch {
+          // Registration is best-effort; verification already succeeded
+        }
         setVerifyFeedback({ type: "success", text: "Verified! Your WhatsApp is connected." });
         await user.reload();
       } else {
