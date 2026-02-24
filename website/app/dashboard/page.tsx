@@ -508,9 +508,13 @@ export default function DashboardPage() {
           </div>
           <Link
             href="/logs?from=dashboard"
-            className="px-4 py-2 rounded-lg bg-slate-800/80 border border-slate-700/80 text-sm font-medium text-slate-100 hover:bg-slate-700/80 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800/80 border border-slate-700/80 text-sm font-medium text-slate-100 hover:bg-slate-700/80 transition-colors"
           >
-            View All Logs -&gt;
+            View All Logs
+            <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
           </Link>
         </div>
 

@@ -43,7 +43,7 @@ export default function LogsPage() {
   return (
     <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        <section className="space-y-3">
+        <section>
           <div className="flex items-center gap-2 text-sm text-slate-400">
             <Link href="/dashboard" className="hover:text-slate-200 transition-colors">
               Dashboard
@@ -51,9 +51,6 @@ export default function LogsPage() {
             <span>/</span>
             <span className="text-slate-200">Logs</span>
           </div>
-          <Link href="/dashboard" className="inline-flex items-center text-sm text-emerald-400 hover:text-emerald-300 transition-colors">
-            &larr; Back to Dashboard
-          </Link>
         </section>
 
         <section className="space-y-2">
