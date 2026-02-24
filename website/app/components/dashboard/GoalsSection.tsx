@@ -72,11 +72,6 @@ const MOCK_GOALS: Goal[] = [
 
 type SortMode = "streak" | "needs-work";
 
-const SORT_OPTIONS: { id: SortMode; label: string }[] = [
-  // { id: "streak", label: "🔥 Top Streaks" },
-  // { id: "needs-work", label: "⚠️ Needs Work" },
-];
-
 function sortGoals(goals: Goal[], mode: SortMode): Goal[] {
   return [...goals].sort((a, b) =>
     mode === "streak"
@@ -100,7 +95,7 @@ function computeStats(goals: Goal[]) {
 // ─── GoalsSection ─────────────────────────────────────────────────────────────
 
 export default function GoalsSection() {
-  const [sortMode, setSortMode] = useState<SortMode>("streak");
+  const [sortMode] = useState<SortMode>("streak");
 
   const sorted = useMemo(() => sortGoals(MOCK_GOALS, sortMode), [sortMode]);
   const stats = useMemo(() => computeStats(MOCK_GOALS), []);

@@ -21,7 +21,7 @@ export default function AnimatedProgressBar({ activeMappingStep }: AnimatedProgr
         />
       </div>
 
-      <p className="mt-2 text-[10px] text-slate-500">"5h deep work" mapped to today&apos;s work target</p>
+      <p className="mt-2 text-[10px] text-slate-500">&ldquo;5h deep work&rdquo; mapped to today&apos;s work target</p>
     </div>
   );
 }

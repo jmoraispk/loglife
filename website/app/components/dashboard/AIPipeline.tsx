@@ -65,16 +65,16 @@ export default function AIPipeline({
   const [activeMappingStep, setActiveMappingStep] = useState(0);
 
   useEffect(() => {
-    if (!isActive) {
-      setActiveMappingStep(0);
-      return;
-    }
+    if (!isActive) return;
 
     const id = setInterval(() => {
       setActiveMappingStep((prev) => (prev + 1) % 4);
     }, 1800);
 
-    return () => clearInterval(id);
+    return () => {
+      clearInterval(id);
+      setActiveMappingStep(0);
+    };
   }, [isActive]);
 
   return (
