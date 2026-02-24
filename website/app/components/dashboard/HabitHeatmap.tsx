@@ -228,7 +228,7 @@ export default function HabitHeatmap({
               </p>
             </div>
             <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Avg score</p>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Avg.</p>
               <p className="text-base font-bold text-white mt-1">
                 {(() => {
                   const activeDays = data.filter((d) => d.value > 0);
@@ -240,7 +240,7 @@ export default function HabitHeatmap({
               </p>
             </div>
             <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Best day</p>
+              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Best</p>
               <p className="text-base font-bold text-emerald-400 mt-1">
                 {Math.max(...data.map((d) => d.value))}
                 <span className="text-sm font-normal text-slate-500 ml-0.5">%</span>
