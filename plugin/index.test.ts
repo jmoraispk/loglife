@@ -623,10 +623,10 @@ describe("POST /loglife/register handler", () => {
     expect(body.registered).toBe(true);
     expect(body.userId).toBeDefined();
 
-    // Verify users.json and generated.json were written
-    expect(mockWriteFileSync).toHaveBeenCalledTimes(2);
-    // Verify openclaw.json was touched for hot-reload
-    expect(mockUtimesSync).toHaveBeenCalledTimes(1);
+    // Verify users.json, generated.json, and openclaw.json were written
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(3);
+    // utimesSync no longer used — openclaw.json is written directly
+    expect(mockUtimesSync).not.toHaveBeenCalled();
   });
 
   it("uses name to derive user ID", async () => {

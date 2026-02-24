@@ -446,9 +446,25 @@ const plugin = {
           const generated = generateConfig(usersConfig);
           writeFileSync(generatedJsonPath, JSON.stringify(generated, null, 2) + "\n");
 
+          // Merge generated config directly into openclaw.json.
+          // We can't rely on $include because the gateway flattens it on hot-reload.
           if (existsSync(openclawJsonPath)) {
-            const now = new Date();
-            utimesSync(openclawJsonPath, now, now);
+            const ocRaw = JSON.parse(readFileSync(openclawJsonPath, "utf-8"));
+
+            ocRaw.agents = { ...ocRaw.agents, list: generated.agents.list };
+            ocRaw.bindings = generated.bindings;
+            ocRaw.session = { ...ocRaw.session, ...generated.session };
+
+            if (!ocRaw.channels) ocRaw.channels = {};
+            for (const [ch, chCfg] of Object.entries(generated.channels as Record<string, Record<string, unknown>>)) {
+              ocRaw.channels[ch] = { ...ocRaw.channels[ch], ...chCfg };
+            }
+
+            if (generated.env) {
+              ocRaw.env = { ...ocRaw.env, ...generated.env };
+            }
+
+            writeFileSync(openclawJsonPath, JSON.stringify(ocRaw, null, 2) + "\n");
           }
 
           api.logger.info(`Registered user "${userId}" (${phone})`);

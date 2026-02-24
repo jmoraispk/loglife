@@ -48,13 +48,35 @@ else
   "$OPENCLAW_BIN" config set plugins.entries.loglife.config.apiKey "$API_KEY"
 fi
 
-# --- 4. Restart the gateway ---
-echo "[4/5] Restarting gateway..."
+# --- 4. Wire up multi-user config include ---
+echo "[4/6] Wiring multi-user config into openclaw.json..."
+OPENCLAW_JSON="$HOME/.openclaw/openclaw.json"
+node -e '
+const fs = require("fs");
+const cfgPath = process.argv[1];
+const cfg = JSON.parse(fs.readFileSync(cfgPath, "utf-8"));
+
+if (!cfg["$include"]) cfg["$include"] = [];
+const inc = "multi-user/generated.json";
+if (!cfg["$include"].includes(inc)) cfg["$include"].push(inc);
+
+// Let the generated config manage dmPolicy and allowFrom
+if (cfg.channels?.whatsapp) {
+  delete cfg.channels.whatsapp.dmPolicy;
+  delete cfg.channels.whatsapp.allowFrom;
+}
+
+fs.writeFileSync(cfgPath, JSON.stringify(cfg, null, 2) + "\n");
+' "$OPENCLAW_JSON"
+echo "  Added \$include for multi-user/generated.json"
+
+# --- 5. Restart the gateway ---
+echo "[5/6] Restarting gateway..."
 "$OPENCLAW_BIN" gateway restart 2>/dev/null || "$OPENCLAW_BIN" gateway start 2>/dev/null || true
 sleep 5
 
-# --- 5. Health check ---
-echo "[5/5] Running health check..."
+# --- 6. Health check ---
+echo "[6/6] Running health check..."
 SESSIONS_STATUS=$(curl -sf -o /dev/null -w "%{http_code}" \
   -H "Authorization: Bearer $API_KEY" \
   "http://localhost:18789/loglife/sessions?phone=healthcheck" 2>/dev/null || echo "000")
