@@ -122,7 +122,8 @@ export default function AccountPage() {
 
   const handleWhatsAppDisconnect = async () => {
     try {
-      const { whatsappPhone, ...rest } = (user!.unsafeMetadata ?? {}) as Record<string, unknown>;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { whatsappPhone: _removed, ...rest } = (user!.unsafeMetadata ?? {}) as Record<string, unknown>;
       await user!.update({ unsafeMetadata: rest });
     } catch {
       alert("Failed to disconnect WhatsApp. Please try again.");

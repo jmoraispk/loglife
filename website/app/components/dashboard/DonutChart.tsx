@@ -24,15 +24,16 @@ export default function DonutChart({ data, size = 216, strokeWidth = 20 }: Donut
   const circumference = 2 * Math.PI * radius;
   const total = data.reduce((sum, d) => sum + d.value, 0);
 
-  let cumulativeAngle = -90;
-
-  const segments = data.map((item) => {
-    const percent = item.value / total;
-    const dashLength = Math.max(0, percent * circumference - SEGMENT_GAP);
-    const rotation = cumulativeAngle;
-    cumulativeAngle += percent * 360;
-    return { ...item, dashLength, rotation, percent };
-  });
+  const segments = data.reduce<Array<CategoryData & { dashLength: number; rotation: number; percent: number }>>(
+    (acc, item) => {
+      const percent = item.value / total;
+      const dashLength = Math.max(0, percent * circumference - SEGMENT_GAP);
+      const prevAngle = acc.length > 0 ? acc[acc.length - 1].rotation + acc[acc.length - 1].percent * 360 : -90;
+      acc.push({ ...item, dashLength, rotation: prevAngle, percent });
+      return acc;
+    },
+    []
+  );
 
   const activeSegment = hovered ? segments.find((s) => s.label === hovered) : null;
 

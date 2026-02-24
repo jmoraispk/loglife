@@ -28,7 +28,8 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 }
 
 function Hero() {
-  const { openWidget } = useWhatsAppWidget();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { openWidget: _unused } = useWhatsAppWidget();
 
   return (
     <section id="hero" className="relative isolate overflow-hidden pt-16 pb-24 min-h-screen flex items-center dot-grid">
