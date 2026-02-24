@@ -90,14 +90,14 @@ function buildChannelsConfig(
       // Discord, Slack, Google Chat: dm.allowFrom + dm.policy
       channels[channel] = {
         dm: {
-          policy: "open",
+          policy: "allowlist",
           allowFrom: allowList,
         },
       };
     } else {
       // WhatsApp, Telegram, Signal, iMessage, etc.: top-level allowFrom + dmPolicy
       channels[channel] = {
-        dmPolicy: "open",
+        dmPolicy: "allowlist",
         allowFrom: allowList,
       };
     }
