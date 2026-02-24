@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import DonutChart, { CategoryData } from "./DonutChart";
 import ActivityList, { Activity } from "./ActivityList";
 
@@ -19,6 +20,8 @@ const MOCK_ACTIVITIES: Activity[] = [
 ];
 
 export default function TodayOverview() {
+  const selectedDate = "2026-02-23";
+
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     month: "long",
@@ -33,9 +36,17 @@ export default function TodayOverview() {
           <h2 className="text-base font-semibold text-white">Today&apos;s Overview</h2>
           <p className="text-sm text-slate-400 mt-1">{today}</p>
         </div>
-        <span className="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20 tracking-wide">
-          Today
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="px-3 py-1 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-semibold border border-emerald-500/20 tracking-wide">
+            Today
+          </span>
+          <Link
+            href={`/logs?date=${selectedDate}&from=dashboard`}
+            className="px-3 py-1 rounded-lg bg-slate-800/70 border border-slate-700/80 text-xs font-semibold text-slate-200 hover:bg-slate-700/80 transition-colors"
+          >
+            View All Logs -&gt;
+          </Link>
+        </div>
       </div>
 
       {/* Card body */}
@@ -43,13 +54,23 @@ export default function TodayOverview() {
         {/* Left: Donut chart */}
         <div>
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-5">Time Distribution</p>
-          <DonutChart data={MOCK_CATEGORIES} />
+          <DonutChart
+            data={MOCK_CATEGORIES}
+            getCategoryHref={(label) => `/logs?category=${encodeURIComponent(label.toLowerCase())}&from=dashboard`}
+          />
         </div>
 
         {/* Right: Activity list */}
         <div>
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-5">Today&apos;s Activities</p>
-          <ActivityList activities={MOCK_ACTIVITIES} />
+          <ActivityList
+            activities={MOCK_ACTIVITIES}
+            getActivityHref={(activity) =>
+              `/logs?date=${selectedDate}&highlight=${encodeURIComponent(activity.title)}&category=${encodeURIComponent(
+                activity.category.toLowerCase()
+              )}&from=dashboard`
+            }
+          />
         </div>
       </div>
     </div>

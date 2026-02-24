@@ -6,7 +6,6 @@ import Link from "next/link";
 import TodayOverview from "@/app/components/dashboard/TodayOverview";
 import HabitHeatmap from "@/app/components/dashboard/HabitHeatmap";
 import GoalsSection from "@/app/components/dashboard/GoalsSection";
-import ActivityLogsSection from "@/app/components/dashboard/ActivityLogsSection";
 import { useState, useRef, useEffect, useCallback } from "react";
 
 interface WhatsAppSession {
@@ -501,8 +500,19 @@ export default function DashboardPage() {
         {/* Goals & Progress */}
         <GoalsSection />
 
-        {/* Activity Logs & Classification */}
-        <ActivityLogsSection />
+        {/* Activity Logs entry point */}
+        <div className="mb-8 bg-slate-900/60 border border-slate-800/60 rounded-2xl px-6 py-4 flex items-center justify-between gap-4">
+          <div>
+            <h2 className="text-base font-semibold text-white">Activity Logs</h2>
+            <p className="text-sm text-slate-400 mt-1">Jump from your overview into detailed logs exploration</p>
+          </div>
+          <Link
+            href="/logs?from=dashboard"
+            className="px-4 py-2 rounded-lg bg-slate-800/80 border border-slate-700/80 text-sm font-medium text-slate-100 hover:bg-slate-700/80 transition-colors"
+          >
+            View All Logs -&gt;
+          </Link>
+        </div>
 
         {/* Main Content */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export interface CategoryData {
   label: string;
@@ -12,12 +13,14 @@ interface DonutChartProps {
   data: CategoryData[];
   size?: number;
   strokeWidth?: number;
+  getCategoryHref?: (label: string) => string;
 }
 
 const SEGMENT_GAP = 4;
 
-export default function DonutChart({ data, size = 216, strokeWidth = 20 }: DonutChartProps) {
+export default function DonutChart({ data, size = 216, strokeWidth = 20, getCategoryHref }: DonutChartProps) {
   const [hovered, setHovered] = useState<string | null>(null);
+  const router = useRouter();
 
   const center = size / 2;
   const radius = (size - strokeWidth) / 2;
@@ -36,6 +39,10 @@ export default function DonutChart({ data, size = 216, strokeWidth = 20 }: Donut
   );
 
   const activeSegment = hovered ? segments.find((s) => s.label === hovered) : null;
+
+  const handleCategoryClick = (label: string) => {
+    router.push(getCategoryHref ? getCategoryHref(label) : `/logs?category=${encodeURIComponent(label.toLowerCase())}`);
+  };
 
   return (
     <div className="flex items-center gap-8">
@@ -72,6 +79,7 @@ export default function DonutChart({ data, size = 216, strokeWidth = 20 }: Donut
               }}
               onMouseEnter={() => setHovered(seg.label)}
               onMouseLeave={() => setHovered(null)}
+              onClick={() => handleCategoryClick(seg.label)}
             />
           ))}
         </svg>
@@ -105,6 +113,7 @@ export default function DonutChart({ data, size = 216, strokeWidth = 20 }: Donut
             className="cursor-pointer group"
             onMouseEnter={() => setHovered(seg.label)}
             onMouseLeave={() => setHovered(null)}
+            onClick={() => handleCategoryClick(seg.label)}
           >
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2.5">
