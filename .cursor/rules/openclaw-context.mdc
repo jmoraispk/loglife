@@ -1,0 +1,123 @@
+---
+description: Context for the OpenClaw project at ~/openclaw — commands, structure, tech stack, and conventions.
+alwaysApply: true
+---
+
+# OpenClaw Project Context
+
+OpenClaw lives at `~/openclaw`. It is a separate repository from this workspace.
+All commands below must be run from `~/openclaw` (use `working_directory` or `cd ~/openclaw`).
+
+## What It Is
+
+Multi-channel personal AI assistant gateway (Node.js/TypeScript). Connects messaging platforms (WhatsApp, Telegram, Slack, Discord, Signal, iMessage, etc.) to an AI agent.
+
+## Package Manager
+
+**pnpm** (v10.23.0, declared via `packageManager` in `package.json`).
+Always use `pnpm`, never `npm` or `yarn`.
+
+## Repository Structure
+
+```
+openclaw/
+├── src/              # Core source (gateway, agents, CLI, channels, config, infra)
+├── extensions/       # Channel/feature plugins (whatsapp, telegram, discord, slack, etc.)
+├── ui/               # Control UI (Lit + Vite web dashboard)
+├── packages/         # Sub-packages (clawdbot, moltbot)
+├── apps/             # Native apps (macos, ios, android)
+├── scripts/          # Build/dev/test helper scripts
+├── skills/           # Bundled skills
+├── docs/             # Documentation (Mintlify)
+├── dist/             # Built output
+├── openclaw.mjs      # CLI entry point
+├── tsdown.config.ts  # Bundler config
+├── tsconfig.json     # TypeScript config (experimentalDecorators: true)
+└── vitest.*.config.ts # Test configs (unit, e2e, live, gateway, extensions)
+```
+
+## Tech Stack
+
+| Layer          | Technology                        |
+|----------------|-----------------------------------|
+| Language       | TypeScript (strict)               |
+| Runtime        | Node.js >= 22                     |
+| Bundler        | tsdown                            |
+| Formatter      | oxfmt                             |
+| Linter         | oxlint (type-aware)               |
+| Type checker   | TypeScript / tsgo (native preview)|
+| Test runner    | Vitest                            |
+| UI framework   | Lit (Control UI)                  |
+| UI bundler     | Vite                              |
+| Package manager| pnpm 10.23.0                      |
+
+## Commands (run from ~/openclaw)
+
+### Setup
+```bash
+pnpm install
+pnpm ui:install       # Install UI deps (auto-runs on ui:build)
+```
+
+### Build
+```bash
+pnpm build            # Full production build
+pnpm ui:build         # Build the Control UI
+```
+
+### Development
+```bash
+pnpm dev              # Run node via tsx (auto-reload)
+pnpm gateway:dev      # Gateway in dev mode (skips channels)
+pnpm gateway:watch    # Watch mode with auto-reload on TS changes
+pnpm ui:dev           # Vite dev server for Control UI
+pnpm tui              # Terminal UI
+pnpm tui:dev          # TUI in dev profile
+```
+
+### Running CLI from Source
+```bash
+pnpm openclaw                           # Run CLI via tsx
+pnpm openclaw onboard --install-daemon  # Setup wizard
+pnpm openclaw gateway --port 18789 --verbose
+pnpm openclaw agent --message "Hello"
+pnpm openclaw doctor                    # Diagnose config issues
+```
+
+### Testing
+```bash
+pnpm test             # All tests (parallel)
+pnpm test:fast        # Unit tests only (fastest)
+pnpm test:e2e         # End-to-end tests
+pnpm test:live        # Live tests (needs OPENCLAW_LIVE_TEST=1)
+pnpm test:watch       # Vitest watch mode
+pnpm test:coverage    # Unit tests with coverage
+pnpm test:ui          # Control UI tests
+```
+
+### Linting / Formatting / Type-checking
+```bash
+pnpm check            # format:check + tsgo + lint (full CI check)
+pnpm lint             # oxlint with type-aware rules
+pnpm lint:fix         # Auto-fix lint + reformat
+pnpm format           # Format code (oxfmt --write)
+pnpm format:check     # Check formatting only
+```
+
+### Pre-PR Checklist
+```bash
+pnpm build && pnpm check && pnpm test
+```
+
+### Docs
+```bash
+pnpm docs:dev         # Local Mintlify docs dev server
+pnpm check:docs       # Check docs formatting + links
+```
+
+## Key Conventions
+
+- UI uses Lit with **legacy decorators** (`@state()`, `@property()`), not standard `accessor` decorators.
+- `tsconfig.json` has `experimentalDecorators: true` and `useDefineForClassFields: false`.
+- Entry point is `openclaw.mjs` which delegates to `dist/index.js` (or tsx in dev).
+- Extensions are self-contained plugins under `extensions/` with their own `package.json`.
