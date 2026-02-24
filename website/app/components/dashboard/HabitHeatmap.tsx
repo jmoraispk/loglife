@@ -230,7 +230,12 @@ export default function HabitHeatmap({
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Avg score</p>
               <p className="text-base font-bold text-white mt-1">
-                {Math.round(data.filter((d) => d.value > 0).reduce((s, d) => s + d.value, 0) / data.filter((d) => d.value > 0).length)}
+                {(() => {
+                  const activeDays = data.filter((d) => d.value > 0);
+                  return activeDays.length > 0
+                    ? Math.round(activeDays.reduce((s, d) => s + d.value, 0) / activeDays.length)
+                    : 0;
+                })()}
                 <span className="text-sm font-normal text-slate-500 ml-0.5">%</span>
               </p>
             </div>
