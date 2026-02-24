@@ -1,6 +1,7 @@
 ---
 description: Context for the OpenClaw project at ~/openclaw — commands, structure, tech stack, and conventions.
-alwaysApply: true
+globs: plugin/**
+alwaysApply: false
 ---
 
 # OpenClaw Project Context
