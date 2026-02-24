@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export interface Activity {
   id: string;
   title: string;
@@ -8,6 +10,7 @@ export interface Activity {
 
 interface ActivityListProps {
   activities: Activity[];
+  getActivityHref?: (activity: Activity) => string;
 }
 
 const CATEGORY_STYLES: Record<Activity["category"], string> = {
@@ -16,27 +19,32 @@ const CATEGORY_STYLES: Record<Activity["category"], string> = {
   Relationships: "bg-amber-500/15 text-amber-300",
 };
 
-export default function ActivityList({ activities }: ActivityListProps) {
+export default function ActivityList({ activities, getActivityHref }: ActivityListProps) {
   return (
     <div className="space-y-2">
       {activities.map((activity) => (
-        <div
+        <Link
           key={activity.id}
-          className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-800/40
-            hover:border-slate-700/60 hover:bg-slate-800/30 hover:scale-[1.01] hover:-translate-y-px
-            transition-all duration-150 cursor-default"
+          href={getActivityHref ? getActivityHref(activity) : "/logs"}
+          className="block"
         >
-          <span className="text-base flex-shrink-0 select-none">{activity.icon}</span>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm text-slate-100 font-medium truncate">{activity.title}</p>
-            <p className="text-xs text-slate-500 mt-0.5">{activity.time}</p>
-          </div>
-          <span
-            className={`text-xs font-medium px-2.5 py-0.5 rounded-lg flex-shrink-0 ${CATEGORY_STYLES[activity.category]}`}
+          <div
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-950/50 border border-slate-800/40
+              hover:border-slate-700/60 hover:bg-slate-800/30 hover:scale-[1.01] hover:-translate-y-px
+              transition-all duration-150 cursor-pointer"
           >
-            {activity.category}
-          </span>
-        </div>
+            <span className="text-base flex-shrink-0 select-none">{activity.icon}</span>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm text-slate-100 font-medium truncate">{activity.title}</p>
+              <p className="text-xs text-slate-500 mt-0.5">{activity.time}</p>
+            </div>
+            <span
+              className={`text-xs font-medium px-2.5 py-0.5 rounded-lg flex-shrink-0 ${CATEGORY_STYLES[activity.category]}`}
+            >
+              {activity.category}
+            </span>
+          </div>
+        </Link>
       ))}
     </div>
   );
