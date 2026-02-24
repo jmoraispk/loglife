@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import RawInputCard from "./RawInputCard";
 import AIProcessingCard from "./AIProcessingCard";
 import StructuredOutputCard from "./StructuredOutputCard";
@@ -49,6 +52,16 @@ function FlowArrow() {
 // ─── AIPipeline ───────────────────────────────────────────────────────────────
 
 export default function AIPipeline() {
+  const [activeMappingStep, setActiveMappingStep] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setActiveMappingStep((prev) => (prev + 1) % 4);
+    }, 1800);
+
+    return () => clearInterval(id);
+  }, []);
+
   return (
     <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl mb-8 animate-fade-in-up">
       {/* Header */}
@@ -67,11 +80,11 @@ export default function AIPipeline() {
 
       {/* 3-step pipeline body */}
       <div className="p-6 flex flex-col lg:flex-row items-stretch gap-3">
-        <RawInputCard />
+        <RawInputCard activeMappingStep={activeMappingStep} />
         <FlowArrow />
         <AIProcessingCard />
         <FlowArrow />
-        <StructuredOutputCard />
+        <StructuredOutputCard activeMappingStep={activeMappingStep} />
       </div>
 
       {/* Connection footer — links output to dashboard sections */}
