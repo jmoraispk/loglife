@@ -73,8 +73,8 @@ const MOCK_GOALS: Goal[] = [
 type SortMode = "streak" | "needs-work";
 
 const SORT_OPTIONS: { id: SortMode; label: string }[] = [
-  { id: "streak", label: "🔥 Top Streaks" },
-  { id: "needs-work", label: "⚠️ Needs Work" },
+  // { id: "streak", label: "🔥 Top Streaks" },
+  // { id: "needs-work", label: "⚠️ Needs Work" },
 ];
 
 function sortGoals(goals: Goal[], mode: SortMode): Goal[] {
@@ -114,7 +114,7 @@ export default function GoalsSection() {
           <p className="text-sm text-slate-400 mt-1">{MOCK_GOALS.length} active goals this month</p>
         </div>
 
-        {/* Sort toggle */}
+        {/* Sort toggle – commented out for now
         <div className="flex items-center gap-0.5 bg-slate-950/60 border border-slate-800/50 rounded-xl p-1">
           {SORT_OPTIONS.map((opt) => (
             <button
@@ -130,6 +130,7 @@ export default function GoalsSection() {
             </button>
           ))}
         </div>
+        */}
       </div>
 
       {/* Goal cards grid */}
@@ -163,6 +164,7 @@ export default function GoalsSection() {
               <span className="text-sm font-normal text-slate-500 ml-1">days</span>
             </p>
           </div>
+          {/* Needs attention – commented out for now
           {stats.struggling > 0 && (
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Needs attention</p>
@@ -172,6 +174,7 @@ export default function GoalsSection() {
               </p>
             </div>
           )}
+          */}
         </div>
         <p className="text-xs text-slate-600 italic">last 7 days shown per goal</p>
       </div>
