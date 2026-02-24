@@ -1,38 +1,29 @@
-// ─── Mock JSON output ─────────────────────────────────────────────────────────
+"use client";
+
+import { useMemo, useState } from "react";
+import DashboardPreview from "./DashboardPreview";
+
+type StructuredOutputCardProps = {
+  activeMappingStep: number;
+};
 
 const MOCK_JSON = `{
   "activities": [
-    { "text": "Morning gym",         "category": "Health"        },
-    { "text": "5h deep work",        "category": "Work",
-      "duration": "5h"                                           },
+    { "text": "Morning gym", "category": "Health" },
+    { "text": "5h deep work", "category": "Work", "duration": "5h" },
     { "text": "Dinner with parents", "category": "Relationships" }
   ],
-  "summary": {
-    "health": 30,
-    "work": 50,
-    "relationships": 20
-  }
+  "summary": { "health": 30, "work": 50, "relationships": 20 }
 }`;
 
-// ─── Simple JSON syntax highlighter (no library) ──────────────────────────────
+export default function StructuredOutputCard({ activeMappingStep }: StructuredOutputCardProps) {
+  const [viewMode, setViewMode] = useState<"user" | "developer">("user");
 
-function syntaxHighlight(json: string): string {
-  return (
-    json
-      // Keys: "key":
-      .replace(/"([^"]+)"(\s*:)/g, '<span style="color:#7dd3fc">"$1"</span>$2')
-      // String values: : "value"
-      .replace(/:\s*"([^"]+)"/g, ': <span style="color:#86efac">"$1"</span>')
-      // Numbers: : 30
-      .replace(/:\s*(\d+)/g, ': <span style="color:#fcd34d">$1</span>')
-      // Braces and brackets
-      .replace(/[{}\[\]]/g, '<span style="color:#94a3b8">$&</span>')
+  const stepTitle = useMemo(
+    () => (viewMode === "user" ? "Dashboard Update" : "Structured Output"),
+    [viewMode],
   );
-}
 
-// ─── StructuredOutputCard ─────────────────────────────────────────────────────
-
-export default function StructuredOutputCard() {
   return (
     <div className="flex-1 flex flex-col gap-3 animate-fade-in-up" style={{ animationDelay: "0.55s" }}>
       {/* Step label */}
@@ -41,27 +32,50 @@ export default function StructuredOutputCard() {
           3
         </span>
         <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest">
-          Structured Output
+          {stepTitle}
         </span>
       </div>
 
       {/* Card */}
       <div className="flex-1 bg-slate-950/70 border border-emerald-900/25 rounded-2xl p-5 overflow-hidden flex flex-col">
-        {/* Fake code-editor chrome */}
-        <div className="flex items-center justify-between mb-4 flex-shrink-0">
-          <div className="flex items-center gap-1.5">
-            <div className="w-2.5 h-2.5 rounded-full bg-rose-500/60" />
-            <div className="w-2.5 h-2.5 rounded-full bg-amber-500/60" />
-            <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/60" />
+        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
+          <p className="text-xs text-slate-400">
+            {viewMode === "user" ? "Live Preview" : "Developer View"}
+          </p>
+
+          <div className="inline-flex rounded-lg border border-slate-700/80 bg-slate-900/70 p-0.5">
+            <button
+              type="button"
+              onClick={() => setViewMode("user")}
+              className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
+                viewMode === "user"
+                  ? "bg-violet-500/20 text-violet-200"
+                  : "text-slate-500 hover:text-slate-300"
+              }`}
+            >
+              User View
+            </button>
+            <button
+              type="button"
+              onClick={() => setViewMode("developer")}
+              className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
+                viewMode === "developer"
+                  ? "bg-emerald-500/20 text-emerald-200"
+                  : "text-slate-500 hover:text-slate-300"
+              }`}
+            >
+              Developer View
+            </button>
           </div>
-          <span className="text-[10px] font-mono text-slate-600">output.json</span>
         </div>
 
-        {/* Highlighted JSON */}
-        <pre
-          className="text-[11.5px] font-mono leading-[1.85] text-slate-400 overflow-x-auto flex-1"
-          dangerouslySetInnerHTML={{ __html: syntaxHighlight(MOCK_JSON) }}
-        />
+        {viewMode === "user" ? (
+          <DashboardPreview activeMappingStep={activeMappingStep} />
+        ) : (
+          <pre className="text-[11.5px] font-mono leading-[1.8] text-slate-400 overflow-x-auto flex-1">
+            {MOCK_JSON}
+          </pre>
+        )}
       </div>
     </div>
   );

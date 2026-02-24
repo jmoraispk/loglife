@@ -4,7 +4,43 @@
 const MOCK_MESSAGE =
   "Had a great day. Went to the gym in the morning, worked 5 hours on the project proposal, and had dinner with my parents.";
 
-export default function RawInputCard() {
+const ACTIVE_PHRASES = [
+  "gym in the morning",
+  "gym in the morning",
+  "worked 5 hours",
+  "dinner with my parents",
+];
+
+type RawInputCardProps = {
+  activeMappingStep?: number;
+};
+
+function renderHighlightedMessage(activeMappingStep = 0) {
+  const phrase = ACTIVE_PHRASES[activeMappingStep] ?? ACTIVE_PHRASES[0];
+  const phraseIndex = MOCK_MESSAGE.toLowerCase().indexOf(phrase.toLowerCase());
+
+  if (phraseIndex === -1) {
+    return MOCK_MESSAGE;
+  }
+
+  const before = MOCK_MESSAGE.slice(0, phraseIndex);
+  const match = MOCK_MESSAGE.slice(phraseIndex, phraseIndex + phrase.length);
+  const after = MOCK_MESSAGE.slice(phraseIndex + phrase.length);
+
+  return (
+    <>
+      {before}
+      <span
+        className="bg-violet-500/20 text-violet-200 border border-violet-400/30 rounded px-1 py-0.5 transition-all duration-500"
+      >
+        {match}
+      </span>
+      {after}
+    </>
+  );
+}
+
+export default function RawInputCard({ activeMappingStep = 0 }: RawInputCardProps) {
   return (
     <div className="flex-1 flex flex-col gap-3 animate-fade-in-up" style={{ animationDelay: "0.1s" }}>
       {/* Step label */}
@@ -35,7 +71,7 @@ export default function RawInputCard() {
         {/* Message bubble */}
         <div className="bg-[#25D366]/5 border border-[#25D366]/10 rounded-xl rounded-tl-none px-4 py-3.5">
           <p className="text-sm text-slate-300 leading-relaxed">
-            &ldquo;{MOCK_MESSAGE}&rdquo;
+            &ldquo;{renderHighlightedMessage(activeMappingStep)}&rdquo;
           </p>
         </div>
 
