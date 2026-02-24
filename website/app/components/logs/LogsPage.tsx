@@ -28,7 +28,7 @@ export default function LogsPage() {
       return MOCK_LOGS.slice(0, selectedRecentCount);
     }
     return MOCK_LOGS;
-  }, [view, selectedRecentCount, selectedDay]);
+  }, [view, selectedRecentCount]);
 
   const contextBannerText = useMemo(() => {
     if (selectedDate) {
