@@ -2,6 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import AIPipelineDemo from "../components/sections/AIPipelineDemo";
 
 // Channel icons as SVG components
 const ChannelIcons = {
@@ -302,6 +303,8 @@ export default function FeaturesPage() {
             ))}
           </div>
         </section>
+
+        <AIPipelineDemo />
 
         {/* Category Comparison Table */}
         <section className="mb-24 animate-slide-up" style={{ animationDelay: "0.4s" }}>

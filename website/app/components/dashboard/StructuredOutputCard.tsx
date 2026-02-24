@@ -5,6 +5,7 @@ import DashboardPreview from "./DashboardPreview";
 
 type StructuredOutputCardProps = {
   activeMappingStep: number;
+  allowDeveloperView?: boolean;
 };
 
 const MOCK_JSON = `{
@@ -16,12 +17,18 @@ const MOCK_JSON = `{
   "summary": { "health": 30, "work": 50, "relationships": 20 }
 }`;
 
-export default function StructuredOutputCard({ activeMappingStep }: StructuredOutputCardProps) {
+export default function StructuredOutputCard({
+  activeMappingStep,
+  allowDeveloperView = true,
+}: StructuredOutputCardProps) {
   const [viewMode, setViewMode] = useState<"user" | "developer">("user");
 
   const stepTitle = useMemo(
-    () => (viewMode === "user" ? "Dashboard Update" : "Structured Output"),
-    [viewMode],
+    () => {
+      if (!allowDeveloperView) return "Dashboard Update";
+      return viewMode === "user" ? "Dashboard Update" : "Structured Output";
+    },
+    [allowDeveloperView, viewMode],
   );
 
   return (
@@ -43,33 +50,35 @@ export default function StructuredOutputCard({ activeMappingStep }: StructuredOu
             {viewMode === "user" ? "Live Preview" : "Developer View"}
           </p>
 
-          <div className="inline-flex rounded-lg border border-slate-700/80 bg-slate-900/70 p-0.5">
-            <button
-              type="button"
-              onClick={() => setViewMode("user")}
-              className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
-                viewMode === "user"
-                  ? "bg-violet-500/20 text-violet-200"
-                  : "text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              User View
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode("developer")}
-              className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
-                viewMode === "developer"
-                  ? "bg-emerald-500/20 text-emerald-200"
-                  : "text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              Developer View
-            </button>
-          </div>
+          {allowDeveloperView && (
+            <div className="inline-flex rounded-lg border border-slate-700/80 bg-slate-900/70 p-0.5">
+              <button
+                type="button"
+                onClick={() => setViewMode("user")}
+                className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
+                  viewMode === "user"
+                    ? "bg-violet-500/20 text-violet-200"
+                    : "text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                User View
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("developer")}
+                className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-colors ${
+                  viewMode === "developer"
+                    ? "bg-emerald-500/20 text-emerald-200"
+                    : "text-slate-500 hover:text-slate-300"
+                }`}
+              >
+                Developer View
+              </button>
+            </div>
+          )}
         </div>
 
-        {viewMode === "user" ? (
+        {viewMode === "user" || !allowDeveloperView ? (
           <DashboardPreview activeMappingStep={activeMappingStep} />
         ) : (
           <pre className="text-[11.5px] font-mono leading-[1.8] text-slate-400 overflow-x-auto flex-1">

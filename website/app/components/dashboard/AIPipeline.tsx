@@ -5,6 +5,12 @@ import RawInputCard from "./RawInputCard";
 import AIProcessingCard from "./AIProcessingCard";
 import StructuredOutputCard from "./StructuredOutputCard";
 
+type AIPipelineProps = {
+  isActive?: boolean;
+  allowDeveloperView?: boolean;
+  className?: string;
+};
+
 // ─── Arrow between steps (responsive: horizontal on desktop, vertical on mobile)
 
 function FlowArrow() {
@@ -51,19 +57,28 @@ function FlowArrow() {
 
 // ─── AIPipeline ───────────────────────────────────────────────────────────────
 
-export default function AIPipeline() {
+export default function AIPipeline({
+  isActive = true,
+  allowDeveloperView = true,
+  className = "",
+}: AIPipelineProps) {
   const [activeMappingStep, setActiveMappingStep] = useState(0);
 
   useEffect(() => {
+    if (!isActive) {
+      setActiveMappingStep(0);
+      return;
+    }
+
     const id = setInterval(() => {
       setActiveMappingStep((prev) => (prev + 1) % 4);
     }, 1800);
 
     return () => clearInterval(id);
-  }, []);
+  }, [isActive]);
 
   return (
-    <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl mb-8 animate-fade-in-up">
+    <div className={`bg-slate-900/60 border border-slate-800/60 rounded-2xl mb-8 animate-fade-in-up ${className}`}>
       {/* Header */}
       <div className="px-6 py-5 border-b border-slate-800/50 flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -84,7 +99,10 @@ export default function AIPipeline() {
         <FlowArrow />
         <AIProcessingCard />
         <FlowArrow />
-        <StructuredOutputCard activeMappingStep={activeMappingStep} />
+        <StructuredOutputCard
+          activeMappingStep={activeMappingStep}
+          allowDeveloperView={allowDeveloperView}
+        />
       </div>
 
       {/* Connection footer — links output to dashboard sections */}
