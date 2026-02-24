@@ -17,20 +17,26 @@
             "group": "Getting started",
             "pages": [
               "index",
-              "quickstart",
-              "contributing-docs"
+              "quickstart"
             ]
           },
           {
-            "group": "Self-host",
+            "group": "Self-hosting",
             "pages": [
               "self-hosting",
               "plugin-installation",
               "configuration",
-              "networking",
-              "architecture",
+              "networking"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
               "development",
-              "security"
+              "architecture",
+              "security",
+              "ai-rules",
+              "contributing-docs"
             ]
           },
           {
