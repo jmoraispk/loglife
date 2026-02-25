@@ -144,16 +144,6 @@ export default function AccountPage() {
   return (
     <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">
       <div className="max-w-4xl mx-auto">
-        {/* Breadcrumb */}
-        <div className="mb-6">
-          <Link href="/dashboard" className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition-colors">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-            Back to Dashboard
-          </Link>
-        </div>
-
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-2xl font-semibold text-white">Account Settings</h1>
