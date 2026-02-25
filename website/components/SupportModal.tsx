@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 
 type SupportModalProps = {
   isOpen: boolean;
@@ -37,10 +37,10 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
     setError(null);
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     resetState();
     onClose();
-  };
+  }, [onClose]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -91,7 +91,7 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
       document.removeEventListener("keydown", keydownHandler);
       document.body.style.overflow = previousOverflow;
     };
-  }, [isOpen]);
+  }, [isOpen, handleClose]);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
