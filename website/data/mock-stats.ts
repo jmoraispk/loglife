@@ -45,8 +45,8 @@ export const mockDailyStats: StatsPoint[] = Array.from({ length: DAY_COUNT }, (_
   const relationshipsRatio = clamp(1 - workRatio - healthRatio, 0.12, 0.36);
 
   let work = Math.round(total * workRatio);
-  let health = Math.round(total * healthRatio);
-  let relationships = Math.round(total * relationshipsRatio);
+  const health = Math.round(total * healthRatio);
+  const relationships = Math.round(total * relationshipsRatio);
 
   const diff = total - (work + health + relationships);
   work += diff;
