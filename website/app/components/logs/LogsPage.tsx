@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import ClassificationPanel from "./ClassificationPanel";
 import LogsControlBar from "./LogsControlBar";
@@ -43,16 +42,6 @@ export default function LogsPage() {
   return (
     <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-6">
-        <section>
-          <div className="flex items-center gap-2 text-sm text-slate-400">
-            <Link href="/dashboard" className="hover:text-slate-200 transition-colors">
-              Dashboard
-            </Link>
-            <span>/</span>
-            <span className="text-slate-200">Logs</span>
-          </div>
-        </section>
-
         <section className="space-y-2">
           <h1 className="text-2xl font-semibold text-white">Activity Logs</h1>
           <p className="text-sm text-slate-400">Explore how messages are classified into insights</p>
