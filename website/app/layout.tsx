@@ -7,6 +7,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { WhatsAppWidgetProvider } from "./contexts/WhatsAppWidgetContext";
 import WhatsAppWidget from "./components/WhatsAppWidget";
 import { WebVitals } from "./components/WebVitals";
+import SupportButton from "@/components/SupportButton";
 
 export const metadata: Metadata = {
   title: "LogLife — Effortless Tracking, in Chat",
@@ -92,6 +93,7 @@ export default function RootLayout({
               <ConditionalNavbar />
               <PageWrapper>{children}</PageWrapper>
               <WhatsAppWidget />
+              <SupportButton />
             </WhatsAppWidgetProvider>
           </ThemeProvider>
         </body>
