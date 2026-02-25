@@ -101,8 +101,8 @@ function StatsPanel({
   currentStreak,
 }: StatsPanelProps) {
   return (
-    <aside className="bg-gradient-to-b from-white/5 to-white/[0.02] border border-white/10 backdrop-blur-sm rounded-xl p-4 md:p-5 transition-all duration-200 ease-out hover:-translate-y-px hover:brightness-105">
-      <div className="space-y-4">
+    <aside className="h-full flex flex-col bg-gradient-to-b from-white/5 to-white/[0.02] border border-white/10 backdrop-blur-sm rounded-xl p-4 md:p-5 transition-all duration-200 ease-out hover:-translate-y-px hover:brightness-105">
+      <div className="flex flex-col flex-1 gap-4">
         <div className="space-y-4">
           <h3 className="text-sm font-semibold text-white">Month Snapshot</h3>
           <div className="space-y-4">
@@ -130,7 +130,7 @@ function StatsPanel({
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="flex-1 flex flex-col justify-center space-y-4">
           <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <div className="space-y-3">
             <h4 className="text-[11px] font-medium uppercase tracking-widest text-white/40">Insights</h4>
@@ -139,7 +139,7 @@ function StatsPanel({
           </div>
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-4 mt-auto pt-2">
           <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
           <div className="flex items-center gap-2.5">
             <span className="text-[11px] font-medium text-white/35">Less</span>
@@ -310,7 +310,7 @@ export default function HabitHeatmap({
 
       {/* Grid */}
       <div className="p-4">
-        <div className="grid grid-cols-1 md:grid-cols-[1.6fr_1fr] gap-6 md:gap-8 items-start">
+        <div className="grid grid-cols-1 md:grid-cols-[560px_1fr] gap-6 md:gap-8 items-stretch">
           <div className="w-full max-w-[560px]">
             <div className="flex items-center gap-2.5 mb-2">
               <span className="text-[11px] font-medium text-white/35">Less</span>
@@ -415,7 +415,7 @@ export default function HabitHeatmap({
             </div>
           </div>
 
-          <div className="w-full max-w-sm md:justify-self-end">
+          <div className="w-full min-w-0">
             <StatsPanel
               activeDays={activeDays}
               daysInMonth={daysInMonth}
