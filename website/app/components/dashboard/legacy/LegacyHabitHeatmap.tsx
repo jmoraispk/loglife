@@ -1,16 +1,14 @@
 "use client";
 import { useState } from "react";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-
 export interface HabitDay {
-  date: string; // "YYYY-MM-DD"
-  value: number; // 0–100
+  date: string;
+  value: number;
 }
 
 interface HabitHeatmapProps {
   data?: HabitDay[];
-  month?: string; // "YYYY-MM"
+  month?: string;
 }
 
 interface StatsPanelProps {
@@ -22,43 +20,39 @@ interface StatsPanelProps {
   currentStreak: number;
 }
 
-// ─── Mock data (Jan 2026 — 31-day max layout test) ─────────────────────────────
-
 const MOCK_DATA: HabitDay[] = [
-  { date: "2026-01-01", value: 70 }, // Thu
-  { date: "2026-01-02", value: 82 }, // Fri
-  { date: "2026-01-03", value: 35 }, // Sat
-  { date: "2026-01-04", value: 20 }, // Sun
-  { date: "2026-01-05", value: 76 }, // Mon
-  { date: "2026-01-06", value: 88 }, // Tue
-  { date: "2026-01-07", value: 64 }, // Wed
-  { date: "2026-01-08", value: 90 }, // Thu
-  { date: "2026-01-09", value: 72 }, // Fri
-  { date: "2026-01-10", value: 28 }, // Sat
-  { date: "2026-01-11", value: 0 },  // Sun — reset
-  { date: "2026-01-12", value: 68 }, // Mon
-  { date: "2026-01-13", value: 80 }, // Tue
-  { date: "2026-01-14", value: 92 }, // Wed — peak
-  { date: "2026-01-15", value: 74 }, // Thu
-  { date: "2026-01-16", value: 58 }, // Fri
-  { date: "2026-01-17", value: 32 }, // Sat
-  { date: "2026-01-18", value: 18 }, // Sun
-  { date: "2026-01-19", value: 84 }, // Mon
-  { date: "2026-01-20", value: 66 }, // Tue
-  { date: "2026-01-21", value: 0 },  // Wed — off day
-  { date: "2026-01-22", value: 52 }, // Thu
-  { date: "2026-01-23", value: 74 }, // Fri
-  { date: "2026-01-24", value: 40 }, // Sat
-  { date: "2026-01-25", value: 22 }, // Sun
-  { date: "2026-01-26", value: 86 }, // Mon
-  { date: "2026-01-27", value: 79 }, // Tue
-  { date: "2026-01-28", value: 67 }, // Wed
-  { date: "2026-01-29", value: 83 }, // Thu
-  { date: "2026-01-30", value: 71 }, // Fri
-  { date: "2026-01-31", value: 36 }, // Sat
+  { date: "2026-01-01", value: 70 },
+  { date: "2026-01-02", value: 82 },
+  { date: "2026-01-03", value: 35 },
+  { date: "2026-01-04", value: 20 },
+  { date: "2026-01-05", value: 76 },
+  { date: "2026-01-06", value: 88 },
+  { date: "2026-01-07", value: 64 },
+  { date: "2026-01-08", value: 90 },
+  { date: "2026-01-09", value: 72 },
+  { date: "2026-01-10", value: 28 },
+  { date: "2026-01-11", value: 0 },
+  { date: "2026-01-12", value: 68 },
+  { date: "2026-01-13", value: 80 },
+  { date: "2026-01-14", value: 92 },
+  { date: "2026-01-15", value: 74 },
+  { date: "2026-01-16", value: 58 },
+  { date: "2026-01-17", value: 32 },
+  { date: "2026-01-18", value: 18 },
+  { date: "2026-01-19", value: 84 },
+  { date: "2026-01-20", value: 66 },
+  { date: "2026-01-21", value: 0 },
+  { date: "2026-01-22", value: 52 },
+  { date: "2026-01-23", value: 74 },
+  { date: "2026-01-24", value: 40 },
+  { date: "2026-01-25", value: 22 },
+  { date: "2026-01-26", value: 86 },
+  { date: "2026-01-27", value: 79 },
+  { date: "2026-01-28", value: 67 },
+  { date: "2026-01-29", value: 83 },
+  { date: "2026-01-30", value: 71 },
+  { date: "2026-01-31", value: 36 },
 ];
-
-// ─── Utilities ────────────────────────────────────────────────────────────────
 
 function getIntensityColor(value: number): string {
   if (value === 0) return "rgba(39,39,42,0.82)";
@@ -86,8 +80,6 @@ function formatShortMonthDay(dateStr: string): string {
     day: "numeric",
   });
 }
-
-// ─── Constants ────────────────────────────────────────────────────────────────
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const LEGEND_LEVELS = [0, 20, 45, 70, 95] as const;
@@ -160,9 +152,7 @@ function StatsPanel({
   );
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
-
-export default function HabitHeatmap({
+export default function LegacyHabitHeatmap({
   data = MOCK_DATA,
   month = "2026-01",
 }: HabitHeatmapProps) {
@@ -254,7 +244,6 @@ export default function HabitHeatmap({
     }
   }
 
-  // Build flat cell array: leading empty + days + trailing empty
   type Cell =
     | { type: "empty"; key: string }
     | {
@@ -269,8 +258,8 @@ export default function HabitHeatmap({
 
   const cells: Cell[] = [];
 
-  for (let i = 0; i < startDayOfWeek; i++) {
-    cells.push({ type: "empty", key: `pre-${i}` });
+  for (let j = 0; j < startDayOfWeek; j++) {
+    cells.push({ type: "empty", key: `pre-${j}` });
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
@@ -293,25 +282,23 @@ export default function HabitHeatmap({
 
   const remainder = cells.length % 7;
   if (remainder !== 0) {
-    for (let i = 0; i < 7 - remainder; i++) {
-      cells.push({ type: "empty", key: `post-${i}` });
+    for (let j = 0; j < 7 - remainder; j++) {
+      cells.push({ type: "empty", key: `post-${j}` });
     }
   }
 
   return (
-    <div className="w-full overflow-hidden rounded-2xl border border-white/10 bg-white/5 p-6 flex flex-col gap-4 animate-fade-in-up-2">
-      {/* Header */}
-      <div className="pb-4 border-b border-slate-800/50">
+    <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl mb-8 animate-fade-in-up-2">
+      <div className="px-5 py-4 border-b border-slate-800/50">
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-white">Monthly Habit Overview</h2>
           <p className="text-lg text-white/95 mt-0.5">{monthLabel}</p>
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="w-full overflow-hidden">
-        <div className="flex flex-col gap-4 lg:flex-row">
-          <div className="min-w-0 flex-1">
+      <div className="p-4">
+        <div className="grid grid-cols-1 md:grid-cols-[560px_1fr] gap-6 md:gap-8 items-stretch">
+          <div className="w-full max-w-[560px]">
             <div className="flex items-center gap-2.5 mb-2">
               <span className="text-[11px] font-medium text-white/35">Less</span>
               <div className="flex items-center gap-1.5">
@@ -326,7 +313,6 @@ export default function HabitHeatmap({
               <span className="text-[11px] font-medium text-white/35">More</span>
             </div>
 
-            {/* Weekday labels */}
             <div className="grid grid-cols-7 w-full gap-2 mb-1.5">
               {WEEKDAYS.map((label) => (
                 <div
@@ -338,7 +324,6 @@ export default function HabitHeatmap({
               ))}
             </div>
 
-            {/* Day cells */}
             <div className="grid grid-cols-7 w-full gap-2 p-1 rounded-lg bg-slate-800/20 ring-1 ring-slate-700/30">
               {cells.map((cell, idx) => {
                 if (cell.type === "empty") {
@@ -361,7 +346,6 @@ export default function HabitHeatmap({
                     onMouseEnter={() => setHoveredStreakId(cell.streakId)}
                     onMouseLeave={() => setHoveredStreakId(null)}
                   >
-                    {/* Cell square */}
                     <div
                       className={`w-full h-full rounded-md border border-white/10 [box-shadow:inset_0_1px_0_rgba(255,255,255,0.08),inset_0_-1px_0_rgba(15,23,42,0.2)] transition-all duration-200 ease-out cursor-pointer
                     hover:scale-[1.06] hover:border-white/30 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_10px_rgba(34,197,94,0.3)] hover:z-10
@@ -373,7 +357,6 @@ export default function HabitHeatmap({
                   `}
                       style={{ backgroundColor: getIntensityColor(cell.value) }}
                     >
-                      {/* Day number — subtle overlay */}
                       <span className={`absolute inset-0 flex items-center justify-center text-sm font-semibold [text-shadow:0_1px_1px_rgba(2,6,23,0.75)] select-none pointer-events-none ${isInactive ? "text-white/55" : "text-white/90"}`}>
                         {cell.day}
                       </span>
@@ -385,7 +368,6 @@ export default function HabitHeatmap({
                       )}
                     </div>
 
-                    {/* Tooltip */}
                     <div
                       className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
                     opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out
@@ -398,11 +380,10 @@ export default function HabitHeatmap({
                             <span className="ml-1.5 text-[10px] font-medium text-emerald-400">Today</span>
                           )}
                         </p>
-                      <p className="text-xs text-slate-300 mt-0.5">
+                        <p className="text-xs text-slate-300 mt-0.5">
                           {formatTooltipValue(cell.value)}
                         </p>
                       </div>
-                      {/* Arrow */}
                       <div
                         className="absolute top-full left-1/2 -translate-x-1/2
                       border-l-[5px] border-r-[5px] border-t-[5px]
@@ -415,7 +396,7 @@ export default function HabitHeatmap({
             </div>
           </div>
 
-          <div className="w-full flex-shrink-0 lg:w-48 xl:w-56">
+          <div className="w-full min-w-0">
             <StatsPanel
               activeDays={activeDays}
               daysInMonth={daysInMonth}
