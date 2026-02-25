@@ -3,29 +3,27 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export interface CategoryData {
+export interface LegacyCategoryData {
   label: string;
   value: number;
   color: string;
 }
 
-interface DonutChartProps {
-  data: CategoryData[];
+interface LegacyDonutChartProps {
+  data: LegacyCategoryData[];
   size?: number;
   strokeWidth?: number;
   getCategoryHref?: (label: string) => string;
-  legendBelow?: boolean;
 }
 
 const SEGMENT_GAP = 4;
 
-export default function DonutChart({
+export default function LegacyDonutChart({
   data,
   size = 216,
   strokeWidth = 20,
   getCategoryHref,
-  legendBelow = false,
-}: DonutChartProps) {
+}: LegacyDonutChartProps) {
   const [hovered, setHovered] = useState<string | null>(null);
   const router = useRouter();
 
@@ -34,7 +32,7 @@ export default function DonutChart({
   const circumference = 2 * Math.PI * radius;
   const total = data.reduce((sum, d) => sum + d.value, 0);
 
-  const segments = data.reduce<Array<CategoryData & { dashLength: number; rotation: number; percent: number }>>(
+  const segments = data.reduce<Array<LegacyCategoryData & { dashLength: number; rotation: number; percent: number }>>(
     (acc, item) => {
       const percent = item.value / total;
       const dashLength = Math.max(0, percent * circumference - SEGMENT_GAP);
@@ -42,7 +40,7 @@ export default function DonutChart({
       acc.push({ ...item, dashLength, rotation: prevAngle, percent });
       return acc;
     },
-    []
+    [],
   );
 
   const activeSegment = hovered ? segments.find((s) => s.label === hovered) : null;
@@ -52,16 +50,9 @@ export default function DonutChart({
   };
 
   return (
-    <div
-      className={`w-full ${
-        legendBelow
-          ? "flex flex-col items-center gap-5"
-          : "flex flex-col items-start gap-6 xl:flex-row xl:items-center"
-      }`}
-    >
-      <div className={`relative max-w-full ${legendBelow ? "" : "flex-shrink-0"}`}>
+    <div className="flex items-center gap-8">
+      <div className="relative flex-shrink-0">
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          {/* Background track */}
           <circle
             cx={center}
             cy={center}
@@ -85,10 +76,7 @@ export default function DonutChart({
               className="transition-all duration-200 cursor-pointer"
               style={{
                 opacity: hovered && hovered !== seg.label ? 0.25 : 1,
-                filter:
-                  hovered === seg.label
-                    ? `drop-shadow(0 0 8px ${seg.color}99)`
-                    : "none",
+                filter: hovered === seg.label ? `drop-shadow(0 0 8px ${seg.color}99)` : "none",
               }}
               onMouseEnter={() => setHovered(seg.label)}
               onMouseLeave={() => setHovered(null)}
@@ -97,7 +85,6 @@ export default function DonutChart({
           ))}
         </svg>
 
-        {/* Center label */}
         <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
           {activeSegment ? (
             <>
@@ -118,8 +105,7 @@ export default function DonutChart({
         </div>
       </div>
 
-      {/* Legend */}
-      <div className={legendBelow ? "flex w-full max-w-[420px] flex-col gap-3" : "flex w-full min-w-0 flex-col gap-5 xl:min-w-[152px]"}>
+      <div className="flex flex-col gap-5 min-w-[152px]">
         {segments.map((seg) => (
           <div
             key={seg.label}
@@ -128,26 +114,23 @@ export default function DonutChart({
             onMouseLeave={() => setHovered(null)}
             onClick={() => handleCategoryClick(seg.label)}
           >
-            <div className={`mb-2 flex items-center ${legendBelow ? "justify-start gap-2" : "justify-between"}`}>
-              <div className="flex min-w-0 items-center gap-2.5">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2.5">
                 <span
                   className="w-2 h-2 rounded-full flex-shrink-0 transition-transform duration-150 group-hover:scale-150"
                   style={{ backgroundColor: seg.color }}
                 />
-                <span className="text-sm text-slate-300 group-hover:text-white transition-colors duration-150 font-medium truncate">
+                <span className="text-sm text-slate-300 group-hover:text-white transition-colors duration-150 font-medium">
                   {seg.label}
                 </span>
               </div>
-              {!legendBelow && (
-                <span
-                  className="text-sm font-bold tabular-nums transition-colors duration-150"
-                  style={{ color: hovered === seg.label ? seg.color : "#f8fafc" }}
-                >
-                  {seg.value}%
-                </span>
-              )}
+              <span
+                className="text-sm font-bold tabular-nums transition-colors duration-150"
+                style={{ color: hovered === seg.label ? seg.color : "#f8fafc" }}
+              >
+                {seg.value}%
+              </span>
             </div>
-            {/* Mini progress bar */}
             <div className="h-[3px] rounded-full bg-slate-800/80 overflow-hidden">
               <div
                 className="h-full rounded-full transition-all duration-300"
@@ -158,14 +141,6 @@ export default function DonutChart({
                 }}
               />
             </div>
-            {legendBelow && (
-              <p
-                className="mt-1 text-xs font-semibold tabular-nums"
-                style={{ color: hovered === seg.label ? seg.color : "#94a3b8" }}
-              >
-                {seg.value}%
-              </p>
-            )}
           </div>
         ))}
       </div>

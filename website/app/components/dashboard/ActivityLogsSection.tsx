@@ -41,9 +41,9 @@ function PipelineStep({
 
 export default function ActivityLogsSection() {
   return (
-    <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl mb-8 animate-fade-in-up-4">
+    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 flex flex-col gap-4 animate-fade-in-up-4 min-h-[260px] lg:min-h-[300px]">
       {/* Header */}
-      <div className="px-6 py-5 border-b border-slate-800/50 flex items-center justify-between flex-wrap gap-3">
+      <div className="pb-4 border-b border-slate-800/50 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-base font-semibold text-white">Activity Logs</h2>
           <p className="text-sm text-slate-400 mt-1">How your messages become insights</p>
@@ -54,7 +54,7 @@ export default function ActivityLogsSection() {
       </div>
 
       {/* Pipeline indicator */}
-      <div className="px-6 py-3 border-b border-slate-800/30 bg-slate-950/20 flex items-center gap-2 overflow-x-auto">
+      <div className="pb-3 border-b border-slate-800/30 bg-slate-950/20 flex items-center gap-2 flex-wrap overflow-hidden">
         <PipelineStep
           icon={
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
@@ -91,7 +91,7 @@ export default function ActivityLogsSection() {
       </div>
 
       {/* Body: 2-column — Classification | Log timeline */}
-      <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ClassificationPanel />
         <ActivityLogList />
       </div>

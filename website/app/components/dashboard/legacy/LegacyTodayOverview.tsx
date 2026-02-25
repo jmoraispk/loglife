@@ -1,10 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import DonutChart, { CategoryData } from "./DonutChart";
-import ActivityList, { Activity } from "./ActivityList";
+import ActivityList, { Activity } from "../ActivityList";
+import LegacyDonutChart, { LegacyCategoryData } from "./LegacyDonutChart";
 
-const MOCK_CATEGORIES: CategoryData[] = [
+const MOCK_CATEGORIES: LegacyCategoryData[] = [
   { label: "Work", value: 50, color: "#3b82f6" },
   { label: "Health", value: 30, color: "#10b981" },
   { label: "Relationships", value: 20, color: "#f59e0b" },
@@ -19,7 +19,7 @@ const MOCK_ACTIVITIES: Activity[] = [
   { id: "6", title: "Evening run", category: "Health", time: "6:30 PM", icon: "🏃" },
 ];
 
-export default function TodayOverview() {
+export default function LegacyTodayOverview() {
   const selectedDate = "2026-02-23";
 
   const today = new Date().toLocaleDateString("en-US", {
@@ -29,9 +29,8 @@ export default function TodayOverview() {
   });
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 flex flex-col gap-4 animate-fade-in-up-1">
-      {/* Card header */}
-      <div className="pb-4 border-b border-slate-800/50 flex items-center justify-between gap-3 flex-wrap">
+    <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl mb-8 animate-fade-in-up-1">
+      <div className="px-6 py-5 border-b border-slate-800/50 flex items-center justify-between">
         <div>
           <h2 className="text-base font-semibold text-white">Today&apos;s Overview</h2>
           <p className="text-sm text-slate-400 mt-1">{today}</p>
@@ -45,7 +44,16 @@ export default function TodayOverview() {
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800/70 border border-slate-700/80 text-xs font-semibold text-slate-200 hover:bg-slate-700/80 transition-colors"
           >
             View All Logs
-            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <svg
+              className="w-3.5 h-3.5 shrink-0"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden
+            >
               <path d="M5 12h14" />
               <path d="m12 5 7 7-7 7" />
             </svg>
@@ -53,27 +61,22 @@ export default function TodayOverview() {
         </div>
       </div>
 
-      {/* Card body */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
-        {/* Left: Donut chart */}
-        <div className="min-w-0 overflow-hidden">
+      <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-10">
+        <div>
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-5">Time Distribution</p>
-          <DonutChart
+          <LegacyDonutChart
             data={MOCK_CATEGORIES}
-            size={236}
-            legendBelow
             getCategoryHref={(label) => `/logs?category=${encodeURIComponent(label.toLowerCase())}&from=dashboard`}
           />
         </div>
 
-        {/* Right: Activity list */}
-        <div className="min-w-0">
+        <div>
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-5">Today&apos;s Activities</p>
           <ActivityList
             activities={MOCK_ACTIVITIES}
             getActivityHref={(activity) =>
               `/logs?date=${selectedDate}&highlight=${encodeURIComponent(activity.title)}&category=${encodeURIComponent(
-                activity.category.toLowerCase()
+                activity.category.toLowerCase(),
               )}&from=dashboard`
             }
           />

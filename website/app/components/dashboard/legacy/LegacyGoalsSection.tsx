@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import GoalCard, { Goal } from "./GoalCard";
-
-// ─── Mock data ────────────────────────────────────────────────────────────────
+import GoalCard, { Goal } from "../GoalCard";
 
 const MOCK_GOALS: Goal[] = [
   {
@@ -68,75 +66,48 @@ const MOCK_GOALS: Goal[] = [
   },
 ];
 
-// ─── Sort modes ───────────────────────────────────────────────────────────────
-
 type SortMode = "streak" | "needs-work";
 
 function sortGoals(goals: Goal[], mode: SortMode): Goal[] {
   return [...goals].sort((a, b) =>
     mode === "streak"
       ? b.streak - a.streak
-      : a.completionRate - b.completionRate
+      : a.completionRate - b.completionRate,
   );
 }
-
-// ─── Summary stats ────────────────────────────────────────────────────────────
 
 function computeStats(goals: Goal[]) {
   const active = goals.filter((g) => g.streak > 0).length;
   const avgCompletion = Math.round(
-    goals.reduce((s, g) => s + g.completionRate, 0) / goals.length
+    goals.reduce((s, g) => s + g.completionRate, 0) / goals.length,
   );
   const topStreak = Math.max(...goals.map((g) => g.streak));
   const struggling = goals.filter((g) => g.completionRate < 40).length;
   return { active, avgCompletion, topStreak, struggling };
 }
 
-// ─── GoalsSection ─────────────────────────────────────────────────────────────
-
-export default function GoalsSection() {
+export default function LegacyGoalsSection() {
   const [sortMode] = useState<SortMode>("streak");
 
   const sorted = useMemo(() => sortGoals(MOCK_GOALS, sortMode), [sortMode]);
   const stats = useMemo(() => computeStats(MOCK_GOALS), []);
 
   return (
-    <div className="rounded-2xl border border-white/10 bg-white/5 p-6 flex flex-col gap-5 animate-fade-in-up-3 min-h-[260px] lg:min-h-[320px]">
-      {/* Header */}
-      <div className="pb-4 border-b border-slate-800/50 flex items-center justify-between flex-wrap gap-3">
+    <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl mb-8 animate-fade-in-up-3">
+      <div className="px-6 py-5 border-b border-slate-800/50 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-base font-semibold text-white">Goals &amp; Progress</h2>
           <p className="text-sm text-slate-400 mt-1">{MOCK_GOALS.length} active goals this month</p>
         </div>
-
-        {/* Sort toggle – commented out for now
-        <div className="flex items-center gap-0.5 bg-slate-950/60 border border-slate-800/50 rounded-xl p-1">
-          {SORT_OPTIONS.map((opt) => (
-            <button
-              key={opt.id}
-              onClick={() => setSortMode(opt.id)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 cursor-pointer ${
-                sortMode === opt.id
-                  ? "bg-slate-700 text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-300"
-              }`}
-            >
-              {opt.label}
-            </button>
-          ))}
-        </div>
-        */}
       </div>
 
-      {/* Goal cards grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
         {sorted.map((goal) => (
           <GoalCard key={goal.id} goal={goal} />
         ))}
       </div>
 
-      {/* Summary footer */}
-      <div className="pt-4 border-t border-slate-800/40 flex items-center justify-between flex-wrap gap-4">
+      <div className="px-6 py-4 border-t border-slate-800/40 flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-6">
           <div>
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">On streak</p>
@@ -159,17 +130,6 @@ export default function GoalsSection() {
               <span className="text-sm font-normal text-slate-500 ml-1">days</span>
             </p>
           </div>
-          {/* Needs attention – commented out for now
-          {stats.struggling > 0 && (
-            <div>
-              <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Needs attention</p>
-              <p className="text-base font-bold text-rose-400 mt-1">
-                {stats.struggling}
-                <span className="text-sm font-normal text-slate-500 ml-1">goal{stats.struggling !== 1 ? "s" : ""}</span>
-              </p>
-            </div>
-          )}
-          */}
         </div>
         <p className="text-xs text-slate-600 italic">last 7 days shown per goal</p>
       </div>
