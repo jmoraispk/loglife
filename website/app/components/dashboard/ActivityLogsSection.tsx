@@ -1,5 +1,7 @@
+import { useMemo } from "react";
 import ClassificationPanel from "./ClassificationPanel";
 import ActivityLogList from "./ActivityLogList";
+import { getActivityLogsForDashboard } from "@/data/test-logs-derived";
 
 // ─── Pipeline step ────────────────────────────────────────────────────────────
 
@@ -40,6 +42,8 @@ function PipelineStep({
 // ─── ActivityLogsSection ──────────────────────────────────────────────────────
 
 export default function ActivityLogsSection() {
+  const logs = useMemo(() => getActivityLogsForDashboard(), []);
+
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-6 flex flex-col gap-4 animate-fade-in-up-4 min-h-[260px] lg:min-h-[300px]">
       {/* Header */}
@@ -93,7 +97,7 @@ export default function ActivityLogsSection() {
       {/* Body: 2-column — Classification | Log timeline */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <ClassificationPanel />
-        <ActivityLogList />
+        <ActivityLogList logs={logs.length > 0 ? logs : undefined} />
       </div>
     </div>
   );

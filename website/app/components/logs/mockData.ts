@@ -1,8 +1,7 @@
 export type LogCategory = "Work" | "Health" | "Relationships" | "Other";
 export type LogType = "Life Log" | "Ignored";
 export type LogsView = "daily" | "recent";
-export type DailyOption = "Feb 23" | "Feb 22" | "Feb 21";
-export type RecentCountOption = 10 | 20 | 50;
+export type RecentCountOption = 10 | 20 | 50 | 100;
 
 export interface LogEntry {
   id: string;
@@ -10,6 +9,10 @@ export interface LogEntry {
   text: string;
   categories: LogCategory[];
   type: LogType;
+  date?: string;
+  timestamp?: string;
+  tags?: string[];
+  importance?: string;
 }
 
 export interface ClassificationExample {
@@ -31,8 +34,13 @@ export const LOG_TYPE_STYLES: Record<LogType, string> = {
   Ignored: "bg-rose-500/15 text-rose-300 border border-rose-500/25",
 };
 
-export const DAILY_OPTIONS: DailyOption[] = ["Feb 23", "Feb 22", "Feb 21"];
-export const RECENT_COUNT_OPTIONS: RecentCountOption[] = [10, 20, 50];
+export const LOGS_PAGE_SIZE = 25;
+export const RECENT_COUNT_OPTIONS: RecentCountOption[] = [10, 20, 50, 100];
+
+export interface DailyDateOption {
+  value: string;
+  label: string;
+}
 
 export const MOCK_LOGS: LogEntry[] = [
   {

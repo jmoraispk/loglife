@@ -7,12 +7,17 @@ import AreaChart from "@/components/stats/AreaChart";
 import DistributionChart, { type HistogramBucket } from "@/components/stats/DistributionChart";
 import ChartControls from "@/components/stats/ChartControls";
 import {
-  mockDailyStats,
-  mockSessionLengths,
-  mockTopEvents,
+  getDailyStatsFromLogs,
+  getSessionLengthsFromLogs,
+  getTopEventsFromLogs,
   RANGE_OPTIONS,
   type DateRange,
   type TopEvent,
+} from "@/data/test-logs-derived";
+import {
+  mockDailyStats,
+  mockSessionLengths,
+  mockTopEvents,
 } from "@/data/mock-stats";
 
 const SERIES_CONFIG: SeriesConfig[] = [
@@ -66,18 +71,27 @@ export default function StatsPage() {
   const [hiddenSeries, setHiddenSeries] = useState<Partial<Record<SeriesKey, boolean>>>({});
   const [selectedEvent, setSelectedEvent] = useState<TopEvent | null>(null);
 
-  const filteredData = useMemo(() => mockDailyStats.slice(-range), [range]);
-  const previousPeriodData = useMemo(() => mockDailyStats.slice(-range * 2, -range), [range]);
+  const dailyStats = useMemo(() => getDailyStatsFromLogs(), []);
+  const sessionLengths = useMemo(() => getSessionLengthsFromLogs(), []);
+  const topEvents = useMemo(() => getTopEventsFromLogs(20), []);
+
+  const useFallback = dailyStats.length === 0;
+  const sourceDailyStats = useFallback ? mockDailyStats : dailyStats;
+  const sourceSessionLengths = useFallback ? mockSessionLengths : sessionLengths;
+  const sourceTopEvents = useFallback ? mockTopEvents : topEvents;
+
+  const filteredData = useMemo(() => sourceDailyStats.slice(-range), [sourceDailyStats, range]);
+  const previousPeriodData = useMemo(() => sourceDailyStats.slice(-range * 2, -range), [sourceDailyStats, range]);
 
   const visibleSessionLengths = useMemo(() => {
     const approximateSamplesPerDay = 6;
-    return mockSessionLengths.slice(-range * approximateSamplesPerDay);
-  }, [range]);
+    return sourceSessionLengths.slice(-range * approximateSamplesPerDay);
+  }, [sourceSessionLengths, range]);
 
   const previousSessionLengths = useMemo(() => {
     const approximateSamplesPerDay = 6;
-    return mockSessionLengths.slice(-range * approximateSamplesPerDay * 2, -range * approximateSamplesPerDay);
-  }, [range]);
+    return sourceSessionLengths.slice(-range * approximateSamplesPerDay * 2, -range * approximateSamplesPerDay);
+  }, [sourceSessionLengths, range]);
 
   const histogramData = useMemo(() => buildHistogram(visibleSessionLengths), [visibleSessionLengths]);
 
@@ -111,7 +125,10 @@ export default function StatsPage() {
 
   const sparklineTotals = useMemo(() => filteredData.slice(-24).map((d) => d.total), [filteredData]);
 
-  const events = useMemo(() => mockTopEvents.filter((event) => event.date >= filteredData[0]?.date), [filteredData]);
+  const events = useMemo(
+    () => sourceTopEvents.filter((event) => event.date >= filteredData[0]?.date),
+    [sourceTopEvents, filteredData]
+  );
 
   const toggleSeries = (key: SeriesKey) => {
     setHiddenSeries((current) => ({

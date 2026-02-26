@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { getHabitHeatmapFromLogs } from "@/data/test-logs-derived";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -22,40 +23,40 @@ interface StatsPanelProps {
   currentStreak: number;
 }
 
-// ─── Mock data (Jan 2026 — 31-day max layout test) ─────────────────────────────
+// ─── Fallback when no logs data ─────────────────────────────────────────────
 
-const MOCK_DATA: HabitDay[] = [
-  { date: "2026-01-01", value: 70 }, // Thu
-  { date: "2026-01-02", value: 82 }, // Fri
-  { date: "2026-01-03", value: 35 }, // Sat
-  { date: "2026-01-04", value: 20 }, // Sun
-  { date: "2026-01-05", value: 76 }, // Mon
-  { date: "2026-01-06", value: 88 }, // Tue
-  { date: "2026-01-07", value: 64 }, // Wed
-  { date: "2026-01-08", value: 90 }, // Thu
-  { date: "2026-01-09", value: 72 }, // Fri
-  { date: "2026-01-10", value: 28 }, // Sat
-  { date: "2026-01-11", value: 0 },  // Sun — reset
-  { date: "2026-01-12", value: 68 }, // Mon
-  { date: "2026-01-13", value: 80 }, // Tue
-  { date: "2026-01-14", value: 92 }, // Wed — peak
-  { date: "2026-01-15", value: 74 }, // Thu
-  { date: "2026-01-16", value: 58 }, // Fri
-  { date: "2026-01-17", value: 32 }, // Sat
-  { date: "2026-01-18", value: 18 }, // Sun
-  { date: "2026-01-19", value: 84 }, // Mon
-  { date: "2026-01-20", value: 66 }, // Tue
-  { date: "2026-01-21", value: 0 },  // Wed — off day
-  { date: "2026-01-22", value: 52 }, // Thu
-  { date: "2026-01-23", value: 74 }, // Fri
-  { date: "2026-01-24", value: 40 }, // Sat
-  { date: "2026-01-25", value: 22 }, // Sun
-  { date: "2026-01-26", value: 86 }, // Mon
-  { date: "2026-01-27", value: 79 }, // Tue
-  { date: "2026-01-28", value: 67 }, // Wed
-  { date: "2026-01-29", value: 83 }, // Thu
-  { date: "2026-01-30", value: 71 }, // Fri
-  { date: "2026-01-31", value: 36 }, // Sat
+const FALLBACK_DATA: HabitDay[] = [
+  { date: "2026-01-01", value: 70 },
+  { date: "2026-01-02", value: 82 },
+  { date: "2026-01-03", value: 35 },
+  { date: "2026-01-04", value: 20 },
+  { date: "2026-01-05", value: 76 },
+  { date: "2026-01-06", value: 88 },
+  { date: "2026-01-07", value: 64 },
+  { date: "2026-01-08", value: 90 },
+  { date: "2026-01-09", value: 72 },
+  { date: "2026-01-10", value: 28 },
+  { date: "2026-01-11", value: 0 },
+  { date: "2026-01-12", value: 68 },
+  { date: "2026-01-13", value: 80 },
+  { date: "2026-01-14", value: 92 },
+  { date: "2026-01-15", value: 74 },
+  { date: "2026-01-16", value: 58 },
+  { date: "2026-01-17", value: 32 },
+  { date: "2026-01-18", value: 18 },
+  { date: "2026-01-19", value: 84 },
+  { date: "2026-01-20", value: 66 },
+  { date: "2026-01-21", value: 0 },
+  { date: "2026-01-22", value: 52 },
+  { date: "2026-01-23", value: 74 },
+  { date: "2026-01-24", value: 40 },
+  { date: "2026-01-25", value: 22 },
+  { date: "2026-01-26", value: 86 },
+  { date: "2026-01-27", value: 79 },
+  { date: "2026-01-28", value: 67 },
+  { date: "2026-01-29", value: 83 },
+  { date: "2026-01-30", value: 71 },
+  { date: "2026-01-31", value: 36 },
 ];
 
 // ─── Utilities ────────────────────────────────────────────────────────────────
@@ -163,9 +164,11 @@ function StatsPanel({
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export default function HabitHeatmap({
-  data = MOCK_DATA,
-  month = "2026-01",
+  data: dataProp,
+  month = new Date().toISOString().slice(0, 7),
 }: HabitHeatmapProps) {
+  const derivedData = useMemo(() => getHabitHeatmapFromLogs(month), [month]);
+  const data = dataProp ?? (derivedData.length > 0 ? derivedData : FALLBACK_DATA);
   const today = new Date().toISOString().split("T")[0];
   const [hoveredStreakId, setHoveredStreakId] = useState<number | null>(null);
 

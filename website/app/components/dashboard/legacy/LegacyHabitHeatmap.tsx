@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { getHabitHeatmapFromLogs } from "@/data/test-logs-derived";
 
 export interface HabitDay {
   date: string;
@@ -20,7 +21,7 @@ interface StatsPanelProps {
   currentStreak: number;
 }
 
-const MOCK_DATA: HabitDay[] = [
+const FALLBACK_DATA: HabitDay[] = [
   { date: "2026-01-01", value: 70 },
   { date: "2026-01-02", value: 82 },
   { date: "2026-01-03", value: 35 },
@@ -153,9 +154,11 @@ function StatsPanel({
 }
 
 export default function LegacyHabitHeatmap({
-  data = MOCK_DATA,
-  month = "2026-01",
+  data: dataProp,
+  month = new Date().toISOString().slice(0, 7),
 }: HabitHeatmapProps) {
+  const derivedData = useMemo(() => getHabitHeatmapFromLogs(month), [month]);
+  const data = dataProp ?? (derivedData.length > 0 ? derivedData : FALLBACK_DATA);
   const today = new Date().toISOString().split("T")[0];
   const [hoveredStreakId, setHoveredStreakId] = useState<number | null>(null);
 
