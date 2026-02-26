@@ -12,7 +12,7 @@ type SupportFormState = {
   subject: string;
   email: string;
   message: string;
-  attachmentName: string;
+  attachment: File | null;
 };
 
 const INITIAL_FORM_STATE: SupportFormState = {
@@ -20,8 +20,11 @@ const INITIAL_FORM_STATE: SupportFormState = {
   subject: "",
   email: "",
   message: "",
-  attachmentName: "",
+  attachment: null,
 };
+
+const MAX_ATTACHMENT_SIZE_MB = 5;
+const MAX_ATTACHMENT_BYTES = MAX_ATTACHMENT_SIZE_MB * 1024 * 1024;
 
 export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
   const [formState, setFormState] = useState<SupportFormState>(INITIAL_FORM_STATE);
@@ -29,9 +32,14 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  /** Ref updated synchronously in onChange so we never open the picker twice after selection */
+  const hasAttachmentRef = useRef(false);
 
   const resetState = () => {
     setFormState(INITIAL_FORM_STATE);
+    hasAttachmentRef.current = false;
+    if (fileInputRef.current) fileInputRef.current.value = "";
     setIsSending(false);
     setIsSent(false);
     setError(null);
@@ -93,23 +101,36 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
     };
   }, [isOpen, handleClose]);
 
+  const openFilePicker = useCallback(() => {
+    if (hasAttachmentRef.current) return;
+    fileInputRef.current?.click();
+  }, []);
+
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (isSending) return;
+
+    if (formState.attachment && formState.attachment.size > MAX_ATTACHMENT_BYTES) {
+      setError(`Attachment must be under ${MAX_ATTACHMENT_SIZE_MB} MB`);
+      return;
+    }
 
     setIsSending(true);
     setError(null);
 
     try {
+      const formData = new FormData();
+      formData.append("type", formState.type);
+      formData.append("subject", formState.subject);
+      formData.append("email", formState.email);
+      formData.append("message", formState.message);
+      if (formState.attachment) {
+        formData.append("attachment", formState.attachment);
+      }
+
       const res = await fetch("/api/support", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: formState.type,
-          subject: formState.subject,
-          email: formState.email,
-          message: formState.message,
-        }),
+        body: formData,
       });
 
       const data = await res.json();
@@ -254,20 +275,87 @@ export default function SupportModal({ isOpen, onClose }: SupportModalProps) {
               />
             </label>
 
-            <label className="block space-y-2 text-sm">
+            <div className="block space-y-2 text-sm">
               <span className="font-medium text-slate-400">Attachment</span>
-              <input
-                type="text"
-                value={formState.attachmentName}
-                onChange={(event) =>
-                  setFormState((prev) => ({
-                    ...prev,
-                    attachmentName: event.target.value,
-                  }))
-                }
-                className="w-full rounded-xl bg-white/[0.06] px-3.5 py-2.5 text-sm text-white placeholder:text-slate-500 transition focus:bg-white/[0.09] focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
-              />
-            </label>
+              <div className="space-y-2">
+                <div className="relative flex min-h-[100px] flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-600 bg-white/[0.04] transition hover:border-slate-500 hover:bg-white/[0.06] focus-within:border-emerald-500/60 focus-within:ring-2 focus-within:ring-emerald-500/40">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    name="attachment"
+                    accept="image/*,.pdf,.txt,.log,.csv,.json"
+                    className="absolute h-0 w-0 overflow-hidden opacity-0 pointer-events-none"
+                    onChange={(event) => {
+                      const file = event.target.files?.[0];
+                      hasAttachmentRef.current = !!file;
+                      setFormState((prev) => ({ ...prev, attachment: file ?? null }));
+                      setError(null);
+                    }}
+                    aria-label="Attachment file"
+                  />
+                  {formState.attachment ? (
+                    <div className="flex flex-col items-center gap-2 px-4 py-3">
+                      <span className="text-sm font-medium text-emerald-300">
+                        {formState.attachment.name}
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        {(formState.attachment.size / 1024).toFixed(1)} KB
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            hasAttachmentRef.current = false;
+                            setFormState((prev) => ({ ...prev, attachment: null }));
+                            if (fileInputRef.current) fileInputRef.current.value = "";
+                          }}
+                          className="rounded-lg bg-slate-700/80 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-slate-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+                        >
+                          Remove
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => fileInputRef.current?.click()}
+                          className="rounded-lg bg-slate-700/80 px-3 py-1.5 text-xs font-medium text-slate-300 transition hover:bg-slate-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+                        >
+                          Change file
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <svg
+                        className="h-8 w-8 text-slate-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={1.5}
+                          d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"
+                        />
+                      </svg>
+                      <span className="mt-1 text-sm text-slate-400">
+                        Add a file (images, PDF, text, log)
+                      </span>
+                      <span className="text-xs text-slate-500">
+                        Max {MAX_ATTACHMENT_SIZE_MB} MB
+                      </span>
+                      <button
+                        type="button"
+                        onClick={openFilePicker}
+                        className="mt-2 rounded-lg bg-slate-700/80 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-600 hover:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/60"
+                      >
+                        Choose file
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
 
             <div className="space-y-3 pt-2">
               {error && (
