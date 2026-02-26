@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ClassificationPanel from "./ClassificationPanel";
 import LogsControlBar from "./LogsControlBar";
@@ -12,7 +12,6 @@ import {
   type RecentCountOption,
   LOGS_PAGE_SIZE,
   MOCK_LOGS,
-  RECENT_COUNT_OPTIONS,
 } from "./mockData";
 
 // Load test logs from website/data (same shape as LogEntry with optional date/timestamp)
@@ -32,12 +31,41 @@ function formatDateLabel(isoDate: string): string {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
+function LogsListSection({
+  filteredLogs,
+  highlightedText,
+}: {
+  filteredLogs: LogEntry[];
+  highlightedText: string | null;
+}) {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / LOGS_PAGE_SIZE));
+  const pageSafe = Math.min(Math.max(1, page), totalPages);
+  const visibleLogs = useMemo(
+    () =>
+      filteredLogs.slice(
+        (pageSafe - 1) * LOGS_PAGE_SIZE,
+        pageSafe * LOGS_PAGE_SIZE
+      ),
+    [filteredLogs, pageSafe]
+  );
+  return (
+    <LogsList
+      logs={visibleLogs}
+      highlightedLogText={highlightedText}
+      totalCount={filteredLogs.length}
+      currentPage={pageSafe}
+      totalPages={totalPages}
+      onPageChange={setPage}
+    />
+  );
+}
+
 export default function LogsPage() {
   const searchParams = useSearchParams();
   const [view, setView] = useState<LogsView>("recent");
   const [selectedRecentCount, setSelectedRecentCount] = useState<RecentCountOption>(50);
   const [selectedDate, setSelectedDate] = useState<string>("");
-  const [page, setPage] = useState(1);
 
   const source = searchParams.get("from");
   const urlDate = searchParams.get("date");
@@ -56,18 +84,13 @@ export default function LogsPage() {
       .map((value) => ({ value, label: formatDateLabel(value) }));
   }, []);
 
-  useEffect(() => {
-    if (urlDate && dailyDateOptions.some((o) => o.value === urlDate)) {
-      setSelectedDate(urlDate);
-      setView("daily");
-    }
-  }, [urlDate, dailyDateOptions]);
-
-  useEffect(() => {
-    if (view === "daily" && !selectedDate && dailyDateOptions.length > 0) {
-      setSelectedDate(dailyDateOptions[0].value);
-    }
-  }, [view, selectedDate, dailyDateOptions]);
+  const effectiveFromUrl =
+    Boolean(urlDate && dailyDateOptions.some((o) => o.value === urlDate));
+  const effectiveView = effectiveFromUrl ? "daily" : view;
+  const effectiveSelectedDate = effectiveFromUrl
+    ? (urlDate as string)
+    : (selectedDate ||
+        (view === "daily" ? dailyDateOptions[0]?.value ?? "" : ""));
 
   const filteredLogs = useMemo(() => {
     let list = ALL_LOGS;
@@ -77,10 +100,10 @@ export default function LogsPage() {
       list = list.filter((log) => log.categories.includes(cat as LogEntry["categories"][number]));
     }
 
-    if (view === "daily") {
+    if (effectiveView === "daily") {
       list = list.filter((log) => {
         const d = log.date ?? (log.timestamp ? log.timestamp.slice(0, 10) : "");
-        return d === selectedDate;
+        return d === effectiveSelectedDate;
       });
       list = [...list].sort((a, b) => (a.time || "").localeCompare(b.time || ""));
     } else {
@@ -93,36 +116,19 @@ export default function LogsPage() {
     }
 
     return list;
-  }, [view, selectedDate, selectedRecentCount, selectedCategory]);
+  }, [effectiveView, effectiveSelectedDate, selectedRecentCount, selectedCategory]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / LOGS_PAGE_SIZE));
-  const pageSafe = Math.min(Math.max(1, page), totalPages);
-  const visibleLogs = useMemo(
-    () =>
-      filteredLogs.slice(
-        (pageSafe - 1) * LOGS_PAGE_SIZE,
-        pageSafe * LOGS_PAGE_SIZE
-      ),
-    [filteredLogs, pageSafe]
-  );
-
-  useEffect(() => {
-    setPage(1);
-  }, [view, selectedDate, selectedRecentCount, selectedCategory]);
-
-  useEffect(() => {
-    if (pageSafe !== page) setPage(pageSafe);
-  }, [pageSafe]);
+  const filterKey = `${effectiveView}-${effectiveSelectedDate}-${selectedRecentCount}-${selectedCategory ?? ""}`;
 
   const contextBannerText = useMemo(() => {
-    if (selectedDate && view === "daily") {
-      return `Showing logs for: ${formatDateLabel(selectedDate)}`;
+    if (effectiveSelectedDate && effectiveView === "daily") {
+      return `Showing logs for: ${formatDateLabel(effectiveSelectedDate)}`;
     }
     if (selectedCategory) {
       return `Filtered by: ${formatCategoryLabel(selectedCategory)}`;
     }
     return null;
-  }, [selectedDate, selectedCategory, view]);
+  }, [effectiveSelectedDate, effectiveView, selectedCategory]);
 
   return (
     <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">
@@ -140,9 +146,9 @@ export default function LogsPage() {
         )}
 
         <LogsControlBar
-          view={view}
+          view={effectiveView}
           dailyDateOptions={dailyDateOptions}
-          selectedDate={selectedDate}
+          selectedDate={effectiveSelectedDate}
           selectedRecentCount={selectedRecentCount}
           onViewChange={setView}
           onDateChange={setSelectedDate}
@@ -154,13 +160,10 @@ export default function LogsPage() {
             <ClassificationPanel />
           </div>
           <div className="bg-slate-900/45 border border-slate-800/50 rounded-2xl p-4 sm:p-5">
-            <LogsList
-              logs={visibleLogs}
-              highlightedLogText={highlightedText}
-              totalCount={filteredLogs.length}
-              currentPage={pageSafe}
-              totalPages={totalPages}
-              onPageChange={setPage}
+            <LogsListSection
+              key={filterKey}
+              filteredLogs={filteredLogs}
+              highlightedText={highlightedText}
             />
           </div>
         </div>
