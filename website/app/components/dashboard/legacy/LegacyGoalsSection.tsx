@@ -2,8 +2,9 @@
 
 import { useState, useMemo } from "react";
 import GoalCard, { Goal } from "../GoalCard";
+import { getGoalsFromLogs } from "@/data/test-logs-derived";
 
-const MOCK_GOALS: Goal[] = [
+const FALLBACK_GOALS: Goal[] = [
   {
     id: "1",
     name: "Go to gym",
@@ -89,15 +90,20 @@ function computeStats(goals: Goal[]) {
 export default function LegacyGoalsSection() {
   const [sortMode] = useState<SortMode>("streak");
 
-  const sorted = useMemo(() => sortGoals(MOCK_GOALS, sortMode), [sortMode]);
-  const stats = useMemo(() => computeStats(MOCK_GOALS), []);
+  const goals = useMemo(() => {
+    const derived = getGoalsFromLogs();
+    return derived.length > 0 ? (derived as Goal[]) : FALLBACK_GOALS;
+  }, []);
+
+  const sorted = useMemo(() => sortGoals(goals, sortMode), [goals, sortMode]);
+  const stats = useMemo(() => computeStats(goals), [goals]);
 
   return (
     <div className="bg-slate-900/60 border border-slate-800/60 rounded-2xl mb-8 animate-fade-in-up-3">
       <div className="px-6 py-5 border-b border-slate-800/50 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-base font-semibold text-white">Goals &amp; Progress</h2>
-          <p className="text-sm text-slate-400 mt-1">{MOCK_GOALS.length} active goals this month</p>
+          <p className="text-sm text-slate-400 mt-1">{goals.length} active goals this month</p>
         </div>
       </div>
 
@@ -113,7 +119,7 @@ export default function LegacyGoalsSection() {
             <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">On streak</p>
             <p className="text-base font-bold text-white mt-1">
               {stats.active}
-              <span className="text-sm font-normal text-slate-500 ml-1">/ {MOCK_GOALS.length}</span>
+              <span className="text-sm font-normal text-slate-500 ml-1">/ {goals.length}</span>
             </p>
           </div>
           <div>

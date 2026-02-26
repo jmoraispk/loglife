@@ -3,14 +3,15 @@
 import Link from "next/link";
 import ActivityList, { Activity } from "../ActivityList";
 import LegacyDonutChart, { LegacyCategoryData } from "./LegacyDonutChart";
+import { getTodayOverviewFromLogs } from "@/data/test-logs-derived";
 
-const MOCK_CATEGORIES: LegacyCategoryData[] = [
+const FALLBACK_CATEGORIES: LegacyCategoryData[] = [
   { label: "Work", value: 50, color: "#3b82f6" },
   { label: "Health", value: 30, color: "#10b981" },
   { label: "Relationships", value: 20, color: "#f59e0b" },
 ];
 
-const MOCK_ACTIVITIES: Activity[] = [
+const FALLBACK_ACTIVITIES: Activity[] = [
   { id: "1", title: "Morning workout", category: "Health", time: "7:00 AM", icon: "🏋️" },
   { id: "2", title: "Team standup", category: "Work", time: "9:30 AM", icon: "💼" },
   { id: "3", title: "Deep work session", category: "Work", time: "10:00 AM", icon: "💻" },
@@ -20,7 +21,11 @@ const MOCK_ACTIVITIES: Activity[] = [
 ];
 
 export default function LegacyTodayOverview() {
-  const selectedDate = "2026-02-23";
+  const { categories, activities, selectedDate } = getTodayOverviewFromLogs();
+  const useFallback = categories.length === 0 && activities.length === 0;
+  const displayCategories: LegacyCategoryData[] = useFallback ? FALLBACK_CATEGORIES : categories;
+  const displayActivities = useFallback ? FALLBACK_ACTIVITIES : activities;
+  const dateForLink = useFallback ? new Date().toISOString().slice(0, 10) : selectedDate;
 
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -40,7 +45,7 @@ export default function LegacyTodayOverview() {
             Today
           </span>
           <Link
-            href={`/logs?date=${selectedDate}&from=dashboard`}
+            href={`/logs?date=${dateForLink}&from=dashboard`}
             className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800/70 border border-slate-700/80 text-xs font-semibold text-slate-200 hover:bg-slate-700/80 transition-colors"
           >
             View All Logs
@@ -65,7 +70,7 @@ export default function LegacyTodayOverview() {
         <div>
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-5">Time Distribution</p>
           <LegacyDonutChart
-            data={MOCK_CATEGORIES}
+            data={displayCategories}
             getCategoryHref={(label) => `/logs?category=${encodeURIComponent(label.toLowerCase())}&from=dashboard`}
           />
         </div>
@@ -73,9 +78,9 @@ export default function LegacyTodayOverview() {
         <div>
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-5">Today&apos;s Activities</p>
           <ActivityList
-            activities={MOCK_ACTIVITIES}
+            activities={displayActivities}
             getActivityHref={(activity) =>
-              `/logs?date=${selectedDate}&highlight=${encodeURIComponent(activity.title)}&category=${encodeURIComponent(
+              `/logs?date=${dateForLink}&highlight=${encodeURIComponent(activity.title)}&category=${encodeURIComponent(
                 activity.category.toLowerCase(),
               )}&from=dashboard`
             }

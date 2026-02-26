@@ -1,11 +1,12 @@
-import { DAILY_OPTIONS, DailyOption, LogsView, RECENT_COUNT_OPTIONS, RecentCountOption } from "./mockData";
+import { DailyDateOption, LogsView, RECENT_COUNT_OPTIONS, RecentCountOption } from "./mockData";
 
 interface LogsControlBarProps {
   view: LogsView;
-  selectedDay: DailyOption;
+  dailyDateOptions: DailyDateOption[];
+  selectedDate: string;
   selectedRecentCount: RecentCountOption;
   onViewChange: (view: LogsView) => void;
-  onDayChange: (day: DailyOption) => void;
+  onDateChange: (date: string) => void;
   onRecentCountChange: (count: RecentCountOption) => void;
 }
 
@@ -34,10 +35,11 @@ function ToggleButton({
 
 export default function LogsControlBar({
   view,
-  selectedDay,
+  dailyDateOptions,
+  selectedDate,
   selectedRecentCount,
   onViewChange,
-  onDayChange,
+  onDateChange,
   onRecentCountChange,
 }: LogsControlBarProps) {
   return (
@@ -51,15 +53,19 @@ export default function LogsControlBar({
         <label className="inline-flex items-center gap-2 text-sm text-slate-400">
           <span>Date:</span>
           <select
-            value={selectedDay}
-            onChange={(event) => onDayChange(event.target.value as DailyOption)}
+            value={selectedDate}
+            onChange={(event) => onDateChange(event.target.value)}
             className="rounded-lg bg-slate-950/70 border border-slate-700/70 text-slate-200 text-sm px-3 py-1.5 outline-none focus:border-emerald-500/40 transition-colors"
           >
-            {DAILY_OPTIONS.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
+            {dailyDateOptions.length === 0 ? (
+              <option value="">No dates</option>
+            ) : (
+              dailyDateOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))
+            )}
           </select>
         </label>
       ) : (
