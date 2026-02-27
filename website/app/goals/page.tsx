@@ -37,10 +37,10 @@ function GoalCard({ goal }: { goal: Goal }) {
   return (
     <Link
       href={`/goals/${goal.id}`}
-      className="group flex h-full flex-col rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4 hover:bg-white/10 hover:border-slate-500/60 transition-colors"
+      className="group flex h-full flex-col rounded-2xl border border-slate-800/60 bg-slate-900/60 hover:bg-slate-900/80 hover:border-slate-700/60 transition-colors"
     >
-      {/* Top: meta + progress */}
-      <div className="flex items-start justify-between gap-4">
+      {/* Card header */}
+      <div className="px-5 py-4 border-b border-slate-800/50 flex items-start justify-between gap-4">
         <div className="min-w-0 space-y-2">
           <div className="flex items-center gap-2 flex-wrap">
             <span
@@ -55,9 +55,7 @@ function GoalCard({ goal }: { goal: Goal }) {
               </span>
             </span>
           </div>
-          <h2 className="text-sm font-semibold text-white truncate">
-            {goal.name}
-          </h2>
+          <h2 className="text-sm font-semibold text-white">{goal.name}</h2>
           <p className="text-xs text-slate-400 line-clamp-2">
             {goal.description}
           </p>
@@ -80,13 +78,13 @@ function GoalCard({ goal }: { goal: Goal }) {
         </div>
       </div>
 
-      {/* Middle: tags + dates */}
-      <div className="flex items-center justify-between gap-4 text-[11px] text-slate-500">
+      {/* Card body: tags + dates */}
+      <div className="px-5 py-3 flex items-center justify-between gap-4 text-[11px] text-slate-500">
         <div className="flex flex-wrap gap-2">
           {goal.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}
-              className="px-2 py-0.5 rounded-full bg-slate-900/60 border border-slate-800/80 text-[10px] text-slate-300"
+              className="px-2 py-0.5 rounded-full bg-slate-950/60 border border-slate-800/80 text-[10px] text-slate-300"
             >
               #{tag}
             </span>
@@ -102,13 +100,13 @@ function GoalCard({ goal }: { goal: Goal }) {
         </span>
       </div>
 
-      {/* Bottom: event count + CTA — mt-auto pins to card bottom */}
-      <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/60 mt-auto">
+      {/* Card footer */}
+      <div className="px-5 py-3 border-t border-slate-800/50 flex items-center justify-between gap-2 mt-auto">
         <span className="text-[11px] text-slate-500">
           {goal.events.length} recent{" "}
           {goal.events.length === 1 ? "event" : "events"}
         </span>
-        <span className="inline-flex items-center gap-1 text-[11px] text-slate-300 group-hover:text-slate-50">
+        <span className="inline-flex items-center gap-1 text-[11px] text-slate-400 group-hover:text-slate-200 transition-colors">
           View timeline
           <svg
             className="w-3.5 h-3.5"
@@ -137,17 +135,15 @@ export default function GoalsPage() {
   return (
     <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">
       <div className="max-w-[1200px] mx-auto space-y-6 animate-fade-in-up-1">
-        <div className="flex items-center justify-between gap-3 flex-wrap mb-6">
-          <div className="space-y-1">
-            <h1 className="text-lg font-semibold text-white">Goals</h1>
-            <p className="text-sm text-slate-400">
-              High-level outcomes you&apos;re driving, with simple timelines and
-              streaks.
-            </p>
-          </div>
-        </div>
+        <header className="mb-6">
+          <h1 className="text-2xl font-semibold text-white">Goals</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            High-level outcomes you&apos;re driving, with simple timelines and
+            streaks.
+          </p>
+        </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {sortedGoals.map((goal) => (
             <GoalCard key={goal.id} goal={goal} />
           ))}
