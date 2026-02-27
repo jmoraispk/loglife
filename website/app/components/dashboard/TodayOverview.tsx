@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import DonutChart, { CategoryData } from "./DonutChart";
-import ActivityList, { Activity } from "./ActivityList";
+import ActivityList from "./ActivityList";
 import { getTodayOverviewFromLogs } from "@/data/test-logs-derived";
 
 const EMPTY_CHART_DATA: CategoryData[] = [

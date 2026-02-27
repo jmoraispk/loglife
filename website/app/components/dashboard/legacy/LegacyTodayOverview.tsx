@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import ActivityList, { Activity } from "../ActivityList";
+import ActivityList from "../ActivityList";
 import LegacyDonutChart, { LegacyCategoryData } from "./LegacyDonutChart";
 import { getTodayOverviewFromLogs } from "@/data/test-logs-derived";
 
