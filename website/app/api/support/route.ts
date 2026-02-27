@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 // Resend's onboarding@resend.dev can only send to your Resend account email.
 // Set SUPPORT_EMAIL in .env.local to that address for testing, or verify a domain
 // and use a custom "from" to send to any address.
@@ -11,6 +9,15 @@ const SUPPORT_EMAIL = process.env.SUPPORT_EMAIL ?? "hafizahtasham07@gmail.com";
 const MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024; // 5 MB
 
 export async function POST(req: NextRequest) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json(
+      { error: "Email service not configured" },
+      { status: 500 },
+    );
+  }
+  const resend = new Resend(apiKey);
+
   const contentType = req.headers.get("content-type") ?? "";
   let type: string | undefined;
   let subject: string | undefined;
