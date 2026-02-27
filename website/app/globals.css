@@ -139,3 +139,40 @@ body {
   transform: translateY(0);
 }
 
+/* Logs Explorer scrollbar — matches app dark theme (slate + brand) */
+.logs-explorer-scroll[data-scrollbar="theme"],
+.logs-explorer-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(71 85 105) rgb(15 23 42);
+}
+/* WebKit: remove default arrows and force dark theme */
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar,
+.logs-explorer-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar-button,
+.logs-explorer-scroll::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar-track,
+.logs-explorer-scroll::-webkit-scrollbar-track {
+  background: rgb(15 23 42) !important;
+  border-radius: 9999px;
+}
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar-thumb,
+.logs-explorer-scroll::-webkit-scrollbar-thumb {
+  background: rgb(71 85 105) !important;
+  border-radius: 9999px;
+}
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar-thumb:hover,
+.logs-explorer-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139) !important;
+}
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar-corner,
+.logs-explorer-scroll::-webkit-scrollbar-corner {
+  background: rgb(15 23 42);
+}
+
