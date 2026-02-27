@@ -51,28 +51,34 @@ const goalDefinitions = [
     id: 'g1',
     name: 'Go to gym',
     description: 'Build strength and consistency',
+    why: 'Stay healthy and build discipline',
     category: 'Health',
     tags: ['gym', 'strength'],
     startDate: '2026-01-02',
     targetDate: '2026-06-01',
+    milestones: ['10 sessions', '20 sessions', '30 sessions'],
   },
   {
     id: 'g2',
     name: 'Deep work habit',
     description: '4 focused hours/day on core project',
+    why: 'Protect deep focus time to ship meaningful work',
     category: 'Work',
     tags: ['deep-work', 'focus'],
     startDate: '2026-01-10',
     targetDate: '2026-12-31',
+    milestones: ['10 deep-work blocks', '50 focused hours', '100 focused hours'],
   },
   {
     id: 'g3',
     name: 'Nurture close relationships',
     description: 'Consistent quality time with family and friends',
+    why: 'Stay connected with people who matter most',
     category: 'Relationships',
     tags: ['family', 'friends'],
     startDate: '2026-01-05',
     targetDate: '2026-12-31',
+    milestones: ['6 meaningful calls', '10 meaningful calls', '20 meaningful calls'],
   },
 ];
 
@@ -131,6 +137,43 @@ function inferGoalValue(text, eventType){
   return null;
 }
 
+function clamp(n, min, max){
+  return Math.max(min, Math.min(max, n));
+}
+
+function daysBetween(isoA, isoB){
+  const a = new Date(`${isoA}T12:00:00.000Z`).getTime();
+  const b = new Date(`${isoB}T12:00:00.000Z`).getTime();
+  return Math.round((b - a) / (24 * 3600 * 1000));
+}
+
+function inferGoalContribution(text, eventType){
+  if (eventType === 'note') return 'note';
+  if (eventType === 'milestone') return 'major';
+
+  const lower = text.toLowerCase();
+  if (/\d+\s*km/.test(lower) || /\d+\s*hours?/.test(lower)) return 'major';
+  if (
+    lower.includes('deep work') ||
+    lower.includes('proposal') ||
+    lower.includes('workout') ||
+    lower.includes('run') ||
+    lower.includes('call')
+  ) {
+    return 'major';
+  }
+
+  return 'minor';
+}
+
+function inferProgressPercent(entryDate, goalStartDate, goalTargetDate){
+  const totalDays = Math.max(1, daysBetween(goalStartDate, goalTargetDate));
+  const elapsedDays = clamp(daysBetween(goalStartDate, entryDate), 0, totalDays);
+  const base = (elapsedDays / totalDays) * 100;
+  const jitter = randInt(-8, 8);
+  return clamp(Math.round(base + jitter), 0, 100);
+}
+
 function maybeGoalData(ts, categoriesArr, text, tags, logType){
   // Keep goal metadata mostly on life logs to mirror real usage.
   if (logType !== 'Life Log') return null;
@@ -145,24 +188,44 @@ function maybeGoalData(ts, categoriesArr, text, tags, logType){
     { item: 'milestone', weight: 10 },
   ]);
 
-  // Start near the synthetic lookback and keep target in the future.
   const entryDate = isoDateOnly(ts);
-  const goalStartDate = addDays(entryDate, -randInt(20, 80));
-  const goalTargetDate = addDays(entryDate, randInt(45, 220));
+  const goalStartDate = goal.startDate;
+  const goalTargetDate = goal.targetDate;
 
   const goalEventValue = inferGoalValue(text, goalEventType);
+  const goalContribution = inferGoalContribution(text, goalEventType);
+  const goalProgressValue = inferProgressPercent(entryDate, goalStartDate, goalTargetDate);
   const mergedTags = Array.from(new Set([...goal.tags, ...tags]));
+
+  const shouldAttachMilestoneMeta = goalEventType === 'milestone';
+  const pickedMilestoneTitle = shouldAttachMilestoneMeta ? pick(goal.milestones) : undefined;
+  const goalMilestoneDate = shouldAttachMilestoneMeta
+    ? addDays(entryDate, randInt(-20, 40))
+    : undefined;
+  const goalMilestoneId = shouldAttachMilestoneMeta
+    ? `${goal.id}-m-${entryDate}-${randInt(100, 999)}`
+    : undefined;
+  const goalMilestoneIsUpcoming = shouldAttachMilestoneMeta
+    ? goalMilestoneDate > entryDate
+    : undefined;
 
   return {
     goalId: goal.id,
     goalName: goal.name,
     goalDescription: goal.description,
+    goalWhy: goal.why,
     goalCategory: goal.category,
     goalTags: mergedTags,
     goalStartDate,
     goalTargetDate,
+    goalProgressValue,
     goalEventType,
     goalEventValue,
+    goalContribution,
+    goalMilestoneId,
+    goalMilestoneDate,
+    goalMilestoneTitle: pickedMilestoneTitle,
+    goalMilestoneIsUpcoming,
   };
 }
 
