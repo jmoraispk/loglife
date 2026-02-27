@@ -134,7 +134,7 @@ export default function WhatsAppWidget() {
     <>
       {isOpen && (
         <div 
-          className={`fixed bottom-6 right-24 z-50 flex flex-col items-center rounded-3xl p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-xl max-w-sm transition-all ease-out bg-slate-900/60 border border-slate-700/50 ${
+          className={`fixed bottom-24 right-24 z-50 flex flex-col items-center rounded-3xl p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-xl max-w-sm transition-all ease-out bg-slate-900/60 border border-slate-700/50 ${
             isAnimating 
               ? 'opacity-0 translate-x-12 duration-200' 
               : 'opacity-100 translate-x-0 duration-300'
@@ -204,7 +204,7 @@ export default function WhatsAppWidget() {
       )}
 
       {/* Single FAB: opens chat panel when closed; becomes close (cross) when panel open */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-3">
+      <div className="fixed bottom-24 right-6 z-50 flex flex-col items-center gap-3">
         {/* Chat panel: enter/exit transition */}
         {isPanelVisible && (
           <div
