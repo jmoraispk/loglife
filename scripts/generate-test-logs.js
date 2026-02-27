@@ -44,6 +44,38 @@ const now = Date.now();
 const MS_IN_DAY = 24*3600*1000;
 const lookbackDays = 90; // generate over last 90 days
 
+// Goal metadata is embedded in some logs so the goals pages can be driven
+// directly from test-logs.json (instead of a separate hard-coded source).
+const goalDefinitions = [
+  {
+    id: 'g1',
+    name: 'Go to gym',
+    description: 'Build strength and consistency',
+    category: 'Health',
+    tags: ['gym', 'strength'],
+    startDate: '2026-01-02',
+    targetDate: '2026-06-01',
+  },
+  {
+    id: 'g2',
+    name: 'Deep work habit',
+    description: '4 focused hours/day on core project',
+    category: 'Work',
+    tags: ['deep-work', 'focus'],
+    startDate: '2026-01-10',
+    targetDate: '2026-12-31',
+  },
+  {
+    id: 'g3',
+    name: 'Nurture close relationships',
+    description: 'Consistent quality time with family and friends',
+    category: 'Relationships',
+    tags: ['family', 'friends'],
+    startDate: '2026-01-05',
+    targetDate: '2026-12-31',
+  },
+];
+
 function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 function randInt(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
 function pad(n){ return n < 10 ? '0'+n : ''+n; }
@@ -65,6 +97,73 @@ function choiceWeighted(weights){
     r -= w.weight;
   }
   return weights[weights.length-1].item;
+}
+
+function isoDateOnly(ts){
+  return yyyyMmDd(ts);
+}
+
+function addDays(isoDateString, days){
+  const d = new Date(`${isoDateString}T12:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+function pickGoalForCategories(categoriesArr){
+  const primary = categoriesArr.find((c) => c !== 'Other');
+  if (!primary) return null;
+  return goalDefinitions.find((g) => g.category === primary) || null;
+}
+
+function inferGoalValue(text, eventType){
+  if (eventType !== 'session') return null;
+
+  const kmMatch = text.match(/(\d+)\s*km/i);
+  if (kmMatch) {
+    return { km: Number(kmMatch[1]) };
+  }
+
+  const hoursMatch = text.match(/(\d+)\s*hours?/i);
+  if (hoursMatch) {
+    return { hours: Number(hoursMatch[1]) };
+  }
+
+  return null;
+}
+
+function maybeGoalData(ts, categoriesArr, text, tags, logType){
+  // Keep goal metadata mostly on life logs to mirror real usage.
+  if (logType !== 'Life Log') return null;
+  if (Math.random() > 0.62) return null;
+
+  const goal = pickGoalForCategories(categoriesArr);
+  if (!goal) return null;
+
+  const goalEventType = choiceWeighted([
+    { item: 'session', weight: 70 },
+    { item: 'note', weight: 20 },
+    { item: 'milestone', weight: 10 },
+  ]);
+
+  // Start near the synthetic lookback and keep target in the future.
+  const entryDate = isoDateOnly(ts);
+  const goalStartDate = addDays(entryDate, -randInt(20, 80));
+  const goalTargetDate = addDays(entryDate, randInt(45, 220));
+
+  const goalEventValue = inferGoalValue(text, goalEventType);
+  const mergedTags = Array.from(new Set([...goal.tags, ...tags]));
+
+  return {
+    goalId: goal.id,
+    goalName: goal.name,
+    goalDescription: goal.description,
+    goalCategory: goal.category,
+    goalTags: mergedTags,
+    goalStartDate,
+    goalTargetDate,
+    goalEventType,
+    goalEventValue,
+  };
 }
 
 // Build an array of timestamps with bursts
@@ -131,6 +230,7 @@ const logs = timestamps.map((ts, idx) => {
 
   const category = pick(categories);
   const categoriesArr = maybeMultiCategory(category);
+  const tags = sampleTags();
 
   // type: Life Log 80% / Ignored 20%
   const type = Math.random() < 0.8 ? 'Life Log' : 'Ignored';
@@ -145,6 +245,7 @@ const logs = timestamps.map((ts, idx) => {
 
   // occasionally include session info (20%)
   const sessionId = Math.random() < 0.2 ? `sess_${randInt(1000,9999)}` : null;
+  const goalData = maybeGoalData(ts, categoriesArr, text, tags, type);
 
   return {
     id: `log_${idx + 1}`,
@@ -153,11 +254,12 @@ const logs = timestamps.map((ts, idx) => {
     time: hhmm(ts),
     text,
     categories: categoriesArr,
-    tags: sampleTags(),
+    tags,
     type,
     importance: Math.random() < 0.05 ? importance : undefined, // keep importance sparse
     sessionId: sessionId || undefined,
-    source: sessionId ? 'whatsapp' : (Math.random() < 0.05 ? 'email' : undefined)
+    source: sessionId ? 'whatsapp' : (Math.random() < 0.05 ? 'email' : undefined),
+    ...(goalData || {}),
   };
 });
 
