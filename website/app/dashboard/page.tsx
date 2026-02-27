@@ -207,6 +207,25 @@ export default function DashboardPage() {
         </Link>
 
         <Link
+          href="/goals?from=dashboard"
+          className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700/70 bg-slate-800/70 px-3 py-2 text-xs font-semibold text-slate-100 transition-colors hover:bg-slate-700/80"
+        >
+          <svg
+            className="h-3.5 w-3.5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M12 2l3 7 7 .5-5.5 4.5L18 22l-6-3.5L6 22l1.5-8L2 9.5 9 9l3-7z" />
+          </svg>
+          Goals
+        </Link>
+
+        <Link
           href="/stats"
           className="inline-flex items-center gap-1.5 rounded-lg border border-slate-700/70 bg-slate-800/70 px-3 py-2 text-xs font-semibold text-slate-100 transition-colors hover:bg-slate-700/80"
         >
