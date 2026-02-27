@@ -1,9 +1,9 @@
-import { TAGS, type TagNode } from "@/data/mock/tags";
+import { TAGS, type TagColor, type TagNode } from "@/data/mock/tags";
 
 export interface Tag {
   id: string;
   name: string;
-  color: string;
+  color: TagColor;
   parentId: string | null;
 }
 
