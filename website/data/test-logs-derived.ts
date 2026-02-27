@@ -26,6 +26,13 @@ interface LogEntryLike {
   goalTargetDate?: string;
   goalEventType?: string;
   goalEventValue?: unknown;
+  goalWhy?: string;
+  goalProgressValue?: unknown;
+  goalContribution?: string;
+  goalMilestoneId?: string;
+  goalMilestoneDate?: string;
+  goalMilestoneTitle?: string;
+  goalMilestoneIsUpcoming?: unknown;
 }
 
 const RAW_LOGS: LogEntryLike[] = Array.isArray(testLogsData) ? (testLogsData as LogEntryLike[]) : [];
@@ -303,6 +310,7 @@ export function getGoalsFromLogs(): Goal[] {
 export type GoalCategory = "Work" | "Health" | "Relationships";
 export type GoalEventType = "session" | "milestone" | "note";
 export type GoalEventValue = { km: number } | { hours: number } | null;
+export type GoalContribution = "major" | "minor" | "note";
 
 export type DetailedGoalEvent = {
   date: string;
@@ -311,6 +319,25 @@ export type DetailedGoalEvent = {
   text: string;
   value: GoalEventValue;
   tags: string[];
+};
+
+export type GoalTimeSeriesPoint = {
+  date: string;
+  value: number;
+};
+
+export type GoalMilestone = {
+  id: string;
+  date: string;
+  title: string;
+  isUpcoming: boolean;
+};
+
+export type GoalContributionEvent = {
+  id: string;
+  date: string;
+  text: string;
+  contribution: GoalContribution;
 };
 
 export type DetailedGoal = {
@@ -324,6 +351,10 @@ export type DetailedGoal = {
   progressPercent: number;
   streak: number;
   events: DetailedGoalEvent[];
+  why: string;
+  timeSeries: GoalTimeSeriesPoint[];
+  milestones: GoalMilestone[];
+  contributionEvents: GoalContributionEvent[];
 };
 
 function isGoalCategory(value: unknown): value is GoalCategory {
@@ -343,6 +374,22 @@ function toGoalEventValue(value: unknown): GoalEventValue {
     return { hours: (value as { hours: number }).hours };
   }
   return null;
+}
+
+function toGoalContribution(value: unknown, fallbackType: GoalEventType): GoalContribution {
+  if (value === "major" || value === "minor" || value === "note") return value;
+  if (fallbackType === "note") return "note";
+  if (fallbackType === "milestone") return "major";
+  return "minor";
+}
+
+function toProgressValue(value: unknown): number | null {
+  if (typeof value !== "number" || Number.isNaN(value)) return null;
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function toBooleanOrNull(value: unknown): boolean | null {
+  return typeof value === "boolean" ? value : null;
 }
 
 function computeStreakFromDates(sortedUniqueDates: string[]): number {
@@ -370,6 +417,7 @@ function computeProgressPercent(sortedUniqueDates: string[]): number {
 }
 
 export function getDetailedGoalsFromLogs(): DetailedGoal[] {
+  const today = new Date().toISOString().slice(0, 10);
   const grouped = new Map<
     string,
     {
@@ -380,7 +428,11 @@ export function getDetailedGoalsFromLogs(): DetailedGoal[] {
       tags: Set<string>;
       startDate: string;
       targetDate: string;
+      why: string | null;
       events: DetailedGoalEvent[];
+      timeSeriesByDate: Map<string, number>;
+      milestonesById: Map<string, GoalMilestone>;
+      contributionEvents: GoalContributionEvent[];
     }
   >();
 
@@ -398,7 +450,11 @@ export function getDetailedGoalsFromLogs(): DetailedGoal[] {
       tags: new Set<string>(),
       startDate: log.goalStartDate ?? date,
       targetDate: log.goalTargetDate ?? date,
+      why: null,
       events: [],
+      timeSeriesByDate: new Map<string, number>(),
+      milestonesById: new Map<string, GoalMilestone>(),
+      contributionEvents: [],
     };
 
     if (!grouped.has(log.goalId)) {
@@ -407,6 +463,9 @@ export function getDetailedGoalsFromLogs(): DetailedGoal[] {
 
     if (!goal.description && log.goalDescription) {
       goal.description = log.goalDescription;
+    }
+    if (!goal.why && typeof log.goalWhy === "string" && log.goalWhy.trim().length > 0) {
+      goal.why = log.goalWhy;
     }
 
     const candidateStart = log.goalStartDate ?? date;
@@ -418,14 +477,45 @@ export function getDetailedGoalsFromLogs(): DetailedGoal[] {
     for (const tag of log.goalTags ?? []) goal.tags.add(tag);
     for (const tag of log.tags ?? []) goal.tags.add(tag);
 
+    const eventType = toGoalEventType(log.goalEventType);
     goal.events.push({
       date,
       time: log.time,
-      type: toGoalEventType(log.goalEventType),
+      type: eventType,
       text: log.text,
       value: toGoalEventValue(log.goalEventValue),
       tags: Array.isArray(log.tags) ? log.tags : [],
     });
+
+    const progressValue = toProgressValue(log.goalProgressValue);
+    if (progressValue != null) {
+      const existingProgress = goal.timeSeriesByDate.get(date);
+      goal.timeSeriesByDate.set(date, existingProgress == null ? progressValue : Math.max(existingProgress, progressValue));
+    }
+
+    goal.contributionEvents.push({
+      id: log.id,
+      date,
+      text: log.text,
+      contribution: toGoalContribution(log.goalContribution, eventType),
+    });
+
+    const milestoneDate = typeof log.goalMilestoneDate === "string" ? log.goalMilestoneDate : date;
+    const hasMilestoneMetadata = Boolean(log.goalMilestoneId || log.goalMilestoneTitle || log.goalMilestoneDate);
+    if (eventType === "milestone" || hasMilestoneMetadata) {
+      const milestoneId = log.goalMilestoneId ?? `${log.id}-ms`;
+      const milestoneTitle =
+        typeof log.goalMilestoneTitle === "string" && log.goalMilestoneTitle.trim().length > 0
+          ? log.goalMilestoneTitle
+          : log.text;
+      const explicitUpcoming = toBooleanOrNull(log.goalMilestoneIsUpcoming);
+      goal.milestonesById.set(milestoneId, {
+        id: milestoneId,
+        date: milestoneDate,
+        title: milestoneTitle,
+        isUpcoming: explicitUpcoming ?? milestoneDate >= today,
+      });
+    }
   }
 
   return Array.from(grouped.values())
@@ -436,6 +526,48 @@ export function getDetailedGoalsFromLogs(): DetailedGoal[] {
         return aKey < bKey ? 1 : aKey > bKey ? -1 : 0;
       });
       const uniqueDates = Array.from(new Set(sortedEvents.map((e) => e.date))).sort();
+      const progressPercent = computeProgressPercent(uniqueDates);
+
+      const timeSeries = Array.from(goal.timeSeriesByDate.entries())
+        .sort(([a], [b]) => a.localeCompare(b))
+        .map(([date, value]) => ({ date, value }));
+
+      const fallbackSeries =
+        uniqueDates.length > 0
+          ? uniqueDates.map((date, index) => ({
+              date,
+              value: Math.max(
+                0,
+                Math.min(100, Math.round(((index + 1) / uniqueDates.length) * progressPercent))
+              ),
+            }))
+          : [{ date: goal.startDate, value: progressPercent }];
+
+      const milestones = Array.from(goal.milestonesById.values()).sort((a, b) =>
+        a.date.localeCompare(b.date)
+      );
+      const fallbackMilestones = sortedEvents
+        .filter((event) => event.type === "milestone")
+        .map((event, index) => ({
+          id: `${goal.id}-fallback-ms-${index}`,
+          date: event.date,
+          title: event.text,
+          isUpcoming: event.date >= today,
+        }));
+
+      const contributionEventsById = new Map<string, GoalContributionEvent>();
+      for (const event of goal.contributionEvents) {
+        contributionEventsById.set(event.id, event);
+      }
+      const contributionEvents = Array.from(contributionEventsById.values()).sort((a, b) =>
+        b.date.localeCompare(a.date)
+      );
+      const fallbackContributionEvents = sortedEvents.slice(0, 6).map((event, index) => ({
+        id: `${goal.id}-fallback-contrib-${index}`,
+        date: event.date,
+        text: event.text,
+        contribution: toGoalContribution(null, event.type),
+      }));
 
       return {
         id: goal.id,
@@ -445,9 +577,13 @@ export function getDetailedGoalsFromLogs(): DetailedGoal[] {
         tags: Array.from(goal.tags),
         startDate: goal.startDate,
         targetDate: goal.targetDate,
-        progressPercent: computeProgressPercent(uniqueDates),
+        progressPercent,
         streak: computeStreakFromDates(uniqueDates),
         events: sortedEvents,
+        why: goal.why ?? "This goal supports your long-term direction.",
+        timeSeries: timeSeries.length > 0 ? timeSeries : fallbackSeries,
+        milestones: milestones.length > 0 ? milestones : fallbackMilestones,
+        contributionEvents: contributionEvents.length > 0 ? contributionEvents : fallbackContributionEvents,
       };
     })
     .sort((a, b) => a.name.localeCompare(b.name));
