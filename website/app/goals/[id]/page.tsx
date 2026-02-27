@@ -2,9 +2,11 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
   getGoalByIdFromLogs,
+  getGoalRadarFromLogs,
   type DetailedGoal as Goal,
   type GoalCategory,
 } from "@/data/test-logs-derived";
+import GoalRadarPanel from "./GoalRadarPanel";
 
 const categoryColors: Record<
   GoalCategory,
@@ -262,6 +264,8 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
     return notFound();
   }
 
+  const radarData = getGoalRadarFromLogs(goal.id);
+
   return (
     <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">
       <div className="max-w-[1200px] mx-auto space-y-4">
@@ -288,6 +292,31 @@ export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
         </div>
 
         <GoalHeader goal={goal} />
+
+        <section className="rounded-2xl border border-slate-800/60 bg-slate-900/60 p-6 animate-fade-in-up-2">
+          <div className="mb-4 flex items-start justify-between gap-3 flex-wrap">
+            <div>
+              <h2 className="text-base font-semibold text-white">Life Balance Radar</h2>
+              <p className="text-sm text-slate-400 mt-1">
+                Static preview of this goal across key dimensions.
+              </p>
+            </div>
+            <span className="px-2.5 py-1 rounded-full bg-slate-800/70 border border-slate-700/80 text-[11px] text-slate-300">
+              Derived from test logs
+            </span>
+          </div>
+          <div className="flex justify-center">
+            <GoalRadarPanel data={radarData} />
+          </div>
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[11px] text-slate-400">
+            <span className="px-2 py-0.5 rounded-full bg-slate-800/70 border border-slate-700/70">
+              Direct: Work, Health, Relationships
+            </span>
+            <span className="px-2 py-0.5 rounded-full bg-slate-800/70 border border-slate-700/70">
+              Inferred: Mind, Body, Social (from text + tags)
+            </span>
+          </div>
+        </section>
 
         <GoalTimeline goal={goal} />
       </div>

@@ -457,6 +457,81 @@ export function getGoalByIdFromLogs(id: string): DetailedGoal | undefined {
   return getDetailedGoalsFromLogs().find((goal) => goal.id === id);
 }
 
+// ─── Radar data: derive 6 axes from goal-linked logs ────────────────────────
+export type RadarDatum = { axis: string; value: number };
+
+const RADAR_AXES = ["Work", "Health", "Relationships", "Mind", "Body", "Social"] as const;
+
+const MIND_KEYWORDS = ["meditation", "focus", "deep work", "deep-work", "planning", "read", "journal"];
+const BODY_KEYWORDS = ["gym", "run", "workout", "sleep", "walk", "health", "strength", "dentist"];
+const SOCIAL_KEYWORDS = ["call", "family", "friends", "friend", "partner", "team", "meeting", "client", "parents"];
+
+function includesAnyKeyword(text: string, keywords: string[]): boolean {
+  return keywords.some((keyword) => text.includes(keyword));
+}
+
+function clampPercent(value: number): number {
+  return Math.max(0, Math.min(100, Math.round(value)));
+}
+
+function defaultRadarForCategory(category: GoalCategory): RadarDatum[] {
+  return RADAR_AXES.map((axis) => {
+    if (axis === category) return { axis, value: 70 };
+    if (axis === "Mind" && category === "Work") return { axis, value: 60 };
+    if (axis === "Body" && category === "Health") return { axis, value: 60 };
+    if (axis === "Social" && category === "Relationships") return { axis, value: 60 };
+    return { axis, value: 40 };
+  });
+}
+
+export function getGoalRadarFromLogs(goalId: string): RadarDatum[] {
+  const targetLogs = RAW_LOGS.filter((log) => log.goalId === goalId && log.type === "Life Log");
+  const goal = getGoalByIdFromLogs(goalId);
+  if (targetLogs.length === 0) {
+    return goal ? defaultRadarForCategory(goal.category) : RADAR_AXES.map((axis) => ({ axis, value: 40 }));
+  }
+
+  let work = 0;
+  let health = 0;
+  let relationships = 0;
+  let categoryMentions = 0;
+  let mindHits = 0;
+  let bodyHits = 0;
+  let socialHits = 0;
+
+  for (const log of targetLogs) {
+    const text = `${log.text} ${(log.tags ?? []).join(" ")}`.toLowerCase();
+    for (const category of log.categories) {
+      if (category === "Work") {
+        work += 1;
+        categoryMentions += 1;
+      } else if (category === "Health") {
+        health += 1;
+        categoryMentions += 1;
+      } else if (category === "Relationships") {
+        relationships += 1;
+        categoryMentions += 1;
+      }
+    }
+
+    if (includesAnyKeyword(text, MIND_KEYWORDS)) mindHits += 1;
+    if (includesAnyKeyword(text, BODY_KEYWORDS)) bodyHits += 1;
+    if (includesAnyKeyword(text, SOCIAL_KEYWORDS)) socialHits += 1;
+  }
+
+  const categoryBase = categoryMentions || 1;
+  const signalBase = targetLogs.length || 1;
+
+  return [
+    { axis: "Work", value: clampPercent((work / categoryBase) * 100) },
+    { axis: "Health", value: clampPercent((health / categoryBase) * 100) },
+    { axis: "Relationships", value: clampPercent((relationships / categoryBase) * 100) },
+    { axis: "Mind", value: clampPercent((mindHits / signalBase) * 100) },
+    { axis: "Body", value: clampPercent((bodyHits / signalBase) * 100) },
+    { axis: "Social", value: clampPercent((socialHits / signalBase) * 100) },
+  ];
+}
+
 // ─── Activity logs for dashboard (timeline): logs for a given date ──────────
 export type ActivityLog = { id: string; time: string; text: string; category: "Work" | "Health" | "Relationships" };
 
