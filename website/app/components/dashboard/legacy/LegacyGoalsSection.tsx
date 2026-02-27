@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useMemo } from "react";
 import GoalCard, { Goal } from "../GoalCard";
 import { getGoalsFromLogs } from "@/data/test-logs-derived";
@@ -105,6 +106,26 @@ export default function LegacyGoalsSection() {
           <h2 className="text-base font-semibold text-white">Goals &amp; Progress</h2>
           <p className="text-sm text-slate-400 mt-1">{goals.length} active goals this month</p>
         </div>
+
+        <Link
+          href="/goals?from=dashboard"
+          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-800/70 border border-slate-700/80 text-xs font-semibold text-slate-200 hover:bg-slate-700/80 transition-colors"
+        >
+          View All Goals
+          <svg
+            className="w-3.5 h-3.5 shrink-0"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden
+          >
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
+        </Link>
       </div>
 
       <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
