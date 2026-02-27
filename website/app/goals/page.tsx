@@ -1,5 +1,9 @@
 import Link from "next/link";
-import { GOALS, type Goal, type GoalCategory } from "@/data/mockGoals";
+import {
+  getDetailedGoalsFromLogs,
+  type DetailedGoal as Goal,
+  type GoalCategory,
+} from "@/data/test-logs-derived";
 
 const categoryColors: Record<
   GoalCategory,
@@ -128,9 +132,7 @@ function GoalCard({ goal }: { goal: Goal }) {
 }
 
 export default function GoalsPage() {
-  const sortedGoals = [...GOALS].sort((a, b) =>
-    a.name.localeCompare(b.name),
-  );
+  const sortedGoals = getDetailedGoalsFromLogs();
 
   return (
     <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">

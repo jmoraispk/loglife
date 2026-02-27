@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getGoalById, type Goal, type GoalCategory } from "@/data/mockGoals";
+import {
+  getGoalByIdFromLogs,
+  type DetailedGoal as Goal,
+  type GoalCategory,
+} from "@/data/test-logs-derived";
 
 const categoryColors: Record<
   GoalCategory,
@@ -252,7 +256,7 @@ interface GoalDetailPageProps {
 
 export default async function GoalDetailPage({ params }: GoalDetailPageProps) {
   const { id } = await params;
-  const goal = getGoalById(id);
+  const goal = getGoalByIdFromLogs(id);
 
   if (!goal) {
     return notFound();

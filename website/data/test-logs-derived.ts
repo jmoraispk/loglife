@@ -16,6 +16,16 @@ interface LogEntryLike {
   date?: string;
   timestamp?: string;
   importance?: string;
+  tags?: string[];
+  goalId?: string;
+  goalName?: string;
+  goalDescription?: string;
+  goalCategory?: string;
+  goalTags?: string[];
+  goalStartDate?: string;
+  goalTargetDate?: string;
+  goalEventType?: string;
+  goalEventValue?: unknown;
 }
 
 const RAW_LOGS: LogEntryLike[] = Array.isArray(testLogsData) ? (testLogsData as LogEntryLike[]) : [];
@@ -44,6 +54,10 @@ function formatTimeForDisplay(time: string): string {
   if (h === 0) return `12:${String(m).padStart(2, "0")} AM`;
   if (h === 12) return `12:${String(m).padStart(2, "0")} PM`;
   return `${h > 12 ? h - 12 : h}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
+}
+
+function getLogDate(log: LogEntryLike): string {
+  return log.date ?? (log.timestamp ? log.timestamp.slice(0, 10) : "");
 }
 
 // ─── Stats types (match @/data/mock-stats) ─────────────────────────────────
@@ -283,6 +297,164 @@ export function getGoalsFromLogs(): Goal[] {
       recentDays,
     };
   });
+}
+
+// ─── Detailed goals for /goals and /goals/[id] pages ────────────────────────
+export type GoalCategory = "Work" | "Health" | "Relationships";
+export type GoalEventType = "session" | "milestone" | "note";
+export type GoalEventValue = { km: number } | { hours: number } | null;
+
+export type DetailedGoalEvent = {
+  date: string;
+  time: string;
+  type: GoalEventType;
+  text: string;
+  value: GoalEventValue;
+  tags: string[];
+};
+
+export type DetailedGoal = {
+  id: string;
+  name: string;
+  description: string;
+  category: GoalCategory;
+  tags: string[];
+  startDate: string;
+  targetDate: string;
+  progressPercent: number;
+  streak: number;
+  events: DetailedGoalEvent[];
+};
+
+function isGoalCategory(value: unknown): value is GoalCategory {
+  return value === "Work" || value === "Health" || value === "Relationships";
+}
+
+function toGoalEventType(value: unknown): GoalEventType {
+  return value === "session" || value === "milestone" || value === "note" ? value : "note";
+}
+
+function toGoalEventValue(value: unknown): GoalEventValue {
+  if (!value || typeof value !== "object") return null;
+  if ("km" in value && typeof (value as { km?: unknown }).km === "number") {
+    return { km: (value as { km: number }).km };
+  }
+  if ("hours" in value && typeof (value as { hours?: unknown }).hours === "number") {
+    return { hours: (value as { hours: number }).hours };
+  }
+  return null;
+}
+
+function computeStreakFromDates(sortedUniqueDates: string[]): number {
+  if (sortedUniqueDates.length === 0) return 0;
+  let streak = 1;
+  for (let i = sortedUniqueDates.length - 1; i > 0; i--) {
+    const curr = new Date(`${sortedUniqueDates[i]}T12:00:00Z`);
+    const prev = new Date(`${sortedUniqueDates[i - 1]}T12:00:00Z`);
+    const diffDays = Math.round((curr.getTime() - prev.getTime()) / (24 * 60 * 60 * 1000));
+    if (diffDays === 1) streak += 1;
+    else break;
+  }
+  return streak;
+}
+
+function computeProgressPercent(sortedUniqueDates: string[]): number {
+  if (sortedUniqueDates.length === 0) return 0;
+  const lastDate = sortedUniqueDates[sortedUniqueDates.length - 1];
+  const end = new Date(`${lastDate}T12:00:00Z`);
+  const start = new Date(end);
+  start.setUTCDate(start.getUTCDate() - 13);
+  const startKey = start.toISOString().slice(0, 10);
+  const activeInWindow = sortedUniqueDates.filter((d) => d >= startKey && d <= lastDate).length;
+  return Math.max(0, Math.min(100, Math.round((activeInWindow / 14) * 100)));
+}
+
+export function getDetailedGoalsFromLogs(): DetailedGoal[] {
+  const grouped = new Map<
+    string,
+    {
+      id: string;
+      name: string;
+      description: string;
+      category: GoalCategory;
+      tags: Set<string>;
+      startDate: string;
+      targetDate: string;
+      events: DetailedGoalEvent[];
+    }
+  >();
+
+  for (const log of RAW_LOGS) {
+    if (!log.goalId || !log.goalName || !isGoalCategory(log.goalCategory)) continue;
+
+    const date = getLogDate(log);
+    if (!date) continue;
+
+    const goal = grouped.get(log.goalId) ?? {
+      id: log.goalId,
+      name: log.goalName,
+      description: log.goalDescription ?? "",
+      category: log.goalCategory,
+      tags: new Set<string>(),
+      startDate: log.goalStartDate ?? date,
+      targetDate: log.goalTargetDate ?? date,
+      events: [],
+    };
+
+    if (!grouped.has(log.goalId)) {
+      grouped.set(log.goalId, goal);
+    }
+
+    if (!goal.description && log.goalDescription) {
+      goal.description = log.goalDescription;
+    }
+
+    const candidateStart = log.goalStartDate ?? date;
+    if (candidateStart < goal.startDate) goal.startDate = candidateStart;
+
+    const candidateTarget = log.goalTargetDate ?? date;
+    if (candidateTarget > goal.targetDate) goal.targetDate = candidateTarget;
+
+    for (const tag of log.goalTags ?? []) goal.tags.add(tag);
+    for (const tag of log.tags ?? []) goal.tags.add(tag);
+
+    goal.events.push({
+      date,
+      time: log.time,
+      type: toGoalEventType(log.goalEventType),
+      text: log.text,
+      value: toGoalEventValue(log.goalEventValue),
+      tags: Array.isArray(log.tags) ? log.tags : [],
+    });
+  }
+
+  return Array.from(grouped.values())
+    .map((goal) => {
+      const sortedEvents = [...goal.events].sort((a, b) => {
+        const aKey = `${a.date}T${a.time}`;
+        const bKey = `${b.date}T${b.time}`;
+        return aKey < bKey ? 1 : aKey > bKey ? -1 : 0;
+      });
+      const uniqueDates = Array.from(new Set(sortedEvents.map((e) => e.date))).sort();
+
+      return {
+        id: goal.id,
+        name: goal.name,
+        description: goal.description,
+        category: goal.category,
+        tags: Array.from(goal.tags),
+        startDate: goal.startDate,
+        targetDate: goal.targetDate,
+        progressPercent: computeProgressPercent(uniqueDates),
+        streak: computeStreakFromDates(uniqueDates),
+        events: sortedEvents,
+      };
+    })
+    .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+export function getGoalByIdFromLogs(id: string): DetailedGoal | undefined {
+  return getDetailedGoalsFromLogs().find((goal) => goal.id === id);
 }
 
 // ─── Activity logs for dashboard (timeline): logs for a given date ──────────
