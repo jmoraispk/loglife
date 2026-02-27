@@ -1,9 +1,11 @@
 import Link from "next/link";
 import {
   getDetailedGoalsFromLogs,
+  getGoalRadarFromLogs,
   type DetailedGoal as Goal,
   type GoalCategory,
 } from "@/data/test-logs-derived";
+import RadarMini from "@/components/charts/RadarMini";
 
 const categoryColors: Record<
   GoalCategory,
@@ -37,6 +39,7 @@ function formatDate(dateString: string) {
 
 function GoalCard({ goal }: { goal: Goal }) {
   const colors = categoryColors[goal.category];
+  const radarData = getGoalRadarFromLogs(goal.id);
 
   return (
     <Link
@@ -66,18 +69,21 @@ function GoalCard({ goal }: { goal: Goal }) {
         </div>
 
         {/* Progress — fixed width so bars align across cards */}
-        <div className="flex flex-col items-end gap-1 shrink-0 w-28">
-          <span className="text-[11px] text-slate-500 uppercase tracking-wide">
-            Progress
-          </span>
-          <span className="text-sm font-semibold text-slate-100">
-            {goal.progressPercent}%
-          </span>
-          <div className="w-full h-1.5 rounded-full bg-slate-800 mt-0.5 overflow-hidden">
-            <div
-              className="h-full rounded-full bg-emerald-400"
-              style={{ width: `${goal.progressPercent}%` }}
-            />
+        <div className="flex items-start gap-3 shrink-0">
+          <RadarMini data={radarData} size={112} />
+          <div className="flex flex-col items-end gap-1 shrink-0 w-24 pt-2">
+            <span className="text-[11px] text-slate-500 uppercase tracking-wide">
+              Progress
+            </span>
+            <span className="text-sm font-semibold text-slate-100">
+              {goal.progressPercent}%
+            </span>
+            <div className="w-full h-1.5 rounded-full bg-slate-800 mt-0.5 overflow-hidden">
+              <div
+                className="h-full rounded-full bg-emerald-400"
+                style={{ width: `${goal.progressPercent}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>
