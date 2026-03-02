@@ -4,14 +4,32 @@ import Link from "next/link";
 import DonutChart, { CategoryData } from "./DonutChart";
 import ActivityList from "./ActivityList";
 import { getTodayOverviewFromLogs } from "@/data/test-logs-derived";
+import { useDemoMode } from "@/hooks/useDemoMode";
+import type { Activity } from "@/data/test-logs-derived";
 
 const EMPTY_CHART_DATA: CategoryData[] = [
   { label: "No activities", value: 100, color: "#475569" },
 ];
 
+const DEMO_CATEGORIES: CategoryData[] = [
+  { label: "Work", value: 46, color: "#3b82f6" },
+  { label: "Health", value: 31, color: "#10b981" },
+  { label: "Relationships", value: 23, color: "#f59e0b" },
+];
+
+const DEMO_ACTIVITIES: Activity[] = [
+  { id: "demo-1", title: "Deep-work architecture sprint", category: "Work", time: "9:00 AM", icon: "💼" },
+  { id: "demo-2", title: "45-minute gym strength session", category: "Health", time: "12:30 PM", icon: "🏃" },
+  { id: "demo-3", title: "Client roadmap sync", category: "Work", time: "2:00 PM", icon: "💼" },
+  { id: "demo-4", title: "Call with family", category: "Relationships", time: "8:15 PM", icon: "👨‍👩‍👧" },
+];
+
 export default function TodayOverview() {
+  const { isDemoMode } = useDemoMode();
   const todayDateString = new Date().toISOString().slice(0, 10);
-  const { categories, activities } = getTodayOverviewFromLogs(todayDateString);
+  const { categories, activities } = isDemoMode
+    ? { categories: DEMO_CATEGORIES, activities: DEMO_ACTIVITIES }
+    : getTodayOverviewFromLogs(todayDateString);
   const hasData = activities.length > 0;
   const displayCategories = hasData ? categories : EMPTY_CHART_DATA;
   const displayActivities = hasData ? activities : [];

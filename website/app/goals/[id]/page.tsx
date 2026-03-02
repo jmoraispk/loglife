@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { use, useMemo, useState } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import TaxonomyPanel from "@/components/taxonomy/TaxonomyPanel";
 import GoalTagList from "@/components/goals/GoalTagList";
 import TagPill from "@/components/tags/TagPill";
 import TagSelector from "@/components/tags/TagSelector";
 import { TAGS, type TagNode } from "@/data/mock/tags";
+import { MOCK_GOALS_WITH_TAGS } from "@/data/mock/goals-with-tags";
 import {
   getDetailedGoalsFromLogs,
   getGoalRadarFromLogs,
@@ -15,6 +17,7 @@ import {
   type GoalCategory,
 } from "@/data/test-logs-derived";
 import GoalRadarPanel from "./GoalRadarPanel";
+import { useDemoMode } from "@/hooks/useDemoMode";
 import {
   addTag,
   applyTagFilter,
@@ -663,16 +666,28 @@ function mapDetailedGoalToStateGoal(goal: DetailedGoal): Goal {
 }
 
 export default function GoalDetailPage({ params }: GoalDetailPageProps) {
+  const { isDemoMode } = useDemoMode();
   const { id } = use(params);
   const searchParams = useSearchParams();
+  const sourceGoals = useMemo(
+    () =>
+      isDemoMode
+        ? MOCK_GOALS_WITH_TAGS
+        : getDetailedGoalsFromLogs().map(mapDetailedGoalToStateGoal),
+    [isDemoMode]
+  );
   const [state, setState] = useState<GoalsWithTagsState>(() => ({
     taxonomy: TAGS,
-    goals: getDetailedGoalsFromLogs().map(mapDetailedGoalToStateGoal),
+    goals: sourceGoals,
   }));
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(() => {
     const categoryTag = searchParams.get("category");
     return categoryTag ? [categoryTag] : [];
   });
+
+  useEffect(() => {
+    setState({ taxonomy: TAGS, goals: sourceGoals });
+  }, [sourceGoals]);
 
   const goal = state.goals.find((item) => item.id === id);
   const usageCounts = useMemo(() => computeTagUsageCounts(state.goals), [state.goals]);
