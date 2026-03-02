@@ -14,11 +14,6 @@ import {
   type DateRange,
   type TopEvent,
 } from "@/data/test-logs-derived";
-import {
-  mockDailyStats,
-  mockSessionLengths,
-  mockTopEvents,
-} from "@/data/mock-stats";
 
 const SERIES_CONFIG: SeriesConfig[] = [
   { key: "total", label: "Total", color: "#22d3ee" },
@@ -74,11 +69,11 @@ export default function StatsPage() {
   const dailyStats = useMemo(() => getDailyStatsFromLogs(), []);
   const sessionLengths = useMemo(() => getSessionLengthsFromLogs(), []);
   const topEvents = useMemo(() => getTopEventsFromLogs(20), []);
+  const hasStatsData = dailyStats.length > 0;
 
-  const useFallback = dailyStats.length === 0;
-  const sourceDailyStats = useFallback ? mockDailyStats : dailyStats;
-  const sourceSessionLengths = useFallback ? mockSessionLengths : sessionLengths;
-  const sourceTopEvents = useFallback ? mockTopEvents : topEvents;
+  const sourceDailyStats = dailyStats;
+  const sourceSessionLengths = sessionLengths;
+  const sourceTopEvents = topEvents;
 
   const filteredData = useMemo(() => sourceDailyStats.slice(-range), [sourceDailyStats, range]);
   const previousPeriodData = useMemo(() => sourceDailyStats.slice(-range * 2, -range), [sourceDailyStats, range]);
@@ -126,7 +121,11 @@ export default function StatsPage() {
   const sparklineTotals = useMemo(() => filteredData.slice(-24).map((d) => d.total), [filteredData]);
 
   const events = useMemo(
-    () => sourceTopEvents.filter((event) => event.date >= filteredData[0]?.date),
+    () => {
+      if (filteredData.length === 0) return [];
+      const startDate = filteredData[0].date;
+      return sourceTopEvents.filter((event) => event.date >= startDate);
+    },
     [sourceTopEvents, filteredData]
   );
 
@@ -176,101 +175,112 @@ export default function StatsPage() {
           />
         </div>
 
-        <section className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <KPICard
-            label="Avg Daily Activity"
-            value={kpis.avgDaily.toFixed(1)}
-            changePct={kpis.avgDailyChange}
-            helperText="Mean total across selected range"
-            sparklineValues={sparklineTotals}
-          />
-          <KPICard
-            label="Median Session Length"
-            value={`${kpis.medianSession.toFixed(0)} min`}
-            changePct={kpis.medianSessionChange}
-            helperText="Middle session duration percentile"
-            sparklineValues={visibleSessionLengths.slice(-24)}
-          />
-          <KPICard
-            label="Total Activities"
-            value={kpis.totalActivities.toLocaleString()}
-            changePct={kpis.totalActivitiesChange}
-            helperText="Cumulative total for range"
-            sparklineValues={filteredData.slice(-24).map((d) => d.work + d.health + d.relationships)}
-          />
-          <KPICard
-            label="Active Days"
-            value={`${kpis.activeDays}/${range}`}
-            changePct={kpis.activeDaysChange}
-            helperText="Days with non-zero tracked totals"
-            sparklineValues={filteredData.slice(-24).map((d) => (d.total > 0 ? 1 : 0))}
-          />
-        </section>
+        {!hasStatsData ? (
+          <section className="rounded-xl border border-dashed border-slate-700/70 bg-slate-900/40 px-4 py-8 text-center">
+            <p className="text-sm text-slate-300">No stats data yet.</p>
+            <p className="mt-1 text-xs text-slate-500">
+              Start logging activity to populate detailed statistics.
+            </p>
+          </section>
+        ) : (
+          <>
+            <section className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+              <KPICard
+                label="Avg Daily Activity"
+                value={kpis.avgDaily.toFixed(1)}
+                changePct={kpis.avgDailyChange}
+                helperText="Mean total across selected range"
+                sparklineValues={sparklineTotals}
+              />
+              <KPICard
+                label="Median Session Length"
+                value={`${kpis.medianSession.toFixed(0)} min`}
+                changePct={kpis.medianSessionChange}
+                helperText="Middle session duration percentile"
+                sparklineValues={visibleSessionLengths.slice(-24)}
+              />
+              <KPICard
+                label="Total Activities"
+                value={kpis.totalActivities.toLocaleString()}
+                changePct={kpis.totalActivitiesChange}
+                helperText="Cumulative total for range"
+                sparklineValues={filteredData.slice(-24).map((d) => d.work + d.health + d.relationships)}
+              />
+              <KPICard
+                label="Active Days"
+                value={`${kpis.activeDays}/${range}`}
+                changePct={kpis.activeDaysChange}
+                helperText="Days with non-zero tracked totals"
+                sparklineValues={filteredData.slice(-24).map((d) => (d.total > 0 ? 1 : 0))}
+              />
+            </section>
 
-        <section className="mb-6">
-          <TimeSeriesChart
-            data={filteredData}
-            series={SERIES_CONFIG}
-            hiddenSeries={hiddenSeries}
-            smoothing={smoothing}
-            onToggleSeries={toggleSeries}
-          />
-        </section>
+            <section className="mb-6">
+              <TimeSeriesChart
+                data={filteredData}
+                series={SERIES_CONFIG}
+                hiddenSeries={hiddenSeries}
+                smoothing={smoothing}
+                onToggleSeries={toggleSeries}
+              />
+            </section>
 
-        <section className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
-          <div className="xl:col-span-2">
-            <AreaChart data={filteredData} smoothing={smoothing} />
-          </div>
-          <DistributionChart data={histogramData} />
-        </section>
+            <section className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-3">
+              <div className="xl:col-span-2">
+                <AreaChart data={filteredData} smoothing={smoothing} />
+              </div>
+              <DistributionChart data={histogramData} />
+            </section>
 
-        <section className="animate-fade-in-up rounded-2xl border border-slate-800/70 bg-slate-900/70">
-          <div className="flex items-center justify-between border-b border-slate-800/70 px-4 py-3">
-            <div>
-              <h2 className="text-sm font-semibold text-slate-100">Top Events & Anomalies</h2>
-              <p className="mt-0.5 text-xs text-slate-500">Click inspect to open the raw event payload</p>
-            </div>
-            <span className="text-xs text-slate-500">{events.length} rows</span>
-          </div>
+            <section className="animate-fade-in-up rounded-2xl border border-slate-800/70 bg-slate-900/70">
+              <div className="flex items-center justify-between border-b border-slate-800/70 px-4 py-3">
+                <div>
+                  <h2 className="text-sm font-semibold text-slate-100">Top Events & Anomalies</h2>
+                  <p className="mt-0.5 text-xs text-slate-500">Click inspect to open the raw event payload</p>
+                </div>
+                <span className="text-xs text-slate-500">{events.length} rows</span>
+              </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px] text-left text-sm">
-              <thead className="bg-slate-950/50 text-xs uppercase tracking-wide text-slate-500">
-                <tr>
-                  <th className="px-4 py-2.5 font-medium">Date</th>
-                  <th className="px-4 py-2.5 font-medium">Time</th>
-                  <th className="px-4 py-2.5 font-medium">Event</th>
-                  <th className="px-4 py-2.5 font-medium">Category</th>
-                  <th className="px-4 py-2.5 font-medium">Importance</th>
-                  <th className="px-4 py-2.5 font-medium">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {events.map((event) => (
-                  <tr key={event.id} className="border-t border-slate-800/60 text-slate-300">
-                    <td className="px-4 py-2.5">{event.date}</td>
-                    <td className="px-4 py-2.5">{event.time}</td>
-                    <td className="max-w-md truncate px-4 py-2.5 text-slate-100">{event.text}</td>
-                    <td className="px-4 py-2.5">{event.category}</td>
-                    <td className="px-4 py-2.5">
-                      <span className={`rounded-md px-2 py-1 text-xs font-medium ${formatImportanceColor(event.importance)}`}>
-                        {event.importance}
-                      </span>
-                    </td>
-                    <td className="px-4 py-2.5">
-                      <button
-                        onClick={() => setSelectedEvent(event)}
-                        className="cursor-pointer rounded-md border border-slate-700 bg-slate-950 px-2.5 py-1 text-xs text-slate-200 transition-colors hover:bg-slate-800/70"
-                      >
-                        Inspect
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[700px] text-left text-sm">
+                  <thead className="bg-slate-950/50 text-xs uppercase tracking-wide text-slate-500">
+                    <tr>
+                      <th className="px-4 py-2.5 font-medium">Date</th>
+                      <th className="px-4 py-2.5 font-medium">Time</th>
+                      <th className="px-4 py-2.5 font-medium">Event</th>
+                      <th className="px-4 py-2.5 font-medium">Category</th>
+                      <th className="px-4 py-2.5 font-medium">Importance</th>
+                      <th className="px-4 py-2.5 font-medium">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {events.map((event) => (
+                      <tr key={event.id} className="border-t border-slate-800/60 text-slate-300">
+                        <td className="px-4 py-2.5">{event.date}</td>
+                        <td className="px-4 py-2.5">{event.time}</td>
+                        <td className="max-w-md truncate px-4 py-2.5 text-slate-100">{event.text}</td>
+                        <td className="px-4 py-2.5">{event.category}</td>
+                        <td className="px-4 py-2.5">
+                          <span className={`rounded-md px-2 py-1 text-xs font-medium ${formatImportanceColor(event.importance)}`}>
+                            {event.importance}
+                          </span>
+                        </td>
+                        <td className="px-4 py-2.5">
+                          <button
+                            onClick={() => setSelectedEvent(event)}
+                            className="cursor-pointer rounded-md border border-slate-700 bg-slate-950 px-2.5 py-1 text-xs text-slate-200 transition-colors hover:bg-slate-800/70"
+                          >
+                            Inspect
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+          </>
+        )}
 
         {selectedEvent ? (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
