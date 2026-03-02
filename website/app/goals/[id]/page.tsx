@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { use, useMemo, useState } from "react";
-import { useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import TaxonomyPanel from "@/components/taxonomy/TaxonomyPanel";
 import GoalTagList from "@/components/goals/GoalTagList";
@@ -676,18 +675,32 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
         : getDetailedGoalsFromLogs().map(mapDetailedGoalToStateGoal),
     [isDemoMode]
   );
-  const [state, setState] = useState<GoalsWithTagsState>(() => ({
-    taxonomy: TAGS,
-    goals: sourceGoals,
-  }));
+  const [taxonomy, setTaxonomy] = useState<TagNode[]>(TAGS);
+  const [goalTagOverrides, setGoalTagOverrides] = useState<Record<string, string[]>>({});
+  const [timelineTagOverrides, setTimelineTagOverrides] = useState<
+    Record<string, Record<string, string[]>>
+  >({});
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(() => {
     const categoryTag = searchParams.get("category");
     return categoryTag ? [categoryTag] : [];
   });
 
-  useEffect(() => {
-    setState({ taxonomy: TAGS, goals: sourceGoals });
-  }, [sourceGoals]);
+  const goals = useMemo(
+    () =>
+      sourceGoals.map((goal) => {
+        const timelineOverrides = timelineTagOverrides[goal.id] ?? {};
+        return {
+          ...goal,
+          tagIds: goalTagOverrides[goal.id] ?? goal.tagIds,
+          timeline: goal.timeline.map((item) => ({
+            ...item,
+            tagIds: timelineOverrides[item.id] ?? item.tagIds,
+          })),
+        };
+      }),
+    [sourceGoals, goalTagOverrides, timelineTagOverrides]
+  );
+  const state = useMemo<GoalsWithTagsState>(() => ({ taxonomy, goals }), [taxonomy, goals]);
 
   const goal = state.goals.find((item) => item.id === id);
   const usageCounts = useMemo(() => computeTagUsageCounts(state.goals), [state.goals]);
@@ -740,14 +753,7 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
           goal={goal}
           state={state}
           onTagPillClick={onTimelineTagClick}
-          onGoalTagsChange={(tagIds) =>
-            setState((current) => ({
-              ...current,
-              goals: current.goals.map((goalItem) =>
-                goalItem.id === goal.id ? { ...goalItem, tagIds } : goalItem
-              ),
-            }))
-          }
+          onGoalTagsChange={(tagIds) => setGoalTagOverrides((current) => ({ ...current, [goal.id]: tagIds }))}
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,240px)_minmax(0,1.5fr)_minmax(0,1fr)] gap-4 items-start">
@@ -756,12 +762,7 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
               <TaxonomyPanel
                 tree={state.taxonomy}
                 counts={usageCounts.byTagId}
-                onAddTag={(input) =>
-                  setState((current) => ({
-                    ...current,
-                    taxonomy: addTag(current.taxonomy, input),
-                  }))
-                }
+                onAddTag={(input) => setTaxonomy((current) => addTag(current, input))}
               />
             </div>
             <details className="lg:hidden rounded-2xl border border-slate-800/60 bg-slate-900/60">
@@ -772,12 +773,7 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
                 <TaxonomyPanel
                   tree={state.taxonomy}
                   counts={usageCounts.byTagId}
-                  onAddTag={(input) =>
-                    setState((current) => ({
-                      ...current,
-                      taxonomy: addTag(current.taxonomy, input),
-                    }))
-                  }
+                  onAddTag={(input) => setTaxonomy((current) => addTag(current, input))}
                 />
               </div>
             </details>
@@ -815,17 +811,12 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
               selectedTagIds={selectedTagIds}
               onTagClick={onTimelineTagClick}
               onItemTagsChange={(itemId, tagIds) =>
-                setState((current) => ({
+                setTimelineTagOverrides((current) => ({
                   ...current,
-                  goals: current.goals.map((goalItem) => {
-                    if (goalItem.id !== goal.id) return goalItem;
-                    return {
-                      ...goalItem,
-                      timeline: goalItem.timeline.map((item) =>
-                        item.id === itemId ? { ...item, tagIds } : item
-                      ),
-                    };
-                  }),
+                  [goal.id]: {
+                    ...(current[goal.id] ?? {}),
+                    [itemId]: tagIds,
+                  },
                 }))
               }
             />
