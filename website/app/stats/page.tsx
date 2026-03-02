@@ -14,6 +14,8 @@ import {
   type DateRange,
   type TopEvent,
 } from "@/data/test-logs-derived";
+import { mockDailyStats, mockSessionLengths, mockTopEvents } from "@/data/mock-stats";
+import { useDemoMode } from "@/hooks/useDemoMode";
 
 const SERIES_CONFIG: SeriesConfig[] = [
   { key: "total", label: "Total", color: "#22d3ee" },
@@ -61,14 +63,24 @@ function formatImportanceColor(importance: TopEvent["importance"]): string {
 }
 
 export default function StatsPage() {
+  const { isDemoMode } = useDemoMode();
   const [range, setRange] = useState<DateRange>(30);
   const [smoothing, setSmoothing] = useState(true);
   const [hiddenSeries, setHiddenSeries] = useState<Partial<Record<SeriesKey, boolean>>>({});
   const [selectedEvent, setSelectedEvent] = useState<TopEvent | null>(null);
 
-  const dailyStats = useMemo(() => getDailyStatsFromLogs(), []);
-  const sessionLengths = useMemo(() => getSessionLengthsFromLogs(), []);
-  const topEvents = useMemo(() => getTopEventsFromLogs(20), []);
+  const dailyStats = useMemo(
+    () => (isDemoMode ? mockDailyStats : getDailyStatsFromLogs()),
+    [isDemoMode]
+  );
+  const sessionLengths = useMemo(
+    () => (isDemoMode ? mockSessionLengths : getSessionLengthsFromLogs()),
+    [isDemoMode]
+  );
+  const topEvents = useMemo(
+    () => (isDemoMode ? mockTopEvents : getTopEventsFromLogs(20)),
+    [isDemoMode]
+  );
   const hasStatsData = dailyStats.length > 0;
 
   const sourceDailyStats = dailyStats;

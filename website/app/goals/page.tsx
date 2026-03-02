@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import GoalTagList from "@/components/goals/GoalTagList";
 import { TAGS, type TagNode } from "@/data/mock/tags";
+import { MOCK_GOALS_WITH_TAGS } from "@/data/mock/goals-with-tags";
 import { getDetailedGoalsFromLogs, type DetailedGoal } from "@/data/test-logs-derived";
 import { applyTagFilter } from "@/utils/tags";
+import { useDemoMode } from "@/hooks/useDemoMode";
 
 type GoalListItem = Pick<
   DetailedGoal,
@@ -138,11 +140,26 @@ function GoalCard({
 }
 
 export default function GoalsPage() {
+  const { isDemoMode } = useDemoMode();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const taxonomy = TAGS;
   const goals = useMemo(
-    () =>
-      getDetailedGoalsFromLogs().map((goal) => ({
+    () => {
+      if (isDemoMode) {
+        return MOCK_GOALS_WITH_TAGS.map((goal) => ({
+          id: goal.id,
+          name: goal.name,
+          description: goal.description,
+          category: goal.category,
+          startDate: goal.startDate,
+          targetDate: goal.targetDate,
+          progressPercent: goal.progressPercent,
+          streak: goal.streak,
+          tagIds: Array.from(new Set(goal.tagIds)),
+          eventCount: goal.timeline.length,
+        }));
+      }
+      return getDetailedGoalsFromLogs().map((goal) => ({
         id: goal.id,
         name: goal.name,
         description: goal.description,
@@ -153,8 +170,9 @@ export default function GoalsPage() {
         streak: goal.streak,
         tagIds: Array.from(new Set(goal.tags)),
         eventCount: goal.events.length,
-      })),
-    []
+      }));
+    },
+    [isDemoMode]
   );
 
   const sortedGoals = useMemo(() => {

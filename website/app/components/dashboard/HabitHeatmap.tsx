@@ -1,6 +1,7 @@
 "use client";
 import { useState, useMemo } from "react";
 import { getHabitHeatmapFromLogs } from "@/data/test-logs-derived";
+import { useDemoMode } from "@/hooks/useDemoMode";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -56,6 +57,39 @@ function formatShortMonthDay(dateStr: string): string {
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const LEGEND_LEVELS = [0, 20, 45, 70, 95] as const;
+const DEMO_DATA: HabitDay[] = [
+  { date: "2026-01-01", value: 70 },
+  { date: "2026-01-02", value: 82 },
+  { date: "2026-01-03", value: 35 },
+  { date: "2026-01-04", value: 20 },
+  { date: "2026-01-05", value: 76 },
+  { date: "2026-01-06", value: 88 },
+  { date: "2026-01-07", value: 64 },
+  { date: "2026-01-08", value: 90 },
+  { date: "2026-01-09", value: 72 },
+  { date: "2026-01-10", value: 28 },
+  { date: "2026-01-11", value: 0 },
+  { date: "2026-01-12", value: 68 },
+  { date: "2026-01-13", value: 80 },
+  { date: "2026-01-14", value: 92 },
+  { date: "2026-01-15", value: 74 },
+  { date: "2026-01-16", value: 58 },
+  { date: "2026-01-17", value: 32 },
+  { date: "2026-01-18", value: 18 },
+  { date: "2026-01-19", value: 84 },
+  { date: "2026-01-20", value: 66 },
+  { date: "2026-01-21", value: 0 },
+  { date: "2026-01-22", value: 52 },
+  { date: "2026-01-23", value: 74 },
+  { date: "2026-01-24", value: 40 },
+  { date: "2026-01-25", value: 22 },
+  { date: "2026-01-26", value: 86 },
+  { date: "2026-01-27", value: 79 },
+  { date: "2026-01-28", value: 67 },
+  { date: "2026-01-29", value: 83 },
+  { date: "2026-01-30", value: 71 },
+  { date: "2026-01-31", value: 36 },
+];
 
 function StatsPanel({
   activeDays,
@@ -131,8 +165,9 @@ export default function HabitHeatmap({
   data: dataProp,
   month = new Date().toISOString().slice(0, 7),
 }: HabitHeatmapProps) {
+  const { isDemoMode } = useDemoMode();
   const derivedData = useMemo(() => getHabitHeatmapFromLogs(month), [month]);
-  const data = dataProp ?? derivedData;
+  const data = isDemoMode ? DEMO_DATA : dataProp ?? derivedData;
   const today = new Date().toISOString().split("T")[0];
   const [hoveredStreakId, setHoveredStreakId] = useState<number | null>(null);
 

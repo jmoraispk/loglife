@@ -11,14 +11,12 @@ import {
   type LogsView,
   type RecentCountOption,
   LOGS_PAGE_SIZE,
+  MOCK_LOGS,
 } from "./mockData";
+import { useDemoMode } from "@/hooks/useDemoMode";
 
 // Load test logs from website/data (same shape as LogEntry with optional date/timestamp)
 import testLogsData from "@/data/test-logs.json";
-
-const ALL_LOGS: LogEntry[] = Array.isArray(testLogsData)
-  ? (testLogsData as LogEntry[])
-  : [];
 
 function formatCategoryLabel(value: string) {
   if (!value) return "";
@@ -61,6 +59,7 @@ function LogsListSection({
 }
 
 export default function LogsPage() {
+  const { isDemoMode } = useDemoMode();
   const searchParams = useSearchParams();
   const [view, setView] = useState<LogsView>("recent");
   const [selectedRecentCount, setSelectedRecentCount] = useState<RecentCountOption>(50);
@@ -70,10 +69,20 @@ export default function LogsPage() {
   const urlDate = searchParams.get("date");
   const selectedCategory = searchParams.get("category");
   const highlightedText = searchParams.get("highlight");
+  const allLogs = useMemo((): LogEntry[] => {
+    if (isDemoMode) {
+      return MOCK_LOGS.map((log, index) => ({
+        ...log,
+        date: "2026-02-26",
+        timestamp: `2026-02-26T${log.time}:00.${String(index).padStart(3, "0")}Z`,
+      }));
+    }
+    return Array.isArray(testLogsData) ? (testLogsData as LogEntry[]) : [];
+  }, [isDemoMode]);
 
   const dailyDateOptions = useMemo((): DailyDateOption[] => {
     const dates = new Set<string>();
-    for (const log of ALL_LOGS) {
+    for (const log of allLogs) {
       const d = log.date ?? (log.timestamp ? log.timestamp.slice(0, 10) : "");
       if (d) dates.add(d);
     }
@@ -81,7 +90,7 @@ export default function LogsPage() {
       .sort((a, b) => b.localeCompare(a))
       .slice(0, 60)
       .map((value) => ({ value, label: formatDateLabel(value) }));
-  }, []);
+  }, [allLogs]);
 
   const effectiveFromUrl =
     Boolean(urlDate && dailyDateOptions.some((o) => o.value === urlDate));
@@ -92,7 +101,7 @@ export default function LogsPage() {
         (view === "daily" ? dailyDateOptions[0]?.value ?? "" : ""));
 
   const filteredLogs = useMemo(() => {
-    let list = ALL_LOGS;
+    let list = allLogs;
 
     if (selectedCategory) {
       const cat = formatCategoryLabel(selectedCategory);
@@ -115,7 +124,7 @@ export default function LogsPage() {
     }
 
     return list;
-  }, [effectiveView, effectiveSelectedDate, selectedRecentCount, selectedCategory]);
+  }, [allLogs, effectiveView, effectiveSelectedDate, selectedRecentCount, selectedCategory]);
 
   const filterKey = `${effectiveView}-${effectiveSelectedDate}-${selectedRecentCount}-${selectedCategory ?? ""}`;
 

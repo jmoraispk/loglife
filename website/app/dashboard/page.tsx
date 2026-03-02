@@ -10,6 +10,7 @@ import LegacyTodayOverview from "@/app/components/dashboard/legacy/LegacyTodayOv
 import LegacyHabitHeatmap from "@/app/components/dashboard/legacy/LegacyHabitHeatmap";
 import LegacyGoalsSection from "@/app/components/dashboard/legacy/LegacyGoalsSection";
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useDemoMode } from "@/hooks/useDemoMode";
 
 interface WhatsAppSession {
   sessionKey?: string;
@@ -64,6 +65,7 @@ export default function DashboardPage() {
   const [verifyCode, setVerifyCode] = useState("");
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyFeedback, setVerifyFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const { isDemoMode, toggleDemoMode } = useDemoMode();
 
   const whatsappPhone = (user?.unsafeMetadata as Record<string, string> | undefined)?.whatsappPhone || "";
   const isWhatsAppConnected = Boolean(whatsappPhone);
@@ -250,6 +252,14 @@ export default function DashboardPage() {
             >
               <span className={`h-2 w-2 rounded-full ${compactMode ? "bg-emerald-400" : "bg-slate-500"}`} />
               Compact mode: {compactMode ? "ON" : "OFF"}
+            </button>
+            <button
+              type="button"
+              onClick={toggleDemoMode}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-700/60 bg-slate-800/60 px-3 py-2 text-xs font-medium text-slate-200 transition-colors hover:border-slate-600 hover:text-white"
+            >
+              <span className={`h-2 w-2 rounded-full ${isDemoMode ? "bg-cyan-400" : "bg-slate-500"}`} />
+              Demo data: {isDemoMode ? "ON" : "OFF"}
             </button>
           </>
         )}

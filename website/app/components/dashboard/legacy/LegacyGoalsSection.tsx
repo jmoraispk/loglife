@@ -4,6 +4,70 @@ import Link from "next/link";
 import { useState, useMemo } from "react";
 import GoalCard, { Goal } from "../GoalCard";
 import { getGoalsFromLogs } from "@/data/test-logs-derived";
+import { useDemoMode } from "@/hooks/useDemoMode";
+
+const DEMO_GOALS: Goal[] = [
+  {
+    id: "1",
+    name: "Go to gym",
+    category: "Health",
+    streak: 5,
+    completionRate: 80,
+    frequency: "3x per week",
+    icon: "🏋️",
+    recentDays: [true, true, false, true, true, true, true],
+  },
+  {
+    id: "2",
+    name: "Deep work sessions",
+    category: "Work",
+    streak: 3,
+    completionRate: 60,
+    frequency: "Daily",
+    icon: "💻",
+    recentDays: [true, false, true, false, true, true, true],
+  },
+  {
+    id: "3",
+    name: "Read before bed",
+    category: "Health",
+    streak: 12,
+    completionRate: 92,
+    frequency: "Daily",
+    icon: "📚",
+    recentDays: [true, true, true, true, true, true, true],
+  },
+  {
+    id: "4",
+    name: "Call a friend or family",
+    category: "Relationships",
+    streak: 1,
+    completionRate: 35,
+    frequency: "2x per week",
+    icon: "📞",
+    recentDays: [false, false, false, false, true, false, false],
+  },
+  {
+    id: "5",
+    name: "Morning walk",
+    category: "Health",
+    streak: 0,
+    completionRate: 20,
+    frequency: "Daily",
+    icon: "🚶",
+    recentDays: [false, true, false, false, false, false, false],
+  },
+  {
+    id: "6",
+    name: "Team check-ins",
+    category: "Work",
+    streak: 8,
+    completionRate: 95,
+    frequency: "Daily",
+    icon: "💼",
+    recentDays: [true, true, true, true, true, true, true],
+  },
+];
 
 type SortMode = "streak" | "needs-work";
 
@@ -26,9 +90,13 @@ function computeStats(goals: Goal[]) {
 }
 
 export default function LegacyGoalsSection() {
+  const { isDemoMode } = useDemoMode();
   const [sortMode] = useState<SortMode>("streak");
 
-  const goals = useMemo(() => getGoalsFromLogs() as Goal[], []);
+  const goals = useMemo(
+    () => (isDemoMode ? DEMO_GOALS : (getGoalsFromLogs() as Goal[])),
+    [isDemoMode]
+  );
   const hasGoalActivity = useMemo(
     () =>
       goals.some(
