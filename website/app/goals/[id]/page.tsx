@@ -1,29 +1,55 @@
  "use client";
 
 import Link from "next/link";
-import { use, useEffect, useMemo, useState } from "react";
+import { use, useMemo, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import TaxonomyPanel from "@/components/taxonomy/TaxonomyPanel";
 import GoalTagList from "@/components/goals/GoalTagList";
 import TagPill from "@/components/tags/TagPill";
 import TagSelector from "@/components/tags/TagSelector";
-import { getGoalRadarFromLogs } from "@/data/test-logs-derived";
-import GoalRadarPanel from "./GoalRadarPanel";
+import { TAGS, type TagNode } from "@/data/mock/tags";
 import {
-  GOALS_TAGS_STORAGE_KEY,
-  INITIAL_GOALS_WITH_TAGS_STATE,
-  type Goal,
-  type GoalsWithTagsState,
-  type TimelineItem,
-} from "@/data/mock/goals-with-tags";
+  getDetailedGoalsFromLogs,
+  getGoalRadarFromLogs,
+  type DetailedGoal,
+  type GoalCategory,
+} from "@/data/test-logs-derived";
+import GoalRadarPanel from "./GoalRadarPanel";
 import {
   addTag,
   applyTagFilter,
-  assignTagToGoal,
-  assignTagToTimelineItem,
   computeTagUsageCounts,
   getTagById,
 } from "@/utils/tags";
+
+type TimelineItem = {
+  id: string;
+  date: string;
+  time: string;
+  type: "session" | "milestone" | "note";
+  text: string;
+  tagIds: string[];
+  value?: { km?: number; hours?: number };
+};
+
+type Goal = {
+  id: string;
+  name: string;
+  description: string;
+  category: GoalCategory;
+  tagIds: string[];
+  startDate: string;
+  targetDate: string;
+  progressPercent: number;
+  streak: number;
+  why: string;
+  timeline: TimelineItem[];
+};
+
+type GoalsWithTagsState = {
+  taxonomy: TagNode[];
+  goals: Goal[];
+};
 
 const categoryColors: Record<
   Goal["category"],
@@ -612,32 +638,41 @@ interface GoalDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
+function mapDetailedGoalToStateGoal(goal: DetailedGoal): Goal {
+  return {
+    id: goal.id,
+    name: goal.name,
+    description: goal.description,
+    category: goal.category,
+    tagIds: Array.from(new Set(goal.tags)),
+    startDate: goal.startDate,
+    targetDate: goal.targetDate,
+    progressPercent: goal.progressPercent,
+    streak: goal.streak,
+    why: goal.why,
+    timeline: goal.events.map((event, index) => ({
+      id: `${goal.id}-${event.date}-${event.time}-${index}`,
+      date: event.date,
+      time: event.time,
+      type: event.type,
+      text: event.text,
+      tagIds: Array.from(new Set(event.tags)),
+      value: event.value ?? undefined,
+    })),
+  };
+}
+
 export default function GoalDetailPage({ params }: GoalDetailPageProps) {
   const { id } = use(params);
   const searchParams = useSearchParams();
-  const [state, setState] = useState<GoalsWithTagsState>(() => {
-    if (typeof window === "undefined") return INITIAL_GOALS_WITH_TAGS_STATE;
-    const raw = window.localStorage.getItem(GOALS_TAGS_STORAGE_KEY);
-    if (!raw) return INITIAL_GOALS_WITH_TAGS_STATE;
-    try {
-      const parsed = JSON.parse(raw) as GoalsWithTagsState;
-      if (parsed?.goals && parsed?.taxonomy) {
-        return parsed;
-      }
-    } catch {
-      // Keep defaults for invalid persisted values.
-    }
-    return INITIAL_GOALS_WITH_TAGS_STATE;
-  });
+  const [state, setState] = useState<GoalsWithTagsState>(() => ({
+    taxonomy: TAGS,
+    goals: getDetailedGoalsFromLogs().map(mapDetailedGoalToStateGoal),
+  }));
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>(() => {
     const categoryTag = searchParams.get("category");
     return categoryTag ? [categoryTag] : [];
   });
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(GOALS_TAGS_STORAGE_KEY, JSON.stringify(state));
-  }, [state]);
 
   const goal = state.goals.find((item) => item.id === id);
   const usageCounts = useMemo(() => computeTagUsageCounts(state.goals), [state.goals]);
@@ -693,7 +728,9 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
           onGoalTagsChange={(tagIds) =>
             setState((current) => ({
               ...current,
-              goals: assignTagToGoal(current.goals, goal.id, tagIds),
+              goals: current.goals.map((goalItem) =>
+                goalItem.id === goal.id ? { ...goalItem, tagIds } : goalItem
+              ),
             }))
           }
         />
@@ -765,7 +802,15 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
               onItemTagsChange={(itemId, tagIds) =>
                 setState((current) => ({
                   ...current,
-                  goals: assignTagToTimelineItem(current.goals, goal.id, itemId, tagIds),
+                  goals: current.goals.map((goalItem) => {
+                    if (goalItem.id !== goal.id) return goalItem;
+                    return {
+                      ...goalItem,
+                      timeline: goalItem.timeline.map((item) =>
+                        item.id === itemId ? { ...item, tagIds } : item
+                      ),
+                    };
+                  }),
                 }))
               }
             />
