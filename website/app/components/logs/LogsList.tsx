@@ -35,18 +35,24 @@ export default function LogsList({
         className="logs-explorer-scroll min-h-0 overflow-y-auto rounded-xl border border-slate-800/60 bg-slate-900/30 max-h-[min(60vh,28rem)]"
         data-scrollbar="theme"
       >
-        <div className="space-y-3 p-1">
-          {logs.map((log) => (
-            <LogItem
-              key={log.id}
-              log={log}
-              isHighlighted={Boolean(
-                highlightedLogText &&
-                  log.text.toLowerCase().includes(highlightedLogText.toLowerCase())
-              )}
-            />
-          ))}
-        </div>
+        {logs.length === 0 ? (
+          <div className="flex min-h-[220px] items-center justify-center px-4 text-center">
+            <p className="text-sm text-slate-500">No logs yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-3 p-1">
+            {logs.map((log) => (
+              <LogItem
+                key={log.id}
+                log={log}
+                isHighlighted={Boolean(
+                  highlightedLogText &&
+                    log.text.toLowerCase().includes(highlightedLogText.toLowerCase())
+                )}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {totalPages > 1 && (
