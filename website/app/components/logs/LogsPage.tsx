@@ -11,7 +11,6 @@ import {
   type LogsView,
   type RecentCountOption,
   LOGS_PAGE_SIZE,
-  MOCK_LOGS,
 } from "./mockData";
 
 // Load test logs from website/data (same shape as LogEntry with optional date/timestamp)
@@ -19,7 +18,7 @@ import testLogsData from "@/data/test-logs.json";
 
 const ALL_LOGS: LogEntry[] = Array.isArray(testLogsData)
   ? (testLogsData as LogEntry[])
-  : MOCK_LOGS;
+  : [];
 
 function formatCategoryLabel(value: string) {
   if (!value) return "";
