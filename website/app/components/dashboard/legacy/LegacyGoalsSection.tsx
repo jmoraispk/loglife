@@ -5,69 +5,6 @@ import { useState, useMemo } from "react";
 import GoalCard, { Goal } from "../GoalCard";
 import { getGoalsFromLogs } from "@/data/test-logs-derived";
 
-const FALLBACK_GOALS: Goal[] = [
-  {
-    id: "1",
-    name: "Go to gym",
-    category: "Health",
-    streak: 5,
-    completionRate: 80,
-    frequency: "3x per week",
-    icon: "🏋️",
-    recentDays: [true, true, false, true, true, true, true],
-  },
-  {
-    id: "2",
-    name: "Deep work sessions",
-    category: "Work",
-    streak: 3,
-    completionRate: 60,
-    frequency: "Daily",
-    icon: "💻",
-    recentDays: [true, false, true, false, true, true, true],
-  },
-  {
-    id: "3",
-    name: "Read before bed",
-    category: "Health",
-    streak: 12,
-    completionRate: 92,
-    frequency: "Daily",
-    icon: "📚",
-    recentDays: [true, true, true, true, true, true, true],
-  },
-  {
-    id: "4",
-    name: "Call a friend or family",
-    category: "Relationships",
-    streak: 1,
-    completionRate: 35,
-    frequency: "2x per week",
-    icon: "📞",
-    recentDays: [false, false, false, false, true, false, false],
-  },
-  {
-    id: "5",
-    name: "Morning walk",
-    category: "Health",
-    streak: 0,
-    completionRate: 20,
-    frequency: "Daily",
-    icon: "🚶",
-    recentDays: [false, true, false, false, false, false, false],
-  },
-  {
-    id: "6",
-    name: "Team check-ins",
-    category: "Work",
-    streak: 8,
-    completionRate: 95,
-    frequency: "Daily",
-    icon: "💼",
-    recentDays: [true, true, true, true, true, true, true],
-  },
-];
-
 type SortMode = "streak" | "needs-work";
 
 function sortGoals(goals: Goal[], mode: SortMode): Goal[] {
@@ -91,10 +28,17 @@ function computeStats(goals: Goal[]) {
 export default function LegacyGoalsSection() {
   const [sortMode] = useState<SortMode>("streak");
 
-  const goals = useMemo(() => {
-    const derived = getGoalsFromLogs();
-    return derived.length > 0 ? (derived as Goal[]) : FALLBACK_GOALS;
-  }, []);
+  const goals = useMemo(() => getGoalsFromLogs() as Goal[], []);
+  const hasGoalActivity = useMemo(
+    () =>
+      goals.some(
+        (goal) =>
+          goal.streak > 0 ||
+          goal.completionRate > 0 ||
+          goal.recentDays.some(Boolean),
+      ),
+    [goals],
+  );
 
   const sorted = useMemo(() => sortGoals(goals, sortMode), [goals, sortMode]);
   const stats = useMemo(() => computeStats(goals), [goals]);
@@ -128,38 +72,55 @@ export default function LegacyGoalsSection() {
         </Link>
       </div>
 
-      <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {sorted.map((goal) => (
-          <GoalCard key={goal.id} goal={goal} />
-        ))}
-      </div>
+      {hasGoalActivity ? (
+        <>
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {sorted.map((goal) => (
+              <GoalCard key={goal.id} goal={goal} />
+            ))}
+          </div>
 
-      <div className="px-6 py-4 border-t border-slate-800/40 flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-6">
-          <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">On streak</p>
-            <p className="text-base font-bold text-white mt-1">
-              {stats.active}
-              <span className="text-sm font-normal text-slate-500 ml-1">/ {goals.length}</span>
-            </p>
+          <div className="px-6 py-4 border-t border-slate-800/40 flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center gap-6">
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">On streak</p>
+                <p className="text-base font-bold text-white mt-1">
+                  {stats.active}
+                  <span className="text-sm font-normal text-slate-500 ml-1">/ {goals.length}</span>
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Avg completion</p>
+                <p className="text-base font-bold text-white mt-1">
+                  {stats.avgCompletion}
+                  <span className="text-sm font-normal text-slate-500 ml-0.5">%</span>
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Best streak</p>
+                <p className="text-base font-bold text-amber-400 mt-1">
+                  🔥 {stats.topStreak}
+                  <span className="text-sm font-normal text-slate-500 ml-1">days</span>
+                </p>
+              </div>
+            </div>
+            <p className="text-xs text-slate-600 italic">last 7 days shown per goal</p>
           </div>
-          <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Avg completion</p>
-            <p className="text-base font-bold text-white mt-1">
-              {stats.avgCompletion}
-              <span className="text-sm font-normal text-slate-500 ml-0.5">%</span>
-            </p>
-          </div>
-          <div>
-            <p className="text-xs font-medium text-slate-500 uppercase tracking-wide">Best streak</p>
-            <p className="text-base font-bold text-amber-400 mt-1">
-              🔥 {stats.topStreak}
-              <span className="text-sm font-normal text-slate-500 ml-1">days</span>
-            </p>
+        </>
+      ) : (
+        <div className="p-6">
+          <div className="rounded-xl border border-dashed border-slate-700/70 bg-slate-900/40 px-4 py-6 text-center">
+            <p className="text-sm text-slate-300">No goal activity yet.</p>
+            <p className="mt-1 text-xs text-slate-500">Start logging to unlock goal progress insights.</p>
+            <Link
+              href="/logs"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-700/70 bg-slate-800/70 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700/80 transition-colors"
+            >
+              Add your first log
+            </Link>
           </div>
         </div>
-        <p className="text-xs text-slate-600 italic">last 7 days shown per goal</p>
-      </div>
+      )}
     </div>
   );
 }

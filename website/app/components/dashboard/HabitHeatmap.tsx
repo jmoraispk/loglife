@@ -23,42 +23,6 @@ interface StatsPanelProps {
   currentStreak: number;
 }
 
-// ─── Fallback when no logs data ─────────────────────────────────────────────
-
-const FALLBACK_DATA: HabitDay[] = [
-  { date: "2026-01-01", value: 70 },
-  { date: "2026-01-02", value: 82 },
-  { date: "2026-01-03", value: 35 },
-  { date: "2026-01-04", value: 20 },
-  { date: "2026-01-05", value: 76 },
-  { date: "2026-01-06", value: 88 },
-  { date: "2026-01-07", value: 64 },
-  { date: "2026-01-08", value: 90 },
-  { date: "2026-01-09", value: 72 },
-  { date: "2026-01-10", value: 28 },
-  { date: "2026-01-11", value: 0 },
-  { date: "2026-01-12", value: 68 },
-  { date: "2026-01-13", value: 80 },
-  { date: "2026-01-14", value: 92 },
-  { date: "2026-01-15", value: 74 },
-  { date: "2026-01-16", value: 58 },
-  { date: "2026-01-17", value: 32 },
-  { date: "2026-01-18", value: 18 },
-  { date: "2026-01-19", value: 84 },
-  { date: "2026-01-20", value: 66 },
-  { date: "2026-01-21", value: 0 },
-  { date: "2026-01-22", value: 52 },
-  { date: "2026-01-23", value: 74 },
-  { date: "2026-01-24", value: 40 },
-  { date: "2026-01-25", value: 22 },
-  { date: "2026-01-26", value: 86 },
-  { date: "2026-01-27", value: 79 },
-  { date: "2026-01-28", value: 67 },
-  { date: "2026-01-29", value: 83 },
-  { date: "2026-01-30", value: 71 },
-  { date: "2026-01-31", value: 36 },
-];
-
 // ─── Utilities ────────────────────────────────────────────────────────────────
 
 function getIntensityColor(value: number): string {
@@ -168,7 +132,7 @@ export default function HabitHeatmap({
   month = new Date().toISOString().slice(0, 7),
 }: HabitHeatmapProps) {
   const derivedData = useMemo(() => getHabitHeatmapFromLogs(month), [month]);
-  const data = dataProp ?? (derivedData.length > 0 ? derivedData : FALLBACK_DATA);
+  const data = dataProp ?? derivedData;
   const today = new Date().toISOString().split("T")[0];
   const [hoveredStreakId, setHoveredStreakId] = useState<number | null>(null);
 
@@ -185,6 +149,7 @@ export default function HabitHeatmap({
   const dataMap = new Map(data.map((d) => [d.date, d.value]));
   const sortedData = [...data].sort((a, b) => a.date.localeCompare(b.date));
   const activeDays = data.filter((d) => d.value > 0).length;
+  const hasLoggedActivity = activeDays > 0;
   const avgPercent =
     activeDays > 0
       ? Math.round(data.filter((d) => d.value > 0).reduce((sum, d) => sum + d.value, 0) / activeDays)
@@ -311,62 +276,68 @@ export default function HabitHeatmap({
         </div>
       </div>
 
-      {/* Grid */}
-      <div className="w-full overflow-hidden">
-        <div className="flex flex-col gap-4 lg:flex-row">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2.5 mb-2">
-              <span className="text-[11px] font-medium text-white/35">Less</span>
-              <div className="flex items-center gap-1.5">
-                {LEGEND_LEVELS.map((v) => (
+      {!hasLoggedActivity ? (
+        <div className="rounded-xl border border-dashed border-slate-700/70 bg-slate-900/40 px-4 py-6 text-center">
+          <p className="text-sm text-slate-300">No habit activity yet for this month.</p>
+          <p className="mt-1 text-xs text-slate-500">Start logging to populate your monthly heatmap.</p>
+        </div>
+      ) : (
+        /* Grid */
+        <div className="w-full overflow-hidden">
+          <div className="flex flex-col gap-4 lg:flex-row">
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2.5 mb-2">
+                <span className="text-[11px] font-medium text-white/35">Less</span>
+                <div className="flex items-center gap-1.5">
+                  {LEGEND_LEVELS.map((v) => (
+                    <div
+                      key={`left-legend-${v}`}
+                      className="w-2.5 h-2.5 rounded-[4px]"
+                      style={{ backgroundColor: getIntensityColor(v) }}
+                    />
+                  ))}
+                </div>
+                <span className="text-[11px] font-medium text-white/35">More</span>
+              </div>
+
+              {/* Weekday labels */}
+              <div className="grid grid-cols-7 w-full gap-2 mb-1.5">
+                {WEEKDAYS.map((label) => (
                   <div
-                    key={`left-legend-${v}`}
-                    className="w-2.5 h-2.5 rounded-[4px]"
-                    style={{ backgroundColor: getIntensityColor(v) }}
-                  />
+                    key={label}
+                    className="text-center text-[11px] font-medium text-white/50 py-0 select-none"
+                  >
+                    {label}
+                  </div>
                 ))}
               </div>
-              <span className="text-[11px] font-medium text-white/35">More</span>
-            </div>
 
-            {/* Weekday labels */}
-            <div className="grid grid-cols-7 w-full gap-2 mb-1.5">
-              {WEEKDAYS.map((label) => (
-                <div
-                  key={label}
-                  className="text-center text-[11px] font-medium text-white/50 py-0 select-none"
-                >
-                  {label}
-                </div>
-              ))}
-            </div>
+              {/* Day cells */}
+              <div className="grid grid-cols-7 w-full gap-2 p-1 rounded-lg bg-slate-800/20 ring-1 ring-slate-700/30">
+                {cells.map((cell, idx) => {
+                  if (cell.type === "empty") {
+                    return (
+                      <div
+                        key={cell.key}
+                        className="aspect-square w-full rounded-md bg-zinc-900/45 border border-white/5 pointer-events-none"
+                      />
+                    );
+                  }
 
-            {/* Day cells */}
-            <div className="grid grid-cols-7 w-full gap-2 p-1 rounded-lg bg-slate-800/20 ring-1 ring-slate-700/30">
-              {cells.map((cell, idx) => {
-                if (cell.type === "empty") {
+                  const isToday = cell.date === today;
+                  const isHoveredStreak = cell.streakId !== null && hoveredStreakId === cell.streakId;
+                  const isInactive = cell.value <= 0;
+
                   return (
                     <div
-                      key={cell.key}
-                      className="aspect-square w-full rounded-md bg-zinc-900/45 border border-white/5 pointer-events-none"
-                    />
-                  );
-                }
-
-                const isToday = cell.date === today;
-                const isHoveredStreak = cell.streakId !== null && hoveredStreakId === cell.streakId;
-                const isInactive = cell.value <= 0;
-
-                return (
-                  <div
-                    key={`${cell.date}-${idx}`}
-                    className="relative group aspect-square w-full"
-                    onMouseEnter={() => setHoveredStreakId(cell.streakId)}
-                    onMouseLeave={() => setHoveredStreakId(null)}
-                  >
-                    {/* Cell square */}
-                    <div
-                      className={`w-full h-full rounded-md border border-white/10 [box-shadow:inset_0_1px_0_rgba(255,255,255,0.08),inset_0_-1px_0_rgba(15,23,42,0.2)] transition-all duration-200 ease-out cursor-pointer
+                      key={`${cell.date}-${idx}`}
+                      className="relative group aspect-square w-full"
+                      onMouseEnter={() => setHoveredStreakId(cell.streakId)}
+                      onMouseLeave={() => setHoveredStreakId(null)}
+                    >
+                      {/* Cell square */}
+                      <div
+                        className={`w-full h-full rounded-md border border-white/10 [box-shadow:inset_0_1px_0_rgba(255,255,255,0.08),inset_0_-1px_0_rgba(15,23,42,0.2)] transition-all duration-200 ease-out cursor-pointer
                     hover:scale-[1.06] hover:border-white/30 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.1),0_0_10px_rgba(34,197,94,0.3)] hover:z-10
                     ${isInactive ? "border-zinc-700/70 shadow-[inset_0_1px_0_rgba(255,255,255,0.04),inset_0_-1px_0_rgba(0,0,0,0.35)]" : ""}
                     ${cell.isStreak ? "border-emerald-300/30 shadow-[inset_0_1px_0_rgba(255,255,255,0.08),inset_0_-1px_0_rgba(15,23,42,0.2),0_0_8px_rgba(34,197,94,0.14)]" : ""}
@@ -374,62 +345,63 @@ export default function HabitHeatmap({
                     ${cell.isCurrentStreak ? "ring-1 ring-emerald-300/40 ring-inset" : ""}
                     ${isToday ? "ring-1 ring-white/25 shadow-[0_0_0_1px_rgba(34,197,94,0.2)]" : ""}
                   `}
-                      style={{ backgroundColor: getIntensityColor(cell.value) }}
-                    >
-                      {/* Day number — subtle overlay */}
-                      <span className={`absolute inset-0 flex items-center justify-center text-sm font-semibold [text-shadow:0_1px_1px_rgba(2,6,23,0.75)] select-none pointer-events-none ${isInactive ? "text-white/55" : "text-white/90"}`}>
-                        {cell.day}
-                      </span>
-                      {cell.isStreak && (
-                        <span
-                          className={`absolute bottom-1 left-1/2 -translate-x-1/2 h-[2px] rounded-full pointer-events-none
+                        style={{ backgroundColor: getIntensityColor(cell.value) }}
+                      >
+                        {/* Day number — subtle overlay */}
+                        <span className={`absolute inset-0 flex items-center justify-center text-sm font-semibold [text-shadow:0_1px_1px_rgba(2,6,23,0.75)] select-none pointer-events-none ${isInactive ? "text-white/55" : "text-white/90"}`}>
+                          {cell.day}
+                        </span>
+                        {cell.isStreak && (
+                          <span
+                            className={`absolute bottom-1 left-1/2 -translate-x-1/2 h-[2px] rounded-full pointer-events-none
                           ${cell.isCurrentStreak ? "w-[18px] bg-emerald-300/75" : "w-[14px] bg-emerald-300/55"}`}
-                        />
-                      )}
-                    </div>
+                          />
+                        )}
+                      </div>
 
-                    {/* Tooltip */}
-                    <div
-                      className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
+                      {/* Tooltip */}
+                      <div
+                        className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2
                     opacity-0 group-hover:opacity-100 transition-all duration-200 ease-out
                     pointer-events-none z-30 whitespace-nowrap"
-                    >
-                      <div className="bg-slate-800/95 border border-white/10 rounded-lg px-2.5 py-1.5 shadow-2xl backdrop-blur-sm">
-                        <p className="text-xs font-semibold text-white">
-                          {formatTooltipDate(cell.date)}
-                          {isToday && (
-                            <span className="ml-1.5 text-[10px] font-medium text-emerald-400">Today</span>
-                          )}
-                        </p>
-                      <p className="text-xs text-slate-300 mt-0.5">
-                          {formatTooltipValue(cell.value)}
-                        </p>
+                      >
+                        <div className="bg-slate-800/95 border border-white/10 rounded-lg px-2.5 py-1.5 shadow-2xl backdrop-blur-sm">
+                          <p className="text-xs font-semibold text-white">
+                            {formatTooltipDate(cell.date)}
+                            {isToday && (
+                              <span className="ml-1.5 text-[10px] font-medium text-emerald-400">Today</span>
+                            )}
+                          </p>
+                        <p className="text-xs text-slate-300 mt-0.5">
+                            {formatTooltipValue(cell.value)}
+                          </p>
+                        </div>
+                        {/* Arrow */}
+                        <div
+                          className="absolute top-full left-1/2 -translate-x-1/2
+                        border-l-[5px] border-r-[5px] border-t-[5px]
+                        border-l-transparent border-r-transparent border-t-slate-800"
+                        />
                       </div>
-                      {/* Arrow */}
-                      <div
-                        className="absolute top-full left-1/2 -translate-x-1/2
-                      border-l-[5px] border-r-[5px] border-t-[5px]
-                      border-l-transparent border-r-transparent border-t-slate-800"
-                      />
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="w-full flex-shrink-0 lg:w-48 xl:w-56">
+              <StatsPanel
+                activeDays={activeDays}
+                daysInMonth={daysInMonth}
+                avgPercent={avgPercent}
+                bestValue={bestDay?.value ?? 0}
+                bestDayLabel={bestDay ? formatShortMonthDay(bestDay.date) : "-"}
+                currentStreak={currentStreak}
+              />
             </div>
           </div>
-
-          <div className="w-full flex-shrink-0 lg:w-48 xl:w-56">
-            <StatsPanel
-              activeDays={activeDays}
-              daysInMonth={daysInMonth}
-              avgPercent={avgPercent}
-              bestValue={bestDay?.value ?? 0}
-              bestDayLabel={bestDay ? formatShortMonthDay(bestDay.date) : "-"}
-              currentStreak={currentStreak}
-            />
-          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
