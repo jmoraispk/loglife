@@ -3,16 +3,27 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import GoalTagList from "@/components/goals/GoalTagList";
-import {
-  GOALS_TAGS_STORAGE_KEY,
-  INITIAL_GOALS_WITH_TAGS_STATE,
-  type Goal,
-  type GoalsWithTagsState,
-} from "@/data/mock/goals-with-tags";
+import { TAGS, type TagNode } from "@/data/mock/tags";
+import { getDetailedGoalsFromLogs, type DetailedGoal } from "@/data/test-logs-derived";
 import { applyTagFilter } from "@/utils/tags";
 
+type GoalListItem = Pick<
+  DetailedGoal,
+  | "id"
+  | "name"
+  | "description"
+  | "category"
+  | "startDate"
+  | "targetDate"
+  | "progressPercent"
+  | "streak"
+> & {
+  tagIds: string[];
+  eventCount: number;
+};
+
 const categoryColors: Record<
-  Goal["category"],
+  GoalListItem["category"],
   { bg: string; text: string; border: string }
 > = {
   Work: {
@@ -46,8 +57,8 @@ function GoalCard({
   taxonomy,
   onTagClick,
 }: {
-  goal: Goal;
-  taxonomy: GoalsWithTagsState["taxonomy"];
+  goal: GoalListItem;
+  taxonomy: TagNode[];
   onTagClick: (tagId: string) => void;
 }) {
   const colors = categoryColors[goal.category];
@@ -102,8 +113,8 @@ function GoalCard({
 
       <div className="px-5 py-3 border-t border-slate-800/50 flex items-center justify-between gap-2 mt-auto">
         <span className="text-[11px] text-slate-500">
-          {goal.timeline.length} recent{" "}
-          {goal.timeline.length === 1 ? "event" : "events"}
+          {goal.eventCount} recent{" "}
+          {goal.eventCount === 1 ? "event" : "events"}
         </span>
         <span className="inline-flex items-center gap-1 text-[11px] text-slate-400 group-hover:text-slate-200 transition-colors">
           View timeline
@@ -127,26 +138,29 @@ function GoalCard({
 }
 
 export default function GoalsPage() {
-  const [state] = useState<GoalsWithTagsState>(() => {
-    if (typeof window === "undefined") return INITIAL_GOALS_WITH_TAGS_STATE;
-    const raw = window.localStorage.getItem(GOALS_TAGS_STORAGE_KEY);
-    if (!raw) return INITIAL_GOALS_WITH_TAGS_STATE;
-    try {
-      const parsed = JSON.parse(raw) as GoalsWithTagsState;
-      if (parsed?.goals && parsed?.taxonomy) {
-        return parsed;
-      }
-    } catch {
-      // Keep default seed data if persisted data is invalid.
-    }
-    return INITIAL_GOALS_WITH_TAGS_STATE;
-  });
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const taxonomy = TAGS;
+  const goals = useMemo(
+    () =>
+      getDetailedGoalsFromLogs().map((goal) => ({
+        id: goal.id,
+        name: goal.name,
+        description: goal.description,
+        category: goal.category,
+        startDate: goal.startDate,
+        targetDate: goal.targetDate,
+        progressPercent: goal.progressPercent,
+        streak: goal.streak,
+        tagIds: Array.from(new Set(goal.tags)),
+        eventCount: goal.events.length,
+      })),
+    []
+  );
 
   const sortedGoals = useMemo(() => {
-    const filtered = applyTagFilter(state.goals, selectedTags);
+    const filtered = applyTagFilter(goals, selectedTags);
     return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
-  }, [state.goals, selectedTags]);
+  }, [goals, selectedTags]);
 
   return (
     <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">
@@ -173,20 +187,42 @@ export default function GoalsPage() {
           )}
         </header>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {sortedGoals.map((goal) => (
-            <GoalCard
-              key={goal.id}
-              goal={goal}
-              taxonomy={state.taxonomy}
-              onTagClick={(tagId) =>
-                setSelectedTags((curr) =>
-                  curr.includes(tagId) ? curr.filter((id) => id !== tagId) : [...curr, tagId]
-                )
-              }
-            />
-          ))}
-        </div>
+        {sortedGoals.length === 0 ? (
+          <div className="rounded-xl border border-dashed border-slate-700/70 bg-slate-900/40 px-4 py-6 text-center">
+            <p className="text-sm text-slate-300">
+              {selectedTags.length > 0 ? "No goals match selected tags." : "No goals yet."}
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              {selectedTags.length > 0
+                ? "Clear filters or add logs with matching tags."
+                : "Start logging goal-linked activity to populate this page."}
+            </p>
+            {selectedTags.length > 0 ? (
+              <button
+                type="button"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-slate-700/70 bg-slate-800/70 px-3 py-1.5 text-xs font-semibold text-slate-200 hover:bg-slate-700/80 transition-colors"
+                onClick={() => setSelectedTags([])}
+              >
+                Clear filters
+              </button>
+            ) : null}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {sortedGoals.map((goal) => (
+              <GoalCard
+                key={goal.id}
+                goal={goal}
+                taxonomy={taxonomy}
+                onTagClick={(tagId) =>
+                  setSelectedTags((curr) =>
+                    curr.includes(tagId) ? curr.filter((id) => id !== tagId) : [...curr, tagId]
+                  )
+                }
+              />
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );
