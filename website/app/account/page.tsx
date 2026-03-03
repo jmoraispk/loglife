@@ -23,8 +23,13 @@ export default function AccountPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [telegramLoading, setTelegramLoading] = useState(false);
+  const [telegramFeedback, setTelegramFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [telegramLink, setTelegramLink] = useState<{ token: string; deepLink: string } | null>(null);
   const whatsappPhone = (user?.unsafeMetadata as Record<string, string> | undefined)?.whatsappPhone || "";
+  const telegramChatId = (user?.unsafeMetadata as Record<string, string> | undefined)?.telegramChatId || "";
   const whatsAppConnected = !!whatsappPhone;
+  const telegramConnected = !!telegramChatId;
 
   React.useEffect(() => {
     if (user) {
@@ -130,10 +135,93 @@ export default function AccountPage() {
     }
   };
 
+  const handleTelegramStartConnect = async () => {
+    setTelegramLoading(true);
+    setTelegramFeedback(null);
+    try {
+      const res = await fetch("/api/telegram/link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "create" }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.deepLink || !data.token) {
+        setTelegramFeedback({ type: "error", text: data.error || "Failed to create Telegram link" });
+        return;
+      }
+
+      setTelegramLink({ token: data.token, deepLink: data.deepLink });
+      window.open(data.deepLink, "_blank", "noopener,noreferrer");
+      setTelegramFeedback({
+        type: "success",
+        text: "Telegram opened. Press Start, then click 'I've Pressed Start'.",
+      });
+    } catch {
+      setTelegramFeedback({ type: "error", text: "Network error. Please try again." });
+    } finally {
+      setTelegramLoading(false);
+    }
+  };
+
+  const handleTelegramCompleteConnect = async () => {
+    if (!telegramLink?.token) return;
+    setTelegramLoading(true);
+    setTelegramFeedback(null);
+    try {
+      const res = await fetch("/api/telegram/link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "complete",
+          token: telegramLink.token,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.linked) {
+        if (res.status === 409 && data.pending) {
+          setTelegramFeedback({
+            type: "error",
+            text: "Not detected yet. Press Start in Telegram bot and try again in a few seconds.",
+          });
+          return;
+        }
+        setTelegramFeedback({ type: "error", text: data.error || "Failed to link Telegram" });
+        return;
+      }
+      setTelegramFeedback({ type: "success", text: "Telegram connected successfully." });
+      setTelegramLink(null);
+      await user!.reload();
+    } catch {
+      setTelegramFeedback({ type: "error", text: "Network error. Please try again." });
+    } finally {
+      setTelegramLoading(false);
+    }
+  };
+
+  const handleTelegramDisconnect = async () => {
+    try {
+      const metadata = (user!.unsafeMetadata ?? {}) as Record<string, unknown>;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { telegramChatId: _removedChatId, telegramPendingLink: _removedLink, ...rest } = metadata;
+      await user!.update({ unsafeMetadata: rest });
+      setTelegramLink(null);
+      setTelegramFeedback(null);
+    } catch {
+      alert("Failed to disconnect Telegram. Please try again.");
+    }
+  };
+
   function maskPhone(phone: string): string {
     if (phone.length <= 4) return phone;
     const last4 = phone.slice(-4);
     const prefix = phone.slice(0, phone.length - 4).replace(/./g, "*");
+    return prefix + last4;
+  }
+
+  function maskId(id: string): string {
+    if (id.length <= 4) return id;
+    const last4 = id.slice(-4);
+    const prefix = id.slice(0, id.length - 4).replace(/./g, "*");
     return prefix + last4;
   }
 
@@ -386,7 +474,82 @@ export default function AccountPage() {
                       )}
                     </div>
 
-                    {user.externalAccounts.length === 0 && !whatsAppConnected && (
+                    {/* Telegram Connection */}
+                    <div className="px-3 py-2.5 rounded-lg bg-slate-950/30 border border-slate-800/30">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <svg className="w-4 h-4 text-[#0088cc]" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z" />
+                          </svg>
+                          <div>
+                            <span className="text-sm text-slate-300">Telegram</span>
+                            {telegramConnected && (
+                              <span className="text-xs text-slate-500 ml-2 font-mono">{maskId(telegramChatId)}</span>
+                            )}
+                          </div>
+                        </div>
+                        {telegramConnected ? (
+                          <div className="flex items-center gap-2">
+                            <span className="px-2 py-0.5 rounded text-xs font-medium bg-green-500/10 text-green-400">
+                              Verified
+                            </span>
+                            <button
+                              onClick={handleTelegramDisconnect}
+                              className="text-xs font-medium text-slate-500 hover:text-red-400 transition-colors cursor-pointer"
+                            >
+                              Disconnect
+                            </button>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={handleTelegramStartConnect}
+                            disabled={telegramLoading}
+                            className="px-3 py-1 rounded-lg text-xs font-medium text-[#0088cc] border border-[#0088cc]/30 hover:bg-[#0088cc]/10 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            {telegramLoading ? "Please wait..." : "Connect Telegram"}
+                          </button>
+                        )}
+                      </div>
+
+                      {!telegramConnected && telegramLink && (
+                        <div className="mt-3 space-y-3">
+                          <p className="text-xs text-slate-500">
+                            Press Start in Telegram bot, then confirm below.
+                          </p>
+                          <div className="flex flex-wrap items-center gap-3">
+                            <button
+                              onClick={handleTelegramCompleteConnect}
+                              disabled={telegramLoading}
+                              className="px-3 py-2 rounded-lg text-xs font-medium text-white bg-[#0088cc] hover:bg-[#0077b5] transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              {telegramLoading ? "Checking..." : "I've Pressed Start"}
+                            </button>
+                            <a
+                              href={telegramLink.deepLink}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center text-xs text-[#0088cc] hover:underline"
+                            >
+                              Open Telegram bot again
+                            </a>
+                          </div>
+                        </div>
+                      )}
+
+                      {telegramFeedback && !telegramConnected && (
+                        <div
+                          className={`mt-3 px-3 py-2 rounded-lg text-xs ${
+                            telegramFeedback.type === "success"
+                              ? "bg-green-500/10 text-green-400"
+                              : "bg-emerald-500/10 text-emerald-400"
+                          }`}
+                        >
+                          {telegramFeedback.text}
+                        </div>
+                      )}
+                    </div>
+
+                    {user.externalAccounts.length === 0 && !whatsAppConnected && !telegramConnected && (
                       <p className="text-sm text-slate-500 pt-1">No connected accounts yet</p>
                     )}
                   </div>

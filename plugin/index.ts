@@ -25,6 +25,7 @@ const VERIFY_TTL_MS = 5 * 60 * 1000;
 const VERIFY_COOLDOWN_MS = 60 * 1000;
 
 export const verificationCodes = new Map<string, VerificationEntry>();
+export const telegramVerificationCodes = new Map<string, VerificationEntry>();
 
 export function normalizePhone(raw: string): string {
   const digits = raw.replace(/[^0-9]/g, "");
@@ -80,6 +81,12 @@ type SendWhatsApp = (
   options: { verbose: boolean },
 ) => Promise<{ messageId: string; toJid: string }>;
 
+type SendTelegram = (
+  to: string,
+  body: string,
+  options?: { verbose: boolean },
+) => Promise<unknown>;
+
 async function sendWhatsAppMessage(
   sendFn: SendWhatsApp,
   to: string,
@@ -92,6 +99,70 @@ async function sendWhatsAppMessage(
     const errMsg = err instanceof Error ? err.message : String(err);
     return { ok: false, error: errMsg };
   }
+}
+
+async function sendTelegramMessage(
+  sendFn: SendTelegram | undefined,
+  to: string,
+  message: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!sendFn) {
+    return { ok: false, error: "Telegram channel is not configured on OpenClaw" };
+  }
+
+  try {
+    await sendFn(to, message, { verbose: false });
+    return { ok: true };
+  } catch {
+    // Fallback for runtimes that do not accept options.
+    try {
+      await sendFn(to, message);
+      return { ok: true };
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      return { ok: false, error: errMsg };
+    }
+  }
+}
+
+function normalizeTelegramPeer(raw: string): string {
+  const value = raw.trim().replace(/^telegram:/i, "").replace(/^@/, "");
+  return value;
+}
+
+function toTelegramIdentifier(raw: string): string {
+  return `telegram:${normalizeTelegramPeer(raw)}`;
+}
+
+function extractTelegramChatId(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  const prefixed = trimmed.match(/^telegram:([A-Za-z0-9_+-]+)$/i);
+  if (prefixed) return prefixed[1];
+
+  const directKey = trimmed.match(/:direct:([A-Za-z0-9_+-]+)$/i);
+  if (directKey) return directKey[1];
+
+  if (/^-?\d+$/.test(trimmed)) return trimmed;
+  return null;
+}
+
+function sessionLikelyTelegram(session: Record<string, unknown>): boolean {
+  const delivery = session.deliveryContext as Record<string, unknown> | undefined;
+  const origin = session.origin as Record<string, unknown> | undefined;
+  const values = [
+    session.lastChannel,
+    session.lastTo,
+    delivery?.channel,
+    delivery?.to,
+    origin?.provider,
+    origin?.surface,
+    origin?.from,
+    origin?.to,
+  ];
+  return values.some((v) => typeof v === "string" && v.toLowerCase().includes("telegram"));
 }
 
 function loadUsersJson(usersJsonPath: string): UsersConfig {
@@ -155,6 +226,11 @@ const plugin = {
     const openclawJsonPath = join(stateDir, "openclaw.json");
 
     const sendWA = api.runtime.channel.whatsapp.sendMessageWhatsApp as SendWhatsApp;
+    const sendTG = (
+      (api.runtime.channel as Record<string, unknown>).telegram as
+        | { sendMessageTelegram?: SendTelegram }
+        | undefined
+    )?.sendMessageTelegram;
 
     // --- GET /loglife/sessions ---
 
@@ -457,6 +533,300 @@ const plugin = {
           const errMsg = err instanceof Error ? err.message : String(err);
           api.logger.error(`Registration failed for ${phone}: ${errMsg}`);
           jsonResponse(res, 500, { error: "Registration failed" });
+        }
+      },
+    });
+
+    // --- POST /loglife/telegram/verify/send ---
+
+    api.registerHttpRoute({
+      path: "/loglife/telegram/verify/send",
+      handler: async (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method !== "POST") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
+        let body: Record<string, unknown>;
+        try {
+          body = await readBody(req);
+        } catch {
+          jsonResponse(res, 400, { error: "Invalid JSON body" });
+          return;
+        }
+
+        const peerRaw = body.phone as string | undefined;
+        if (!peerRaw || typeof peerRaw !== "string") {
+          jsonResponse(res, 400, { error: "Missing required field: phone" });
+          return;
+        }
+
+        const peer = normalizeTelegramPeer(peerRaw);
+        if (peer.length < 3) {
+          jsonResponse(res, 400, { error: "Invalid Telegram recipient" });
+          return;
+        }
+
+        const codeKey = `telegram:${peer}`;
+        const existing = telegramVerificationCodes.get(codeKey);
+        if (existing && Date.now() - existing.sentAt < VERIFY_COOLDOWN_MS) {
+          const retryIn = Math.ceil((VERIFY_COOLDOWN_MS - (Date.now() - existing.sentAt)) / 1000);
+          jsonResponse(res, 429, { error: `Too many requests. Try again in ${retryIn}s` });
+          return;
+        }
+
+        const code = String(randomInt(100_000, 999_999));
+        telegramVerificationCodes.set(codeKey, {
+          code,
+          expiresAt: Date.now() + VERIFY_TTL_MS,
+          sentAt: Date.now(),
+        });
+
+        const message = `Your LogLife verification code is: ${code}`;
+        const result = await sendTelegramMessage(sendTG, peer, message);
+
+        if (!result.ok) {
+          telegramVerificationCodes.delete(codeKey);
+          jsonResponse(res, 502, { error: result.error ?? "Failed to send message" });
+          return;
+        }
+
+        jsonResponse(res, 200, { sent: true });
+      },
+    });
+
+    // --- POST /loglife/telegram/verify/check ---
+
+    api.registerHttpRoute({
+      path: "/loglife/telegram/verify/check",
+      handler: async (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method !== "POST") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
+        let body: Record<string, unknown>;
+        try {
+          body = await readBody(req);
+        } catch {
+          jsonResponse(res, 400, { error: "Invalid JSON body" });
+          return;
+        }
+
+        const peerRaw = body.phone as string | undefined;
+        const codeInput = body.code as string | undefined;
+
+        if (!peerRaw || typeof peerRaw !== "string") {
+          jsonResponse(res, 400, { error: "Missing required field: phone" });
+          return;
+        }
+        if (!codeInput || typeof codeInput !== "string") {
+          jsonResponse(res, 400, { error: "Missing required field: code" });
+          return;
+        }
+
+        const peer = normalizeTelegramPeer(peerRaw);
+        const codeKey = `telegram:${peer}`;
+        const entry = telegramVerificationCodes.get(codeKey);
+
+        if (!entry || Date.now() > entry.expiresAt) {
+          telegramVerificationCodes.delete(codeKey);
+          jsonResponse(res, 200, { verified: false, error: "Code expired or not found" });
+          return;
+        }
+
+        if (!safeCompare(entry.code, codeInput.trim())) {
+          jsonResponse(res, 200, { verified: false, error: "Invalid code" });
+          return;
+        }
+
+        telegramVerificationCodes.delete(codeKey);
+        jsonResponse(res, 200, { verified: true });
+
+        sendTelegramMessage(
+          sendTG,
+          peer,
+          "Welcome to LogLife! Your dashboard is now connected. Send me a message anytime to start journaling.",
+        ).catch(() => { /* best-effort */ });
+      },
+    });
+
+    // --- POST /loglife/telegram/register ---
+
+    api.registerHttpRoute({
+      path: "/loglife/telegram/register",
+      handler: async (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method !== "POST") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
+        let body: Record<string, unknown>;
+        try {
+          body = await readBody(req);
+        } catch {
+          jsonResponse(res, 400, { error: "Invalid JSON body" });
+          return;
+        }
+
+        const peerRaw = body.phone as string | undefined;
+        if (!peerRaw || typeof peerRaw !== "string") {
+          jsonResponse(res, 400, { error: "Missing required field: phone" });
+          return;
+        }
+
+        const peer = normalizeTelegramPeer(peerRaw);
+        if (peer.length < 3) {
+          jsonResponse(res, 400, { error: "Invalid Telegram recipient" });
+          return;
+        }
+
+        const telegramIdentifier = toTelegramIdentifier(peer);
+        const name = (body.name as string | undefined)?.trim() || undefined;
+        const model = (body.model as string | undefined)?.trim() || undefined;
+
+        try {
+          const usersConfig = loadUsersJson(usersJsonPath);
+
+          // Idempotent: check if telegram identifier is already registered
+          const targetIdentifiers = parseAllIdentifiers([telegramIdentifier]);
+          const alreadyRegistered = usersConfig.users.some((u) =>
+            u.identifiers.some((id) => {
+              try {
+                const parsed = parseAllIdentifiers([id]);
+                return parsed.some((p) =>
+                  targetIdentifiers.some((ti) => ti.channel === p.channel && ti.peerId === p.peerId),
+                );
+              } catch {
+                return false;
+              }
+            }),
+          );
+
+          if (alreadyRegistered) {
+            jsonResponse(res, 200, { registered: true, existing: true });
+            return;
+          }
+
+          const userId = deriveUserId(telegramIdentifier, name, usersConfig);
+          const newUser: UserProfile = {
+            id: userId,
+            identifiers: [telegramIdentifier],
+          };
+          if (name) newUser.name = name;
+          if (model) newUser.model = model;
+
+          usersConfig.users.push(newUser);
+
+          mkdirSync(multiUserDir, { recursive: true });
+          writeFileSync(usersJsonPath, JSON.stringify(usersConfig, null, 2) + "\n");
+
+          const generated = generateConfig(usersConfig);
+          writeFileSync(generatedJsonPath, JSON.stringify(generated, null, 2) + "\n");
+
+          if (existsSync(openclawJsonPath)) {
+            const now = new Date();
+            utimesSync(openclawJsonPath, now, now);
+          }
+
+          api.logger.info(`Registered user "${userId}" (${telegramIdentifier})`);
+          jsonResponse(res, 200, { registered: true, userId });
+        } catch (err) {
+          const errMsg = err instanceof Error ? err.message : String(err);
+          api.logger.error(`Registration failed for ${telegramIdentifier}: ${errMsg}`);
+          jsonResponse(res, 500, { error: "Registration failed" });
+        }
+      },
+    });
+
+    // --- POST /loglife/telegram/link/resolve ---
+
+    api.registerHttpRoute({
+      path: "/loglife/telegram/link/resolve",
+      handler: async (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method !== "POST") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
+        let body: Record<string, unknown>;
+        try {
+          body = await readBody(req);
+        } catch {
+          jsonResponse(res, 400, { error: "Invalid JSON body" });
+          return;
+        }
+
+        const tokenRaw = body.token as string | undefined;
+        if (!tokenRaw || typeof tokenRaw !== "string") {
+          jsonResponse(res, 400, { error: "Missing required field: token" });
+          return;
+        }
+
+        const token = tokenRaw.trim().replace(/^ll_/, "");
+        if (!token) {
+          jsonResponse(res, 400, { error: "Invalid token" });
+          return;
+        }
+        const startMarker = `ll_${token}`;
+
+        try {
+          const raw = await readFile(sessionsPath, "utf-8");
+          const sessions: Record<string, Record<string, unknown>> = JSON.parse(raw);
+
+          for (const [sessionKey, session] of Object.entries(sessions)) {
+            if (!sessionLikelyTelegram(session)) continue;
+
+            const sessionFile = session.sessionFile;
+            if (typeof sessionFile !== "string" || !sessionFile) continue;
+
+            let sessionContent = "";
+            try {
+              sessionContent = await readFile(sessionFile, "utf-8");
+            } catch {
+              continue;
+            }
+
+            if (!sessionContent.includes(startMarker)) continue;
+
+            const delivery = session.deliveryContext as Record<string, unknown> | undefined;
+            const origin = session.origin as Record<string, unknown> | undefined;
+            const chatId =
+              extractTelegramChatId(delivery?.to)
+              ?? extractTelegramChatId(session.lastTo)
+              ?? extractTelegramChatId(origin?.from)
+              ?? extractTelegramChatId(origin?.to)
+              ?? extractTelegramChatId(sessionKey);
+
+            if (!chatId) continue;
+
+            jsonResponse(res, 200, { found: true, chatId, sessionKey });
+            return;
+          }
+
+          jsonResponse(res, 404, { found: false, error: "Token not observed in Telegram sessions yet" });
+        } catch {
+          jsonResponse(res, 500, { error: "Failed to resolve Telegram link token" });
         }
       },
     });
