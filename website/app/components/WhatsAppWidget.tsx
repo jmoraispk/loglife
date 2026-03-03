@@ -70,6 +70,8 @@ export default function WhatsAppWidget() {
   const number = "17155157761";
   const message = "START";
   const link = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+  const telegramBotUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "loglifetestbot";
+  const telegramLink = `https://t.me/${telegramBotUsername}`;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -119,6 +121,10 @@ export default function WhatsAppWidget() {
 
   const openChatPanel = () => setIsChatPanelOpen(true);
   const closeChatPanel = () => setIsPanelClosing(true);
+  const openTelegram = () => {
+    window.open(telegramLink, "_blank", "noopener,noreferrer");
+    setIsPanelClosing(true);
+  };
 
   const isPanelVisible = isChatPanelOpen || isPanelClosing;
   const panelTransitionClasses =
@@ -224,7 +230,7 @@ export default function WhatsAppWidget() {
               type="button"
               className="flex items-center justify-center rounded-full p-4 w-14 h-14 bg-gradient-to-br from-[#0088cc] to-[#0077b5] text-white shadow-2xl border border-[#0088cc]/80 cursor-pointer transition-transform duration-300 ease-out hover:scale-105"
               aria-label="Telegram"
-              onClick={() => {}}
+              onClick={openTelegram}
             >
               <IconTelegram />
             </button>

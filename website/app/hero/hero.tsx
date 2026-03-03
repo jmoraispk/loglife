@@ -434,6 +434,8 @@ function WhatYouGet() {
 function FinalCTA() {
   const { ref, visible } = useInView();
   const { openWidget } = useWhatsAppWidget();
+  const telegramBotUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "loglifetestbot";
+  const telegramLink = `https://t.me/${telegramBotUsername}`;
 
   return (
     <section ref={ref} className={`relative py-24 reveal ${visible ? "visible" : ""}`}>
@@ -458,7 +460,7 @@ function FinalCTA() {
               WhatsApp
             </button>
             <button
-              onClick={openWidget}
+              onClick={() => window.open(telegramLink, "_blank", "noopener,noreferrer")}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0088cc]/10 border border-[#0088cc]/30 text-[#0088cc] text-sm font-medium hover:bg-[#0088cc]/20 transition-colors cursor-pointer"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">

@@ -4,7 +4,7 @@ import { auth, clerkClient } from "@clerk/nextjs/server";
 
 const OPENCLAW_API_URL = process.env.OPENCLAW_API_URL;
 const OPENCLAW_API_KEY = process.env.OPENCLAW_API_KEY;
-const TELEGRAM_BOT_USERNAME = process.env.TELEGRAM_BOT_USERNAME;
+const TELEGRAM_BOT_USERNAME = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME;
 const LINK_TTL_MS = 10 * 60 * 1000;
 
 type LinkMeta = {
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
   if (action === "create") {
     if (!TELEGRAM_BOT_USERNAME) {
       return NextResponse.json(
-        { error: "Server not configured: missing TELEGRAM_BOT_USERNAME" },
+        { error: "Server not configured: missing NEXT_PUBLIC_TELEGRAM_BOT_USERNAME" },
         { status: 503 },
       );
     }
