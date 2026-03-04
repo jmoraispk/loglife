@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { useWhatsAppWidget } from "@/app/contexts/WhatsAppWidgetContext";
+import { useWhatsAppWidget } from "@/contexts/WhatsAppWidgetContext";
 
 const PANEL_TRANSITION_MS = 200;
 
