@@ -1,5 +1,5 @@
 "use client";
-import LogLifeHero from "./hero/hero";
+import LogLifeHero from "@/components/hero/LogLifeHero";
 import Footer from "@/components/Footer";
 
 export default function HomePage() {
