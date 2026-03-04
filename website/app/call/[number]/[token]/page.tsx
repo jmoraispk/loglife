@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, Suspense } from "react";
 import { useParams } from "next/navigation";
-import { useWhatsAppWidget } from "../../../contexts/WhatsAppWidgetContext";
+import { useWhatsAppWidget } from "@/contexts/WhatsAppWidgetContext";
 import Vapi from "@vapi-ai/web";
 
 function CallPageContent() {
