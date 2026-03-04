@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
+import { useWhatsAppWidget } from "@/app/contexts/WhatsAppWidgetContext";
 
 function useInView(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null);
