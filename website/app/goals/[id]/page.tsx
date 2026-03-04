@@ -15,7 +15,7 @@ import {
   type DetailedGoal,
   type GoalCategory,
 } from "@/data/test-logs-derived";
-import GoalRadarPanel from "./GoalRadarPanel";
+import GoalRadarPanel from "@/components/goals/GoalRadarPanel";
 import { useDemoMode } from "@/hooks/useDemoMode";
 import {
   addTag,
