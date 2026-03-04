@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense } from "react";
-import LogsPage from "@/app/components/logs/LogsPage";
+import LogsPage from "@/components/logs/LogsPage";
 
 export default function LogsRoutePage() {
   return (

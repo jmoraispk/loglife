@@ -1,12 +1,12 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import { ClerkProvider } from "@clerk/nextjs";
-import ConditionalNavbar from "./components/ConditionalNavbar";
-import PageWrapper from "./components/PageWrapper";
+import ConditionalNavbar from "@/components/ConditionalNavbar";
+import PageWrapper from "@/components/PageWrapper";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { WhatsAppWidgetProvider } from "./contexts/WhatsAppWidgetContext";
-import WhatsAppWidget from "./components/WhatsAppWidget";
-import { WebVitals } from "./components/WebVitals";
+import WhatsAppWidget from "@/components/WhatsAppWidget";
+import { WebVitals } from "@/components/WebVitals";
 import SupportButton from "@/components/SupportButton";
 
 export const metadata: Metadata = {
