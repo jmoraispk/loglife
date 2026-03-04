@@ -3,12 +3,12 @@ import { useUser, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import TodayOverview from "@/app/components/dashboard/TodayOverview";
-import HabitHeatmap from "@/app/components/dashboard/HabitHeatmap";
-import GoalsSection from "@/app/components/dashboard/GoalsSection";
-import LegacyTodayOverview from "@/app/components/dashboard/legacy/LegacyTodayOverview";
-import LegacyHabitHeatmap from "@/app/components/dashboard/legacy/LegacyHabitHeatmap";
-import LegacyGoalsSection from "@/app/components/dashboard/legacy/LegacyGoalsSection";
+import TodayOverview from "@/components/dashboard/TodayOverview";
+import HabitHeatmap from "@/components/dashboard/HabitHeatmap";
+import GoalsSection from "@/components/dashboard/GoalsSection";
+import LegacyTodayOverview from "@/components/dashboard/legacy/LegacyTodayOverview";
+import LegacyHabitHeatmap from "@/components/dashboard/legacy/LegacyHabitHeatmap";
+import LegacyGoalsSection from "@/components/dashboard/legacy/LegacyGoalsSection";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useDemoMode } from "@/hooks/useDemoMode";
 

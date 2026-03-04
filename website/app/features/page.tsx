@@ -2,7 +2,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import AIPipelineDemo from "../components/sections/AIPipelineDemo";
+import AIPipelineDemo from "@/components/sections/AIPipelineDemo";
 
 // Channel icons as SVG components
 const ChannelIcons = {
