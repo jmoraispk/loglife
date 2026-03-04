@@ -1,7 +1,7 @@
  "use client";
 
 import { useMemo, useState } from "react";
-import GoalCard, { type GoalListItem } from "@/components/goals/GoalCard";
+import GoalCard from "@/components/goals/GoalCard";
 import { TAGS } from "@/data/mock/tags";
 import { MOCK_GOALS_WITH_TAGS } from "@/data/mock/goals-with-tags";
 import { getDetailedGoalsFromLogs } from "@/data/test-logs-derived";
