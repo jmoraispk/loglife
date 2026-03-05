@@ -1,0 +1,174 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+export interface CategoryData {
+  label: string;
+  value: number;
+  color: string;
+}
+
+interface DonutChartProps {
+  data: CategoryData[];
+  size?: number;
+  strokeWidth?: number;
+  getCategoryHref?: (label: string) => string;
+  legendBelow?: boolean;
+}
+
+const SEGMENT_GAP = 4;
+
+export default function DonutChart({
+  data,
+  size = 216,
+  strokeWidth = 20,
+  getCategoryHref,
+  legendBelow = false,
+}: DonutChartProps) {
+  const [hovered, setHovered] = useState<string | null>(null);
+  const router = useRouter();
+
+  const center = size / 2;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+
+  const segments = data.reduce<Array<CategoryData & { dashLength: number; rotation: number; percent: number }>>(
+    (acc, item) => {
+      const percent = item.value / total;
+      const dashLength = Math.max(0, percent * circumference - SEGMENT_GAP);
+      const prevAngle = acc.length > 0 ? acc[acc.length - 1].rotation + acc[acc.length - 1].percent * 360 : -90;
+      acc.push({ ...item, dashLength, rotation: prevAngle, percent });
+      return acc;
+    },
+    []
+  );
+
+  const activeSegment = hovered ? segments.find((s) => s.label === hovered) : null;
+
+  const handleCategoryClick = (label: string) => {
+    router.push(getCategoryHref ? getCategoryHref(label) : `/logs?category=${encodeURIComponent(label.toLowerCase())}`);
+  };
+
+  return (
+    <div
+      className={`w-full ${
+        legendBelow
+          ? "flex flex-col items-center gap-5"
+          : "flex flex-col items-start gap-6 xl:flex-row xl:items-center"
+      }`}
+    >
+      <div className={`relative max-w-full ${legendBelow ? "" : "flex-shrink-0"}`}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+          {/* Background track */}
+          <circle
+            cx={center}
+            cy={center}
+            r={radius}
+            fill="none"
+            stroke="#1e293b"
+            strokeWidth={strokeWidth}
+          />
+          {segments.map((seg) => (
+            <circle
+              key={seg.label}
+              cx={center}
+              cy={center}
+              r={radius}
+              fill="none"
+              stroke={seg.color}
+              strokeWidth={hovered === seg.label ? strokeWidth + 5 : strokeWidth}
+              strokeDasharray={`${seg.dashLength} ${circumference}`}
+              strokeDashoffset={0}
+              transform={`rotate(${seg.rotation} ${center} ${center})`}
+              className="transition-all duration-200 cursor-pointer"
+              style={{
+                opacity: hovered && hovered !== seg.label ? 0.25 : 1,
+                filter:
+                  hovered === seg.label
+                    ? `drop-shadow(0 0 8px ${seg.color}99)`
+                    : "none",
+              }}
+              onMouseEnter={() => setHovered(seg.label)}
+              onMouseLeave={() => setHovered(null)}
+              onClick={() => handleCategoryClick(seg.label)}
+            />
+          ))}
+        </svg>
+
+        {/* Center label */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none select-none">
+          {activeSegment ? (
+            <>
+              <span
+                className="text-3xl font-bold tabular-nums transition-colors duration-150"
+                style={{ color: activeSegment.color }}
+              >
+                {activeSegment.value}%
+              </span>
+              <span className="text-xs text-slate-400 mt-1">{activeSegment.label}</span>
+            </>
+          ) : (
+            <>
+              <span className="text-xl font-bold text-white">Today</span>
+              <span className="text-xs text-slate-500 mt-1">{data.length} areas</span>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className={legendBelow ? "flex w-full max-w-[420px] flex-col gap-3" : "flex w-full min-w-0 flex-col gap-5 xl:min-w-[152px]"}>
+        {segments.map((seg) => (
+          <div
+            key={seg.label}
+            className="cursor-pointer group"
+            onMouseEnter={() => setHovered(seg.label)}
+            onMouseLeave={() => setHovered(null)}
+            onClick={() => handleCategoryClick(seg.label)}
+          >
+            <div className={`mb-2 flex items-center ${legendBelow ? "justify-start gap-2" : "justify-between"}`}>
+              <div className="flex min-w-0 items-center gap-2.5">
+                <span
+                  className="w-2 h-2 rounded-full flex-shrink-0 transition-transform duration-150 group-hover:scale-150"
+                  style={{ backgroundColor: seg.color }}
+                />
+                <span className="text-sm text-slate-300 group-hover:text-white transition-colors duration-150 font-medium truncate">
+                  {seg.label}
+                </span>
+              </div>
+              {!legendBelow && (
+                <span
+                  className="text-sm font-bold tabular-nums transition-colors duration-150"
+                  style={{ color: hovered === seg.label ? seg.color : "#f8fafc" }}
+                >
+                  {seg.value}%
+                </span>
+              )}
+            </div>
+            {/* Mini progress bar */}
+            <div className="h-[3px] rounded-full bg-slate-800/80 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all duration-300"
+                style={{
+                  width: `${seg.value}%`,
+                  backgroundColor: seg.color,
+                  opacity: hovered && hovered !== seg.label ? 0.25 : 1,
+                }}
+              />
+            </div>
+            {legendBelow && (
+              <p
+                className="mt-1 text-xs font-semibold tabular-nums"
+                style={{ color: hovered === seg.label ? seg.color : "#94a3b8" }}
+              >
+                {seg.value}%
+              </p>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
