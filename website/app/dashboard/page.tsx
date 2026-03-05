@@ -647,7 +647,7 @@ export default function DashboardPage() {
             {/* Main Content */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* WhatsApp Session Detail */}
-              <div className="lg:col-span-2 bg-slate-900/50 border border-slate-800/50 rounded-xl">
+              <div className="lg:col-span-3 bg-slate-900/50 border border-slate-800/50 rounded-xl">
                 <div className="px-5 py-4 border-b border-slate-800/50 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
                     <svg className="w-4 h-4 text-[#25D366]" viewBox="0 0 24 24" fill="currentColor">
@@ -749,61 +749,6 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* Quick Actions */}
-              <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl">
-                <div className="px-5 py-4 border-b border-slate-800/50">
-                  <h2 className="text-sm font-medium text-white">Quick Actions</h2>
-                </div>
-                <div className="p-3">
-                  <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all cursor-pointer text-left">
-                    <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-300">New Journal Entry</p>
-                      <p className="text-xs text-slate-500">Record a thought or reflection</p>
-                    </div>
-                  </button>
-
-                  <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all cursor-pointer text-left">
-                    <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-300">View Timeline</p>
-                      <p className="text-xs text-slate-500">See your D/W/M/Q/Y highlights</p>
-                    </div>
-                  </button>
-
-                  <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all cursor-pointer text-left">
-                    <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-300">Insights</p>
-                      <p className="text-xs text-slate-500">Explore patterns and progress</p>
-                    </div>
-                  </button>
-
-                  <a href="https://docs.loglife.co/" target="_blank" rel="noopener noreferrer" className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-slate-400 hover:bg-slate-800/50 hover:text-white transition-all text-left">
-                    <div className="w-8 h-8 rounded-lg bg-yellow-500/10 flex items-center justify-center flex-shrink-0">
-                      <svg className="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                      </svg>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-300">Documentation</p>
-                      <p className="text-xs text-slate-500">Learn how to use LogLife</p>
-                    </div>
-                  </a>
-                </div>
-              </div>
             </div>
 
             {/* Recent Activity */}
