@@ -106,6 +106,85 @@ If either check fails, the deploy is marked as failed in GitHub Actions.
 
 The website deploys to Vercel automatically on push to `main`. No gateway restart needed — the website is a separate deployment that connects to the plugin via `OPENCLAW_API_URL`.
 
+## User lifecycle and onboarding tests
+
+Use these commands to verify the V1 onboarding flow and monitor user state while testing.
+
+### Monitor registered users
+
+```bash
+curl -s "http://127.0.0.1:18789/loglife/users" \
+  -H "Authorization: Bearer test-key-for-local-dev"
+```
+
+For live monitoring:
+
+```bash
+watch -n 2 'curl -s "http://127.0.0.1:18789/loglife/users" -H "Authorization: Bearer test-key-for-local-dev"'
+```
+
+### Remove a user quickly
+
+Use the helper script:
+
+```bash
+bash plugin/scripts/unregister-user.sh --phone +15551234567
+```
+
+You can also call the endpoint directly:
+
+```bash
+curl -s -X POST "http://127.0.0.1:18789/loglife/unregister" \
+  -H "Authorization: Bearer test-key-for-local-dev" \
+  -H "Content-Type: application/json" \
+  -d '{"phone":"+15551234567"}'
+```
+
+### V1 onboarding test checklist
+
+<Steps>
+<Step title="Start from a clean user state">
+  Remove your test phone with `unregister-user.sh`.
+  
+  <Check>
+    Confirm `/loglife/users` shows your phone is no longer registered.
+  </Check>
+</Step>
+
+<Step title="Run dashboard onboarding">
+  In the dashboard, enter your phone number and continue the V1 flow:
+  1) register first, 2) send/check verification code.
+  
+  <Check>
+    You should receive a verification code on WhatsApp and complete verification.
+  </Check>
+</Step>
+
+<Step title="Verify backend state">
+  Query `/loglife/users` and confirm your user appears.
+  
+  <Check>
+    The `count` increases and your phone appears in `users`.
+  </Check>
+</Step>
+
+<Step title="Verify idempotency">
+  Repeat the same registration for the same phone.
+  
+  <Check>
+    Registration should not create duplicates.
+  </Check>
+</Step>
+
+<Step title="Verify removal path">
+  Remove the same phone using `/loglife/unregister`.
+  
+  <Check>
+    `/loglife/users` no longer includes that user.
+  </Check>
+</Step>
+</Steps>
+
 ## Docs preview
 
 To preview documentation changes locally:

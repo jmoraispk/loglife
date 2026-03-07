@@ -1,6 +1,6 @@
 import type { OpenClawPluginApi } from "openclaw/plugin-sdk";
 import { readFile } from "node:fs/promises";
-import { readFileSync, writeFileSync, mkdirSync, existsSync, utimesSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { timingSafeEqual, randomInt, createHash } from "node:crypto";
 import { URL } from "node:url";
@@ -100,6 +100,69 @@ function loadUsersJson(usersJsonPath: string): UsersConfig {
   }
   const raw = JSON.parse(readFileSync(usersJsonPath, "utf-8"));
   return validateUsersConfig(raw);
+}
+
+function hasMatchingIdentifier(userIdentifiers: string[], phone: string): boolean {
+  const phoneIdentifiers = parseAllIdentifiers([phone]);
+  return userIdentifiers.some((id) => {
+    try {
+      const parsed = parseAllIdentifiers([id]);
+      return parsed.some((p) =>
+        phoneIdentifiers.some((pi) => pi.channel === p.channel && pi.peerId === p.peerId),
+      );
+    } catch {
+      return false;
+    }
+  });
+}
+
+function applyGeneratedConfigToOpenclaw(
+  openclawJsonPath: string,
+  generated: ReturnType<typeof generateConfig>,
+): void {
+  if (!existsSync(openclawJsonPath)) return;
+
+  const ocRaw = JSON.parse(readFileSync(openclawJsonPath, "utf-8"));
+
+  const previousManagedChannels = new Set<string>();
+  const existingBindings = ocRaw.bindings as Array<{ match?: { channel?: string } }> | undefined;
+  for (const binding of existingBindings ?? []) {
+    const channel = binding?.match?.channel;
+    if (channel) previousManagedChannels.add(channel);
+  }
+
+  ocRaw.agents = { ...ocRaw.agents, list: generated.agents.list };
+  ocRaw.bindings = generated.bindings;
+  ocRaw.session = { ...ocRaw.session, ...generated.session };
+
+  if (!ocRaw.channels) ocRaw.channels = {};
+
+  const newManagedChannels = new Set<string>(Object.keys(generated.channels ?? {}));
+  const allManagedChannels = new Set<string>([...previousManagedChannels, ...newManagedChannels]);
+
+  for (const channel of allManagedChannels) {
+    const next = (generated.channels as Record<string, Record<string, unknown>>)[channel];
+    if (next) {
+      ocRaw.channels[channel] = { ...ocRaw.channels[channel], ...next };
+      continue;
+    }
+
+    // Channel used to be managed by generated config but is no longer present.
+    // Remove allow-list fields so stale access does not remain after unregister.
+    if (!ocRaw.channels[channel]) continue;
+    delete ocRaw.channels[channel].dmPolicy;
+    delete ocRaw.channels[channel].allowFrom;
+    if (ocRaw.channels[channel].dm && typeof ocRaw.channels[channel].dm === "object") {
+      delete ocRaw.channels[channel].dm.policy;
+      delete ocRaw.channels[channel].dm.allowFrom;
+    }
+  }
+
+  if (generated.env) {
+    ocRaw.env = { ...ocRaw.env, ...generated.env };
+  }
+
+  writeFileSync(openclawJsonPath, JSON.stringify(ocRaw, null, 2) + "\n");
 }
 
 function deriveUserId(phone: string, name: string | undefined, config: UsersConfig): string {
@@ -411,18 +474,8 @@ const plugin = {
           const usersConfig = loadUsersJson(usersJsonPath);
 
           // Idempotent: check if phone is already registered
-          const phoneIdentifiers = parseAllIdentifiers([phone]);
           const alreadyRegistered = usersConfig.users.some((u) =>
-            u.identifiers.some((id) => {
-              try {
-                const parsed = parseAllIdentifiers([id]);
-                return parsed.some((p) =>
-                  phoneIdentifiers.some((pi) => pi.channel === p.channel && pi.peerId === p.peerId),
-                );
-              } catch {
-                return false;
-              }
-            }),
+            hasMatchingIdentifier(u.identifiers, phone),
           );
 
           if (alreadyRegistered) {
@@ -446,26 +499,8 @@ const plugin = {
           const generated = generateConfig(usersConfig);
           writeFileSync(generatedJsonPath, JSON.stringify(generated, null, 2) + "\n");
 
-          // Merge generated config directly into openclaw.json.
           // We can't rely on $include because the gateway flattens it on hot-reload.
-          if (existsSync(openclawJsonPath)) {
-            const ocRaw = JSON.parse(readFileSync(openclawJsonPath, "utf-8"));
-
-            ocRaw.agents = { ...ocRaw.agents, list: generated.agents.list };
-            ocRaw.bindings = generated.bindings;
-            ocRaw.session = { ...ocRaw.session, ...generated.session };
-
-            if (!ocRaw.channels) ocRaw.channels = {};
-            for (const [ch, chCfg] of Object.entries(generated.channels as Record<string, Record<string, unknown>>)) {
-              ocRaw.channels[ch] = { ...ocRaw.channels[ch], ...chCfg };
-            }
-
-            if (generated.env) {
-              ocRaw.env = { ...ocRaw.env, ...generated.env };
-            }
-
-            writeFileSync(openclawJsonPath, JSON.stringify(ocRaw, null, 2) + "\n");
-          }
+          applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
 
           api.logger.info(`Registered user "${userId}" (${phone})`);
           jsonResponse(res, 200, { registered: true, userId });
@@ -473,6 +508,103 @@ const plugin = {
           const errMsg = err instanceof Error ? err.message : String(err);
           api.logger.error(`Registration failed for ${phone}: ${errMsg}`);
           jsonResponse(res, 500, { error: "Registration failed" });
+        }
+      },
+    });
+
+    // --- POST /loglife/unregister ---
+
+    api.registerHttpRoute({
+      path: "/loglife/unregister",
+      handler: async (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method !== "POST") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
+        let body: Record<string, unknown>;
+        try {
+          body = await readBody(req);
+        } catch {
+          jsonResponse(res, 400, { error: "Invalid JSON body" });
+          return;
+        }
+
+        const phoneRaw = body.phone as string | undefined;
+        if (!phoneRaw || typeof phoneRaw !== "string") {
+          jsonResponse(res, 400, { error: "Missing required field: phone" });
+          return;
+        }
+
+        const phone = normalizePhone(phoneRaw);
+        if (phone.length < 8) {
+          jsonResponse(res, 400, { error: "Invalid phone number" });
+          return;
+        }
+
+        try {
+          const usersConfig = loadUsersJson(usersJsonPath);
+
+          const before = usersConfig.users.length;
+          const removed = usersConfig.users.filter((u) => hasMatchingIdentifier(u.identifiers, phone));
+          usersConfig.users = usersConfig.users.filter((u) => !hasMatchingIdentifier(u.identifiers, phone));
+
+          if (before === usersConfig.users.length) {
+            jsonResponse(res, 200, { removed: false, existing: false });
+            return;
+          }
+
+          mkdirSync(multiUserDir, { recursive: true });
+          writeFileSync(usersJsonPath, JSON.stringify(usersConfig, null, 2) + "\n");
+
+          const generated = generateConfig(usersConfig);
+          writeFileSync(generatedJsonPath, JSON.stringify(generated, null, 2) + "\n");
+
+          applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
+
+          api.logger.info(`Unregistered ${removed.length} user(s) for phone ${phone}`);
+          jsonResponse(res, 200, {
+            removed: true,
+            removedUserIds: removed.map((u) => u.id),
+          });
+        } catch (err) {
+          const errMsg = err instanceof Error ? err.message : String(err);
+          api.logger.error(`Unregister failed for ${phone}: ${errMsg}`);
+          jsonResponse(res, 500, { error: "Unregister failed" });
+        }
+      },
+    });
+
+    // --- GET /loglife/users ---
+
+    api.registerHttpRoute({
+      path: "/loglife/users",
+      handler: async (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method !== "GET") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
+        try {
+          const usersConfig = loadUsersJson(usersJsonPath);
+          jsonResponse(res, 200, {
+            count: usersConfig.users.length,
+            users: usersConfig.users,
+          });
+        } catch (err) {
+          const errMsg = err instanceof Error ? err.message : String(err);
+          api.logger.error(`Failed to read users list: ${errMsg}`);
+          jsonResponse(res, 500, { error: "Failed to read users list" });
         }
       },
     });

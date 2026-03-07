@@ -666,3 +666,209 @@ describe("POST /loglife/register handler", () => {
     expect(mockWriteFileSync).not.toHaveBeenCalled();
   });
 });
+
+// ---------------------------------------------------------------------------
+// Handler tests: POST /loglife/unregister
+// ---------------------------------------------------------------------------
+
+describe("POST /loglife/unregister handler", () => {
+  const API_KEY = "unregister-test-key";
+
+  let unregisterHandler: RouteHandler;
+  let mockWriteFileSync: ReturnType<typeof vi.fn>;
+  let usersJsonContent: string;
+
+  beforeEach(async () => {
+    vi.resetModules();
+
+    usersJsonContent = JSON.stringify({
+      users: [
+        { id: "alice", identifiers: ["+15551234567"] },
+        { id: "bob", identifiers: ["+15557654321"] },
+      ],
+      defaults: { dmScope: "main" },
+    });
+
+    mockWriteFileSync = vi.fn();
+
+    vi.doMock("node:fs", () => ({
+      readFileSync: vi.fn().mockImplementation((path: string) => {
+        if (path.includes("users.json")) return usersJsonContent;
+        return JSON.stringify({
+          agents: { defaults: { model: { primary: "x" } } },
+          channels: { whatsapp: { groupPolicy: "allowlist", debounceMs: 0, mediaMaxMb: 50 } },
+          bindings: [],
+        });
+      }),
+      writeFileSync: mockWriteFileSync,
+      mkdirSync: vi.fn(),
+      existsSync: vi.fn().mockReturnValue(true),
+    }));
+
+    vi.doMock("node:fs/promises", () => ({
+      readFile: vi.fn().mockResolvedValue("{}"),
+      writeFile: vi.fn().mockResolvedValue(undefined),
+    }));
+
+    const mod = await import("./index.js");
+    const { routes, api } = createMockApi({ apiKey: API_KEY });
+    mod.default.register(api as never);
+    unregisterHandler = routes.get("/loglife/unregister")!;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.resetModules();
+  });
+
+  it("returns 401 without auth", async () => {
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/unregister",
+      body: { phone: "+15551234567" },
+    });
+    const res = mockRes();
+    await unregisterHandler(req, res);
+    expect(res._status).toBe(401);
+  });
+
+  it("returns 405 for GET method", async () => {
+    const req = mockReq({
+      method: "GET",
+      url: "/loglife/unregister",
+      headers: { authorization: `Bearer ${API_KEY}` },
+    });
+    const res = mockRes();
+    await unregisterHandler(req, res);
+    expect(res._status).toBe(405);
+  });
+
+  it("returns 400 when phone is missing", async () => {
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/unregister",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: {},
+    });
+    const res = mockRes();
+    await unregisterHandler(req, res);
+    expect(res._status).toBe(400);
+    expect(res.json()).toEqual({ error: "Missing required field: phone" });
+  });
+
+  it("returns removed:false when phone is not registered", async () => {
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/unregister",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: { phone: "+15550000000" },
+    });
+    const res = mockRes();
+    await unregisterHandler(req, res);
+    expect(res._status).toBe(200);
+    expect(res.json()).toEqual({ removed: false, existing: false });
+    expect(mockWriteFileSync).not.toHaveBeenCalled();
+  });
+
+  it("unregisters matching phone and rewrites config files", async () => {
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/unregister",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: { phone: "+15551234567" },
+    });
+    const res = mockRes();
+    await unregisterHandler(req, res);
+
+    expect(res._status).toBe(200);
+    const body = res.json() as Record<string, unknown>;
+    expect(body.removed).toBe(true);
+    expect(body.removedUserIds).toEqual(["alice"]);
+
+    // users.json, generated.json, openclaw.json
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(3);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Handler tests: GET /loglife/users
+// ---------------------------------------------------------------------------
+
+describe("GET /loglife/users handler", () => {
+  const API_KEY = "list-users-key";
+
+  let usersHandler: RouteHandler;
+
+  beforeEach(async () => {
+    vi.resetModules();
+
+    const usersJsonContent = JSON.stringify({
+      users: [
+        { id: "alice", identifiers: ["+15551234567"], name: "Alice" },
+        { id: "bob", identifiers: ["+15557654321"], name: "Bob" },
+      ],
+      defaults: { dmScope: "main" },
+    });
+
+    vi.doMock("node:fs", () => ({
+      readFileSync: vi.fn().mockImplementation((path: string) => {
+        if (path.includes("users.json")) return usersJsonContent;
+        return "{}";
+      }),
+      writeFileSync: vi.fn(),
+      mkdirSync: vi.fn(),
+      existsSync: vi.fn().mockReturnValue(true),
+    }));
+
+    vi.doMock("node:fs/promises", () => ({
+      readFile: vi.fn().mockResolvedValue("{}"),
+      writeFile: vi.fn().mockResolvedValue(undefined),
+    }));
+
+    const mod = await import("./index.js");
+    const { routes, api } = createMockApi({ apiKey: API_KEY });
+    mod.default.register(api as never);
+    usersHandler = routes.get("/loglife/users")!;
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+    vi.resetModules();
+  });
+
+  it("returns 401 without auth", async () => {
+    const req = mockReq({
+      method: "GET",
+      url: "/loglife/users",
+    });
+    const res = mockRes();
+    await usersHandler(req, res);
+    expect(res._status).toBe(401);
+  });
+
+  it("returns 405 for non-GET methods", async () => {
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/users",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: {},
+    });
+    const res = mockRes();
+    await usersHandler(req, res);
+    expect(res._status).toBe(405);
+  });
+
+  it("returns current users list", async () => {
+    const req = mockReq({
+      method: "GET",
+      url: "/loglife/users",
+      headers: { authorization: `Bearer ${API_KEY}` },
+    });
+    const res = mockRes();
+    await usersHandler(req, res);
+    expect(res._status).toBe(200);
+    const body = res.json() as { count: number; users: Array<{ id: string }> };
+    expect(body.count).toBe(2);
+    expect(body.users.map((u) => u.id)).toEqual(["alice", "bob"]);
+  });
+});

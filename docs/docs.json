@@ -61,7 +61,9 @@
               "api-reference/endpoint/get-sessions",
               "api-reference/endpoint/verify-send",
               "api-reference/endpoint/verify-check",
-              "api-reference/endpoint/register"
+              "api-reference/endpoint/register",
+              "api-reference/endpoint/unregister",
+              "api-reference/endpoint/users"
             ]
           }
         ]
