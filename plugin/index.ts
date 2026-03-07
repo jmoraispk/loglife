@@ -26,10 +26,7 @@ const VERIFY_COOLDOWN_MS = 60 * 1000;
 const LINK_TTL_MS = 5 * 60 * 1000;
 const LINK_MAX_MESSAGES = 5;
 const LINK_CODE_REGEX = /^LF-\d{4}$/;
-const SUPPRESS_REPLY_TTL_MS = 30_000;
-const LINK_WELCOME_TEXT = "Welcome to LogLife! Your WhatsApp is connected. Tip: send a quick voice note about your day to get started.";
-const SILENT_REPLY_TOKEN = "NO_REPLY";
-const RECENT_CODE_TTL_MS = 2 * 60 * 1000;
+const LINK_WELCOME_TEXT = "Welcome to LogLife! Your WhatsApp is connected. Tip: Send a quick voice note about why you're trying LogLife to get started.";
 
 export const verificationCodes = new Map<string, VerificationEntry>();
 
@@ -42,9 +39,7 @@ type PendingLink = {
 };
 
 const pendingLinks = new Map<string, PendingLink>();
-const suppressReply = new Map<string, { expiresAt: number; remaining: number }>();
 const verifiedPhones = new Set<string>();
-const recentlyVerifiedCodes = new Map<string, number>();
 
 export function normalizePhone(raw: string): string {
   const digits = raw.replace(/[^0-9]/g, "");
@@ -197,40 +192,6 @@ function extractPhone(value: unknown): string | undefined {
   return `+${digits}`;
 }
 
-function extractFirstPhone(...values: unknown[]): string | undefined {
-  for (const value of values) {
-    const phone = extractPhone(value);
-    if (phone) return phone;
-  }
-  return undefined;
-}
-
-function extractLinkCode(text: string): string | undefined {
-  const match = text.toUpperCase().match(/\bLF-\d{4}\b/);
-  return match?.[0];
-}
-
-function messageText(value: unknown): string {
-  if (!value || typeof value !== "object") {
-    return typeof value === "string" ? value : "";
-  }
-  const rec = value as Record<string, unknown>;
-  if (typeof rec.content === "string") return rec.content;
-  if (Array.isArray(rec.content)) {
-    return rec.content
-      .map((part) => {
-        if (typeof part === "string") return part;
-        if (!part || typeof part !== "object") return "";
-        const p = part as Record<string, unknown>;
-        return typeof p.text === "string" ? p.text : "";
-      })
-      .filter(Boolean)
-      .join("\n");
-  }
-  if (typeof rec.text === "string") return rec.text;
-  return "";
-}
-
 function deriveUserId(phone: string, name: string | undefined, config: UsersConfig): string {
   const existingIds = new Set(config.users.map((u) => u.id));
 
@@ -302,17 +263,6 @@ const plugin = {
       if (removed) persistPendingLinks();
     };
 
-    const clearSuppressReply = (phone: string) => {
-      suppressReply.delete(phone);
-    };
-
-    const addSuppressReply = (phone: string, remaining = 1) => {
-      suppressReply.set(phone, {
-        expiresAt: Date.now() + SUPPRESS_REPLY_TTL_MS,
-        remaining,
-      });
-    };
-
     try {
       if (existsSync(pendingLinksPath)) {
         const raw = JSON.parse(readFileSync(pendingLinksPath, "utf-8")) as { pending?: PendingLink[] };
@@ -366,18 +316,7 @@ const plugin = {
         }
         pendingLinks.delete(phone);
         changed = true;
-        clearSuppressReply(phone);
         verifiedPhones.delete(phone);
-      }
-
-      for (const [phone, state] of suppressReply.entries()) {
-        if (now <= state.expiresAt) continue;
-        suppressReply.delete(phone);
-      }
-
-      for (const [code, expiresAt] of recentlyVerifiedCodes.entries()) {
-        if (now <= expiresAt) continue;
-        recentlyVerifiedCodes.delete(code);
       }
 
       if (changed) {
@@ -437,12 +376,7 @@ const plugin = {
           }
 
           verifiedPhones.add(phone);
-          recentlyVerifiedCodes.set(pending.code, Date.now() + RECENT_CODE_TTL_MS);
           removePendingLink(phone);
-          // Suppress the first generated reply after linking code.
-          // Use remaining=2 to stay robust across channel internals that may emit an
-          // extra outbound event around this transition.
-          addSuppressReply(phone, 2);
 
           await sendWhatsAppMessage(
             sendWA,
@@ -469,80 +403,6 @@ const plugin = {
         return { cancel: true };
       });
 
-      onEvent("before_prompt_build", (event: any) => {
-        const messages = Array.isArray(event?.messages) ? event.messages : [];
-        const last = messages.length > 0 ? messages[messages.length - 1] : undefined;
-        const lastText = messageText(last).toUpperCase();
-        if (!lastText) return undefined;
-
-        const code = extractLinkCode(lastText);
-        if (!code) return undefined;
-        // Treat LF-#### as a control token, not user chat content.
-        // This ensures linking codes never trigger an assistant reply,
-        // including in paths that bypass outbound message_sending hooks.
-        recentlyVerifiedCodes.delete(code);
-        return {
-          prependContext: `System instruction: this inbound message is a linking handshake code (${code}). Do not send any user-facing reply for this turn. Respond with exactly ${SILENT_REPLY_TOKEN}.`,
-        };
-      });
-
-      onEvent("message_sending", (event: any, ctx: any) => {
-        const now = Date.now();
-        const phone = extractFirstPhone(
-          event?.metadata?.recipientE164,
-          event?.metadata?.to,
-          event?.metadata?.toJid,
-          event?.deliveryContext?.to,
-          event?.deliveryContext?.toJid,
-          event?.origin?.to,
-          event?.toJid,
-          event?.jid,
-          event?.message?.to,
-          event?.to,
-          event?.recipient,
-          event?.recipientPhone,
-        );
-        if (!phone) return undefined;
-
-        const outboundText = String(
-          event?.content
-          ?? event?.message?.text
-          ?? event?.message?.body
-          ?? event?.text
-          ?? "",
-        ).trim();
-
-        // message_received hooks are fire-and-forget; if the agent races ahead,
-        // pendingLinks may still be present for this phone. In that case, suppress
-        // any auto-reply until linking flow settles (except our explicit welcome).
-        const pendingByPhone = pendingLinks.has(phone);
-        const pendingByConversation = typeof ctx?.conversationId === "string"
-          ? pendingLinks.has(extractPhone(ctx.conversationId) ?? "")
-          : false;
-        if ((pendingByPhone || pendingByConversation) && outboundText !== LINK_WELCOME_TEXT) {
-          return { cancel: true };
-        }
-
-        if (suppressReply.size === 0) return undefined;
-
-        const suppressState = suppressReply.get(phone);
-        if (!suppressState) return undefined;
-        if (now > suppressState.expiresAt) {
-          suppressReply.delete(phone);
-          return undefined;
-        }
-        if (outboundText === LINK_WELCOME_TEXT) {
-          return undefined;
-        }
-
-        suppressState.remaining -= 1;
-        if (suppressState.remaining <= 0) {
-          suppressReply.delete(phone);
-        } else {
-          suppressReply.set(phone, suppressState);
-        }
-        return { cancel: true };
-      });
     }
 
     // --- GET /loglife/sessions ---
@@ -906,7 +766,6 @@ const plugin = {
 
             pendingLinks.clear();
             persistPendingLinks();
-            suppressReply.clear();
             verifiedPhones.clear();
 
             jsonResponse(res, 200, {
@@ -918,7 +777,6 @@ const plugin = {
           }
 
           removePendingLink(phone);
-          clearSuppressReply(phone);
           verifiedPhones.delete(phone);
 
           const result = removeUserByPhone(phone);
