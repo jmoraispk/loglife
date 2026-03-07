@@ -61,6 +61,12 @@ function normalizeWaMeTarget(raw: string | undefined): string {
   return trimmed.replace(/[^0-9]/g, "");
 }
 
+function formatCountdown(totalSeconds: number): string {
+  const mins = Math.floor(totalSeconds / 60);
+  const secs = totalSeconds % 60;
+  return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+}
+
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
@@ -76,11 +82,14 @@ export default function DashboardPage() {
   const [verifyStep, setVerifyStep] = useState<"phone" | "message">("phone");
   const [linkCode, setLinkCode] = useState("");
   const [pollUntil, setPollUntil] = useState<number | null>(null);
+  const [pollNow, setPollNow] = useState(Date.now());
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyFeedback, setVerifyFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   const whatsappPhone = (user?.unsafeMetadata as Record<string, string> | undefined)?.whatsappPhone || "";
   const waTarget = normalizeWaMeTarget(process.env.NEXT_PUBLIC_LOGLIFE_WHATSAPP_NUMBER);
+  const fullPhone = `${countryCode}${phoneLocal}`;
+  const fullPhoneDisplay = `+${countryCode}${phoneLocal}`;
 
   const fetchSession = useCallback((isRefresh = false) => {
     if (!whatsappPhone) {
@@ -108,6 +117,59 @@ export default function DashboardPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!user || verifyStep !== "message" || !fullPhone || !pollUntil) return;
+    let cancelled = false;
+
+    const poll = async () => {
+      if (Date.now() > pollUntil) {
+        if (!cancelled) {
+          setVerifyFeedback({
+            type: "error",
+            text: "Linking timed out after 5 minutes. Start again to generate a new code.",
+          });
+          setVerifyStep("phone");
+          setLinkCode("");
+          setPollUntil(null);
+        }
+        clearInterval(timer);
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/verify/status?phone=${encodeURIComponent(fullPhone)}`);
+        const data = await res.json();
+        if (res.ok && data.verified) {
+          setVerifyFeedback({ type: "success", text: "Verified! Your WhatsApp is connected." });
+          setPollUntil(null);
+          clearInterval(timer);
+          await user.reload();
+        }
+      } catch {
+        // Best-effort polling; keep trying until timeout.
+      }
+    };
+
+    const timer: ReturnType<typeof setInterval> = setInterval(() => {
+      void poll();
+    }, 2000);
+
+    void poll();
+
+    return () => {
+      cancelled = true;
+      clearInterval(timer);
+    };
+  }, [verifyStep, fullPhone, pollUntil, user]);
+
+  useEffect(() => {
+    if (verifyStep !== "message" || !pollUntil) return;
+    const ticker = setInterval(() => {
+      setPollNow(Date.now());
+    }, 1000);
+    return () => clearInterval(ticker);
+  }, [verifyStep, pollUntil]);
+
   if (!isLoaded) {
     return (
       <main className="min-h-screen flex items-center justify-center">
@@ -125,9 +187,6 @@ export default function DashboardPage() {
     await signOut();
     router.push("/");
   };
-
-  const fullPhone = `${countryCode}${phoneLocal}`;
-  const fullPhoneDisplay = `+${countryCode}${phoneLocal}`;
 
   const handleStartLinking = async () => {
     if (!fullPhone.trim()) return;
@@ -162,50 +221,9 @@ export default function DashboardPage() {
     }
   };
 
-  useEffect(() => {
-    if (verifyStep !== "message" || !fullPhone || !pollUntil) return;
-    let timer: ReturnType<typeof setInterval> | undefined;
-    let cancelled = false;
-
-    const poll = async () => {
-      if (Date.now() > pollUntil) {
-        if (!cancelled) {
-          setVerifyFeedback({
-            type: "error",
-            text: "Linking timed out after 5 minutes. Start again to generate a new code.",
-          });
-          setVerifyStep("phone");
-          setLinkCode("");
-          setPollUntil(null);
-        }
-        if (timer) clearInterval(timer);
-        return;
-      }
-
-      try {
-        const res = await fetch(`/api/verify/status?phone=${encodeURIComponent(fullPhone)}`);
-        const data = await res.json();
-        if (res.ok && data.verified) {
-          setVerifyFeedback({ type: "success", text: "Verified! Your WhatsApp is connected." });
-          setPollUntil(null);
-          if (timer) clearInterval(timer);
-          await user.reload();
-        }
-      } catch {
-        // Best-effort polling; keep trying until timeout.
-      }
-    };
-
-    void poll();
-    timer = setInterval(() => {
-      void poll();
-    }, 2000);
-
-    return () => {
-      cancelled = true;
-      if (timer) clearInterval(timer);
-    };
-  }, [verifyStep, fullPhone, pollUntil, user]);
+  const countdownSeconds = pollUntil
+    ? Math.max(0, Math.ceil((pollUntil - pollNow) / 1000))
+    : 0;
 
   return (
     <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">
@@ -451,6 +469,12 @@ export default function DashboardPage() {
                       <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/15 px-3 py-2">
                         <p className="text-xs text-slate-300">
                           Waiting from a WhatsApp message from <span className="font-mono text-emerald-300">{fullPhoneDisplay}</span>.
+                          {" "}
+                          {pollUntil && (
+                            <span className="text-slate-400">
+                              Code expires in <span className="font-mono text-emerald-300">{formatCountdown(countdownSeconds)}</span>.
+                            </span>
+                          )}
                           {" "}
                           <button
                             onClick={() => {

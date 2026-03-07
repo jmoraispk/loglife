@@ -26,6 +26,7 @@ const VERIFY_COOLDOWN_MS = 60 * 1000;
 const LINK_TTL_MS = 5 * 60 * 1000;
 const LINK_MAX_MESSAGES = 5;
 const LINK_CODE_REGEX = /^LF-\d{4}$/;
+const SUPPRESS_REPLY_TTL_MS = 30_000;
 
 export const verificationCodes = new Map<string, VerificationEntry>();
 
@@ -38,7 +39,7 @@ type PendingLink = {
 };
 
 const pendingLinks = new Map<string, PendingLink>();
-const suppressReply = new Set<string>();
+const suppressReply = new Map<string, number>();
 const verifiedPhones = new Set<string>();
 
 export function normalizePhone(raw: string): string {
@@ -192,6 +193,14 @@ function extractPhone(value: unknown): string | undefined {
   return `+${digits}`;
 }
 
+function extractFirstPhone(...values: unknown[]): string | undefined {
+  for (const value of values) {
+    const phone = extractPhone(value);
+    if (phone) return phone;
+  }
+  return undefined;
+}
+
 function deriveUserId(phone: string, name: string | undefined, config: UsersConfig): string {
   const existingIds = new Set(config.users.map((u) => u.id));
 
@@ -242,9 +251,54 @@ const plugin = {
     const multiUserDir = cfg.multiUserDir ?? join(stateDir, "multi-user");
     const usersJsonPath = join(multiUserDir, "users.json");
     const generatedJsonPath = join(multiUserDir, "generated.json");
+    const pendingLinksPath = join(multiUserDir, "pending-links.json");
     const openclawJsonPath = join(stateDir, "openclaw.json");
 
     const sendWA = api.runtime.channel.whatsapp.sendMessageWhatsApp as SendWhatsApp;
+
+    const persistPendingLinks = () => {
+      mkdirSync(multiUserDir, { recursive: true });
+      const records = [...pendingLinks.values()];
+      writeFileSync(pendingLinksPath, JSON.stringify({ pending: records }, null, 2) + "\n");
+    };
+
+    const upsertPendingLink = (entry: PendingLink) => {
+      pendingLinks.set(entry.phone, entry);
+      persistPendingLinks();
+    };
+
+    const removePendingLink = (phone: string) => {
+      const removed = pendingLinks.delete(phone);
+      if (removed) persistPendingLinks();
+    };
+
+    const clearSuppressReply = (phone: string) => {
+      suppressReply.delete(phone);
+    };
+
+    const addSuppressReply = (phone: string) => {
+      suppressReply.set(phone, Date.now() + SUPPRESS_REPLY_TTL_MS);
+    };
+
+    try {
+      if (existsSync(pendingLinksPath)) {
+        const raw = JSON.parse(readFileSync(pendingLinksPath, "utf-8")) as { pending?: PendingLink[] };
+        for (const entry of raw.pending ?? []) {
+          const phone = normalizePhone(entry.phone ?? "");
+          if (!phone || !entry.code || !entry.expiresAt) continue;
+          pendingLinks.set(phone, {
+            code: String(entry.code).trim().toUpperCase(),
+            phone,
+            expiresAt: Number(entry.expiresAt),
+            messageCount: Number(entry.messageCount ?? 0),
+            createdByRegister: Boolean(entry.createdByRegister),
+          });
+        }
+      }
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      api.logger.warn(`Failed to load pending links: ${errMsg}`);
+    }
 
     const removeUserByPhone = (phone: string): { removed: boolean; removedUserIds: string[] } => {
       const usersConfig = loadUsersJson(usersJsonPath);
@@ -267,6 +321,7 @@ const plugin = {
 
     const cleanupExpiredPendingLinks = () => {
       const now = Date.now();
+      let changed = false;
       for (const [phone, pending] of pendingLinks.entries()) {
         if (now <= pending.expiresAt) continue;
         if (pending.createdByRegister) {
@@ -277,8 +332,18 @@ const plugin = {
           }
         }
         pendingLinks.delete(phone);
-        suppressReply.delete(phone);
+        changed = true;
+        clearSuppressReply(phone);
         verifiedPhones.delete(phone);
+      }
+
+      for (const [phone, expiresAt] of suppressReply.entries()) {
+        if (now <= expiresAt) continue;
+        suppressReply.delete(phone);
+      }
+
+      if (changed) {
+        persistPendingLinks();
       }
     };
 
@@ -328,21 +393,21 @@ const plugin = {
                   // best-effort cleanup
                 }
               }
-              pendingLinks.delete(phone);
+              removePendingLink(phone);
             }
-            return;
+            return { cancel: true };
           }
 
           verifiedPhones.add(phone);
-          pendingLinks.delete(phone);
-          suppressReply.add(phone);
+          removePendingLink(phone);
+          addSuppressReply(phone);
 
           await sendWhatsAppMessage(
             sendWA,
             phone,
             "Welcome to LogLife! Your WhatsApp is connected. Tip: send a quick voice note about your day to get started.",
           );
-          return;
+          return { cancel: true };
         }
 
         pending.messageCount += 1;
@@ -354,20 +419,33 @@ const plugin = {
               // best-effort cleanup
             }
           }
-          pendingLinks.delete(phone);
+          removePendingLink(phone);
+          return { cancel: true };
         }
+
+        upsertPendingLink(pending);
+        return { cancel: true };
       });
 
       onEvent("message_sending", (event: any) => {
         if (suppressReply.size === 0) return undefined;
-        const phone = extractPhone(
-          event?.metadata?.recipientE164
-          ?? event?.metadata?.to
-          ?? event?.deliveryContext?.to
-          ?? event?.to
-          ?? event?.recipient,
+        const now = Date.now();
+        const phone = extractFirstPhone(
+          event?.metadata?.recipientE164,
+          event?.metadata?.to,
+          event?.deliveryContext?.to,
+          event?.origin?.to,
+          event?.to,
+          event?.recipient,
+          event?.recipientPhone,
         );
-        if (!phone || !suppressReply.has(phone)) return undefined;
+        if (!phone) return undefined;
+        const suppressUntil = suppressReply.get(phone);
+        if (!suppressUntil) return undefined;
+        if (now > suppressUntil) {
+          suppressReply.delete(phone);
+          return undefined;
+        }
         suppressReply.delete(phone);
         return { cancel: true };
       });
@@ -634,7 +712,7 @@ const plugin = {
 
           if (alreadyRegistered) {
             const linkCode = generateLinkCode();
-            pendingLinks.set(phone, {
+            upsertPendingLink({
               code: linkCode,
               phone,
               expiresAt: Date.now() + LINK_TTL_MS,
@@ -665,7 +743,7 @@ const plugin = {
           applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
 
           const linkCode = generateLinkCode();
-          pendingLinks.set(phone, {
+          upsertPendingLink({
             code: linkCode,
             phone,
             expiresAt: Date.now() + LINK_TTL_MS,
@@ -733,6 +811,7 @@ const plugin = {
             applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
 
             pendingLinks.clear();
+            persistPendingLinks();
             suppressReply.clear();
             verifiedPhones.clear();
 
@@ -744,8 +823,8 @@ const plugin = {
             return;
           }
 
-          pendingLinks.delete(phone);
-          suppressReply.delete(phone);
+          removePendingLink(phone);
+          clearSuppressReply(phone);
           verifiedPhones.delete(phone);
 
           const result = removeUserByPhone(phone);
@@ -789,6 +868,7 @@ const plugin = {
         }
 
         const phone = normalizePhone(phoneRaw);
+        cleanupExpiredPendingLinks();
         const verified = verifiedPhones.has(phone);
         const pending = pendingLinks.has(phone);
         const pendingEntry = pendingLinks.get(phone);
@@ -796,17 +876,6 @@ const plugin = {
 
         if (verified) {
           verifiedPhones.delete(phone);
-        }
-
-        if (pendingEntry && expired) {
-          if (pendingEntry.createdByRegister) {
-            try {
-              removeUserByPhone(phone);
-            } catch {
-              // best-effort cleanup
-            }
-          }
-          pendingLinks.delete(phone);
         }
 
         jsonResponse(res, 200, { verified, pending, expired });
@@ -829,6 +898,7 @@ const plugin = {
         }
 
         try {
+          cleanupExpiredPendingLinks();
           const usersConfig = loadUsersJson(usersJsonPath);
           jsonResponse(res, 200, {
             count: usersConfig.users.length,

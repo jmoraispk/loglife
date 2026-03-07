@@ -624,8 +624,8 @@ describe("POST /loglife/register handler", () => {
     expect(body.userId).toBeDefined();
     expect(body.linkCode).toMatch(/^LF-\d{4}$/);
 
-    // Verify users.json, generated.json, and openclaw.json were written
-    expect(mockWriteFileSync).toHaveBeenCalledTimes(3);
+    // users.json, generated.json, openclaw.json, pending-links.json
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(4);
     // utimesSync no longer used — openclaw.json is written directly
     expect(mockUtimesSync).not.toHaveBeenCalled();
   });
@@ -664,8 +664,12 @@ describe("POST /loglife/register handler", () => {
     expect(body.existing).toBe(true);
     expect(body.linkCode).toMatch(/^LF-\d{4}$/);
 
-    // Should NOT write files for existing user
-    expect(mockWriteFileSync).not.toHaveBeenCalled();
+    // Existing user still gets a fresh pending-link entry on disk
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(1);
+    expect(mockWriteFileSync).toHaveBeenCalledWith(
+      expect.stringContaining("pending-links.json"),
+      expect.any(String),
+    );
   });
 });
 
@@ -806,7 +810,7 @@ describe("POST /loglife/unregister handler", () => {
     expect(body.removedAll).toBe(true);
     expect(body.removed).toBe(true);
     expect(body.removedUserIds).toEqual(["alice", "bob"]);
-    expect(mockWriteFileSync).toHaveBeenCalledTimes(3);
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(4);
   });
 });
 
