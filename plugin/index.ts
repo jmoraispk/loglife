@@ -27,6 +27,7 @@ const LINK_TTL_MS = 5 * 60 * 1000;
 const LINK_MAX_MESSAGES = 5;
 const LINK_CODE_REGEX = /^LF-\d{4}$/;
 const SUPPRESS_REPLY_TTL_MS = 30_000;
+const LINK_WELCOME_TEXT = "Welcome to LogLife! Your WhatsApp is connected. Tip: send a quick voice note about your day to get started.";
 
 export const verificationCodes = new Map<string, VerificationEntry>();
 
@@ -39,7 +40,7 @@ type PendingLink = {
 };
 
 const pendingLinks = new Map<string, PendingLink>();
-const suppressReply = new Map<string, number>();
+const suppressReply = new Map<string, { expiresAt: number; remaining: number }>();
 const verifiedPhones = new Set<string>();
 
 export function normalizePhone(raw: string): string {
@@ -276,8 +277,11 @@ const plugin = {
       suppressReply.delete(phone);
     };
 
-    const addSuppressReply = (phone: string) => {
-      suppressReply.set(phone, Date.now() + SUPPRESS_REPLY_TTL_MS);
+    const addSuppressReply = (phone: string, remaining = 1) => {
+      suppressReply.set(phone, {
+        expiresAt: Date.now() + SUPPRESS_REPLY_TTL_MS,
+        remaining,
+      });
     };
 
     try {
@@ -337,8 +341,8 @@ const plugin = {
         verifiedPhones.delete(phone);
       }
 
-      for (const [phone, expiresAt] of suppressReply.entries()) {
-        if (now <= expiresAt) continue;
+      for (const [phone, state] of suppressReply.entries()) {
+        if (now <= state.expiresAt) continue;
         suppressReply.delete(phone);
       }
 
@@ -400,12 +404,15 @@ const plugin = {
 
           verifiedPhones.add(phone);
           removePendingLink(phone);
-          addSuppressReply(phone);
+          // Suppress the first generated reply after linking code.
+          // Use remaining=2 to stay robust across channel internals that may emit an
+          // extra outbound event around this transition.
+          addSuppressReply(phone, 2);
 
           await sendWhatsAppMessage(
             sendWA,
             phone,
-            "Welcome to LogLife! Your WhatsApp is connected. Tip: send a quick voice note about your day to get started.",
+            LINK_WELCOME_TEXT,
           );
           return { cancel: true };
         }
@@ -433,20 +440,42 @@ const plugin = {
         const phone = extractFirstPhone(
           event?.metadata?.recipientE164,
           event?.metadata?.to,
+          event?.metadata?.toJid,
           event?.deliveryContext?.to,
+          event?.deliveryContext?.toJid,
           event?.origin?.to,
+          event?.toJid,
+          event?.jid,
+          event?.message?.to,
           event?.to,
           event?.recipient,
           event?.recipientPhone,
         );
         if (!phone) return undefined;
-        const suppressUntil = suppressReply.get(phone);
-        if (!suppressUntil) return undefined;
-        if (now > suppressUntil) {
+        const suppressState = suppressReply.get(phone);
+        if (!suppressState) return undefined;
+        if (now > suppressState.expiresAt) {
           suppressReply.delete(phone);
           return undefined;
         }
-        suppressReply.delete(phone);
+
+        const outboundText = String(
+          event?.content
+          ?? event?.message?.text
+          ?? event?.message?.body
+          ?? event?.text
+          ?? "",
+        ).trim();
+        if (outboundText === LINK_WELCOME_TEXT) {
+          return undefined;
+        }
+
+        suppressState.remaining -= 1;
+        if (suppressState.remaining <= 0) {
+          suppressReply.delete(phone);
+        } else {
+          suppressReply.set(phone, suppressState);
+        }
         return { cancel: true };
       });
     }

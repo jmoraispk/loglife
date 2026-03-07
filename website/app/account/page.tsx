@@ -23,6 +23,7 @@ export default function AccountPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [disconnectingWhatsApp, setDisconnectingWhatsApp] = useState(false);
   const whatsappPhone = (user?.unsafeMetadata as Record<string, string> | undefined)?.whatsappPhone || "";
   const whatsAppConnected = !!whatsappPhone;
 
@@ -121,11 +122,26 @@ export default function AccountPage() {
   };
 
   const handleWhatsAppDisconnect = async () => {
+    if (!user || !whatsappPhone || disconnectingWhatsApp) return;
+    setDisconnectingWhatsApp(true);
     try {
-      const { whatsappPhone, ...rest } = (user!.unsafeMetadata ?? {}) as Record<string, unknown>;
-      await user!.update({ unsafeMetadata: rest });
+      const unregisterRes = await fetch("/api/unregister", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: whatsappPhone }),
+      });
+      if (!unregisterRes.ok) {
+        throw new Error("Failed to remove phone from gateway allowlist");
+      }
+
+      const metadata = (user.unsafeMetadata ?? {}) as Record<string, unknown>;
+      const rest = Object.fromEntries(Object.entries(metadata).filter(([key]) => key !== "whatsappPhone"));
+      await user.update({ unsafeMetadata: rest });
+      setMessage({ type: "success", text: "WhatsApp disconnected and number removed." });
     } catch {
-      alert("Failed to disconnect WhatsApp. Please try again.");
+      setMessage({ type: "error", text: "Failed to disconnect WhatsApp. Please try again." });
+    } finally {
+      setDisconnectingWhatsApp(false);
     }
   };
 
@@ -380,9 +396,10 @@ export default function AccountPage() {
                           </span>
                           <button
                             onClick={handleWhatsAppDisconnect}
-                            className="text-xs font-medium text-slate-500 hover:text-red-400 transition-colors cursor-pointer"
+                            disabled={disconnectingWhatsApp}
+                            className="text-xs font-medium text-slate-500 hover:text-red-400 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                           >
-                            Disconnect
+                            {disconnectingWhatsApp ? "Disconnecting..." : "Disconnect"}
                           </button>
                         </div>
                       ) : (

@@ -221,6 +221,26 @@ export default function DashboardPage() {
     }
   };
 
+  const handleChangeNumber = async () => {
+    const phoneToRemove = fullPhone.trim();
+    if (phoneToRemove) {
+      try {
+        await fetch("/api/unregister", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ phone: phoneToRemove }),
+        });
+      } catch {
+        // Best-effort cleanup. We still reset local state so user can continue.
+      }
+    }
+
+    setVerifyStep("phone");
+    setLinkCode("");
+    setVerifyFeedback(null);
+    setPollUntil(null);
+  };
+
   const countdownSeconds = pollUntil
     ? Math.max(0, Math.ceil((pollUntil - pollNow) / 1000))
     : 0;
@@ -466,28 +486,28 @@ export default function DashboardPage() {
                         </div>
                       )}
 
-                      <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/15 px-3 py-2">
+                      <div className="rounded-lg bg-emerald-500/5 border border-emerald-500/15 px-3 py-2 space-y-2">
                         <p className="text-xs text-slate-300">
-                          Waiting from a WhatsApp message from <span className="font-mono text-emerald-300">{fullPhoneDisplay}</span>.
-                          {" "}
-                          {pollUntil && (
-                            <span className="text-slate-400">
-                              Code expires in <span className="font-mono text-emerald-300">{formatCountdown(countdownSeconds)}</span>.
-                            </span>
-                          )}
-                          {" "}
+                          Waiting for a WhatsApp message from{" "}
+                          <span className="font-mono text-emerald-300">{fullPhoneDisplay}</span>.
+                        </p>
+
+                        <p className="text-xs text-slate-400">
+                          Wrong number?{" "}
                           <button
-                            onClick={() => {
-                              setVerifyStep("phone");
-                              setLinkCode("");
-                              setVerifyFeedback(null);
-                              setPollUntil(null);
-                            }}
-                            className="text-emerald-400 hover:underline cursor-pointer"
+                            onClick={handleChangeNumber}
+                            className="text-emerald-300 hover:text-emerald-200 hover:underline cursor-pointer"
                           >
                             Change number
                           </button>
                         </p>
+
+                        {pollUntil && (
+                          <p className="text-xs text-slate-400">
+                            Code expires in{" "}
+                            <span className="font-mono text-emerald-300">{formatCountdown(countdownSeconds)}</span>.
+                          </p>
+                        )}
                       </div>
                     </>
                   )}
