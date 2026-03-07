@@ -10,7 +10,12 @@ set -euo pipefail
 #
 # Optional env vars:
 #   OPENCLAW_API_URL (default: http://127.0.0.1:18789)
-#   OPENCLAW_API_KEY (default: test-key-for-local-dev)
+#   OPENCLAW_API_KEY (overrides auto-resolved key)
+#   OPENCLAW_CONFIG_PATH (default: ~/.openclaw/openclaw.json)
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=plugin/scripts/lib.sh
+source "$SCRIPT_DIR/lib.sh"
 
 WATCH_MODE="false"
 INTERVAL="2"
@@ -33,7 +38,12 @@ while [[ $# -gt 0 ]]; do
 done
 
 OPENCLAW_API_URL="${OPENCLAW_API_URL:-http://127.0.0.1:18789}"
-OPENCLAW_API_KEY="${OPENCLAW_API_KEY:-test-key-for-local-dev}"
+if ! OPENCLAW_API_KEY="$(resolve_openclaw_api_key)"; then
+  echo "Could not resolve LogLife API key."
+  echo "Set OPENCLAW_API_KEY or ensure plugins.entries.loglife.config.apiKey exists in:"
+  echo "  ${OPENCLAW_CONFIG_PATH:-$HOME/.openclaw/openclaw.json}"
+  exit 1
+fi
 
 cmd="curl -s \"$OPENCLAW_API_URL/loglife/users\" -H \"Authorization: Bearer $OPENCLAW_API_KEY\""
 

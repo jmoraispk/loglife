@@ -9,7 +9,12 @@ set -euo pipefail
 #
 # Optional env vars:
 #   OPENCLAW_API_URL (default: http://127.0.0.1:18789)
-#   OPENCLAW_API_KEY (default: test-key-for-local-dev)
+#   OPENCLAW_API_KEY (overrides auto-resolved key)
+#   OPENCLAW_CONFIG_PATH (default: ~/.openclaw/openclaw.json)
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=plugin/scripts/lib.sh
+source "$SCRIPT_DIR/lib.sh"
 
 PHONE=""
 REMOVE_ALL="false"
@@ -37,7 +42,12 @@ if [[ "$REMOVE_ALL" != "true" && -z "$PHONE" ]]; then
 fi
 
 OPENCLAW_API_URL="${OPENCLAW_API_URL:-http://127.0.0.1:18789}"
-OPENCLAW_API_KEY="${OPENCLAW_API_KEY:-test-key-for-local-dev}"
+if ! OPENCLAW_API_KEY="$(resolve_openclaw_api_key)"; then
+  echo "Could not resolve LogLife API key."
+  echo "Set OPENCLAW_API_KEY or ensure plugins.entries.loglife.config.apiKey exists in:"
+  echo "  ${OPENCLAW_CONFIG_PATH:-$HOME/.openclaw/openclaw.json}"
+  exit 1
+fi
 
 if [[ "$REMOVE_ALL" == "true" ]]; then
   echo "Unregistering ALL users ..."
