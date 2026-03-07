@@ -265,6 +265,32 @@ const plugin = {
       return { removed: true, removedUserIds: removed.map((u) => u.id) };
     };
 
+    const cleanupExpiredPendingLinks = () => {
+      const now = Date.now();
+      for (const [phone, pending] of pendingLinks.entries()) {
+        if (now <= pending.expiresAt) continue;
+        if (pending.createdByRegister) {
+          try {
+            removeUserByPhone(phone);
+          } catch {
+            // best-effort cleanup
+          }
+        }
+        pendingLinks.delete(phone);
+        suppressReply.delete(phone);
+        verifiedPhones.delete(phone);
+      }
+    };
+
+    const cleanupTimer = setInterval(() => {
+      try {
+        cleanupExpiredPendingLinks();
+      } catch {
+        // best-effort background maintenance
+      }
+    }, 30_000);
+    cleanupTimer.unref?.();
+
     const onEvent = (api as { on?: (name: string, handler: (event: any, ctx: any) => unknown) => void }).on;
     if (typeof onEvent === "function") {
       onEvent("message_received", async (event: any) => {
