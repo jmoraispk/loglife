@@ -83,6 +83,7 @@ export default function DashboardPage() {
   const [linkCode, setLinkCode] = useState("");
   const [pollUntil, setPollUntil] = useState<number | null>(null);
   const [pollNow, setPollNow] = useState(Date.now());
+  const [copiedCode, setCopiedCode] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyFeedback, setVerifyFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -239,6 +240,17 @@ export default function DashboardPage() {
     setLinkCode("");
     setVerifyFeedback(null);
     setPollUntil(null);
+  };
+
+  const handleCopyLinkCode = async () => {
+    if (!linkCode) return;
+    try {
+      await navigator.clipboard.writeText(linkCode);
+      setCopiedCode(true);
+      setTimeout(() => setCopiedCode(false), 1200);
+    } catch {
+      // Ignore clipboard failures silently to keep UI lightweight.
+    }
   };
 
   const countdownSeconds = pollUntil
@@ -462,10 +474,21 @@ export default function DashboardPage() {
                   ) : (
                     <>
                       <div className="rounded-lg bg-slate-950/50 border border-slate-700/50 p-3">
-                        <p className="text-sm text-slate-300">
-                          <span className="font-medium text-white">Registered.</span> Here&apos;s the generated code:{" "}
-                          <span className="font-mono text-emerald-400">{linkCode}</span>
-                        </p>
+                        <div className="flex items-start justify-between gap-3">
+                          <p className="text-sm text-slate-300">
+                            <span className="font-medium text-white">Registered.</span> Here&apos;s the generated code:{" "}
+                            <span className="font-mono text-emerald-400">{linkCode}</span>
+                          </p>
+                          {linkCode && (
+                            <button
+                              onClick={handleCopyLinkCode}
+                              title="Copy code"
+                              className="text-[10px] text-slate-500 hover:text-slate-300 transition-colors cursor-pointer"
+                            >
+                              {copiedCode ? "copied" : "copy"}
+                            </button>
+                          )}
+                        </div>
                       </div>
 
                       {waTarget && linkCode ? (

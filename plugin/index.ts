@@ -28,6 +28,8 @@ const LINK_MAX_MESSAGES = 5;
 const LINK_CODE_REGEX = /^LF-\d{4}$/;
 const SUPPRESS_REPLY_TTL_MS = 30_000;
 const LINK_WELCOME_TEXT = "Welcome to LogLife! Your WhatsApp is connected. Tip: send a quick voice note about your day to get started.";
+const SILENT_REPLY_TOKEN = "NO_REPLY";
+const RECENT_CODE_TTL_MS = 2 * 60 * 1000;
 
 export const verificationCodes = new Map<string, VerificationEntry>();
 
@@ -42,6 +44,7 @@ type PendingLink = {
 const pendingLinks = new Map<string, PendingLink>();
 const suppressReply = new Map<string, { expiresAt: number; remaining: number }>();
 const verifiedPhones = new Set<string>();
+const recentlyVerifiedCodes = new Map<string, number>();
 
 export function normalizePhone(raw: string): string {
   const digits = raw.replace(/[^0-9]/g, "");
@@ -202,6 +205,32 @@ function extractFirstPhone(...values: unknown[]): string | undefined {
   return undefined;
 }
 
+function extractLinkCode(text: string): string | undefined {
+  const match = text.toUpperCase().match(/\bLF-\d{4}\b/);
+  return match?.[0];
+}
+
+function messageText(value: unknown): string {
+  if (!value || typeof value !== "object") {
+    return typeof value === "string" ? value : "";
+  }
+  const rec = value as Record<string, unknown>;
+  if (typeof rec.content === "string") return rec.content;
+  if (Array.isArray(rec.content)) {
+    return rec.content
+      .map((part) => {
+        if (typeof part === "string") return part;
+        if (!part || typeof part !== "object") return "";
+        const p = part as Record<string, unknown>;
+        return typeof p.text === "string" ? p.text : "";
+      })
+      .filter(Boolean)
+      .join("\n");
+  }
+  if (typeof rec.text === "string") return rec.text;
+  return "";
+}
+
 function deriveUserId(phone: string, name: string | undefined, config: UsersConfig): string {
   const existingIds = new Set(config.users.map((u) => u.id));
 
@@ -346,6 +375,11 @@ const plugin = {
         suppressReply.delete(phone);
       }
 
+      for (const [code, expiresAt] of recentlyVerifiedCodes.entries()) {
+        if (now <= expiresAt) continue;
+        recentlyVerifiedCodes.delete(code);
+      }
+
       if (changed) {
         persistPendingLinks();
       }
@@ -403,6 +437,7 @@ const plugin = {
           }
 
           verifiedPhones.add(phone);
+          recentlyVerifiedCodes.set(pending.code, Date.now() + RECENT_CODE_TTL_MS);
           removePendingLink(phone);
           // Suppress the first generated reply after linking code.
           // Use remaining=2 to stay robust across channel internals that may emit an
@@ -434,8 +469,24 @@ const plugin = {
         return { cancel: true };
       });
 
-      onEvent("message_sending", (event: any) => {
-        if (suppressReply.size === 0) return undefined;
+      onEvent("before_prompt_build", (event: any) => {
+        const messages = Array.isArray(event?.messages) ? event.messages : [];
+        const last = messages.length > 0 ? messages[messages.length - 1] : undefined;
+        const lastText = messageText(last).toUpperCase();
+        if (!lastText) return undefined;
+
+        const code = extractLinkCode(lastText);
+        if (!code) return undefined;
+        // Treat LF-#### as a control token, not user chat content.
+        // This ensures linking codes never trigger an assistant reply,
+        // including in paths that bypass outbound message_sending hooks.
+        recentlyVerifiedCodes.delete(code);
+        return {
+          prependContext: `System instruction: this inbound message is a linking handshake code (${code}). Do not send any user-facing reply for this turn. Respond with exactly ${SILENT_REPLY_TOKEN}.`,
+        };
+      });
+
+      onEvent("message_sending", (event: any, ctx: any) => {
         const now = Date.now();
         const phone = extractFirstPhone(
           event?.metadata?.recipientE164,
@@ -452,12 +503,6 @@ const plugin = {
           event?.recipientPhone,
         );
         if (!phone) return undefined;
-        const suppressState = suppressReply.get(phone);
-        if (!suppressState) return undefined;
-        if (now > suppressState.expiresAt) {
-          suppressReply.delete(phone);
-          return undefined;
-        }
 
         const outboundText = String(
           event?.content
@@ -466,6 +511,26 @@ const plugin = {
           ?? event?.text
           ?? "",
         ).trim();
+
+        // message_received hooks are fire-and-forget; if the agent races ahead,
+        // pendingLinks may still be present for this phone. In that case, suppress
+        // any auto-reply until linking flow settles (except our explicit welcome).
+        const pendingByPhone = pendingLinks.has(phone);
+        const pendingByConversation = typeof ctx?.conversationId === "string"
+          ? pendingLinks.has(extractPhone(ctx.conversationId) ?? "")
+          : false;
+        if ((pendingByPhone || pendingByConversation) && outboundText !== LINK_WELCOME_TEXT) {
+          return { cancel: true };
+        }
+
+        if (suppressReply.size === 0) return undefined;
+
+        const suppressState = suppressReply.get(phone);
+        if (!suppressState) return undefined;
+        if (now > suppressState.expiresAt) {
+          suppressReply.delete(phone);
+          return undefined;
+        }
         if (outboundText === LINK_WELCOME_TEXT) {
           return undefined;
         }
