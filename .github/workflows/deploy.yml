@@ -37,6 +37,10 @@ jobs:
             git checkout main
             git reset --hard origin/main
 
+            # Re-apply LogLife plugin setup (idempotent): plugin config wiring,
+            # multi-user include/policy sync, workspace AGENTS linking rules.
+            bash plugin/setup.sh --loglife-dir "$HOME/loglife" --openclaw-dir "$HOME/openclaw"
+
             # Resolve the openclaw binary
             if command -v openclaw &>/dev/null; then
               OPENCLAW=openclaw
