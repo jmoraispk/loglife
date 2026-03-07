@@ -22,26 +22,34 @@ if [[ ! -f "$OPENCLAW_BIN" ]]; then
   exit 1
 fi
 
-echo "Restarting local OpenClaw gateway..."
+echo "Restarting local OpenClaw gateway (force local mode)..."
 
-# Try service-style restart first (works if gateway service is installed).
-if "$OPENCLAW_BIN" gateway restart >/dev/null 2>&1; then
-  echo "Gateway restarted via service manager."
-else
-  # Fallback for foreground/local runs.
-  "$OPENCLAW_BIN" gateway stop >/dev/null 2>&1 || true
-  pkill -f "openclaw-gateway" >/dev/null 2>&1 || true
-  pkill -f "openclaw.mjs gateway run" >/dev/null 2>&1 || true
-  sleep 1
+# Force a clean local restart. Service manager restarts can keep stale runtime state.
+"$OPENCLAW_BIN" gateway stop >/dev/null 2>&1 || true
+pkill -f "openclaw-gateway" >/dev/null 2>&1 || true
+pkill -f "openclaw.mjs gateway run" >/dev/null 2>&1 || true
+sleep 1
 
-  mkdir -p "$(dirname "$OPENCLAW_LOG_PATH")"
-  nohup "$OPENCLAW_BIN" gateway run >"$OPENCLAW_LOG_PATH" 2>&1 &
-  sleep 2
-  echo "Gateway started in background (fallback mode)."
-fi
+mkdir -p "$(dirname "$OPENCLAW_LOG_PATH")"
+
+# Ensure gateway uses the current workspace plugin source.
+"$OPENCLAW_BIN" plugins install "$HOME/loglife/plugin" --link >/dev/null 2>&1 || true
+
+nohup "$OPENCLAW_BIN" gateway run >"$OPENCLAW_LOG_PATH" 2>&1 &
+sleep 2
+echo "Gateway started in background from current workspace plugin."
 
 # Basic probe
-if curl -sS "http://127.0.0.1:${OPENCLAW_PORT}/" >/dev/null 2>&1; then
+ready="false"
+for _ in {1..10}; do
+  if curl -sS "http://127.0.0.1:${OPENCLAW_PORT}/" >/dev/null 2>&1; then
+    ready="true"
+    break
+  fi
+  sleep 1
+done
+
+if [[ "$ready" == "true" ]]; then
   echo "Gateway is up: http://127.0.0.1:${OPENCLAW_PORT}/"
 else
   echo "Gateway did not respond on port ${OPENCLAW_PORT} yet."

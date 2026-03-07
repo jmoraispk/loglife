@@ -23,8 +23,23 @@ export type VerificationEntry = {
 
 const VERIFY_TTL_MS = 5 * 60 * 1000;
 const VERIFY_COOLDOWN_MS = 60 * 1000;
+const LINK_TTL_MS = 5 * 60 * 1000;
+const LINK_MAX_MESSAGES = 5;
+const LINK_CODE_REGEX = /^LF-\d{4}$/;
 
 export const verificationCodes = new Map<string, VerificationEntry>();
+
+type PendingLink = {
+  code: string;
+  phone: string;
+  expiresAt: number;
+  messageCount: number;
+  createdByRegister: boolean;
+};
+
+const pendingLinks = new Map<string, PendingLink>();
+const suppressReply = new Set<string>();
+const verifiedPhones = new Set<string>();
 
 export function normalizePhone(raw: string): string {
   const digits = raw.replace(/[^0-9]/g, "");
@@ -165,6 +180,18 @@ function applyGeneratedConfigToOpenclaw(
   writeFileSync(openclawJsonPath, JSON.stringify(ocRaw, null, 2) + "\n");
 }
 
+function generateLinkCode(): string {
+  return `LF-${String(randomInt(0, 10_000)).padStart(4, "0")}`;
+}
+
+function extractPhone(value: unknown): string | undefined {
+  if (typeof value !== "string" || !value) return undefined;
+  const base = value.includes("@") ? value.split("@")[0] : value;
+  const digits = base.replace(/[^0-9]/g, "");
+  if (!digits) return undefined;
+  return `+${digits}`;
+}
+
 function deriveUserId(phone: string, name: string | undefined, config: UsersConfig): string {
   const existingIds = new Set(config.users.map((u) => u.id));
 
@@ -218,6 +245,107 @@ const plugin = {
     const openclawJsonPath = join(stateDir, "openclaw.json");
 
     const sendWA = api.runtime.channel.whatsapp.sendMessageWhatsApp as SendWhatsApp;
+
+    const removeUserByPhone = (phone: string): { removed: boolean; removedUserIds: string[] } => {
+      const usersConfig = loadUsersJson(usersJsonPath);
+      const before = usersConfig.users.length;
+      const removed = usersConfig.users.filter((u) => hasMatchingIdentifier(u.identifiers, phone));
+      usersConfig.users = usersConfig.users.filter((u) => !hasMatchingIdentifier(u.identifiers, phone));
+
+      if (before === usersConfig.users.length) {
+        return { removed: false, removedUserIds: [] };
+      }
+
+      mkdirSync(multiUserDir, { recursive: true });
+      writeFileSync(usersJsonPath, JSON.stringify(usersConfig, null, 2) + "\n");
+
+      const generated = generateConfig(usersConfig);
+      writeFileSync(generatedJsonPath, JSON.stringify(generated, null, 2) + "\n");
+      applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
+      return { removed: true, removedUserIds: removed.map((u) => u.id) };
+    };
+
+    const onEvent = (api as { on?: (name: string, handler: (event: any, ctx: any) => unknown) => void }).on;
+    if (typeof onEvent === "function") {
+      onEvent("message_received", async (event: any) => {
+        if (pendingLinks.size === 0) return;
+        const phone = extractPhone(
+          event?.metadata?.senderE164
+          ?? event?.metadata?.from
+          ?? event?.origin?.from
+          ?? event?.from
+          ?? event?.sender
+          ?? event?.senderPhone,
+        );
+        if (!phone) return;
+
+        const pending = pendingLinks.get(phone);
+        if (!pending) return;
+
+        const now = Date.now();
+        const content = String(
+          event?.content
+          ?? event?.message?.text
+          ?? event?.message?.body
+          ?? event?.text
+          ?? "",
+        ).trim().toUpperCase();
+
+        if (content === pending.code || LINK_CODE_REGEX.test(content)) {
+          if (content !== pending.code) {
+            pending.messageCount += 1;
+            if (pending.messageCount >= LINK_MAX_MESSAGES || now > pending.expiresAt) {
+              if (pending.createdByRegister) {
+                try {
+                  removeUserByPhone(phone);
+                } catch {
+                  // best-effort cleanup
+                }
+              }
+              pendingLinks.delete(phone);
+            }
+            return;
+          }
+
+          verifiedPhones.add(phone);
+          pendingLinks.delete(phone);
+          suppressReply.add(phone);
+
+          await sendWhatsAppMessage(
+            sendWA,
+            phone,
+            "Welcome to LogLife! Your WhatsApp is connected. Tip: send a quick voice note about your day to get started.",
+          );
+          return;
+        }
+
+        pending.messageCount += 1;
+        if (pending.messageCount >= LINK_MAX_MESSAGES || now > pending.expiresAt) {
+          if (pending.createdByRegister) {
+            try {
+              removeUserByPhone(phone);
+            } catch {
+              // best-effort cleanup
+            }
+          }
+          pendingLinks.delete(phone);
+        }
+      });
+
+      onEvent("message_sending", (event: any) => {
+        if (suppressReply.size === 0) return undefined;
+        const phone = extractPhone(
+          event?.metadata?.recipientE164
+          ?? event?.metadata?.to
+          ?? event?.deliveryContext?.to
+          ?? event?.to
+          ?? event?.recipient,
+        );
+        if (!phone || !suppressReply.has(phone)) return undefined;
+        suppressReply.delete(phone);
+        return { cancel: true };
+      });
+    }
 
     // --- GET /loglife/sessions ---
 
@@ -479,7 +607,15 @@ const plugin = {
           );
 
           if (alreadyRegistered) {
-            jsonResponse(res, 200, { registered: true, existing: true });
+            const linkCode = generateLinkCode();
+            pendingLinks.set(phone, {
+              code: linkCode,
+              phone,
+              expiresAt: Date.now() + LINK_TTL_MS,
+              messageCount: 0,
+              createdByRegister: false,
+            });
+            jsonResponse(res, 200, { registered: true, existing: true, linkCode });
             return;
           }
 
@@ -502,8 +638,17 @@ const plugin = {
           // We can't rely on $include because the gateway flattens it on hot-reload.
           applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
 
+          const linkCode = generateLinkCode();
+          pendingLinks.set(phone, {
+            code: linkCode,
+            phone,
+            expiresAt: Date.now() + LINK_TTL_MS,
+            messageCount: 0,
+            createdByRegister: true,
+          });
+
           api.logger.info(`Registered user "${userId}" (${phone})`);
-          jsonResponse(res, 200, { registered: true, userId });
+          jsonResponse(res, 200, { registered: true, userId, linkCode });
         } catch (err) {
           const errMsg = err instanceof Error ? err.message : String(err);
           api.logger.error(`Registration failed for ${phone}: ${errMsg}`);
@@ -535,48 +680,110 @@ const plugin = {
           return;
         }
 
+        const removeAll = body.all === true;
         const phoneRaw = body.phone as string | undefined;
-        if (!phoneRaw || typeof phoneRaw !== "string") {
-          jsonResponse(res, 400, { error: "Missing required field: phone" });
+        if (!removeAll && (!phoneRaw || typeof phoneRaw !== "string")) {
+          jsonResponse(res, 400, { error: "Missing required field: phone (or pass all:true)" });
           return;
         }
 
-        const phone = normalizePhone(phoneRaw);
-        if (phone.length < 8) {
+        const phone = removeAll ? "" : normalizePhone(phoneRaw as string);
+        if (!removeAll && phone.length < 8) {
           jsonResponse(res, 400, { error: "Invalid phone number" });
           return;
         }
 
         try {
-          const usersConfig = loadUsersJson(usersJsonPath);
+          if (removeAll) {
+            const usersConfig = loadUsersJson(usersJsonPath);
+            const removedUserIds = usersConfig.users.map((u) => u.id);
 
-          const before = usersConfig.users.length;
-          const removed = usersConfig.users.filter((u) => hasMatchingIdentifier(u.identifiers, phone));
-          usersConfig.users = usersConfig.users.filter((u) => !hasMatchingIdentifier(u.identifiers, phone));
+            usersConfig.users = [];
+            mkdirSync(multiUserDir, { recursive: true });
+            writeFileSync(usersJsonPath, JSON.stringify(usersConfig, null, 2) + "\n");
 
-          if (before === usersConfig.users.length) {
-            jsonResponse(res, 200, { removed: false, existing: false });
+            const generated = generateConfig(usersConfig);
+            writeFileSync(generatedJsonPath, JSON.stringify(generated, null, 2) + "\n");
+            applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
+
+            pendingLinks.clear();
+            suppressReply.clear();
+            verifiedPhones.clear();
+
+            jsonResponse(res, 200, {
+              removed: removedUserIds.length > 0,
+              removedAll: true,
+              removedUserIds,
+            });
             return;
           }
 
-          mkdirSync(multiUserDir, { recursive: true });
-          writeFileSync(usersJsonPath, JSON.stringify(usersConfig, null, 2) + "\n");
+          pendingLinks.delete(phone);
+          suppressReply.delete(phone);
+          verifiedPhones.delete(phone);
 
-          const generated = generateConfig(usersConfig);
-          writeFileSync(generatedJsonPath, JSON.stringify(generated, null, 2) + "\n");
-
-          applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
-
-          api.logger.info(`Unregistered ${removed.length} user(s) for phone ${phone}`);
+          const result = removeUserByPhone(phone);
+          if (!result.removed) {
+            jsonResponse(res, 200, { removed: false, existing: false });
+            return;
+          }
+          api.logger.info(`Unregistered ${result.removedUserIds.length} user(s) for phone ${phone}`);
           jsonResponse(res, 200, {
             removed: true,
-            removedUserIds: removed.map((u) => u.id),
+            removedUserIds: result.removedUserIds,
           });
         } catch (err) {
           const errMsg = err instanceof Error ? err.message : String(err);
           api.logger.error(`Unregister failed for ${phone}: ${errMsg}`);
           jsonResponse(res, 500, { error: "Unregister failed" });
         }
+      },
+    });
+
+    // --- GET /loglife/verify/status ---
+
+    api.registerHttpRoute({
+      path: "/loglife/verify/status",
+      handler: async (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method !== "GET") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
+        const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+        const phoneRaw = url.searchParams.get("phone");
+        if (!phoneRaw) {
+          jsonResponse(res, 400, { error: "Missing required query: phone" });
+          return;
+        }
+
+        const phone = normalizePhone(phoneRaw);
+        const verified = verifiedPhones.has(phone);
+        const pending = pendingLinks.has(phone);
+        const pendingEntry = pendingLinks.get(phone);
+        const expired = pendingEntry ? Date.now() > pendingEntry.expiresAt : false;
+
+        if (verified) {
+          verifiedPhones.delete(phone);
+        }
+
+        if (pendingEntry && expired) {
+          if (pendingEntry.createdByRegister) {
+            try {
+              removeUserByPhone(phone);
+            } catch {
+              // best-effort cleanup
+            }
+          }
+          pendingLinks.delete(phone);
+        }
+
+        jsonResponse(res, 200, { verified, pending, expired });
       },
     });
 

@@ -118,15 +118,16 @@ Use these commands to verify the V1 onboarding flow and monitor user state while
 
 ### Monitor registered users
 
+One-time check:
+
 ```bash
-curl -s "http://127.0.0.1:18789/loglife/users" \
-  -H "Authorization: Bearer test-key-for-local-dev"
+bash plugin/scripts/check-registered-users.sh
 ```
 
-For live monitoring:
+Live monitoring:
 
 ```bash
-watch -n 2 'curl -s "http://127.0.0.1:18789/loglife/users" -H "Authorization: Bearer test-key-for-local-dev"'
+bash plugin/scripts/check-registered-users.sh --watch --interval 2
 ```
 
 ### Remove a user quickly
@@ -134,7 +135,7 @@ watch -n 2 'curl -s "http://127.0.0.1:18789/loglife/users" -H "Authorization: Be
 Use the helper script:
 
 ```bash
-bash plugin/scripts/unregister-user.sh --phone +15551234567
+bash plugin/scripts/unregister-user.sh --phone 15551234567
 ```
 
 You can also call the endpoint directly:
@@ -144,6 +145,12 @@ curl -s -X POST "http://127.0.0.1:18789/loglife/unregister" \
   -H "Authorization: Bearer test-key-for-local-dev" \
   -H "Content-Type: application/json" \
   -d '{"phone":"+15551234567"}'
+```
+
+To clear all registered users (clean slate):
+
+```bash
+bash plugin/scripts/unregister-user.sh --all
 ```
 
 ### V1 onboarding test checklist

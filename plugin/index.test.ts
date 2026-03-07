@@ -622,6 +622,7 @@ describe("POST /loglife/register handler", () => {
     const body = res.json() as Record<string, unknown>;
     expect(body.registered).toBe(true);
     expect(body.userId).toBeDefined();
+    expect(body.linkCode).toMatch(/^LF-\d{4}$/);
 
     // Verify users.json, generated.json, and openclaw.json were written
     expect(mockWriteFileSync).toHaveBeenCalledTimes(3);
@@ -661,6 +662,7 @@ describe("POST /loglife/register handler", () => {
     const body = res.json() as Record<string, unknown>;
     expect(body.registered).toBe(true);
     expect(body.existing).toBe(true);
+    expect(body.linkCode).toMatch(/^LF-\d{4}$/);
 
     // Should NOT write files for existing user
     expect(mockWriteFileSync).not.toHaveBeenCalled();
@@ -753,7 +755,7 @@ describe("POST /loglife/unregister handler", () => {
     const res = mockRes();
     await unregisterHandler(req, res);
     expect(res._status).toBe(400);
-    expect(res.json()).toEqual({ error: "Missing required field: phone" });
+    expect(res.json()).toEqual({ error: "Missing required field: phone (or pass all:true)" });
   });
 
   it("returns removed:false when phone is not registered", async () => {
@@ -786,6 +788,24 @@ describe("POST /loglife/unregister handler", () => {
     expect(body.removedUserIds).toEqual(["alice"]);
 
     // users.json, generated.json, openclaw.json
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(3);
+  });
+
+  it("supports all:true to clear all users", async () => {
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/unregister",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: { all: true },
+    });
+    const res = mockRes();
+    await unregisterHandler(req, res);
+
+    expect(res._status).toBe(200);
+    const body = res.json() as Record<string, unknown>;
+    expect(body.removedAll).toBe(true);
+    expect(body.removed).toBe(true);
+    expect(body.removedUserIds).toEqual(["alice", "bob"]);
     expect(mockWriteFileSync).toHaveBeenCalledTimes(3);
   });
 });
