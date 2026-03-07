@@ -1,0 +1,40 @@
+---
+title: "AI rules"
+description: "Cursor rule files that give AI agents project context automatically"
+---
+
+LogLife includes `.cursor/rules/` files that feed project-specific context to [Cursor](https://cursor.com) (or any AI editor that supports the format). When you open the repository in Cursor, the agent already knows the tech stack, available commands, and coding conventions — no pasting of README snippets needed.
+
+## How it works
+
+Cursor reads `.mdc` files from `.cursor/rules/` and injects their contents into every AI conversation. Each file has YAML frontmatter that controls when it activates:
+
+- **`alwaysApply: true`** — injected into every conversation automatically.
+- **`globs: "plugin/**"`** — only injected when you have matching files open.
+- **`alwaysApply: false`** (no globs) — available in the rule picker but never auto-injected.
+
+## Current rules
+
+| File | Activates | What it provides |
+|------|-----------|-----------------|
+| `loglife.mdc` | Always | Repository structure, package manager (`pnpm`), tech stack (Next.js, Clerk, Tailwind, Vapi), key conventions, and available commands |
+| `openclaw.mdc` | When editing `plugin/` files | OpenClaw project context at `~/openclaw` — build/dev/test commands, repo structure, and conventions (tsdown, oxlint, Lit decorators) |
+| `mintlify.mdc` | When editing `docs/` files | Mintlify component reference, writing style guide, and documentation standards |
+
+## Adding or editing rules
+
+Rules live in `.cursor/rules/` at the repository root. To add a new rule, create a `.mdc` file with the appropriate frontmatter:
+
+```yaml
+---
+description: Short description shown in the rule picker
+globs: src/**/*.ts
+alwaysApply: false
+---
+```
+
+Then write the rule body in Markdown below the frontmatter. Keep rules concise and actionable — they are injected as context into the AI's prompt, so unnecessary length wastes tokens.
+
+<Tip>
+If you are not using Cursor, these files have no effect on your workflow. They are ignored by the build, linter, and deployment pipeline.
+</Tip>

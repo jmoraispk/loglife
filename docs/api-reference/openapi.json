@@ -286,6 +286,91 @@
           }
         }
       }
+    },
+    "/loglife/unregister": {
+      "post": {
+        "operationId": "unregisterUser",
+        "summary": "Remove a registered user",
+        "description": "Removes a user from `users.json` by phone number, regenerates config, and updates gateway config. Idempotent — returns removed:false if the phone is not registered.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["phone"],
+                "properties": {
+                  "phone": {
+                    "type": "string",
+                    "description": "Phone number in E.164 format",
+                    "example": "+15551234567"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Unregister result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "removed": { "type": "boolean" },
+                    "existing": { "type": "boolean", "description": "False when no matching user exists" },
+                    "removedUserIds": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": { "description": "Missing or invalid phone number" },
+          "401": { "description": "Unauthorized" },
+          "500": { "description": "Unregister failed" }
+        }
+      }
+    },
+    "/loglife/users": {
+      "get": {
+        "operationId": "listUsers",
+        "summary": "List registered users",
+        "description": "Returns the current users list from `users.json`. Useful for development and monitoring.",
+        "responses": {
+          "200": {
+            "description": "Current users list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": { "type": "integer", "example": 2 },
+                    "users": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": { "type": "string" },
+                          "name": { "type": "string" },
+                          "identifiers": {
+                            "type": "array",
+                            "items": { "type": "string" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": { "description": "Unauthorized" }
+        }
+      }
     }
   }
 }

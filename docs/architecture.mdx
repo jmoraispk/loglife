@@ -37,13 +37,15 @@ flowchart LR
 
 ### Generated configuration
 
-The multi-user system produces a `generated.json` file that is included in `openclaw.json` via the `$include` directive. This file contains:
+The multi-user system produces a `generated.json` file that contains:
 
 - **`agents.list`** — one agent definition per user (ID, name, model, skills)
 - **`bindings`** — routing rules mapping `{channel, peerId}` to an agent
 - **`channels`** — per-channel allow-lists and DM policies
 - **`session`** — session scoping settings
 - **`env`** — shared environment variables (API keys used by all users)
+
+At runtime, the plugin merges this generated structure directly into `openclaw.json` after register/unregister operations. This avoids relying on `$include` during hot reload.
 
 ### Session scoping
 
@@ -66,10 +68,22 @@ New users are added at runtime through the [`/loglife/register`](/api-reference/
 1. The plugin reads `users.json` (the source of truth for all users)
 2. Appends the new user with their phone number as an identifier
 3. Calls `generateConfig()` to rebuild `generated.json`
-4. Writes the updated config
-5. Touches `openclaw.json` to trigger a gateway hot-reload
+4. Merges generated `agents`, `bindings`, `channels`, and `session` into `openclaw.json`
+5. Writes `openclaw.json` (no restart required)
 
-The gateway picks up the new agent, binding, and allow-list entry immediately — **no restart required**.
+The gateway picks up the new agent, binding, and allow-list entry immediately.
+
+### Runtime user removal
+
+Users can be removed at runtime through [`/loglife/unregister`](/api-reference/endpoint/unregister):
+
+1. The plugin reads `users.json`
+2. Removes the matching user by phone identifier
+3. Rebuilds `generated.json`
+4. Merges the updated generated config into `openclaw.json`
+5. Cleans stale allow-list fields when a channel no longer has managed users
+
+This keeps add/remove symmetric and prevents stale access rules.
 
 <Info>
   The full rebuild approach regenerates `generated.json` from scratch on every registration. This is fast enough for the foreseeable scale — under 50ms at 1,000 users, about 1-2 seconds at 100,000 users.

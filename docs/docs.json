@@ -16,21 +16,26 @@
           {
             "group": "Getting started",
             "pages": [
-              "index",
-              "quickstart",
-              "contributing-docs"
+              "index"
             ]
           },
           {
-            "group": "Self-host",
+            "group": "Self-hosting",
             "pages": [
               "self-hosting",
               "plugin-installation",
               "configuration",
-              "networking",
-              "architecture",
+              "networking"
+            ]
+          },
+          {
+            "group": "Development",
+            "pages": [
               "development",
-              "security"
+              "architecture",
+              "security",
+              "ai-rules",
+              "contributing-docs"
             ]
           },
           {
@@ -56,7 +61,9 @@
               "api-reference/endpoint/get-sessions",
               "api-reference/endpoint/verify-send",
               "api-reference/endpoint/verify-check",
-              "api-reference/endpoint/register"
+              "api-reference/endpoint/register",
+              "api-reference/endpoint/unregister",
+              "api-reference/endpoint/users"
             ]
           }
         ]

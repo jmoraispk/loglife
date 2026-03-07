@@ -45,22 +45,22 @@ User authentication is handled by **Clerk**. The website's API routes verify tha
 - An unauthenticated browser request to `/api/verify` is rejected before it ever reaches the plugin.
 - The plugin itself does not need to know about individual users — it trusts the website's Bearer token.
 
-## Phone verification
+## WhatsApp linking security model (current V2 flow)
 
-Phone ownership is proven through a **6-digit verification code** sent via WhatsApp:
+Phone ownership is proven through a **user-initiated WhatsApp message** containing an `LF-XXXX` code.
 
-1. User enters their phone number on the dashboard.
-2. The plugin generates a code using `crypto.randomInt` (cryptographically secure).
-3. The code is sent to the phone via the OpenClaw gateway.
-4. The user enters the code on the dashboard.
-5. The plugin compares it using `crypto.timingSafeEqual`.
+1. User enters phone on the dashboard.
+2. Backend registers the phone and generates a short-lived link code.
+3. User taps a prefilled WhatsApp button and sends the code from that phone.
+4. Plugin auto-verifies, marks link complete, and sends a welcome message.
 
-### Protections
+### Expiry and cleanup behavior
 
-- **5-minute TTL**: Codes expire after 5 minutes. Expired codes are rejected.
-- **Single use**: A code is deleted immediately after successful verification. It cannot be reused.
-- **Rate limiting**: Only one code can be sent per phone number per 60 seconds. Repeated requests return `429 Too Many Requests`.
-- **Timing-safe comparison**: Code comparison uses constant-time equality to prevent timing side-channel attacks.
+- **TTL**: Pending link codes expire after 5 minutes.
+- **Sweep interval**: Expired pending links are cleaned every 30 seconds.
+- **Effective removal window**: cleanup usually happens between `5:00` and `5:30` after link creation (or earlier if message-count guardrails trigger).
+- **Persistence across restarts**: pending links are stored in `multi-user/pending-links.json`, so a restart does not silently drop pending-link cleanup state.
+- **Wrong-number rollback scope**: only users created during the current register flow are auto-removed on expiry; pre-existing users are not auto-deleted.
 
 ## Rate limits
 
@@ -68,8 +68,8 @@ Phone ownership is proven through a **6-digit verification code** sent via Whats
 
 | Resource | Limit | Window |
 |---|---|---|
-| Verification code sends | 1 per phone | 60 seconds |
-| Verification code validity | 1 code | 5 minutes |
+| Verify/send code API (legacy flow) | 1 per phone | 60 seconds |
+| Pending link validity (V2 flow) | 1 link | 5 minutes |
 
 ### Planned limits
 
@@ -80,7 +80,23 @@ As LogLife scales, additional guardrails will be added:
 - **Token budgets** — per-user token consumption caps per billing period
 - **Usage dashboard** — visible on the dashboard so users can monitor their own consumption
 
-## Data flow
+## Stage-by-stage attacks and mitigations
+
+| Stage | Possible attacks | Current mitigation |
+|---|---|---|
+| Dashboard register request | Unauthenticated caller attempts registration; forged client requests | Clerk session required by website API route; plugin route protected by Bearer API key; timing-safe token compare |
+| Phone entry and linking | User enters wrong number; script repeatedly requests links | 5-minute TTL; 30-second sweeper; pending-link message-count cap; existing-user path is idempotent |
+| Pending (not verified yet) | Unverified sender tries to trigger agent replies by messaging random text/code-like payloads | Pending links are tracked per phone; linking messages are intercepted and canceled before normal agent reply path |
+| Code replay / brute-force | Try old codes, random `LF-XXXX` payloads, or repeated guesses | Exact-code match required per phone; pending link expires quickly; wrong attempts increase counters and can trigger cleanup |
+| Verified messaging | Abuse via high message volume or expensive prompts | Allow-list DM policy; account-level controls and disable path; planned per-user message/token budgets |
+| Infra / operational | Gateway restart during linking; stale in-memory state | Pending-link state is persisted to disk and reloaded; cleanup continues after restart |
+
+### Residual risk and intentional behavior
+
+- Existing users are intentionally not auto-deleted when a fresh link attempt expires. This avoids deleting valid long-lived users during accidental re-link attempts.
+- If you need stronger enforcement (for example, "must re-verify before any further messaging"), use a stricter reconnect mode that temporarily suspends allow-list access until verification completes.
+
+## Data flow (legacy verification API)
 
 ```mermaid
 %%{init: {'theme': 'neutral'}}%%

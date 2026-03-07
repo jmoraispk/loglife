@@ -43,7 +43,7 @@ describe("generateConfig", () => {
     expect(result.channels).toHaveProperty("signal");
     const wa = result.channels.whatsapp as Record<string, unknown>;
     expect(wa.allowFrom).toEqual(["+1234567890"]);
-    expect(wa.dmPolicy).toBe("open");
+    expect(wa.dmPolicy).toBe("allowlist");
 
     expect(result.session.dmScope).toBe("per-peer");
   });
@@ -83,11 +83,11 @@ describe("generateConfig", () => {
 
     const discord = result.channels.discord as Record<string, Record<string, unknown>>;
     expect(discord.dm.allowFrom).toEqual(["111"]);
-    expect(discord.dm.policy).toBe("open");
+    expect(discord.dm.policy).toBe("allowlist");
 
     const tg = result.channels.telegram as Record<string, unknown>;
     expect(tg.allowFrom).toEqual(["alice_tg"]);
-    expect(tg.dmPolicy).toBe("open");
+    expect(tg.dmPolicy).toBe("allowlist");
   });
 
   it("uses default model when user has no model", () => {
@@ -160,7 +160,7 @@ describe("generateConfig", () => {
     const result = generateConfig(config);
     const slack = result.channels.slack as Record<string, Record<string, unknown>>;
     expect(slack.dm.allowFrom).toEqual(["U012345"]);
-    expect(slack.dm.policy).toBe("open");
+    expect(slack.dm.policy).toBe("allowlist");
   });
 
   it("includes shared.env in generated output", () => {
