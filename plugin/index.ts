@@ -26,7 +26,12 @@ const VERIFY_COOLDOWN_MS = 60 * 1000;
 const LINK_TTL_MS = 5 * 60 * 1000;
 const LINK_MAX_MESSAGES = 5;
 const LINK_CODE_REGEX = /^LF-\d{4}$/;
-const LINK_WELCOME_TEXT = "Welcome to LogLife! Your WhatsApp is connected. Tip: Send a quick voice note about why you're trying LogLife to get started.";
+const LINK_WELCOME_TEXT = `Welcome to LogLife! Your WhatsApp is connected.
+
+Here's 3 things to send your first voice journal on:
+- What habits would you like to track?
+- What gave you energy today, and what drained it?
+- What is one small win from today you want to keep repeating?`;
 
 export const verificationCodes = new Map<string, VerificationEntry>();
 
