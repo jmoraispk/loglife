@@ -15,4 +15,8 @@ openclaw channels status --probe
 
 # 5) Watch registered users
 bash plugin/scripts/check-registered-users.sh --watch --interval 2
+
+# Extra script helpers
+bash plugin/scripts/unregister-user.sh --phone 15551234567  # or --all
+bash plugin/scripts/restart-local-gateway.sh
 ```
