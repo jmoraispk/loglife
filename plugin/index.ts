@@ -1,6 +1,6 @@
 import type { OpenClawPluginApi } from "openclaw/plugin-sdk";
 import { readFile } from "node:fs/promises";
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, utimesSync } from "node:fs";
 import { join } from "node:path";
 import { timingSafeEqual, randomInt, createHash } from "node:crypto";
 import { URL } from "node:url";
@@ -795,10 +795,6 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/unregister",
-    // --- POST /loglife/telegram/verify/send ---
-
-    api.registerHttpRoute({
-      path: "/loglife/telegram/verify/send",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "POST") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -877,12 +873,29 @@ const plugin = {
       },
     });
 
-    // --- GET /loglife/verify/status ---
+    // --- POST /loglife/telegram/verify/send ---
 
     api.registerHttpRoute({
-      path: "/loglife/verify/status",
+      path: "/loglife/telegram/verify/send",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
-        if (req.method !== "GET") {
+        if (req.method !== "POST") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
+        let body: Record<string, unknown>;
+        try {
+          body = await readBody(req);
+        } catch {
+          jsonResponse(res, 400, { error: "Invalid JSON body" });
+          return;
+        }
+
         const peerRaw = body.phone as string | undefined;
         if (!peerRaw || typeof peerRaw !== "string") {
           jsonResponse(res, 400, { error: "Missing required field: phone" });
@@ -923,12 +936,12 @@ const plugin = {
       },
     });
 
-    // --- POST /loglife/telegram/verify/check ---
+    // --- GET /loglife/verify/status ---
 
     api.registerHttpRoute({
-      path: "/loglife/telegram/verify/check",
+      path: "/loglife/verify/status",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
-        if (req.method !== "POST") {
+        if (req.method !== "GET") {
           jsonResponse(res, 405, { error: "Method not allowed" });
           return;
         }
@@ -960,12 +973,21 @@ const plugin = {
       },
     });
 
-    // --- GET /loglife/users ---
+    // --- POST /loglife/telegram/verify/check ---
 
     api.registerHttpRoute({
-      path: "/loglife/users",
+      path: "/loglife/telegram/verify/check",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
-        if (req.method !== "GET") {
+        if (req.method !== "POST") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
         let body: Record<string, unknown>;
         try {
           body = await readBody(req);
@@ -1012,12 +1034,12 @@ const plugin = {
       },
     });
 
-    // --- POST /loglife/telegram/register ---
+    // --- GET /loglife/users ---
 
     api.registerHttpRoute({
-      path: "/loglife/telegram/register",
+      path: "/loglife/users",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
-        if (req.method !== "POST") {
+        if (req.method !== "GET") {
           jsonResponse(res, 405, { error: "Method not allowed" });
           return;
         }
@@ -1038,6 +1060,25 @@ const plugin = {
           const errMsg = err instanceof Error ? err.message : String(err);
           api.logger.error(`Failed to read users list: ${errMsg}`);
           jsonResponse(res, 500, { error: "Failed to read users list" });
+        }
+      },
+    });
+
+    // --- POST /loglife/telegram/register ---
+
+    api.registerHttpRoute({
+      path: "/loglife/telegram/register",
+      handler: async (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method !== "POST") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
         let body: Record<string, unknown>;
         try {
           body = await readBody(req);
