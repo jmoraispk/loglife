@@ -104,6 +104,7 @@ export default function DashboardPage() {
     (user?.unsafeMetadata as Record<string, unknown> | undefined)?.developerSettingsEnabled
   );
   const isWhatsAppConnected = Boolean(whatsappPhone);
+  const countdownSeconds = pollUntil ? Math.max(0, Math.ceil((pollUntil - Date.now()) / 1000)) : 0;
 
   const fetchSession = useCallback((isRefresh = false) => {
     if (!whatsappPhone) {
