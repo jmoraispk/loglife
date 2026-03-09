@@ -17,6 +17,7 @@ import {
 } from "@/data/test-logs-derived";
 import GoalRadarPanel from "@/components/goals/GoalRadarPanel";
 import { useDemoMode } from "@/hooks/useDemoMode";
+import { useDeveloperSettingsAccess } from "@/hooks/useDeveloperSettingsAccess";
 import {
   addTag,
   applyTagFilter,
@@ -665,6 +666,7 @@ function mapDetailedGoalToStateGoal(goal: DetailedGoal): Goal {
 }
 
 export default function GoalDetailPage({ params }: GoalDetailPageProps) {
+  const { isCheckingAccess, isBlocked } = useDeveloperSettingsAccess();
   const { isDemoMode } = useDemoMode();
   const { id } = use(params);
   const searchParams = useSearchParams();
@@ -704,6 +706,16 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
 
   const goal = state.goals.find((item) => item.id === id);
   const usageCounts = useMemo(() => computeTagUsageCounts(state.goals), [state.goals]);
+
+  if (isCheckingAccess || isBlocked) {
+    return (
+      <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">
+        <div className="max-w-[1200px] mx-auto flex items-center justify-center text-slate-400">
+          Loading...
+        </div>
+      </main>
+    );
+  }
 
   if (!goal) {
     return (

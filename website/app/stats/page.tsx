@@ -16,6 +16,7 @@ import {
 } from "@/data/test-logs-derived";
 import { mockDailyStats, mockSessionLengths, mockTopEvents } from "@/data/mock-stats";
 import { useDemoMode } from "@/hooks/useDemoMode";
+import { useDeveloperSettingsAccess } from "@/hooks/useDeveloperSettingsAccess";
 
 const SERIES_CONFIG: SeriesConfig[] = [
   { key: "total", label: "Total", color: "#22d3ee" },
@@ -63,6 +64,7 @@ function formatImportanceColor(importance: TopEvent["importance"]): string {
 }
 
 export default function StatsPage() {
+  const { isCheckingAccess, isBlocked } = useDeveloperSettingsAccess();
   const { isDemoMode } = useDemoMode();
   const [range, setRange] = useState<DateRange>(30);
   const [smoothing, setSmoothing] = useState(true);
@@ -165,6 +167,16 @@ export default function StatsPage() {
     link.click();
     URL.revokeObjectURL(url);
   };
+
+  if (isCheckingAccess || isBlocked) {
+    return (
+      <main className="min-h-screen px-4 pb-12 pt-20 lg:px-8">
+        <div className="mx-auto flex max-w-[1400px] items-center justify-center text-slate-400">
+          Loading...
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen px-4 pb-12 pt-20 lg:px-8">

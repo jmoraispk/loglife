@@ -100,6 +100,9 @@ export default function DashboardPage() {
   const waTarget = normalizeWaMeTarget(process.env.NEXT_PUBLIC_LOGLIFE_WHATSAPP_NUMBER);
   const fullPhone = `${countryCode}${phoneLocal}`;
   const fullPhoneDisplay = `+${countryCode}${phoneLocal}`;
+  const developerSettingsEnabled = Boolean(
+    (user?.unsafeMetadata as Record<string, unknown> | undefined)?.developerSettingsEnabled
+  );
   const isWhatsAppConnected = Boolean(whatsappPhone);
 
   const fetchSession = useCallback((isRefresh = false) => {
@@ -192,6 +195,14 @@ export default function DashboardPage() {
   if (!user) {
     router.push("/login");
     return null;
+  }
+
+  if (!developerSettingsEnabled) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <main className="flex-1 px-3 pb-6 pt-20 sm:px-4 lg:px-6 lg:pb-8" />
+      </div>
+    );
   }
 
   const handleSignOut = async () => {

@@ -7,8 +7,10 @@ import { MOCK_GOALS_WITH_TAGS } from "@/data/mock/goals-with-tags";
 import { getDetailedGoalsFromLogs } from "@/data/test-logs-derived";
 import { applyTagFilter } from "@/utils/tags";
 import { useDemoMode } from "@/hooks/useDemoMode";
+import { useDeveloperSettingsAccess } from "@/hooks/useDeveloperSettingsAccess";
 
 export default function GoalsPage() {
+  const { isCheckingAccess, isBlocked } = useDeveloperSettingsAccess();
   const { isDemoMode } = useDemoMode();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const taxonomy = TAGS;
@@ -48,6 +50,16 @@ export default function GoalsPage() {
     const filtered = applyTagFilter(goals, selectedTags);
     return [...filtered].sort((a, b) => a.name.localeCompare(b.name));
   }, [goals, selectedTags]);
+
+  if (isCheckingAccess || isBlocked) {
+    return (
+      <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">
+        <div className="max-w-[1200px] mx-auto flex items-center justify-center text-slate-400">
+          Loading...
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="min-h-screen pt-20 pb-12 px-4 lg:px-8">

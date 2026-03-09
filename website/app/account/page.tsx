@@ -27,6 +27,9 @@ export default function AccountPage() {
   const [telegramLoading, setTelegramLoading] = useState(false);
   const [telegramFeedback, setTelegramFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [telegramLink, setTelegramLink] = useState<{ token: string; deepLink: string } | null>(null);
+  const [developerSettingsEnabled, setDeveloperSettingsEnabled] = useState(false);
+  const [developerSettingsLoading, setDeveloperSettingsLoading] = useState(false);
+  const [developerSettingsMessage, setDeveloperSettingsMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const whatsappPhone = (user?.unsafeMetadata as Record<string, string> | undefined)?.whatsappPhone || "";
   const telegramChatId = (user?.unsafeMetadata as Record<string, string> | undefined)?.telegramChatId || "";
   const whatsAppConnected = !!whatsappPhone;
@@ -36,6 +39,9 @@ export default function AccountPage() {
     if (user) {
       setFirstName(user.firstName || "");
       setLastName(user.lastName || "");
+      setDeveloperSettingsEnabled(
+        Boolean((user.unsafeMetadata as Record<string, unknown> | undefined)?.developerSettingsEnabled)
+      );
     }
   }, [user]);
 
@@ -223,6 +229,34 @@ export default function AccountPage() {
       setTelegramFeedback(null);
     } catch {
       alert("Failed to disconnect Telegram. Please try again.");
+    }
+  };
+
+  const handleToggleDeveloperSettings = async () => {
+    const nextValue = !developerSettingsEnabled;
+    setDeveloperSettingsLoading(true);
+    setDeveloperSettingsMessage(null);
+
+    try {
+      const metadata = (user!.unsafeMetadata ?? {}) as Record<string, unknown>;
+      await user!.update({
+        unsafeMetadata: {
+          ...metadata,
+          developerSettingsEnabled: nextValue,
+        },
+      });
+      setDeveloperSettingsEnabled(nextValue);
+      setDeveloperSettingsMessage({
+        type: "success",
+        text: `Developer settings turned ${nextValue ? "on" : "off"}.`,
+      });
+    } catch {
+      setDeveloperSettingsMessage({
+        type: "error",
+        text: "Failed to update developer settings. Please try again.",
+      });
+    } finally {
+      setDeveloperSettingsLoading(false);
     }
   };
 
@@ -415,6 +449,51 @@ export default function AccountPage() {
                         )}
                       </div>
                     ))}
+                  </div>
+                </div>
+
+                {/* Developer Settings */}
+                <div className="bg-slate-900/50 border border-slate-800/50 rounded-xl">
+                  <div className="px-6 py-4 border-b border-slate-800/50">
+                    <h2 className="text-sm font-medium text-white">Developer Settings</h2>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center justify-between px-3 py-2.5 rounded-lg bg-slate-950/30 border border-slate-800/30">
+                      <div>
+                        <p className="text-sm text-slate-300">Enable developer settings</p>
+                        <p className="text-xs text-slate-500 mt-0.5">
+                          Turn this on to enable developer settings.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleToggleDeveloperSettings}
+                        disabled={developerSettingsLoading}
+                        role="switch"
+                        aria-checked={developerSettingsEnabled}
+                        aria-label="Toggle developer settings"
+                        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                          developerSettingsEnabled ? "bg-emerald-500" : "bg-slate-700"
+                        }`}
+                      >
+                        <span
+                          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                            developerSettingsEnabled ? "translate-x-6" : "translate-x-1"
+                          }`}
+                        />
+                      </button>
+                    </div>
+                    {developerSettingsMessage && (
+                      <div
+                        className={`px-3 py-2 rounded-lg text-xs ${
+                          developerSettingsMessage.type === "success"
+                            ? "bg-green-500/10 text-green-400"
+                            : "bg-emerald-500/10 text-emerald-400"
+                        }`}
+                      >
+                        {developerSettingsMessage.text}
+                      </div>
+                    )}
                   </div>
                 </div>
 
