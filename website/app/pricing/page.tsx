@@ -351,10 +351,11 @@ export default function PricingPage() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid lg:grid-cols-2 gap-6 items-start max-w-4xl mx-auto mb-24 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+        <div className="max-w-6xl mx-auto mb-24 overflow-x-auto pb-2 animate-slide-up" style={{ animationDelay: "0.1s" }}>
+          <div className="flex w-full min-w-[920px] gap-6 items-start justify-center">
 
           {/* Self-Hosted (Free) */}
-          <div className="relative bg-slate-950/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 flex flex-col hover:border-slate-700 transition-all duration-300 group">
+          <div className="relative min-w-0 basis-[30%] bg-slate-950/40 backdrop-blur-xl border border-slate-800 rounded-3xl p-8 flex flex-col hover:border-slate-700 transition-all duration-300 group">
             <div className="absolute inset-0 bg-gradient-to-b from-slate-800/10 to-transparent rounded-3xl pointer-events-none" />
 
             <div className="mb-8">
@@ -402,10 +403,10 @@ export default function PricingPage() {
           </div>
 
           {/* Hosted */}
-          <div className="relative bg-slate-900/60 backdrop-blur-xl border-2 border-emerald-500/40 rounded-3xl overflow-hidden flex flex-col hover:border-emerald-500/60 transition-all duration-300 group shadow-lg shadow-emerald-500/10">
+          <div className="relative min-w-0 basis-[40%] bg-slate-900/60 backdrop-blur-xl border-2 border-emerald-500/40 rounded-3xl overflow-hidden flex flex-col hover:border-emerald-500/60 transition-all duration-300 group shadow-lg shadow-emerald-500/10">
             <div className="h-1.5 bg-gradient-to-r from-emerald-500 via-emerald-400 to-emerald-600" />
 
-            <div className="p-8 flex flex-col flex-1">
+            <div className="p-8 flex flex-col">
               <div className="mb-8">
                 <div className="flex items-center gap-3 mb-6">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 group-hover:scale-110 transition-transform duration-300">
@@ -425,17 +426,17 @@ export default function PricingPage() {
                 </div>
               </div>
 
-              <div className="space-y-4 mb-8 flex-1">
+              <div className="space-y-4 mb-8">
                 <div className="flex items-start gap-3 text-slate-300">
                   <CheckIcon className="w-5 h-5 mt-0.5 shrink-0 text-emerald-400" />
                   <span className="text-sm font-medium text-emerald-400">Hosted private instance</span>
                 </div>
                 {[
                   "Included API usage",
+                  "Start journaling immediately",
                   "Dashboard access",
-                  "Health telemetry integrations",
-                  "No Maintenance, Always on",
-                  "Automatic Updates of Latest Features",
+                  "Zero maintenance",
+                  "Always on",
                   "Priority Email Support",
                 ].map((item) => (
                   <div key={item} className="flex items-start gap-3 text-slate-300">
@@ -457,6 +458,60 @@ export default function PricingPage() {
               <p className="text-xs text-slate-500 text-center mt-2">No card needed.</p>
             </div>
           </div>
+
+          {/* Unlimited */}
+          <div className="relative min-w-0 basis-[30%] bg-slate-950/30 backdrop-blur-xl border border-slate-800 rounded-3xl overflow-hidden flex flex-col opacity-75">
+            <div className="p-8 flex flex-col">
+              <div className="mb-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-900 border border-slate-700 text-slate-400">
+                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.59 14.37a6 6 0 00-8.48-8.48l-4.24 4.24a2 2 0 000 2.83l4.24 4.24a6 6 0 008.48-8.48zm0 0L19.83 18.6M8.5 8.5l7 7" />
+                    </svg>
+                  </div>
+                  <span className="px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-bold border border-slate-700 uppercase tracking-wider">
+                    Coming Soon
+                  </span>
+                </div>
+                <h2 className="text-2xl font-bold text-white mb-1">Unlimited</h2>
+                <p className="text-sm text-slate-500 mb-4">For Life Trackers &amp; Pro Journalers</p>
+                <div className="flex items-baseline gap-2">
+                  <span className="text-4xl font-bold text-slate-400">Soon</span>
+                  <span className="text-slate-600 font-medium line-through">$49/mo</span>
+                </div>
+              </div>
+
+              <div className="space-y-4 mb-8">
+                {[
+                  { label: "Everything in Hosted" },
+                  { label: "Unlimited API" },
+                  { label: "Health and fitness trackers", examples: "Oura, Garmin, Fitbit" },
+                  { label: "Personal knowledge systems", examples: "Notion, Obsidian, Evernote" },
+                  { label: "Specialized skills", examples: "video summaries, Google" },
+                  { label: "SuperMemory support" },
+                  { label: "AI phone calls" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-start gap-3 text-slate-300">
+                    <CheckIcon className="w-5 h-5 mt-0.5 shrink-0 text-slate-500" />
+                    <div className="text-sm leading-relaxed">
+                      <span className="block">{item.label}</span>
+                      {item.examples ? <span className="block text-slate-500">({item.examples})</span> : null}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                disabled
+                className="w-full inline-flex items-center justify-center px-4 py-3 bg-slate-800 text-slate-400 text-sm font-semibold rounded-xl border border-slate-700 cursor-not-allowed"
+              >
+                Coming Soon
+              </button>
+              <p className="text-xs text-slate-500 text-center mt-2">Planned premium tier.</p>
+            </div>
+          </div>
+        </div>
         </div>
 
         {/* Animated Time Comparison */}
