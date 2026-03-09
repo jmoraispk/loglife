@@ -466,7 +466,9 @@ export default function PricingPage() {
                 <div className="flex items-center gap-3 mb-6">
                   <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-slate-900 border border-slate-700 text-slate-400">
                     <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.59 14.37a6 6 0 00-8.48-8.48l-4.24 4.24a2 2 0 000 2.83l4.24 4.24a6 6 0 008.48-8.48zm0 0L19.83 18.6M8.5 8.5l7 7" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M14.5 4.5c-2.6.9-5.1 3.4-6 6l-2.3 2.3a.9.9 0 00.48 1.52l2.08.35.35 2.08a.9.9 0 001.52.48l2.3-2.3c2.6-.9 5.1-3.4 6-6 .22-.63-.37-1.22-1-1z" />
+                      <circle cx="14.25" cy="9.75" r="1.25" strokeWidth={1.8} />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M8.5 15.5l-2 2M6 18h2.5M6 18v-2.5" />
                     </svg>
                   </div>
                   <span className="px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-bold border border-slate-700 uppercase tracking-wider">
@@ -484,12 +486,12 @@ export default function PricingPage() {
               <div className="space-y-4 mb-8">
                 {[
                   { label: "Everything in Hosted" },
-                  { label: "Unlimited API" },
+                  { label: "Unlimited usage" },
+                  { label: "AI phone calls" },
+                  { label: "SuperMemory support" },
                   { label: "Health and fitness trackers", examples: "Oura, Garmin, Fitbit" },
                   { label: "Personal knowledge systems", examples: "Notion, Obsidian, Evernote" },
                   { label: "Specialized skills", examples: "video summaries, Google" },
-                  { label: "SuperMemory support" },
-                  { label: "AI phone calls" },
                 ].map((item) => (
                   <div key={item.label} className="flex items-start gap-3 text-slate-300">
                     <CheckIcon className="w-5 h-5 mt-0.5 shrink-0 text-slate-500" />
