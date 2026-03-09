@@ -90,7 +90,7 @@ export default function DashboardPage() {
   const [verifyStep, setVerifyStep] = useState<"phone" | "message">("phone");
   const [linkCode, setLinkCode] = useState("");
   const [pollUntil, setPollUntil] = useState<number | null>(null);
-  const [pollNow, setPollNow] = useState(Date.now());
+  const [, setPollNow] = useState(Date.now());
   const [copiedCode, setCopiedCode] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyFeedback, setVerifyFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
