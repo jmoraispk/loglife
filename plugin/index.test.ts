@@ -682,6 +682,7 @@ describe("POST /loglife/unregister handler", () => {
 
   let unregisterHandler: RouteHandler;
   let mockWriteFileSync: ReturnType<typeof vi.fn>;
+  let mockRmSync: ReturnType<typeof vi.fn>;
   let usersJsonContent: string;
 
   beforeEach(async () => {
@@ -696,10 +697,17 @@ describe("POST /loglife/unregister handler", () => {
     });
 
     mockWriteFileSync = vi.fn();
+    mockRmSync = vi.fn();
 
     vi.doMock("node:fs", () => ({
       readFileSync: vi.fn().mockImplementation((path: string) => {
         if (path.includes("users.json")) return usersJsonContent;
+        if (path.includes("peer-agent-assignments.json")) {
+          return JSON.stringify({
+            "whatsapp:default:dm:+15551234567": "alice",
+            "whatsapp:default:dm:+19999999999": "main",
+          });
+        }
         return JSON.stringify({
           agents: { defaults: { model: { primary: "x" } } },
           channels: { whatsapp: { groupPolicy: "allowlist", debounceMs: 0, mediaMaxMb: 50 } },
@@ -707,6 +715,7 @@ describe("POST /loglife/unregister handler", () => {
         });
       }),
       writeFileSync: mockWriteFileSync,
+      rmSync: mockRmSync,
       mkdirSync: vi.fn(),
       existsSync: vi.fn().mockReturnValue(true),
     }));
@@ -774,6 +783,7 @@ describe("POST /loglife/unregister handler", () => {
     expect(res._status).toBe(200);
     expect(res.json()).toEqual({ removed: false, existing: false });
     expect(mockWriteFileSync).not.toHaveBeenCalled();
+    expect(mockRmSync).not.toHaveBeenCalled();
   });
 
   it("unregisters matching phone and rewrites config files", async () => {
@@ -791,8 +801,16 @@ describe("POST /loglife/unregister handler", () => {
     expect(body.removed).toBe(true);
     expect(body.removedUserIds).toEqual(["alice"]);
 
-    // users.json, generated.json, openclaw.json
-    expect(mockWriteFileSync).toHaveBeenCalledTimes(3);
+    // users.json, generated.json, openclaw.json, peer-agent-assignments.json
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(4);
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/agents/alice"),
+      { recursive: true, force: true },
+    );
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/workspace-alice"),
+      { recursive: true, force: true },
+    );
   });
 
   it("supports all:true to clear all users", async () => {
@@ -810,7 +828,23 @@ describe("POST /loglife/unregister handler", () => {
     expect(body.removedAll).toBe(true);
     expect(body.removed).toBe(true);
     expect(body.removedUserIds).toEqual(["alice", "bob"]);
-    expect(mockWriteFileSync).toHaveBeenCalledTimes(4);
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(5);
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/agents/alice"),
+      { recursive: true, force: true },
+    );
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/workspace-alice"),
+      { recursive: true, force: true },
+    );
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/agents/bob"),
+      { recursive: true, force: true },
+    );
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/workspace-bob"),
+      { recursive: true, force: true },
+    );
   });
 });
 

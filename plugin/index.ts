@@ -1,6 +1,6 @@
 import type { OpenClawPluginApi } from "openclaw/plugin-sdk";
 import { readFile } from "node:fs/promises";
-import { readFileSync, writeFileSync, mkdirSync, existsSync, utimesSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, utimesSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { timingSafeEqual, randomInt, createHash } from "node:crypto";
 import { URL } from "node:url";
@@ -315,6 +315,7 @@ const plugin = {
     const generatedJsonPath = join(multiUserDir, "generated.json");
     const pendingLinksPath = join(multiUserDir, "pending-links.json");
     const openclawJsonPath = join(stateDir, "openclaw.json");
+    const peerAgentAssignmentsPath = join(stateDir, "peer-agent-assignments.json");
 
     const sendWA = api.runtime.channel.whatsapp.sendMessageWhatsApp as SendWhatsApp;
     const sendTG = (
@@ -337,6 +338,42 @@ const plugin = {
     const removePendingLink = (phone: string) => {
       const removed = pendingLinks.delete(phone);
       if (removed) persistPendingLinks();
+    };
+
+    const cleanupUserRuntimeState = (userIds: string[]) => {
+      const targets = [...new Set(userIds.map((id) => id.trim()).filter(Boolean))];
+      if (targets.length === 0) return;
+
+      for (const userId of targets) {
+        // Never delete the primary agent by mistake.
+        if (userId === "main") continue;
+        rmSync(join(stateDir, "agents", userId), { recursive: true, force: true });
+        rmSync(join(stateDir, `workspace-${userId}`), { recursive: true, force: true });
+      }
+
+      if (!existsSync(peerAgentAssignmentsPath)) return;
+
+      try {
+        const raw = JSON.parse(readFileSync(peerAgentAssignmentsPath, "utf-8")) as Record<string, unknown>;
+        const next: Record<string, string> = {};
+        let changed = false;
+
+        for (const [assignmentKey, assignedAgentId] of Object.entries(raw)) {
+          if (typeof assignedAgentId !== "string") continue;
+          if (targets.includes(assignedAgentId)) {
+            changed = true;
+            continue;
+          }
+          next[assignmentKey] = assignedAgentId;
+        }
+
+        if (changed) {
+          writeFileSync(peerAgentAssignmentsPath, JSON.stringify(next, null, 2) + "\n");
+        }
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        api.logger.warn(`Failed to clean peer-agent assignments: ${errMsg}`);
+      }
     };
 
     try {
@@ -375,6 +412,7 @@ const plugin = {
       const generated = generateConfig(usersConfig);
       writeFileSync(generatedJsonPath, JSON.stringify(generated, null, 2) + "\n");
       applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
+      cleanupUserRuntimeState(removed.map((u) => u.id));
       return { removed: true, removedUserIds: removed.map((u) => u.id) };
     };
 
@@ -839,6 +877,7 @@ const plugin = {
             const generated = generateConfig(usersConfig);
             writeFileSync(generatedJsonPath, JSON.stringify(generated, null, 2) + "\n");
             applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
+            cleanupUserRuntimeState(removedUserIds);
 
             pendingLinks.clear();
             persistPendingLinks();
