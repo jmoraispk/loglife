@@ -198,18 +198,97 @@ export default function DashboardPage() {
     return null;
   }
 
-  if (!developerSettingsEnabled && isWhatsAppConnected) {
-    return (
-      <div className="min-h-screen flex flex-col">
-        <main className="flex-1 px-3 pb-6 pt-20 sm:px-4 lg:px-6 lg:pb-8" />
-      </div>
-    );
-  }
-
   const handleSignOut = async () => {
     await signOut();
     router.push("/");
   };
+
+  if (!developerSettingsEnabled && isWhatsAppConnected) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <main className="flex-1 px-3 pb-6 pt-20 sm:px-4 lg:px-6 lg:pb-8">
+          <div className="mx-auto w-full max-w-7xl">
+            <div className="mb-4 flex items-center justify-between lg:mb-3">
+              <div className="flex items-center gap-3">
+                <div>
+                  <h1 className="text-xl font-semibold text-white md:text-2xl lg:text-3xl">Dashboard</h1>
+                  <p className="mt-1 text-sm text-slate-400">
+                    Welcome back, {user.firstName || user.emailAddresses[0]?.emailAddress}
+                  </p>
+                </div>
+                <button
+                  onClick={() => fetchSession(true)}
+                  disabled={refreshing || sessionLoading}
+                  title="Refresh session data"
+                  className="ml-1 mt-0.5 cursor-pointer rounded-lg p-2 text-slate-400 transition-all hover:bg-slate-800/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <svg className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="relative" ref={menuRef}>
+                <button
+                  onClick={() => setMenuOpen(!menuOpen)}
+                  className="relative flex h-9 w-9 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-slate-700 ring-2 ring-slate-700 transition-all hover:ring-slate-600"
+                >
+                  {user.imageUrl ? (
+                    <Image
+                      src={user.imageUrl}
+                      alt={user.fullName || "User"}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <span className="text-sm font-medium text-white">
+                      {user.firstName?.[0] || user.emailAddresses[0]?.emailAddress[0]?.toUpperCase()}
+                    </span>
+                  )}
+                </button>
+
+                {menuOpen && (
+                  <div className="absolute right-0 z-50 mt-2 w-56 overflow-hidden rounded-xl border border-slate-800/50 bg-slate-900 shadow-xl">
+                    <div className="border-b border-slate-800/50 px-4 py-3">
+                      <p className="truncate text-sm font-medium text-white">{user.fullName || "User"}</p>
+                      <p className="truncate text-xs text-slate-500">
+                        {user.emailAddresses[0]?.emailAddress}
+                      </p>
+                    </div>
+
+                    <div className="p-1.5">
+                      <Link
+                        href="/account"
+                        onClick={() => setMenuOpen(false)}
+                        className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-400 transition-all hover:bg-slate-800/50 hover:text-white"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Account settings
+                      </Link>
+                      <button
+                        onClick={handleSignOut}
+                        className="flex w-full cursor-pointer items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-slate-400 transition-all hover:bg-emerald-500/10 hover:text-emerald-400"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                        </svg>
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <LegacyTodayOverview />
+            <LegacyHabitHeatmap />
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const handleStartLinking = async () => {
     if (!fullPhone.trim()) return;
