@@ -198,7 +198,7 @@ export default function DashboardPage() {
     return null;
   }
 
-  if (!developerSettingsEnabled) {
+  if (!developerSettingsEnabled && isWhatsAppConnected) {
     return (
       <div className="min-h-screen flex flex-col">
         <main className="flex-1 px-3 pb-6 pt-20 sm:px-4 lg:px-6 lg:pb-8" />
