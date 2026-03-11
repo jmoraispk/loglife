@@ -6,6 +6,8 @@ import Link from "next/link";
 import TodayOverview from "@/components/dashboard/TodayOverview";
 import HabitHeatmap from "@/components/dashboard/HabitHeatmap";
 import GoalsSection from "@/components/dashboard/GoalsSection";
+import NonDeveloperTodayOverview from "@/components/dashboard/nonDeveloper/NonDeveloperTodayOverview";
+import NonDeveloperHabitHeatmap from "@/components/dashboard/nonDeveloper/NonDeveloperHabitHeatmap";
 import LegacyTodayOverview from "@/components/dashboard/legacy/LegacyTodayOverview";
 import LegacyHabitHeatmap from "@/components/dashboard/legacy/LegacyHabitHeatmap";
 import LegacyGoalsSection from "@/components/dashboard/legacy/LegacyGoalsSection";
@@ -282,8 +284,8 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-            <LegacyTodayOverview />
-            <LegacyHabitHeatmap />
+            <NonDeveloperTodayOverview />
+            <NonDeveloperHabitHeatmap />
           </div>
         </main>
       </div>
