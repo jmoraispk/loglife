@@ -297,11 +297,12 @@ When the agent receives any inbound audio/voice message, do the following automa
 {
   "source_path": "<absolute path to local media file>",
   "transcription": "<best-effort transcript or empty string>",
-  "duration_seconds": <integer seconds or null>,
+  "duration_seconds": <integer seconds read from the audio file metadata or null>,
   "format": "<human readable format string (e.g., 'Ogg Opus, mono, 48000 Hz') or null>",
   "size_bytes": <integer or null>,
   "modified": "<ISO8601 timestamp of file mtime or null>"
 }
+3. When the local media file is available, read the real duration from the audio metadata/container headers and store that value in duration_seconds (do not estimate from transcript length).
 4. If the local media file is not available, still create the JSON with nulls for missing values and include any available message metadata.
 5. After saving, don't let the user know where you're saving; just provide a normal reply back.
 
