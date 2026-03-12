@@ -125,6 +125,10 @@ function shortMessageId(id: string): string {
   return `${id.slice(0, 8)}...${id.slice(-6)}`;
 }
 
+function toIsoDateFromMs(ms: number): string {
+  return new Date(ms).toISOString().slice(0, 10);
+}
+
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
@@ -336,6 +340,7 @@ export default function DashboardPage() {
   const totalAudioDurationSeconds = audioWithKnownDuration.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0);
   const totalDurationLabel = audioWithKnownDuration.length > 0 ? formatDurationLabel(totalAudioDurationSeconds) : "Unknown";
   const now = new Date();
+  const currentMonth = now.toISOString().slice(0, 7);
   const todayAudioItems = audioMetadataItems.filter((item) => {
     if (!item.modifiedMs) return false;
     const itemDate = new Date(item.modifiedMs);
@@ -343,6 +348,21 @@ export default function DashboardPage() {
   });
   const todayAudioDurationSeconds = todayAudioItems.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0);
   const todayAudioTranscriptsCount = todayAudioItems.filter((item) => item.transcription.trim().length > 0).length;
+  const monthAudioItems = audioMetadataItems.filter((item) => {
+    if (!item.modifiedMs) return false;
+    return toIsoDateFromMs(item.modifiedMs).startsWith(`${currentMonth}-`);
+  });
+  const activityByDay = new Map<string, number>();
+  for (const item of monthAudioItems) {
+    if (!item.modifiedMs) continue;
+    const isoDate = toIsoDateFromMs(item.modifiedMs);
+    activityByDay.set(isoDate, (activityByDay.get(isoDate) ?? 0) + 1);
+  }
+  const maxActivityInDay = Math.max(...activityByDay.values(), 0);
+  const nonDeveloperHabitHeatmapData = Array.from(activityByDay.entries()).map(([date, count]) => ({
+    date,
+    value: maxActivityInDay > 0 ? Math.max(1, Math.round((count / maxActivityInDay) * 100)) : 0,
+  }));
 
   if (!developerSettingsEnabled && isWhatsAppConnected) {
     return (
@@ -436,7 +456,10 @@ export default function DashboardPage() {
                 modified: item.modified,
               }))}
             />
-            <NonDeveloperHabitHeatmap />
+            <NonDeveloperHabitHeatmap
+              data={nonDeveloperHabitHeatmapData}
+              month={currentMonth}
+            />
 
             <section id="audio-metadata-section" className="mt-6 rounded-xl border border-slate-800/50 bg-slate-900/50">
               <div className="flex items-center justify-between border-b border-slate-800/50 px-4 py-3">
