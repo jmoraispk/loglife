@@ -30,6 +30,25 @@ interface WhatsAppSession {
   model?: string;
 }
 
+interface AudioMetadataResponse {
+  userId?: string;
+  audioMetadata?: Record<string, unknown>;
+  count?: number;
+  error?: string;
+}
+
+interface AudioMetadataItem {
+  messageId: string;
+  sourcePath: string | null;
+  sourceFileName: string | null;
+  transcription: string;
+  durationSeconds: number | null;
+  format: string | null;
+  sizeBytes: number | null;
+  modified: string | null;
+  modifiedMs: number | null;
+}
+
 function formatRelativeTime(timestamp: number | undefined | null): string {
   if (timestamp == null || timestamp === 0) return "never";
   const now = Date.now();
@@ -76,6 +95,36 @@ function formatCountdown(totalSeconds: number): string {
   return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 }
 
+function formatDurationLabel(seconds: number | null): string {
+  if (seconds == null || Number.isNaN(seconds)) return "Unknown";
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  const remainderSeconds = seconds % 60;
+  if (minutes < 60) return `${minutes}m ${remainderSeconds}s`;
+  const hours = Math.floor(minutes / 60);
+  const remainderMinutes = minutes % 60;
+  return `${hours}h ${remainderMinutes}m`;
+}
+
+function formatBytesLabel(bytes: number | null): string {
+  if (bytes == null || Number.isNaN(bytes)) return "Unknown";
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function formatDateTimeLabel(isoString: string | null): string {
+  if (!isoString) return "Unknown";
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return "Unknown";
+  return date.toLocaleString();
+}
+
+function shortMessageId(id: string): string {
+  if (id.length <= 18) return id;
+  return `${id.slice(0, 8)}...${id.slice(-6)}`;
+}
+
 export default function DashboardPage() {
   const { user, isLoaded } = useUser();
   const { signOut } = useClerk();
@@ -96,6 +145,10 @@ export default function DashboardPage() {
   const [copiedCode, setCopiedCode] = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
   const [verifyFeedback, setVerifyFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [audioMetadata, setAudioMetadata] = useState<Record<string, unknown>>({});
+  const [audioMetadataCount, setAudioMetadataCount] = useState(0);
+  const [audioMetadataLoading, setAudioMetadataLoading] = useState(false);
+  const [audioMetadataError, setAudioMetadataError] = useState<string | null>(null);
   const { isDemoMode, toggleDemoMode } = useDemoMode();
 
   const whatsappPhone = (user?.unsafeMetadata as Record<string, string> | undefined)?.whatsappPhone || "";
@@ -125,6 +178,42 @@ export default function DashboardPage() {
   }, [whatsappPhone]);
 
   useEffect(() => { fetchSession(); }, [fetchSession]);
+
+  const fetchAudioMetadata = useCallback(async () => {
+    if (!whatsappPhone || developerSettingsEnabled) {
+      setAudioMetadata({});
+      setAudioMetadataCount(0);
+      setAudioMetadataLoading(false);
+      setAudioMetadataError(null);
+      return;
+    }
+
+    setAudioMetadataLoading(true);
+    setAudioMetadataError(null);
+    try {
+      const response = await fetch(`/api/audio-metadata?phone=${encodeURIComponent(whatsappPhone)}`);
+      const data = (await response.json()) as AudioMetadataResponse;
+      if (!response.ok || data.error) {
+        setAudioMetadata({});
+        setAudioMetadataCount(0);
+        setAudioMetadataError(data.error || "Failed to load audio metadata");
+        return;
+      }
+
+      setAudioMetadata(data.audioMetadata ?? {});
+      setAudioMetadataCount(typeof data.count === "number" ? data.count : Object.keys(data.audioMetadata ?? {}).length);
+    } catch {
+      setAudioMetadata({});
+      setAudioMetadataCount(0);
+      setAudioMetadataError("Failed to load audio metadata");
+    } finally {
+      setAudioMetadataLoading(false);
+    }
+  }, [whatsappPhone, developerSettingsEnabled]);
+
+  useEffect(() => {
+    void fetchAudioMetadata();
+  }, [fetchAudioMetadata]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -205,6 +294,56 @@ export default function DashboardPage() {
     router.push("/");
   };
 
+  const audioMetadataItems: AudioMetadataItem[] = Object.entries(audioMetadata)
+    .map(([messageId, value]) => {
+      const record = (value && typeof value === "object") ? value as Record<string, unknown> : {};
+      const sourcePath = typeof record.source_path === "string" ? record.source_path : null;
+      const transcription = typeof record.transcription === "string" ? record.transcription : "";
+      const durationSeconds = typeof record.duration_seconds === "number" && Number.isFinite(record.duration_seconds)
+        ? Math.max(0, Math.round(record.duration_seconds))
+        : null;
+      const format = typeof record.format === "string" ? record.format : null;
+      const sizeBytes = typeof record.size_bytes === "number" && Number.isFinite(record.size_bytes)
+        ? Math.max(0, Math.round(record.size_bytes))
+        : null;
+      const modified = typeof record.modified === "string" ? record.modified : null;
+      const modifiedMs = modified ? new Date(modified).getTime() : null;
+      const sourceFileName = sourcePath
+        ? sourcePath.split("/").filter(Boolean).pop() ?? sourcePath
+        : null;
+
+      return {
+        messageId,
+        sourcePath,
+        sourceFileName,
+        transcription,
+        durationSeconds,
+        format,
+        sizeBytes,
+        modified,
+        modifiedMs: Number.isFinite(modifiedMs ?? NaN) ? modifiedMs : null,
+      };
+    })
+    .sort((a, b) => {
+      const left = a.modifiedMs ?? 0;
+      const right = b.modifiedMs ?? 0;
+      if (right !== left) return right - left;
+      return a.messageId.localeCompare(b.messageId);
+    });
+
+  const audioWithTranscriptCount = audioMetadataItems.filter((item) => item.transcription.trim().length > 0).length;
+  const audioWithKnownDuration = audioMetadataItems.filter((item) => item.durationSeconds != null);
+  const totalAudioDurationSeconds = audioWithKnownDuration.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0);
+  const totalDurationLabel = audioWithKnownDuration.length > 0 ? formatDurationLabel(totalAudioDurationSeconds) : "Unknown";
+  const now = new Date();
+  const todayAudioItems = audioMetadataItems.filter((item) => {
+    if (!item.modifiedMs) return false;
+    const itemDate = new Date(item.modifiedMs);
+    return itemDate.toDateString() === now.toDateString();
+  });
+  const todayAudioDurationSeconds = todayAudioItems.reduce((sum, item) => sum + (item.durationSeconds ?? 0), 0);
+  const todayAudioTranscriptsCount = todayAudioItems.filter((item) => item.transcription.trim().length > 0).length;
+
   if (!developerSettingsEnabled && isWhatsAppConnected) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -284,8 +423,115 @@ export default function DashboardPage() {
                 )}
               </div>
             </div>
-            <NonDeveloperTodayOverview />
+            <NonDeveloperTodayOverview
+              audioStats={{
+                totalCount: audioMetadataCount,
+                todayCount: todayAudioItems.length,
+                todayDurationSeconds: todayAudioDurationSeconds,
+                transcriptsCount: todayAudioTranscriptsCount,
+              }}
+              audioItems={audioMetadataItems.map((item) => ({
+                messageId: item.messageId,
+                transcription: item.transcription,
+                modified: item.modified,
+              }))}
+            />
             <NonDeveloperHabitHeatmap />
+
+            <section id="audio-metadata-section" className="mt-6 rounded-xl border border-slate-800/50 bg-slate-900/50">
+              <div className="flex items-center justify-between border-b border-slate-800/50 px-4 py-3">
+                <div>
+                  <h2 className="text-sm font-semibold text-white">Audio Metadata</h2>
+                  <p className="mt-0.5 text-xs text-slate-500">
+                    Your saved voice notes in a simple, readable view.
+                  </p>
+                </div>
+                <button
+                  onClick={() => void fetchAudioMetadata()}
+                  disabled={audioMetadataLoading}
+                  className="rounded-md border border-slate-700/70 bg-slate-800/70 px-2.5 py-1.5 text-xs font-medium text-slate-200 transition-colors hover:bg-slate-700/80 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {audioMetadataLoading ? "Refreshing..." : "Refresh"}
+                </button>
+              </div>
+
+              <div className="p-4">
+                {audioMetadataError ? (
+                  <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-3 py-2 text-xs text-red-300">
+                    {audioMetadataError}
+                  </div>
+                ) : audioMetadataLoading ? (
+                  <div className="text-xs text-slate-400">Loading audio metadata...</div>
+                ) : audioMetadataCount === 0 ? (
+                  <div className="text-xs text-slate-400">No audio metadata found yet.</div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <div className="rounded-lg border border-slate-800/60 bg-slate-950/40 px-3 py-2">
+                        <p className="text-[11px] uppercase tracking-wide text-slate-500">Voice Notes</p>
+                        <p className="mt-1 text-base font-semibold text-white">{audioMetadataCount}</p>
+                      </div>
+                      <div className="rounded-lg border border-slate-800/60 bg-slate-950/40 px-3 py-2">
+                        <p className="text-[11px] uppercase tracking-wide text-slate-500">Total Audio Time</p>
+                        <p className="mt-1 text-base font-semibold text-white">{totalDurationLabel}</p>
+                      </div>
+                      <div className="rounded-lg border border-slate-800/60 bg-slate-950/40 px-3 py-2">
+                        <p className="text-[11px] uppercase tracking-wide text-slate-500">Transcripts Ready</p>
+                        <p className="mt-1 text-base font-semibold text-white">{audioWithTranscriptCount}</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      {audioMetadataItems.map((item) => (
+                        <article
+                          key={item.messageId}
+                          className="rounded-lg border border-slate-800/60 bg-slate-950/40 px-3 py-3"
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="truncate text-sm font-medium text-white">
+                                Voice note {shortMessageId(item.messageId)}
+                              </p>
+                              <p className="truncate text-xs text-slate-500">
+                                {item.sourceFileName ?? "Unknown source file"}
+                              </p>
+                            </div>
+                            <span className="shrink-0 rounded-full border border-slate-700/70 bg-slate-900/80 px-2 py-0.5 text-xs text-slate-300">
+                              {formatDurationLabel(item.durationSeconds)}
+                            </span>
+                          </div>
+
+                          <div className="mt-2 rounded-md border border-slate-800/50 bg-slate-900/70 px-2.5 py-2 text-sm text-slate-200">
+                            {item.transcription.trim() || "No transcript available yet."}
+                          </div>
+
+                          <div className="mt-2 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+                            <div className="rounded-md border border-slate-800/50 bg-slate-900/60 px-2 py-1.5">
+                              <p className="text-slate-500">Recorded</p>
+                              <p className="mt-0.5 text-slate-200">{formatDateTimeLabel(item.modified)}</p>
+                            </div>
+                            <div className="rounded-md border border-slate-800/50 bg-slate-900/60 px-2 py-1.5">
+                              <p className="text-slate-500">File size</p>
+                              <p className="mt-0.5 text-slate-200">{formatBytesLabel(item.sizeBytes)}</p>
+                            </div>
+                            <div className="rounded-md border border-slate-800/50 bg-slate-900/60 px-2 py-1.5">
+                              <p className="text-slate-500">Format</p>
+                              <p className="mt-0.5 truncate text-slate-200">{item.format ?? "Unknown"}</p>
+                            </div>
+                            <div className="rounded-md border border-slate-800/50 bg-slate-900/60 px-2 py-1.5">
+                              <p className="text-slate-500">Status</p>
+                              <p className="mt-0.5 text-slate-200">
+                                {item.transcription.trim() ? "Transcribed" : "Awaiting transcript"}
+                              </p>
+                            </div>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </section>
           </div>
         </main>
       </div>

@@ -24,14 +24,79 @@ const DEMO_ACTIVITIES: Activity[] = [
   { id: "demo-4", title: "Call with family", category: "Relationships", time: "8:15 PM", icon: "👨‍👩‍👧" },
 ];
 
-export default function NonDeveloperTodayOverview() {
+type AudioOverviewStats = {
+  totalCount: number;
+  todayCount: number;
+  todayDurationSeconds: number;
+  transcriptsCount: number;
+};
+
+type AudioOverviewItem = {
+  messageId: string;
+  transcription: string;
+  modified: string | null;
+};
+
+function formatDurationLabel(seconds: number): string {
+  if (seconds <= 0) return "0s";
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.floor(seconds / 60);
+  const remainderSeconds = seconds % 60;
+  if (minutes < 60) return `${minutes}m ${remainderSeconds}s`;
+  const hours = Math.floor(minutes / 60);
+  const remainderMinutes = minutes % 60;
+  return `${hours}h ${remainderMinutes}m`;
+}
+
+export default function NonDeveloperTodayOverview({
+  audioStats,
+  audioItems,
+}: {
+  audioStats?: AudioOverviewStats;
+  audioItems?: AudioOverviewItem[];
+}) {
   const { isDemoMode } = useDemoMode();
   const todayDateString = new Date().toISOString().slice(0, 10);
   const { categories, activities } = isDemoMode
     ? { categories: DEMO_CATEGORIES, activities: DEMO_ACTIVITIES }
     : getTodayOverviewFromLogs(todayDateString);
-  const hasData = activities.length > 0;
-  const displayCategories: LegacyCategoryData[] = hasData ? categories : EMPTY_CHART_DATA;
+  const hasLogData = activities.length > 0;
+  const todayAudioActivities: Activity[] = (audioItems ?? [])
+    .filter((item) => {
+      if (!item.modified) return false;
+      const date = new Date(item.modified);
+      if (Number.isNaN(date.getTime())) return false;
+      return date.toISOString().slice(0, 10) === todayDateString;
+    })
+    .sort((a, b) => {
+      const aMs = a.modified ? new Date(a.modified).getTime() : 0;
+      const bMs = b.modified ? new Date(b.modified).getTime() : 0;
+      return bMs - aMs;
+    })
+    .slice(0, 3)
+    .map((item) => {
+      const date = item.modified ? new Date(item.modified) : null;
+      const title = item.transcription.trim()
+        ? item.transcription.trim().slice(0, 72)
+        : `Voice note ${item.messageId.slice(0, 8)}`;
+      return {
+        id: `audio-${item.messageId}`,
+        title: title.length >= 72 ? `${title}...` : title,
+        category: "Health" as const,
+        time: date && !Number.isNaN(date.getTime())
+          ? date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+          : "Unknown time",
+        icon: "🎤",
+      };
+    });
+  const hasAudioFallback = !hasLogData && todayAudioActivities.length > 0;
+  const hasData = hasLogData || hasAudioFallback;
+  const displayCategories: LegacyCategoryData[] = hasLogData
+    ? categories
+    : hasAudioFallback
+      ? [{ label: "Voice Notes", value: 100, color: "#06b6d4" }]
+      : EMPTY_CHART_DATA;
+  const displayActivities = hasLogData ? activities : todayAudioActivities;
   const dateForLink = todayDateString;
   const displayDate = new Date().toLocaleDateString("en-US", {
     weekday: "long",
@@ -72,12 +137,28 @@ export default function NonDeveloperTodayOverview() {
         </div>
       </div>
 
+      {audioStats && (
+        <div className="px-6 py-3 border-b border-slate-800/40 bg-slate-950/30">
+          <div className="flex flex-wrap items-center gap-2 text-xs">
+            <span className="rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-2.5 py-1 text-cyan-300">
+              Voice notes today: {audioStats.todayCount}
+            </span>
+            <span className="rounded-lg border border-indigo-500/20 bg-indigo-500/10 px-2.5 py-1 text-indigo-300">
+              Audio time today: {formatDurationLabel(audioStats.todayDurationSeconds)}
+            </span>
+            <span className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-emerald-300">
+              Transcripts ready: {audioStats.transcriptsCount}/{audioStats.totalCount}
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-10">
         <div>
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-5">Time Distribution</p>
           <LegacyDonutChart
             data={displayCategories}
-            getCategoryHref={hasData ? (label) => `/logs?category=${encodeURIComponent(label.toLowerCase())}&from=dashboard` : undefined}
+            getCategoryHref={hasLogData ? (label) => `/logs?category=${encodeURIComponent(label.toLowerCase())}&from=dashboard` : undefined}
           />
         </div>
 
@@ -85,11 +166,13 @@ export default function NonDeveloperTodayOverview() {
           <p className="text-[11px] font-semibold text-slate-500 uppercase tracking-widest mb-5">Today&apos;s Activities</p>
           {hasData ? (
             <ActivityList
-              activities={activities}
+              activities={displayActivities}
               getActivityHref={(activity) =>
-                `/logs?date=${dateForLink}&highlight=${encodeURIComponent(activity.title)}&category=${encodeURIComponent(
-                  activity.category.toLowerCase(),
-                )}&from=dashboard`
+                hasLogData
+                  ? `/logs?date=${dateForLink}&highlight=${encodeURIComponent(activity.title)}&category=${encodeURIComponent(
+                    activity.category.toLowerCase(),
+                  )}&from=dashboard`
+                  : "/dashboard#audio-metadata-section"
               }
             />
           ) : (

@@ -1,5 +1,5 @@
 import type { OpenClawPluginApi } from "openclaw/plugin-sdk";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { readFileSync, writeFileSync, mkdirSync, existsSync, utimesSync, rmSync } from "node:fs";
 import { join } from "node:path";
 import { timingSafeEqual, randomInt, createHash } from "node:crypto";
@@ -1141,6 +1141,96 @@ const plugin = {
           peer,
           "Welcome to LogLife! Your dashboard is now connected. Send me a message anytime to start journaling.",
         ).catch(() => { /* best-effort */ });
+      },
+    });
+
+    // --- GET /loglife/audio-metadata ---
+
+    api.registerHttpRoute({
+      path: "/loglife/audio-metadata",
+      handler: async (req: IncomingMessage, res: ServerResponse) => {
+        if (req.method !== "GET") {
+          jsonResponse(res, 405, { error: "Method not allowed" });
+          return;
+        }
+
+        if (!apiKey || !verifyApiKey(req, apiKey)) {
+          jsonResponse(res, 401, { error: "Unauthorized" });
+          return;
+        }
+
+        const url = new URL(req.url ?? "/", `http://${req.headers.host ?? "localhost"}`);
+        const phoneRaw = url.searchParams.get("phone");
+        const userIdRaw = url.searchParams.get("userId");
+
+        if (!phoneRaw && !userIdRaw) {
+          jsonResponse(res, 400, { error: "Provide ?phone= or ?userId=" });
+          return;
+        }
+
+        try {
+          const usersConfig = loadUsersJson(usersJsonPath);
+          let targetUser: UserProfile | undefined;
+
+          if (userIdRaw) {
+            const userId = userIdRaw.trim();
+            if (userId) {
+              targetUser = usersConfig.users.find((u) => u.id === userId);
+            }
+          }
+
+          if (!targetUser && phoneRaw) {
+            const normalizedPhone = normalizePhone(phoneRaw);
+            targetUser = usersConfig.users.find((u) =>
+              hasMatchingIdentifier(u.identifiers, normalizedPhone),
+            );
+          }
+
+          if (!targetUser) {
+            jsonResponse(res, 404, { error: "User not found" });
+            return;
+          }
+
+          const audioMetadataDir = join(stateDir, `workspace-${targetUser.id}`, "audio_metadata");
+          if (!existsSync(audioMetadataDir)) {
+            jsonResponse(res, 200, {
+              userId: targetUser.id,
+              audioMetadata: {},
+              count: 0,
+            });
+            return;
+          }
+
+          const files = await readdir(audioMetadataDir, { withFileTypes: true });
+          const jsonFiles = files
+            .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith(".json"))
+            .map((entry) => entry.name)
+            .sort();
+
+          const audioMetadata: Record<string, unknown> = {};
+          for (const fileName of jsonFiles) {
+            const filePath = join(audioMetadataDir, fileName);
+            let parsed: unknown;
+            try {
+              parsed = JSON.parse(await readFile(filePath, "utf-8"));
+            } catch {
+              parsed = null;
+            }
+
+            const messageId = fileName.replace(/\.json$/i, "");
+            audioMetadata[messageId] = parsed;
+          }
+
+          jsonResponse(res, 200, {
+            userId: targetUser.id,
+            audioMetadata,
+            count: jsonFiles.length,
+          });
+        } catch (err) {
+          const errMsg = err instanceof Error ? err.message : String(err);
+          api.logger.error(`Failed to read audio metadata: ${errMsg}`);
+          jsonResponse(res, 500, { error: "Failed to read audio metadata" });
+        }
       },
     });
 
