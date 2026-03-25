@@ -4,7 +4,7 @@
   "description": "LogLife dashboard API plugin for OpenClaw",
   "type": "module",
   "openclaw": {
-    "extensions": ["."]
+    "extensions": ["./index.ts"]
   },
   "scripts": {
     "test": "vitest run",

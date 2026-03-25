@@ -593,6 +593,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/sessions",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "GET") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -684,6 +685,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/verify/send",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "POST") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -746,6 +748,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/verify/check",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "POST") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -806,6 +809,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/register",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "POST") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -904,6 +908,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/unregister",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "POST") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -987,6 +992,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/telegram/verify/send",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "POST") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -1050,6 +1056,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/verify/status",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "GET") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -1087,6 +1094,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/telegram/verify/check",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "POST") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -1148,6 +1156,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/audio-metadata",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "GET") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -1238,6 +1247,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/users",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "GET") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -1268,6 +1278,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/telegram/register",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "POST") {
           jsonResponse(res, 405, { error: "Method not allowed" });
@@ -1362,6 +1373,7 @@ const plugin = {
 
     api.registerHttpRoute({
       path: "/loglife/telegram/link/resolve",
+      auth: "plugin",
       handler: async (req: IncomingMessage, res: ServerResponse) => {
         if (req.method !== "POST") {
           jsonResponse(res, 405, { error: "Method not allowed" });
