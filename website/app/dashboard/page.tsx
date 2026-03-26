@@ -166,9 +166,11 @@ export default function DashboardPage() {
   const countdownSeconds = pollUntil ? Math.max(0, Math.ceil((pollUntil - Date.now()) / 1000)) : 0;
 
   const fetchSession = useCallback((isRefresh = false) => {
-    if (!whatsappPhone) {
+    // Non-developer dashboard does not render session internals.
+    if (!developerSettingsEnabled || !whatsappPhone) {
       setSession(null);
       setSessionLoading(false);
+      setRefreshing(false);
       return;
     }
     if (isRefresh) setRefreshing(true);
@@ -179,7 +181,7 @@ export default function DashboardPage() {
       .then((data) => { if (!data.error) setSession(data); else setSession(null); })
       .catch(() => { setSession(null); })
       .finally(() => { setSessionLoading(false); setRefreshing(false); });
-  }, [whatsappPhone]);
+  }, [whatsappPhone, developerSettingsEnabled]);
 
   useEffect(() => { fetchSession(); }, [fetchSession]);
 
@@ -378,12 +380,12 @@ export default function DashboardPage() {
                   </p>
                 </div>
                 <button
-                  onClick={() => fetchSession(true)}
-                  disabled={refreshing || sessionLoading}
-                  title="Refresh session data"
+                  onClick={() => void fetchAudioMetadata()}
+                  disabled={audioMetadataLoading}
+                  title="Refresh audio metadata"
                   className="ml-1 mt-0.5 cursor-pointer rounded-lg p-2 text-slate-400 transition-all hover:bg-slate-800/50 hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <svg className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`h-4 w-4 ${audioMetadataLoading ? "animate-spin" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
                 </button>
