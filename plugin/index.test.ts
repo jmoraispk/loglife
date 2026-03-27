@@ -525,6 +525,7 @@ describe("POST /loglife/register handler", () => {
   let mockWriteFileSync: ReturnType<typeof vi.fn>;
   let mockUtimesSync: ReturnType<typeof vi.fn>;
   let usersJsonContent: string;
+  let openclawJsonContent: string;
 
   beforeEach(async () => {
     vi.resetModules();
@@ -533,12 +534,23 @@ describe("POST /loglife/register handler", () => {
       users: [],
       defaults: { dmScope: "main" },
     });
+    openclawJsonContent = JSON.stringify({
+      agents: { list: [{ id: "main", name: "Main Agent" }] },
+      bindings: [],
+      channels: { whatsapp: { groupPolicy: "allowlist" } },
+      session: {},
+    });
 
     mockWriteFileSync = vi.fn();
     mockUtimesSync = vi.fn();
 
     vi.doMock("node:fs", () => ({
-      readFileSync: vi.fn().mockImplementation(() => usersJsonContent),
+      readFileSync: vi.fn().mockImplementation((path: string) => {
+        if (path.includes("users.json")) return usersJsonContent;
+        if (path.includes("peer-agent-assignments.json")) return "{}";
+        if (path.includes("openclaw.json")) return openclawJsonContent;
+        return "# AGENTS.md\n";
+      }),
       writeFileSync: mockWriteFileSync,
       mkdirSync: vi.fn(),
       existsSync: vi.fn().mockReturnValue(true),
@@ -624,10 +636,49 @@ describe("POST /loglife/register handler", () => {
     expect(body.userId).toBeDefined();
     expect(body.linkCode).toMatch(/^LF-\d{4}$/);
 
-    // users.json, generated.json, openclaw.json, pending-links.json
-    expect(mockWriteFileSync).toHaveBeenCalledTimes(4);
+    // users.json, generated.json, openclaw.json, pending-links.json,
+    // plus peer-agent-assignments.json cleanup for stale sticky routes
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(5);
     // utimesSync no longer used — openclaw.json is written directly
     expect(mockUtimesSync).not.toHaveBeenCalled();
+
+    const openclawWrite = mockWriteFileSync.mock.calls.find(([path]) =>
+      String(path).includes("openclaw.json"),
+    );
+    expect(openclawWrite).toBeDefined();
+    const writtenOpenclaw = JSON.parse(String(openclawWrite![1])) as {
+      agents?: { list?: Array<{ id: string }> };
+    };
+    expect(writtenOpenclaw.agents?.list?.map((a) => a.id)).toEqual(["main", "alice"]);
+  });
+
+  it("bootstraps explicit main agent when openclaw.json has none", async () => {
+    openclawJsonContent = JSON.stringify({
+      agents: { defaults: { model: { primary: "openai/gpt-4o-mini" } } },
+      bindings: [],
+      channels: { whatsapp: { groupPolicy: "allowlist" } },
+      session: {},
+    });
+
+    const req = mockReq({
+      method: "POST",
+      url: "/loglife/register",
+      headers: { authorization: `Bearer ${API_KEY}` },
+      body: { phone: "+15551234567", name: "Alice" },
+    });
+    const res = mockRes();
+    await registerHandler(req, res);
+
+    expect(res._status).toBe(200);
+    const openclawWrite = mockWriteFileSync.mock.calls.find(([path]) =>
+      String(path).includes("openclaw.json"),
+    );
+    expect(openclawWrite).toBeDefined();
+    const writtenOpenclaw = JSON.parse(String(openclawWrite![1])) as {
+      agents?: { list?: Array<{ id: string; name?: string }> };
+    };
+    expect(writtenOpenclaw.agents?.list?.map((a) => a.id)).toEqual(["main", "alice"]);
+    expect(writtenOpenclaw.agents?.list?.[0]?.name).toBe("Main");
   });
 
   it("uses name to derive user ID", async () => {
@@ -664,8 +715,8 @@ describe("POST /loglife/register handler", () => {
     expect(body.existing).toBe(true);
     expect(body.linkCode).toMatch(/^LF-\d{4}$/);
 
-    // Existing user still gets a fresh pending-link entry on disk
-    expect(mockWriteFileSync).toHaveBeenCalledTimes(1);
+    // Existing user refreshes config, syncs workspace AGENTS, and writes pending-link entry.
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(4);
     expect(mockWriteFileSync).toHaveBeenCalledWith(
       expect.stringContaining("pending-links.json"),
       expect.any(String),
@@ -682,6 +733,7 @@ describe("POST /loglife/unregister handler", () => {
 
   let unregisterHandler: RouteHandler;
   let mockWriteFileSync: ReturnType<typeof vi.fn>;
+  let mockRmSync: ReturnType<typeof vi.fn>;
   let usersJsonContent: string;
 
   beforeEach(async () => {
@@ -696,10 +748,17 @@ describe("POST /loglife/unregister handler", () => {
     });
 
     mockWriteFileSync = vi.fn();
+    mockRmSync = vi.fn();
 
     vi.doMock("node:fs", () => ({
       readFileSync: vi.fn().mockImplementation((path: string) => {
         if (path.includes("users.json")) return usersJsonContent;
+        if (path.includes("peer-agent-assignments.json")) {
+          return JSON.stringify({
+            "whatsapp:default:dm:+15551234567": "alice",
+            "whatsapp:default:dm:+19999999999": "main",
+          });
+        }
         return JSON.stringify({
           agents: { defaults: { model: { primary: "x" } } },
           channels: { whatsapp: { groupPolicy: "allowlist", debounceMs: 0, mediaMaxMb: 50 } },
@@ -707,6 +766,7 @@ describe("POST /loglife/unregister handler", () => {
         });
       }),
       writeFileSync: mockWriteFileSync,
+      rmSync: mockRmSync,
       mkdirSync: vi.fn(),
       existsSync: vi.fn().mockReturnValue(true),
     }));
@@ -774,6 +834,7 @@ describe("POST /loglife/unregister handler", () => {
     expect(res._status).toBe(200);
     expect(res.json()).toEqual({ removed: false, existing: false });
     expect(mockWriteFileSync).not.toHaveBeenCalled();
+    expect(mockRmSync).not.toHaveBeenCalled();
   });
 
   it("unregisters matching phone and rewrites config files", async () => {
@@ -791,8 +852,16 @@ describe("POST /loglife/unregister handler", () => {
     expect(body.removed).toBe(true);
     expect(body.removedUserIds).toEqual(["alice"]);
 
-    // users.json, generated.json, openclaw.json
-    expect(mockWriteFileSync).toHaveBeenCalledTimes(3);
+    // users.json, generated.json, openclaw.json, peer-agent-assignments.json
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(4);
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/agents/alice"),
+      { recursive: true, force: true },
+    );
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/workspace-alice"),
+      { recursive: true, force: true },
+    );
   });
 
   it("supports all:true to clear all users", async () => {
@@ -810,7 +879,23 @@ describe("POST /loglife/unregister handler", () => {
     expect(body.removedAll).toBe(true);
     expect(body.removed).toBe(true);
     expect(body.removedUserIds).toEqual(["alice", "bob"]);
-    expect(mockWriteFileSync).toHaveBeenCalledTimes(4);
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(5);
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/agents/alice"),
+      { recursive: true, force: true },
+    );
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/workspace-alice"),
+      { recursive: true, force: true },
+    );
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/agents/bob"),
+      { recursive: true, force: true },
+    );
+    expect(mockRmSync).toHaveBeenCalledWith(
+      expect.stringContaining("/workspace-bob"),
+      { recursive: true, force: true },
+    );
   });
 });
 

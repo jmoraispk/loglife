@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { useWhatsAppWidget } from "../contexts/WhatsAppWidgetContext";
+import { useWhatsAppWidget } from "@/contexts/WhatsAppWidgetContext";
 
 const PANEL_TRANSITION_MS = 200;
 
@@ -70,6 +70,8 @@ export default function WhatsAppWidget() {
   const number = "17155157761";
   const message = "START";
   const link = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+  const telegramBotUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "loglifetestbot";
+  const telegramLink = `https://t.me/${telegramBotUsername}`;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -119,6 +121,10 @@ export default function WhatsAppWidget() {
 
   const openChatPanel = () => setIsChatPanelOpen(true);
   const closeChatPanel = () => setIsPanelClosing(true);
+  const openTelegram = () => {
+    window.open(telegramLink, "_blank", "noopener,noreferrer");
+    setIsPanelClosing(true);
+  };
 
   const isPanelVisible = isChatPanelOpen || isPanelClosing;
   const panelTransitionClasses =
@@ -134,7 +140,7 @@ export default function WhatsAppWidget() {
     <>
       {isOpen && (
         <div 
-          className={`fixed bottom-6 right-24 z-50 flex flex-col items-center rounded-3xl p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-xl max-w-sm transition-all ease-out bg-slate-900/60 border border-slate-700/50 ${
+          className={`fixed bottom-24 right-24 z-50 flex flex-col items-center rounded-3xl p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)] backdrop-blur-xl max-w-sm transition-all ease-out bg-slate-900/60 border border-slate-700/50 ${
             isAnimating 
               ? 'opacity-0 translate-x-12 duration-200' 
               : 'opacity-100 translate-x-0 duration-300'
@@ -204,7 +210,7 @@ export default function WhatsAppWidget() {
       )}
 
       {/* Single FAB: opens chat panel when closed; becomes close (cross) when panel open */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-center gap-3">
+      <div className="fixed bottom-24 right-6 z-50 flex flex-col items-center gap-3">
         {/* Chat panel: enter/exit transition */}
         {isPanelVisible && (
           <div
@@ -224,7 +230,7 @@ export default function WhatsAppWidget() {
               type="button"
               className="flex items-center justify-center rounded-full p-4 w-14 h-14 bg-gradient-to-br from-[#0088cc] to-[#0077b5] text-white shadow-2xl border border-[#0088cc]/80 cursor-pointer transition-transform duration-300 ease-out hover:scale-105"
               aria-label="Telegram"
-              onClick={() => {}}
+              onClick={openTelegram}
             >
               <IconTelegram />
             </button>

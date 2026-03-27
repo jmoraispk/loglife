@@ -78,6 +78,17 @@ body {
   }
 }
 
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .animate-fade-in {
   animation: fade-in 1s ease-out;
 }
@@ -92,6 +103,30 @@ body {
   animation-fill-mode: both;
 }
 
+/* Dashboard section entrance animations */
+.animate-fade-in-up {
+  animation: fade-in-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.animate-fade-in-up-1 { animation: fade-in-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+.animate-fade-in-up-2 { animation: fade-in-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.12s both; }
+.animate-fade-in-up-3 { animation: fade-in-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.19s both; }
+.animate-fade-in-up-4 { animation: fade-in-up 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.26s both; }
+
+/* AI Pipeline — shimmer text sweep */
+@keyframes shimmer-sweep {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, #475569 0%, #94a3b8 45%, #475569 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shimmer-sweep 2.5s linear infinite;
+}
+
 /* Scroll-triggered reveal */
 .reveal {
   opacity: 0;
@@ -103,3 +138,41 @@ body {
   opacity: 1;
   transform: translateY(0);
 }
+
+/* Logs Explorer scrollbar — matches app dark theme (slate + brand) */
+.logs-explorer-scroll[data-scrollbar="theme"],
+.logs-explorer-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(71 85 105) rgb(15 23 42);
+}
+/* WebKit: remove default arrows and force dark theme */
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar,
+.logs-explorer-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar-button,
+.logs-explorer-scroll::-webkit-scrollbar-button {
+  display: none;
+  height: 0;
+  width: 0;
+}
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar-track,
+.logs-explorer-scroll::-webkit-scrollbar-track {
+  background: rgb(15 23 42) !important;
+  border-radius: 9999px;
+}
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar-thumb,
+.logs-explorer-scroll::-webkit-scrollbar-thumb {
+  background: rgb(71 85 105) !important;
+  border-radius: 9999px;
+}
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar-thumb:hover,
+.logs-explorer-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgb(100 116 139) !important;
+}
+.logs-explorer-scroll[data-scrollbar="theme"]::-webkit-scrollbar-corner,
+.logs-explorer-scroll::-webkit-scrollbar-corner {
+  background: rgb(15 23 42);
+}
+
