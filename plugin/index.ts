@@ -294,6 +294,14 @@ function deriveUserId(phone: string, name: string | undefined, config: UsersConf
 
 const AUDIO_METADATA_RULE_BEGIN = "<!-- LOGLIFE_AUDIO_METADATA_RULE:BEGIN -->";
 const AUDIO_METADATA_RULE_END = "<!-- LOGLIFE_AUDIO_METADATA_RULE:END -->";
+const WORKSPACE_TEMPLATE_FILES = [
+  "BOOTSTRAP.md",
+  "HEARTBEAT.md",
+  "IDENTITY.md",
+  "SOUL.md",
+  "TOOLS.md",
+  "USER.md",
+] as const;
 const AUDIO_METADATA_RULE_BLOCK = `${AUDIO_METADATA_RULE_BEGIN}
 # Rule: Save inbound audio metadata
 
@@ -392,9 +400,16 @@ const plugin = {
       const workspaceDir = join(stateDir, `workspace-${userId}`);
       const agentsFilePath = join(workspaceDir, "AGENTS.md");
       const baseAgentsFilePath = join(stateDir, "workspace", "AGENTS.md");
+      const baseWorkspaceDir = join(stateDir, "workspace");
 
       try {
         mkdirSync(workspaceDir, { recursive: true });
+        for (const fileName of WORKSPACE_TEMPLATE_FILES) {
+          const sourcePath = join(baseWorkspaceDir, fileName);
+          const destinationPath = join(workspaceDir, fileName);
+          if (!existsSync(sourcePath) || existsSync(destinationPath)) continue;
+          writeFileSync(destinationPath, readFileSync(sourcePath, "utf-8"));
+        }
         upsertAudioMetadataRuleInAgentsFile(agentsFilePath, baseAgentsFilePath);
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : String(err);
@@ -909,6 +924,8 @@ const plugin = {
             applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
             // Re-resolve routing from current bindings instead of stale sticky assignment.
             clearPeerAssignmentsForPhone(phone);
+            const existingUser = usersConfig.users.find((u) => hasMatchingIdentifier(u.identifiers, phone));
+            if (existingUser) ensureUserWorkspaceAudioMetadataRule(existingUser.id);
             const linkCode = generateLinkCode();
             upsertPendingLink({
               code: linkCode,

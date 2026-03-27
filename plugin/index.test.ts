@@ -715,8 +715,8 @@ describe("POST /loglife/register handler", () => {
     expect(body.existing).toBe(true);
     expect(body.linkCode).toMatch(/^LF-\d{4}$/);
 
-    // Existing user still refreshes generated/openclaw config and gets a pending-link entry.
-    expect(mockWriteFileSync).toHaveBeenCalledTimes(3);
+    // Existing user refreshes config, syncs workspace AGENTS, and writes pending-link entry.
+    expect(mockWriteFileSync).toHaveBeenCalledTimes(4);
     expect(mockWriteFileSync).toHaveBeenCalledWith(
       expect.stringContaining("pending-links.json"),
       expect.any(String),
