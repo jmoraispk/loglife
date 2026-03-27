@@ -217,7 +217,15 @@ function applyGeneratedConfigToOpenclaw(
     if (channel) previousManagedChannels.add(channel);
   }
 
-  ocRaw.agents = { ...ocRaw.agents, list: generated.agents.list };
+  const existingAgentList = Array.isArray(ocRaw.agents?.list)
+    ? (ocRaw.agents.list as Array<Record<string, unknown>>)
+    : [];
+  const preservedMainAgent = existingAgentList.find((agent) => agent?.id === "main");
+  const ensuredMainAgent = preservedMainAgent ?? { id: "main", name: "Main" };
+  const generatedAgentsWithoutMain = generated.agents.list.filter((agent) => agent.id !== "main");
+  const mergedAgentList = [ensuredMainAgent, ...generatedAgentsWithoutMain];
+
+  ocRaw.agents = { ...ocRaw.agents, list: mergedAgentList };
   ocRaw.bindings = generated.bindings;
   ocRaw.session = { ...ocRaw.session, ...generated.session };
 
@@ -408,6 +416,48 @@ const plugin = {
     const removePendingLink = (phone: string) => {
       const removed = pendingLinks.delete(phone);
       if (removed) persistPendingLinks();
+    };
+
+    const clearPeerAssignmentsForPhone = (phone: string) => {
+      if (!existsSync(peerAgentAssignmentsPath)) return;
+
+      const phoneNorm = phone.trim().toLowerCase();
+      const phoneDigits = phoneNorm.replace(/[^0-9]/g, "");
+      if (!phoneDigits) return;
+
+      const shouldDropAssignment = (assignmentKey: string): boolean => {
+        const keyNorm = assignmentKey.trim().toLowerCase();
+        if (!keyNorm.startsWith("whatsapp:") && !keyNorm.startsWith("signal:")) {
+          return false;
+        }
+
+        // Match explicit +E164 keys and JID-style keys (digits-only fallback).
+        if (keyNorm.includes(phoneNorm)) return true;
+        const keyDigits = keyNorm.replace(/[^0-9]/g, "");
+        return keyDigits.includes(phoneDigits);
+      };
+
+      try {
+        const raw = JSON.parse(readFileSync(peerAgentAssignmentsPath, "utf-8")) as Record<string, unknown>;
+        const next: Record<string, string> = {};
+        let changed = false;
+
+        for (const [assignmentKey, assignedAgentId] of Object.entries(raw)) {
+          if (typeof assignedAgentId !== "string") continue;
+          if (shouldDropAssignment(assignmentKey)) {
+            changed = true;
+            continue;
+          }
+          next[assignmentKey] = assignedAgentId;
+        }
+
+        if (changed) {
+          writeFileSync(peerAgentAssignmentsPath, JSON.stringify(next, null, 2) + "\n");
+        }
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : String(err);
+        api.logger.warn(`Failed to clear peer-agent assignments for ${phone}: ${errMsg}`);
+      }
     };
 
     const cleanupUserRuntimeState = (userIds: string[]) => {
@@ -853,6 +903,12 @@ const plugin = {
           );
 
           if (alreadyRegistered) {
+            // Keep runtime config in sync even for idempotent re-register calls.
+            const generated = generateConfig(usersConfig);
+            writeFileSync(generatedJsonPath, JSON.stringify(generated, null, 2) + "\n");
+            applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
+            // Re-resolve routing from current bindings instead of stale sticky assignment.
+            clearPeerAssignmentsForPhone(phone);
             const linkCode = generateLinkCode();
             upsertPendingLink({
               code: linkCode,
@@ -883,6 +939,7 @@ const plugin = {
 
           // We can't rely on $include because the gateway flattens it on hot-reload.
           applyGeneratedConfigToOpenclaw(openclawJsonPath, generated);
+          clearPeerAssignmentsForPhone(phone);
           ensureUserWorkspaceAudioMetadataRule(userId);
 
           const linkCode = generateLinkCode();
