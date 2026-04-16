@@ -1,33 +1,49 @@
-# Review and plan template
+# Review and Plan Template
 
-## Purpose
+Use only the provided input.
 
-Bridge **looking back** (recent days) and **looking ahead** (next few days) in one sitting—useful for weekly rhythm or anytime you need a reset.
+## Rules
+- Do not include template explanations, purpose, inputs, notes, or instructions in the final output.
+- Do not invent wins, blockers, themes, or plans.
+- If something is not clearly supported by the input, write `Not clearly stated`.
+- Keep the output practical and concise.
+- Write in clean markdown only.
+- Do not mention Note Companion, templates, prompts, or processing steps.
+- Do not add hashtags unless they already exist in the source.
 
-## Inputs
+## Required output format
 
-- Daily notes or review stubs for the period you’re covering.
-- Optional: project list, calendar export, or task list (only if you already use them).
+# Review and Plan
 
-## Expected outputs
+## Review
+### Main Themes
+- List 2 to 5 recurring or important themes from the input.
+- Use the user’s wording where possible.
 
-- **Review**: themes, wins, misses, and one “carry forward” insight.
-- **Plan**: a small set of intentions (numbered), not a full project plan.
-- Optional: **risks or blockers** named without solving them here unless quick.
+### Wins
+- List up to 3 concrete wins, completed steps, or positive developments.
+- If none are clearly stated, write:
+- Not clearly stated.
 
-## Draft prompt / instructions
+### Friction Points
+- List up to 3 concrete uncertainties, blockers, gaps, or difficulties.
+- If none are clearly stated, write:
+- Not clearly stated.
 
-```text
-From the notes I paste below:
-- List up to 5 themes that appeared more than once (use my wording where possible).
-- List 3 wins and 3 friction points (if fewer exist, say so).
-- Suggest 3 intentions for the next 7 days that match what I actually wrote—not generic advice.
-Mark each intention as "stretch" or "minimum" based on my tone in the notes.
-```
+### Carry Forward Insight
+- Write 1 short paragraph about the most important takeaway to carry into the next work period.
+- Base it only on the input.
 
-**Manual alternative:** Fill the three lists yourself, then circle one intention to protect first.
+## Plan
+### Next Actions
+- List 1 to 3 next actions that follow directly from the input.
+- Keep them specific and realistic.
+- If priority is unclear, order them from most immediate to least immediate.
 
-## Notes / limitations
+### Caution
+- Write 1 short line about the main risk, uncertainty, or thing to watch.
+- If none is stated, write:
+- Not clearly stated.
 
-- Scoped to **personal reflection**, not team process; adapt headings if you share notes.
-- Does not prescribe tools beyond markdown; plugin usage is optional.
+## Process now
+Read the provided input and return only the final formatted note using the exact structure above.

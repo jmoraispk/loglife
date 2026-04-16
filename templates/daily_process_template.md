@@ -1,34 +1,56 @@
-# Daily process template
+# Daily Process Template
 
 ## Purpose
+Turn one raw daily note or one pasted audio/transcript into a clean, structured daily summary for Loglife.
 
-Support a **short, repeatable end-of-day (or next-morning) pass**: close the day, surface what matters, and leave a minimal hook for tomorrow—compatible with Note Companion when you choose to use it.
+## Use
+Use this template on:
+- one raw daily note
+- or one pasted voice transcript
+- or one mixed raw capture for a single day
 
-## Inputs
+## Output rules
+- Use only the information in the provided input.
+- Do not invent events, times, tasks, emotions, or decisions.
+- If something is unclear, say `Not clearly stated`.
+- Keep the output concise and structured.
+- Do not include template explanations, instructions, purpose, inputs, notes, or commentary in the final output.
+- Do not mention Note Companion, templates, or processing steps in the output.
+- Do not add hashtags unless they already exist in the source.
+- Write the final result in clean markdown only.
 
-- Today’s raw captures (daily note, inbox, or plugin output — wherever you actually write).
-- Optional: yesterday’s “tomorrow” line if you use one.
+## Required output format
 
-## Expected outputs
+# Daily Processed Note
 
-- A filled section or note with: **log**, **reflection**, **one priority or intention** for the next working block.
-- Clear distinction if anything here is **AI-generated** vs **your words** (headings or labels).
+## Today Log
+- List the concrete things that happened, were explored, were tested, were discussed, or were decided.
+- Keep each bullet short and factual.
 
-## Draft prompt / instructions
+## Key Points
+- List the most important findings, decisions, constraints, or uncertainties from the note.
+- Focus on what matters for future work.
 
-Use as a starting point for you or for a plugin prompt; edit to match your vault.
+## Open Questions
+- List unanswered questions or unclear parts that need follow-up.
+- If there are none, write:
+- None stated.
 
-```text
-Summarize only what I wrote below. Do not invent events.
-1) Bullet list: concrete things that happened today (from my text only).
-2) One short paragraph: mood or energy in my words, paraphrased faithfully.
-3) One sentence: the single most important thing for tomorrow, based only on my notes.
-If something is missing, say "not stated" instead of guessing.
-```
+## Tomorrow Priority
+- Write 1 to 3 bullets for the clearest next actions based only on the note.
+- If no next action is stated or strongly implied, write:
+- Not clearly stated.
 
-**Manual alternative (no AI):** Answer in order: (1) three bullets — what happened, (2) one line — how it felt, (3) one line — tomorrow’s first move.
+## Short Summary
+- Write a short paragraph summarizing the day faithfully.
+- Keep it neutral and practical.
 
-## Notes / limitations
+## Extraction rules
+- Prefer concrete actions over vague reflections.
+- If the note includes both ideas and actions, separate them clearly.
+- Preserve uncertainty where uncertainty exists.
+- Do not convert uncertainty into decisions.
+- If the input is very small, still follow the same structure.
 
-- Stays lightweight on purpose; expand only if a week proves it’s too thin.
-- Does not assume specific Note Companion UI strings or commands.
+## Process now
+Read the provided input and return only the final formatted note using the exact structure above.
